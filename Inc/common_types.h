@@ -28,14 +28,15 @@ typedef struct
 	
 }curve_shape_t;
 
-typedef enum
+enum
 {
 	FILTER_NO = 0,
 	FILTER_LOW,
 	FILTER_MEDIUM,
 	FILTER_HIGH,
 	
-} filter_t;
+}; 
+typedef uint8_t filter_t;
 
 typedef struct
 {
@@ -44,12 +45,12 @@ typedef struct
 	uint16_t 				calib_max;
 	uint8_t 				autocalib;
 	uint8_t					inverted;
-	curve_shape_t 	curve_shape;
 	filter_t 				filter;
-	
+	curve_shape_t 	curve_shape;
+	uint8_t					reserved[10];
 } axis_config_t;
 
-typedef enum
+enum
 {
 	NOT_USED = 0,
 	
@@ -64,10 +65,10 @@ typedef enum
 	ENCODER_SINGLE_INPUT,
 	ENCODER_CHAINED_INPUT,
 	ENCODER_CHAINED_COMMON,
-	
-}	pin_t;
+};
+typedef uint8_t pin_t;
 
-typedef enum
+enum
 {
 	BUTTON_NORMAL = 0,
 	BUTTON_INVERTED,
@@ -96,15 +97,17 @@ typedef enum
 	BUTTON_TO_ANALOG,
 	BUTTON_SHIFT,
 	
-} button_t;
+};
+typedef uint8_t button_t;
 
-typedef enum
+
+enum
 {
 	ENCODER_1_1 = 0,
 	ENCODER_1_2,
 	ENCODER_1_4,
-	
-}	encoder_type_t;
+};	
+typedef uint8_t encoder_type_t;
 
 typedef struct
 {
@@ -117,16 +120,27 @@ typedef struct
 
 typedef struct 
 {
+	// config 1
 	uint16_t 				firmware_version;
-	axis_config_t 	axis_config[MAX_AXIS_NUM];
-	pin_t 					pins[USED_PINS_NUM];
-	button_t 				buttons[MAX_BUTTONS_NUM];		
-	encoder_t 			encoders[MAX_ENCODERS_NUM];
 	char 						device_name[10];
 	uint16_t				button_debounce_ms;
 	uint16_t				toggle_press_time_ms;
 	uint16_t				encoder_press_time_ms;
+	uint16_t 				exchange_period_ms;	
+	pin_t 					pins[USED_PINS_NUM];
 	
+	// config 2-5
+	axis_config_t 	axis_config[MAX_AXIS_NUM];
+
+	// config 6-7
+	button_t 				buttons[MAX_BUTTONS_NUM];
+
+	// config 8
+	encoder_t 			encoders[MAX_ENCODERS_NUM];
+	
+	// config 9-10
+	uint8_t					reserved_1[62];
+	uint8_t					reserved_2[62];
 }app_config_t;
 
 typedef struct

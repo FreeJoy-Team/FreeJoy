@@ -17,6 +17,22 @@
 static const app_config_t init_config =
 {
 	.firmware_version = 1,
+	.device_name[0] = 'F',
+	.device_name[1] = 'r',
+	.device_name[2] = 'e',
+	.device_name[3] = 'e',
+	.device_name[4] = 'J',
+	.device_name[5] = 'o',
+	.device_name[6] = 'y',
+	.device_name[7] = ' ',
+	.device_name[8] = ' ',
+	.device_name[9] = 0,
+	
+	.button_debounce_ms = 30,
+	.toggle_press_time_ms = 200,
+	.encoder_press_time_ms = 100,
+	.exchange_period_ms = 10,
+
 	
 	.pins[0] = AXIS_ANALOG,						// PA0
 	.pins[1] = AXIS_ANALOG,						// PA1
@@ -250,42 +266,8 @@ static const app_config_t init_config =
 	.encoders[11].pin_b = 0xFF,
 	.encoders[11].pin_c = 0xFF,
 	.encoders[11].type = ENCODER_1_1,
-	
-	.encoders[12].pin_a = 0xFF,
-	.encoders[12].pin_b = 0xFF,
-	.encoders[12].pin_c = 0xFF,
-	.encoders[12].type = ENCODER_1_1,
-	
-	.encoders[13].pin_a = 0xFF,
-	.encoders[13].pin_b = 0xFF,
-	.encoders[13].pin_c = 0xFF,
-	.encoders[13].type = ENCODER_1_1,
-	
-	.encoders[14].pin_a = 0xFF,
-	.encoders[14].pin_b = 0xFF,
-	.encoders[14].pin_c = 0xFF,
-	.encoders[14].type = ENCODER_1_1,
-	
-	.encoders[15].pin_a = 0xFF,
-	.encoders[15].pin_b = 0xFF,
-	.encoders[15].pin_c = 0xFF,
-	.encoders[15].type = ENCODER_1_1,
 
-	.hid_id[0] = 'F',
-	.hid_id[1] = 'r',
-	.hid_id[2] = 'e',
-	.hid_id[3] = 'e',
-	.hid_id[4] = 'J',
-	.hid_id[5] = 'o',
-	.hid_id[6] = 'y',
-	.hid_id[7] = ' ',
-	.hid_id[8] = ' ',
-	.hid_id[9] = 0,
-	
-	.button_debounce_ms = 30,
-	.toggle_press_time_ms = 200,
-	.encoder_press_time_ms = 100,
-	
+
 };
 
 /* ########################## Assert Selection ############################## */
