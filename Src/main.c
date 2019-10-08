@@ -33,7 +33,7 @@ joy_report_t joy_report;
   */
 int main(void)
 {
-	uint32_t millis =0, joy_millis=0, config_millis=0;
+	int32_t millis =0, joy_millis=0, config_millis=0;
 	
   HAL_Init();
 	
@@ -52,19 +52,6 @@ int main(void)
   while (1)
   {
 		millis = HAL_GetTick();
-		
-//		if (millis - joy_millis > config.exchange_period_ms)
-//		{
-//			joy_millis = millis;
-//			
-//			joy_report.id = JOY_REPORT_ID;
-//			
-//			ButtonsGet(joy_report.button_data);
-//			AnalogGet(joy_report.axis_data);	
-//			POVsGet(joy_report.pov_data);
-//			
-//			USBD_CUSTOM_HID_SendReport(	&hUsbDeviceFS, (uint8_t *)&(joy_report.id), sizeof(joy_report)-sizeof(joy_report.dummy));
-//		}
 		
 		if ((config_requested > 0) & (config_requested <= 10) & (millis > config_millis))
 		{		
@@ -155,6 +142,21 @@ int main(void)
 			USBD_CUSTOM_HID_SendReport(	&hUsbDeviceFS, (uint8_t *)&(tmp_buf), 64);
 			config_requested = 0;	
 			config_millis = millis;
+			// 1 second delay for joy report in config mode
+			joy_millis = millis + 1000;
+		}
+		
+		if (millis - joy_millis > config.exchange_period_ms)
+		{
+			joy_millis = millis;
+			
+			joy_report.id = JOY_REPORT_ID;
+			
+			ButtonsGet(joy_report.button_data);
+			AnalogGet(joy_report.axis_data);	
+			POVsGet(joy_report.pov_data);
+			
+			USBD_CUSTOM_HID_SendReport(	&hUsbDeviceFS, (uint8_t *)&(joy_report.id), sizeof(joy_report)-sizeof(joy_report.dummy));
 		}
   }
 }
