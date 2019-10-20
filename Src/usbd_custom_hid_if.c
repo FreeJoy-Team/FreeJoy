@@ -51,7 +51,7 @@
 #include "usbd_custom_hid_if.h"
 
 /* USER CODE BEGIN INCLUDE */
-
+#include "flash.h"
 /* USER CODE END INCLUDE */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -60,7 +60,10 @@
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
+
+extern app_config_t config;
 volatile extern uint8_t config_requested;
+volatile extern uint8_t config_requesting;
 /* USER CODE END PV */
 
 /** @addtogroup STM32_USB_OTG_DEVICE_LIBRARY
@@ -167,21 +170,32 @@ __ALIGN_BEGIN static uint8_t CUSTOM_HID_ReportDesc_FS[USBD_CUSTOM_HID_REPORT_DES
 //		0xc0,                          // END_COLLECTION
 //		
 		0x06, 0x00, 0xff,              // USAGE_PAGE (Vendor Defined Page 1)
-//    0x09, 0x01,                    // USAGE (Vendor Usage 1)
-//    0xa1, 0x01,                    // COLLECTION (Application)
+		0x85, CONFIG_IN_REPORT_ID,     //   REPORT_ID (2)
     0x09, 0x01,                    //   USAGE (Vendor Usage 1)
-    0x85, 0x02,                    //   REPORT_ID (2)
     0x15, 0x00,                    //   LOGICAL_MINIMUM (0)
     0x26, 0xff, 0x00,              //   LOGICAL_MAXIMUM (255)
     0x75, 0x08,                    //   REPORT_SIZE (8)
     0x95, 0x3f,                    //   REPORT_COUNT (63)
     0x81, 0x00,                    //   INPUT (Data,Ary,Abs)
+		
     0x09, 0x02,                    //   USAGE (Vendor Usage 2)
-//		0x85, 0x02,                    //   REPORT_ID (2)
     0x75, 0x08,                    //   REPORT_SIZE (8)
     0x95, 0x01,                    //   REPORT_COUNT (1)
     0x91, 0x00,                    //   OUTPUT (Data,Ary,Abs)
-    0xc0,                           // END_COLLECTION
+		
+    0x85, CONFIG_OUT_REPORT_ID,    //   REPORT_ID (3)	
+
+    0x09, 0x03,                    //   USAGE (Vendor Usage 3)
+    0x75, 0x08,                    //   REPORT_SIZE (8)
+    0x95, 0x01,                    //   REPORT_COUNT (1)
+		0x81, 0x00,                    //   INPUT (Data,Ary,Abs)
+		
+    0x09, 0x04,                    //   USAGE (Vendor Usage 4)
+    0x75, 0x08,                    //   REPORT_SIZE (8)
+    0x95, 0x3f,                    //   REPORT_COUNT (63)
+		0x91, 0x00,                    //   OUTPUT (Data,Ary,Abs)
+		
+		0xc0,                           // END_COLLECTION
 
 };
 
@@ -265,6 +279,9 @@ static int8_t CUSTOM_HID_DeInit_FS(void)
 static int8_t CUSTOM_HID_OutEvent_FS(uint8_t event_idx, uint8_t state)
 {
   /* USER CODE BEGIN 6 */
+	static app_config_t tmp_config;
+	uint8_t i;
+	uint8_t pos = 2;
 	uint8_t repotId;
 	USBD_CUSTOM_HID_HandleTypeDef * hhid = (USBD_CUSTOM_HID_HandleTypeDef*)hUsbDeviceFS.pClassData;
 	
@@ -272,8 +289,94 @@ static int8_t CUSTOM_HID_OutEvent_FS(uint8_t event_idx, uint8_t state)
 	
 	switch (repotId)
 	{
-		case CONFIG_REPORT_ID:
+		case CONFIG_IN_REPORT_ID:
 			config_requested = hhid->Report_buf[1];			// requested config packet number
+		break;
+		
+		case CONFIG_OUT_REPORT_ID:
+			switch (hhid->Report_buf[1])
+			{
+				case 1:
+					memcpy((uint8_t *) &(tmp_config.firmware_version), &hhid->Report_buf[pos], sizeof(tmp_config.firmware_version));
+					pos += sizeof(tmp_config.firmware_version);
+					memcpy((uint8_t *) &(tmp_config.device_name), &hhid->Report_buf[pos], sizeof(tmp_config.device_name));
+					pos += sizeof(tmp_config.device_name);
+					memcpy((uint8_t *) &(tmp_config.button_debounce_ms), &hhid->Report_buf[pos], 8);
+					pos += 8;
+					
+					memcpy((uint8_t *) &(tmp_config.pins), &hhid->Report_buf[63-sizeof(tmp_config.pins)], sizeof(tmp_config.pins));
+				break;
+				
+				case 2:
+					i = 0;
+					while(64 - pos > sizeof(axis_config_t))
+					{
+						memcpy((uint8_t *) &(tmp_config.axis_config[i++]), &hhid->Report_buf[pos], sizeof(axis_config_t));
+						pos += sizeof(axis_config_t);
+					}
+					break;
+				
+				case 3:
+					i = 2;
+					while(64 - pos > sizeof(axis_config_t))
+					{
+						memcpy((uint8_t *) &(tmp_config.axis_config[i++]), &hhid->Report_buf[pos], sizeof(axis_config_t));
+						pos += sizeof(axis_config_t);
+					}
+					break;
+				
+				case 4:
+					i = 4;
+					while(64 - pos > sizeof(axis_config_t))
+					{
+						memcpy((uint8_t *) &(tmp_config.axis_config[i++]), &hhid->Report_buf[pos], sizeof(axis_config_t));
+						pos += sizeof(axis_config_t);
+					}
+					break;
+
+				case 5:
+					i = 6;
+					while(64 - pos > sizeof(axis_config_t))
+					{
+						memcpy((uint8_t *) &(tmp_config.axis_config[i++]), &hhid->Report_buf[pos], sizeof(axis_config_t));
+						pos += sizeof(axis_config_t);
+					}
+					break;
+				
+				case 6:
+					memcpy((uint8_t *) &(tmp_config.buttons[0]), &hhid->Report_buf[pos], 62);
+					break;
+				
+				case 7:
+					memcpy((uint8_t *) &(tmp_config.buttons[62]), &hhid->Report_buf[pos], 62);
+					break;
+				
+				case 8:
+					memcpy((uint8_t *) &(tmp_config.buttons[124]), &hhid->Report_buf[pos], 4);
+				
+					memcpy((uint8_t *) &(tmp_config.encoders), &hhid->Report_buf[63-sizeof(tmp_config.encoders)], sizeof(tmp_config.encoders));
+					break;
+				
+				case 9:
+					
+					break;
+				
+				case 10:
+					
+					break;
+				
+				default:
+					break;
+			}
+			if (hhid->Report_buf[1] < 10)		// request new packet
+			{
+				config_requesting = hhid->Report_buf[1] + 1;
+			}
+			else // last packet received
+			{
+				ConfigSet(&tmp_config);
+				ConfigGet(&config);
+			}
 		break;
 		
 		default:

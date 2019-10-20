@@ -20,6 +20,7 @@
 /* Private variables ---------------------------------------------------------*/
 app_config_t config;
 volatile uint8_t config_requested;
+volatile uint8_t config_requesting;
 joy_report_t joy_report;
 
 //uint8_t report_data[64];
@@ -41,13 +42,11 @@ int main(void)
 	
 	MX_USB_DEVICE_Init();
 	
-	ConfigSet((app_config_t *) &init_config);
+	//ConfigSet((app_config_t *) &init_config);
 	ConfigGet(&config);
 
 	GPIO_Init(&config);
-	ADC_Init(&config);
-	
-  
+	ADC_Init(&config);  
 
   while (1)
   {
@@ -60,7 +59,7 @@ int main(void)
 			uint8_t i;
 			
 			memset(tmp_buf, 0, sizeof(tmp_buf));			
-			tmp_buf[0] = CONFIG_REPORT_ID;					
+			tmp_buf[0] = CONFIG_IN_REPORT_ID;					
 			tmp_buf[1] = config_requested;
 			
 			switch(config_requested)
@@ -141,6 +140,19 @@ int main(void)
 				
 			USBD_CUSTOM_HID_SendReport(	&hUsbDeviceFS, (uint8_t *)&(tmp_buf), 64);
 			config_requested = 0;	
+			config_millis = millis;
+			// 1 second delay for joy report in config mode
+			joy_millis = millis + 1000;
+		}
+		
+		if ((config_requesting > 1) & (config_requesting <= 10) & (millis > config_millis))
+		{	
+			uint8_t tmp_buf[2];
+			tmp_buf[0] = CONFIG_OUT_REPORT_ID;
+			tmp_buf[1] = config_requesting;
+			
+			USBD_CUSTOM_HID_SendReport(	&hUsbDeviceFS, (uint8_t *)&(tmp_buf), 2);
+			config_requesting = 0;	
 			config_millis = millis;
 			// 1 second delay for joy report in config mode
 			joy_millis = millis + 1000;
