@@ -13,7 +13,7 @@ ADC_HandleTypeDef hadc1;
 DMA_HandleTypeDef hdma_adc1;
 TIM_HandleTypeDef htim3;
 uint16_t adc_data[MAX_AXIS_NUM];
-analog_data_t analog_data[MAX_AXIS_NUM];
+analog_data_t axis_data[MAX_AXIS_NUM];
 
 adc_channel_config_t channel_config[MAX_AXIS_NUM] =
 {
@@ -175,7 +175,7 @@ void AnalogProcess (app_config_t * p_config)
 		
 		// TODO: Shapes
 		// analog_data[i] = ShapeFunc(i, tmp16);
-		analog_data[i] = tmp16;
+		axis_data[i] = tmp16;
 	}	
 }
 
@@ -185,11 +185,15 @@ void AxisResetCalibration (app_config_t * p_config, uint8_t axis_num)
 	p_config->axis_config[axis_num].calib_min = 4095;
 }
 
-void AnalogGet (analog_data_t * data)
+void AnalogGet (analog_data_t * scaled_data, analog_data_t * raw_data)
 {
-	if (data != NULL)
+	if (scaled_data != NULL)
 	{
-		memcpy(data, analog_data, sizeof(analog_data));
+		memcpy(scaled_data, axis_data, sizeof(axis_data));
+	}
+	if (raw_data != NULL)
+	{
+		memcpy(raw_data, adc_data, sizeof(adc_data));
 	}
 }
 

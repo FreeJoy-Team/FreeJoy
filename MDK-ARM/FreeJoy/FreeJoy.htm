@@ -3,7 +3,7 @@
 <title>Static Call Graph - [FreeJoy\FreeJoy.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image FreeJoy\FreeJoy.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Sun Oct 20 13:57:32 2019
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Mon Oct 21 11:41:40 2019
 <BR><P>
 <H3>Maximum Stack Usage =        232 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -359,8 +359,8 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[47]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[60]"></a>AnalogGet</STRONG> (Thumb, 18 bytes, Stack size 8 bytes, analog.o(i.AnalogGet))
-<BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = AnalogGet
+<P><STRONG><a name="[60]"></a>AnalogGet</STRONG> (Thumb, 32 bytes, Stack size 16 bytes, analog.o(i.AnalogGet))
+<BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = AnalogGet
 </UL>
 <BR>[Calls]<UL><LI><a href="#[61]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy
 </UL>
@@ -1417,7 +1417,7 @@ Global Symbols
 
 <P><STRONG><a name="[fb]"></a>__scatterload_zeroinit</STRONG> (Thumb, 14 bytes, Stack size unknown bytes, handlers.o(i.__scatterload_zeroinit), UNUSED)
 
-<P><STRONG><a name="[47]"></a>main</STRONG> (Thumb, 640 bytes, Stack size 64 bytes, main.o(i.main))
+<P><STRONG><a name="[47]"></a>main</STRONG> (Thumb, 644 bytes, Stack size 64 bytes, main.o(i.main))
 <BR><BR>[Stack]<UL><LI>Max Depth = 232<LI>Call Chain = main &rArr; SystemClock_Config &rArr; HAL_RCC_ClockConfig &rArr; HAL_InitTick &rArr; HAL_NVIC_SetPriority &rArr; NVIC_SetPriority
 </UL>
 <BR>[Calls]<UL><LI><a href="#[c9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBD_CUSTOM_HID_SendReport
@@ -1445,7 +1445,7 @@ Local Symbols
 <P><STRONG><a name="[7]"></a>CUSTOM_HID_Init_FS</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, usbd_custom_hid_if.o(i.CUSTOM_HID_Init_FS))
 <BR>[Address Reference Count : 1]<UL><LI> usbd_custom_hid_if.o(.data)
 </UL>
-<P><STRONG><a name="[9]"></a>CUSTOM_HID_OutEvent_FS</STRONG> (Thumb, 416 bytes, Stack size 32 bytes, usbd_custom_hid_if.o(i.CUSTOM_HID_OutEvent_FS))
+<P><STRONG><a name="[9]"></a>CUSTOM_HID_OutEvent_FS</STRONG> (Thumb, 408 bytes, Stack size 32 bytes, usbd_custom_hid_if.o(i.CUSTOM_HID_OutEvent_FS))
 <BR><BR>[Stack]<UL><LI>Max Depth = 136<LI>Call Chain = CUSTOM_HID_OutEvent_FS &rArr; ConfigSet &rArr; HAL_FLASH_Program &rArr; FLASH_WaitForLastOperation
 </UL>
 <BR>[Calls]<UL><LI><a href="#[6a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ConfigSet

@@ -150,6 +150,7 @@ typedef struct
 	uint8_t 		button_data[MAX_BUTTONS_NUM/8];
 	uint16_t 		axis_data[MAX_AXIS_NUM];
 	uint8_t 		pov_data[MAX_POVS_NUM];
+	uint16_t		raw_axis_data[MAX_AXIS_NUM];
 	
 } joy_report_t;
 

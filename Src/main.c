@@ -165,7 +165,7 @@ int main(void)
 			joy_report.id = JOY_REPORT_ID;
 			
 			ButtonsGet(joy_report.button_data);
-			AnalogGet(joy_report.axis_data);	
+			AnalogGet(joy_report.axis_data, joy_report.raw_axis_data);	
 			POVsGet(joy_report.pov_data);
 			
 			USBD_CUSTOM_HID_SendReport(	&hUsbDeviceFS, (uint8_t *)&(joy_report.id), sizeof(joy_report)-sizeof(joy_report.dummy));

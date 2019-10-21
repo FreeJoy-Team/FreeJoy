@@ -25,7 +25,7 @@ typedef uint16_t analog_data_t;
 void ADC_Init (app_config_t * p_config);
 void AnalogProcess (app_config_t * p_config);
 void AxisResetCalibration (app_config_t * p_config, uint8_t axis_num);
-void AnalogGet (analog_data_t * data);
+void AnalogGet (analog_data_t * scaled_data, analog_data_t * raw_data);
 
 #endif 	/* __ANALOG_H__ */
 
