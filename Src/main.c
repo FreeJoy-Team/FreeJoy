@@ -65,14 +65,14 @@ int main(void)
 			switch(config_requested)
 			{
 					case 1:	
-					memcpy(&tmp_buf[pos], (uint8_t *) &(config.firmware_version), sizeof(config.firmware_version));
-					pos += sizeof(config.firmware_version);
-					memcpy(&tmp_buf[pos], (uint8_t *) &(config.device_name), sizeof(config.device_name));
-					pos += sizeof(config.device_name);
-					memcpy(&tmp_buf[pos], (uint8_t *) &(config.button_debounce_ms), 8);
-					pos += 8;
-					
-					memcpy(&tmp_buf[63-sizeof(config.pins)], (uint8_t *) &(config.pins), sizeof(config.pins));
+						memcpy(&tmp_buf[pos], (uint8_t *) &(config.firmware_version), sizeof(config.firmware_version));
+						pos += sizeof(config.firmware_version);
+						memcpy(&tmp_buf[pos], (uint8_t *) &(config.device_name), sizeof(config.device_name));
+						pos += sizeof(config.device_name);
+						memcpy(&tmp_buf[pos], (uint8_t *) &(config.button_debounce_ms), 8);
+						pos += 8;
+						
+						memcpy(&tmp_buf[63-sizeof(config.pins)], (uint8_t *) &(config.pins), sizeof(config.pins));
 					break;
 				
 				case 2:

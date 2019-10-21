@@ -305,7 +305,7 @@ static int8_t CUSTOM_HID_OutEvent_FS(uint8_t event_idx, uint8_t state)
 			{
 				case 1:
 //					memcpy((uint8_t *) &(tmp_config.firmware_version), &hhid->Report_buf[pos], sizeof(tmp_config.firmware_version));
-//					pos += sizeof(tmp_config.firmware_version);
+					pos += sizeof(tmp_config.firmware_version);
 					memcpy((uint8_t *) &(tmp_config.device_name), &hhid->Report_buf[pos], sizeof(tmp_config.device_name));
 					pos += sizeof(tmp_config.device_name);
 					memcpy((uint8_t *) &(tmp_config.button_debounce_ms), &hhid->Report_buf[pos], 8);
@@ -381,8 +381,10 @@ static int8_t CUSTOM_HID_OutEvent_FS(uint8_t event_idx, uint8_t state)
 			}
 			else // last packet received
 			{
+				tmp_config.firmware_version = config.firmware_version;
 				ConfigSet(&tmp_config);
-				ConfigGet(&config);
+				//ConfigGet(&config);
+				HAL_NVIC_SystemReset();
 			}
 		break;
 		

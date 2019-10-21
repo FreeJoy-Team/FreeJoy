@@ -53,10 +53,6 @@ void ButtonProcess (uint8_t pin_num, app_config_t * p_config)
 				buttons_state[pos].current_state = state;
 				buttons_state[pos].prev_state = buttons_state[pos].current_state;
 				buttons_state[pos].cnt += buttons_state[pos].current_state;
-				
-				// set bit in buttons data
-				buttons_data[(pos & 0xF8)>>3] &= !(1 << (pos & 0x07));
-				buttons_data[(pos & 0xF8)>>3] |= (buttons_state[pos].current_state << (pos & 0x07));
 			}
 			// reset if state changed during debounce period
 			else if (	buttons_state[pos].changed && 
@@ -82,10 +78,6 @@ void ButtonProcess (uint8_t pin_num, app_config_t * p_config)
 				buttons_state[pos].prev_state = 1;
 				buttons_state[pos].current_state = !buttons_state[pos].current_state;
 				buttons_state[pos].cnt++;
-				
-				// set bit in buttons data
-				buttons_data[(pos & 0xF8)>>3] &= !(1 << (pos & 0x07));
-				buttons_data[(pos & 0xF8)>>3] |= (buttons_state[pos].current_state << (pos & 0x07));
 			}
 			// reset if state changed during debounce period
 			else if (!state && millis - buttons_state[pos].time_last > p_config->button_debounce_ms)
@@ -110,10 +102,6 @@ void ButtonProcess (uint8_t pin_num, app_config_t * p_config)
 				buttons_state[pos].current_state = 1;
 				buttons_state[pos].prev_state = state;
 				buttons_state[pos].cnt++;
-				
-				// set bit in buttons data
-				buttons_data[(pos & 0xF8)>>3] &= !(1 << (pos & 0x07));
-				buttons_data[(pos & 0xF8)>>3] |= (buttons_state[pos].current_state << (pos & 0x07));
 			}
 			// release button after push time
 			else if (	millis - buttons_state[pos].time_last > p_config->toggle_press_time_ms)
@@ -138,10 +126,6 @@ void ButtonProcess (uint8_t pin_num, app_config_t * p_config)
 				buttons_state[pos].current_state = 1;
 				buttons_state[pos].prev_state = state;
 				buttons_state[pos].cnt++;
-				
-				// set bit in buttons data
-				buttons_data[(pos & 0xF8)>>3] &= !(1 << (pos & 0x07));
-				buttons_data[(pos & 0xF8)>>3] |= (buttons_state[pos].current_state << (pos & 0x07));
 			}
 			// release button after push time
 			else if (	millis - buttons_state[pos].time_last > p_config->toggle_press_time_ms)
@@ -167,10 +151,6 @@ void ButtonProcess (uint8_t pin_num, app_config_t * p_config)
 				buttons_state[pos].current_state = 1;
 				buttons_state[pos].prev_state = state;
 				buttons_state[pos].cnt++;
-				
-				// set bit in buttons data
-				buttons_data[(pos & 0xF8)>>3] &= !(1 << (pos & 0x07));
-				buttons_data[(pos & 0xF8)>>3] |= (buttons_state[pos].current_state << (pos & 0x07));
 			}
 			// release button after push time
 			else if (	millis - buttons_state[pos].time_last > p_config->toggle_press_time_ms)
@@ -433,6 +413,13 @@ void ButtonsCheck (app_config_t * p_config)
 			HAL_GPIO_WritePin(p_pin_config[i].port, p_pin_config[i].pin, GPIO_PIN_SET);
 		}
 	}
+	
+	// convert data to report format
+	for (int i=0;i<pos;i++)
+		{
+			buttons_data[(i & 0xF8)>>3] &= ~(1 << (i & 0x07));
+			buttons_data[(i & 0xF8)>>3] |= (buttons_state[i].current_state << (i & 0x07));
+		}
 	
 	for (int i=0; i<MAX_POVS_NUM; i++)
 	{

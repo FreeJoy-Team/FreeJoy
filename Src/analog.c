@@ -38,8 +38,8 @@ static uint32_t map(uint32_t x,
 	tmp8 = x;
 	
 	
-	if (tmp8 < in_min)	tmp8 = in_min;
-	if (tmp8 > in_max)	tmp8 = in_max;
+	if (tmp8 < in_min)	return in_min;
+	if (tmp8 > in_max)	return in_max;
 	
 	if (tmp8 < in_center)
 	{
