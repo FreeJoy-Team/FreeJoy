@@ -19,8 +19,10 @@
 
 /* Private variables ---------------------------------------------------------*/
 app_config_t config;
-volatile uint8_t config_requested;
-volatile uint8_t config_requesting;
+volatile uint8_t config_in_cnt;
+volatile uint8_t config_out_cnt;
+volatile uint16_t firmware_in_cnt;
+volatile uint8_t bootloader = 0;
 joy_report_t joy_report;
 
 //uint8_t report_data[64];
@@ -34,7 +36,7 @@ joy_report_t joy_report;
   */
 int main(void)
 {
-	int32_t millis =0, joy_millis=0, config_millis=0;
+	int32_t millis =0, joy_millis=0;
 	
   HAL_Init();
 	
@@ -42,8 +44,14 @@ int main(void)
 	
 	MX_USB_DEVICE_Init();
 	
-	//ConfigSet((app_config_t *) &init_config);
+	
 	ConfigGet(&config);
+	// set default config at first startup
+	if (config.firmware_version == 0xFFFF)
+	{
+		ConfigSet((app_config_t *) &init_config);
+		ConfigGet(&config);
+	}
 
 	GPIO_Init(&config);
 	ADC_Init(&config);  
@@ -52,17 +60,17 @@ int main(void)
   {
 		millis = HAL_GetTick();
 		
-		if ((config_requested > 0) & (config_requested <= 10) & (millis > config_millis))
+		if ((config_in_cnt > 0) & (config_in_cnt <= 10))
 		{		
 			uint8_t tmp_buf[64];
 			uint8_t pos = 2;
 			uint8_t i;
 			
 			memset(tmp_buf, 0, sizeof(tmp_buf));			
-			tmp_buf[0] = CONFIG_IN_REPORT_ID;					
-			tmp_buf[1] = config_requested;
+			tmp_buf[0] = REPORT_ID_CONFIG_IN;					
+			tmp_buf[1] = config_in_cnt;
 			
-			switch(config_requested)
+			switch(config_in_cnt)
 			{
 					case 1:	
 						memcpy(&tmp_buf[pos], (uint8_t *) &(config.firmware_version), sizeof(config.firmware_version));
@@ -139,21 +147,32 @@ int main(void)
 			}
 				
 			USBD_CUSTOM_HID_SendReport(	&hUsbDeviceFS, (uint8_t *)&(tmp_buf), 64);
-			config_requested = 0;	
-			config_millis = millis;
+			config_in_cnt = 0;	
 			// 1 second delay for joy report in config mode
 			joy_millis = millis + 1000;
 		}
 		
-		if ((config_requesting > 1) & (config_requesting <= 10) & (millis > config_millis))
+		if ((config_out_cnt > 1) & (config_out_cnt <= 10))
 		{	
 			uint8_t tmp_buf[2];
-			tmp_buf[0] = CONFIG_OUT_REPORT_ID;
-			tmp_buf[1] = config_requesting;
+			tmp_buf[0] = REPORT_ID_CONFIG_OUT;
+			tmp_buf[1] = config_out_cnt;
 			
 			USBD_CUSTOM_HID_SendReport(	&hUsbDeviceFS, (uint8_t *)&(tmp_buf), 2);
-			config_requesting = 0;	
-			config_millis = millis;
+			config_out_cnt = 0;	
+			// 1 second delay for joy report in config mode
+			joy_millis = millis + 1000;
+		}
+		
+		if (firmware_in_cnt > 0)
+		{
+			uint8_t tmp_buf[3];
+			tmp_buf[0] = REPORT_ID_FIRMWARE;
+			tmp_buf[1] = (firmware_in_cnt)>>8;
+			tmp_buf[2] = (firmware_in_cnt)&0xFF;
+			USBD_CUSTOM_HID_SendReport(	&hUsbDeviceFS, (uint8_t *)&(tmp_buf), 3);
+			
+			firmware_in_cnt = 0;
 			// 1 second delay for joy report in config mode
 			joy_millis = millis + 1000;
 		}
@@ -162,7 +181,7 @@ int main(void)
 		{
 			joy_millis = millis;
 			
-			joy_report.id = JOY_REPORT_ID;
+			joy_report.id = REPORT_ID_JOY;
 			
 			ButtonsGet(joy_report.button_data);
 			AnalogGet(joy_report.axis_data, joy_report.raw_axis_data);	
@@ -170,10 +189,32 @@ int main(void)
 			
 			USBD_CUSTOM_HID_SendReport(	&hUsbDeviceFS, (uint8_t *)&(joy_report.id), sizeof(joy_report)-sizeof(joy_report.dummy));
 		}
+		
+		// jump to bootloader
+		if (bootloader > 0)
+		{
+			EnterBootloader();
+		}
   }
 }
 
-
+void EnterBootloader (void)
+{
+	uint32_t bootloader_addr;
+	typedef void(*pFunction)(void);
+	pFunction Bootloader;
+	
+	bootloader = 0;
+	
+	__disable_irq();
+	bootloader_addr = *(uint32_t*) (BOOTLOADER_ADDR + 4);
+	
+	Bootloader = (pFunction) bootloader_addr;
+	
+	__set_MSP(*(__IO uint32_t*) BOOTLOADER_ADDR);
+	
+	Bootloader();
+}
 
 
 /**

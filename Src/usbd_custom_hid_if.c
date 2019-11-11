@@ -62,8 +62,10 @@
 /* Private variables ---------------------------------------------------------*/
 
 extern app_config_t config;
-volatile extern uint8_t config_requested;
-volatile extern uint8_t config_requesting;
+volatile extern uint8_t config_in_cnt;
+volatile extern uint8_t config_out_cnt;
+volatile extern uint16_t firmware_in_cnt;
+volatile extern uint8_t bootloader;
 /* USER CODE END PV */
 
 /** @addtogroup STM32_USB_OTG_DEVICE_LIBRARY
@@ -126,7 +128,7 @@ __ALIGN_BEGIN static uint8_t CUSTOM_HID_ReportDesc_FS[USBD_CUSTOM_HID_REPORT_DES
     0x09, 0x05,                    // USAGE (Game Pad)
     0xa1, 0x01,                    // COLLECTION (Application)
 
-		0x85, JOY_REPORT_ID,				 	 //		REPORT_ID	(JOY_REPORT_ID)	
+		0x85, REPORT_ID_JOY,				 	 //		REPORT_ID	(JOY_REPORT_ID)	
 	  0x05, 0x09,                    //   USAGE_PAGE (Button)
     0x19, 0x01,                    //   USAGE_MINIMUM (Button 1)
     0x29, MAX_BUTTONS_NUM,         //   USAGE_MAXIMUM (Button MAX_BUTTONS_NUM)
@@ -177,7 +179,7 @@ __ALIGN_BEGIN static uint8_t CUSTOM_HID_ReportDesc_FS[USBD_CUSTOM_HID_REPORT_DES
     0x81, 0x00,                    //   INPUT (Data,Ary,Abs)
 		
 		// config data
-		0x85, CONFIG_IN_REPORT_ID,     //   REPORT_ID (2)
+		0x85, REPORT_ID_CONFIG_IN,     //   REPORT_ID (2)
     0x09, 0x02,                    //   USAGE (Vendor Usage 2)
     0x15, 0x00,                    //   LOGICAL_MINIMUM (0)
     0x26, 0xff, 0x00,              //   LOGICAL_MAXIMUM (255)
@@ -190,8 +192,7 @@ __ALIGN_BEGIN static uint8_t CUSTOM_HID_ReportDesc_FS[USBD_CUSTOM_HID_REPORT_DES
     0x95, 0x01,                    //   REPORT_COUNT (1)
     0x91, 0x00,                    //   OUTPUT (Data,Ary,Abs)
 		
-    0x85, CONFIG_OUT_REPORT_ID,    //   REPORT_ID (3)	
-
+    0x85, REPORT_ID_CONFIG_OUT,    //   REPORT_ID (3)	
     0x09, 0x04,                    //   USAGE (Vendor Usage 4)
     0x75, 0x08,                    //   REPORT_SIZE (8)
     0x95, 0x01,                    //   REPORT_COUNT (1)
@@ -200,6 +201,17 @@ __ALIGN_BEGIN static uint8_t CUSTOM_HID_ReportDesc_FS[USBD_CUSTOM_HID_REPORT_DES
     0x09, 0x05,                    //   USAGE (Vendor Usage 5)
     0x75, 0x08,                    //   REPORT_SIZE (8)
     0x95, 0x3f,                    //   REPORT_COUNT (63)
+		0x91, 0x00,                    //   OUTPUT (Data,Ary,Abs)
+		
+		0x85, REPORT_ID_FIRMWARE,    	 //   REPORT_ID (3)	
+    0x09, 0x06,                    //   USAGE (Vendor Usage 6)
+    0x75, 0x08,                    //   REPORT_SIZE (8)
+    0x95, 0x02,                    //   REPORT_COUNT (1)
+		0x81, 0x00,                    //   INPUT (Data,Ary,Abs)
+		
+    0x09, 0x07,                    //   USAGE (Vendor Usage 7)
+    0x75, 0x08,                    //   REPORT_SIZE (8)
+		0x95, 0x3f,                    //   REPORT_COUNT (63)
 		0x91, 0x00,                    //   OUTPUT (Data,Ary,Abs)
 		
 		0xc0,                           // END_COLLECTION
@@ -287,6 +299,7 @@ static int8_t CUSTOM_HID_OutEvent_FS(uint8_t event_idx, uint8_t state)
 {
   /* USER CODE BEGIN 6 */
 	static app_config_t tmp_config;
+	static uint16_t firmware_len = 0;
 	uint8_t i;
 	uint8_t pos = 2;
 	uint8_t repotId;
@@ -296,14 +309,18 @@ static int8_t CUSTOM_HID_OutEvent_FS(uint8_t event_idx, uint8_t state)
 	
 	switch (repotId)
 	{
-		case CONFIG_IN_REPORT_ID:
-			config_requested = hhid->Report_buf[1];			// requested config packet number
+		case REPORT_ID_CONFIG_IN:
+		{
+			config_in_cnt = hhid->Report_buf[1];			// requested config packet number
+		}
 		break;
 		
-		case CONFIG_OUT_REPORT_ID:
+		case REPORT_ID_CONFIG_OUT:
+		{
 			switch (hhid->Report_buf[1])
 			{
 				case 1:
+					{
 //					memcpy((uint8_t *) &(tmp_config.firmware_version), &hhid->Report_buf[pos], sizeof(tmp_config.firmware_version));
 					pos += sizeof(tmp_config.firmware_version);
 					memcpy((uint8_t *) &(tmp_config.device_name), &hhid->Report_buf[pos], sizeof(tmp_config.device_name));
@@ -312,64 +329,81 @@ static int8_t CUSTOM_HID_OutEvent_FS(uint8_t event_idx, uint8_t state)
 					pos += 8;
 					
 					memcpy((uint8_t *) &(tmp_config.pins), &hhid->Report_buf[63-sizeof(tmp_config.pins)], sizeof(tmp_config.pins));
+					}
 				break;
 				
 				case 2:
+				{
 					i = 0;
 					while(64 - pos > sizeof(axis_config_t))
 					{
 						memcpy((uint8_t *) &(tmp_config.axis_config[i++]), &hhid->Report_buf[pos], sizeof(axis_config_t));
 						pos += sizeof(axis_config_t);
 					}
-					break;
+				}
+				break;
 				
 				case 3:
+				{
 					i = 2;
 					while(64 - pos > sizeof(axis_config_t))
 					{
 						memcpy((uint8_t *) &(tmp_config.axis_config[i++]), &hhid->Report_buf[pos], sizeof(axis_config_t));
 						pos += sizeof(axis_config_t);
 					}
-					break;
+				}
+				break;
 				
 				case 4:
+				{
 					i = 4;
 					while(64 - pos > sizeof(axis_config_t))
 					{
 						memcpy((uint8_t *) &(tmp_config.axis_config[i++]), &hhid->Report_buf[pos], sizeof(axis_config_t));
 						pos += sizeof(axis_config_t);
 					}
-					break;
+				}
+				break;
 
 				case 5:
+				{
 					i = 6;
 					while(64 - pos > sizeof(axis_config_t))
 					{
 						memcpy((uint8_t *) &(tmp_config.axis_config[i++]), &hhid->Report_buf[pos], sizeof(axis_config_t));
 						pos += sizeof(axis_config_t);
 					}
-					break;
+				}
+				break;
 				
 				case 6:
+				{
 					memcpy((uint8_t *) &(tmp_config.buttons[0]), &hhid->Report_buf[pos], 62);
-					break;
+				}
+				break;
 				
 				case 7:
+				{
 					memcpy((uint8_t *) &(tmp_config.buttons[62]), &hhid->Report_buf[pos], 62);
-					break;
+				}
+				break;
 				
 				case 8:
+				{
 					memcpy((uint8_t *) &(tmp_config.buttons[124]), &hhid->Report_buf[pos], 4);
 				
 					memcpy((uint8_t *) &(tmp_config.encoders), &hhid->Report_buf[63-sizeof(tmp_config.encoders)], sizeof(tmp_config.encoders));
-					break;
+				}
+				break;
 				
 				case 9:
-					
+				{
+				}					
 					break;
 				
 				case 10:
-					
+				{
+				}					
 					break;
 				
 				default:
@@ -377,7 +411,7 @@ static int8_t CUSTOM_HID_OutEvent_FS(uint8_t event_idx, uint8_t state)
 			}
 			if (hhid->Report_buf[1] < 10)		// request new packet
 			{
-				config_requesting = hhid->Report_buf[1] + 1;
+				config_out_cnt = hhid->Report_buf[1] + 1;
 			}
 			else // last packet received
 			{
@@ -386,6 +420,72 @@ static int8_t CUSTOM_HID_OutEvent_FS(uint8_t event_idx, uint8_t state)
 				//ConfigGet(&config);
 				HAL_NVIC_SystemReset();
 			}
+		}
+		break;
+			
+		case REPORT_ID_FIRMWARE:
+		{
+			FLASH_EraseInitTypeDef FLASH_EraseInitStruct;
+			uint32_t PageError = 0;
+			uint16_t crc = 0;
+			
+			uint16_t cnt = hhid->Report_buf[1]<<8 | hhid->Report_buf[2];
+			
+			if (cnt == 0)			// first packet with info data
+			{
+				firmware_len = hhid->Report_buf[5]<<8 | hhid->Report_buf[4];
+				
+				FLASH_EraseInitStruct.TypeErase = FLASH_TYPEERASE_PAGES;
+				FLASH_EraseInitStruct.NbPages = 24;
+				FLASH_EraseInitStruct.PageAddress = FIRMWARE_COPY_ADDR;
+				
+				HAL_FLASH_Unlock();
+				HAL_FLASHEx_Erase(&FLASH_EraseInitStruct, &PageError);
+				for (uint8_t i=0;i<60;i+=2)
+				{
+					uint16_t tmp16 = hhid->Report_buf[i + 5]<<8 | hhid->Report_buf[i + 4];
+					HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, FIRMWARE_COPY_ADDR + (cnt)*60 + i, tmp16);
+				}
+				HAL_FLASH_Lock();
+				firmware_in_cnt = cnt+1;
+			}
+			else if ( (firmware_len > 0) && (cnt*60 < firmware_len) )		// body of firmware data
+			{
+				HAL_FLASH_Unlock();
+				for (uint8_t i=0;i<60;i+=2)
+				{
+					uint16_t tmp16 = hhid->Report_buf[i + 5]<<8 | hhid->Report_buf[i + 4];
+					HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, FIRMWARE_COPY_ADDR + (cnt)*60 + i, tmp16);
+				}
+				HAL_FLASH_Lock();
+				firmware_in_cnt = cnt+1;
+			}
+			else if (firmware_len > 0)		// last packet
+			{
+				HAL_FLASH_Unlock();
+				for (uint8_t i=0;i<60;i+=2)
+				{
+					uint16_t tmp16 = hhid->Report_buf[i + 5]<<8 | hhid->Report_buf[i + 4];
+					HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, FIRMWARE_COPY_ADDR + (cnt)*60 + i, tmp16);
+				}
+				HAL_FLASH_Lock();
+				
+				crc = (*(uint8_t *) (FIRMWARE_COPY_ADDR + firmware_len - 2)) << 8 |
+							(*(uint8_t *) (FIRMWARE_COPY_ADDR + firmware_len - 1));
+				
+				{
+					// TODO: crc check
+				}
+				
+				// jump to bootloader
+				bootloader = 1;
+				
+			}
+			else break;
+			
+			
+			
+		}
 		break;
 		
 		default:

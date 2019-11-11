@@ -16,7 +16,11 @@
 
 static const app_config_t init_config =
 {
-	.firmware_version = 1,
+	.firmware_version = 1,		// do not change
+	
+	/* 
+		Name of device in devices dispatcher
+	*/
 	.device_name[0] = 'F',
 	.device_name[1] = 'r',
 	.device_name[2] = 'e',
@@ -26,14 +30,26 @@ static const app_config_t init_config =
 	.device_name[6] = 'y',
 	.device_name[7] = ' ',
 	.device_name[8] = ' ',
-	.device_name[9] = 0,
+	.device_name[9] = 0,			
 	
-	.button_debounce_ms = 30,
-	.toggle_press_time_ms = 200,
-	.encoder_press_time_ms = 100,
-	.exchange_period_ms = 10,
+	.button_debounce_ms = 30,					// debounce time for all buttons
+	
+	.toggle_press_time_ms = 200,			// amount of millisecods virtual button 
+																		// will be pressed at toggle switch event
+	
+	.encoder_press_time_ms = 100,			// amount of millisecods virtual button 
+																		// will be pressed at encoder increment/decrement
+																		
+	.exchange_period_ms = 10,					// amount of millisecond between joystick data sending
 
-	
+	/*
+		Device pins configuration. Available values:
+		- AXIS_ANALOG (only for pins 0-7)
+		- BUTTON_GND
+		- BUTTON_VCC
+		- BUTTON_COLUMN
+		- BUTTON_ROW
+	*/
 	.pins[0] = AXIS_ANALOG,						// PA0
 	.pins[1] = AXIS_ANALOG,						// PA1
 	.pins[2] = AXIS_ANALOG,						// PA2
@@ -65,6 +81,9 @@ static const app_config_t init_config =
 	.pins[28] = NOT_USED,							// PC14
 	.pins[29] = NOT_USED,							// PC15
 	
+	/*
+		Configuration of anlog axes
+	*/
 	.axis_config[0].calib_min = 0,
 	.axis_config[0].calib_center = 2047,
 	.axis_config[0].calib_max = 4095,
@@ -269,6 +288,9 @@ static const app_config_t init_config =
 
 
 };
+
+
+void EnterBootloader (void);
 
 /* ########################## Assert Selection ############################## */
 /**

@@ -18,10 +18,16 @@
 #define MAX_POVS_NUM							4						// max 4
 #define MAX_ENCODERS_NUM					12					// max 16
 
+#define FIRMWARE_COPY_ADDR				(0x8000000 + 0x6400)
+#define BOOTLOADER_ADDR						(0x800D000)
 
-#define JOY_REPORT_ID							1
-#define CONFIG_IN_REPORT_ID				2
-#define CONFIG_OUT_REPORT_ID			3
+enum
+{
+	REPORT_ID_JOY = 1,
+	REPORT_ID_CONFIG_IN,
+	REPORT_ID_CONFIG_OUT,
+	REPORT_ID_FIRMWARE,
+};
 
 
 #endif 	/* __COMMON_DEFINES_H__ */
