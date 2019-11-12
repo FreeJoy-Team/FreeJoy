@@ -52,6 +52,7 @@
 
 /* USER CODE BEGIN INCLUDE */
 #include "flash.h"
+#include "crc16.h"
 /* USER CODE END INCLUDE */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -427,13 +428,17 @@ static int8_t CUSTOM_HID_OutEvent_FS(uint8_t event_idx, uint8_t state)
 		{
 			FLASH_EraseInitTypeDef FLASH_EraseInitStruct;
 			uint32_t PageError = 0;
-			uint16_t crc = 0;
+			uint16_t crc_in = 0;
+			uint16_t crc_comp = 0;
 			
 			uint16_t cnt = hhid->Report_buf[1]<<8 | hhid->Report_buf[2];
 			
 			if (cnt == 0)			// first packet with info data
 			{
 				firmware_len = hhid->Report_buf[5]<<8 | hhid->Report_buf[4];
+				
+				if (firmware_len <= 0x6400)	// check new firmware size
+				{
 				
 				FLASH_EraseInitStruct.TypeErase = FLASH_TYPEERASE_PAGES;
 				FLASH_EraseInitStruct.NbPages = 24;
@@ -448,6 +453,11 @@ static int8_t CUSTOM_HID_OutEvent_FS(uint8_t event_idx, uint8_t state)
 				}
 				HAL_FLASH_Lock();
 				firmware_in_cnt = cnt+1;
+				}
+				else // firmware size error
+				{
+					
+				}
 			}
 			else if ( (firmware_len > 0) && (cnt*60 < firmware_len) )		// body of firmware data
 			{
@@ -470,16 +480,13 @@ static int8_t CUSTOM_HID_OutEvent_FS(uint8_t event_idx, uint8_t state)
 				}
 				HAL_FLASH_Lock();
 				
-				crc = (*(uint8_t *) (FIRMWARE_COPY_ADDR + firmware_len - 2)) << 8 |
-							(*(uint8_t *) (FIRMWARE_COPY_ADDR + firmware_len - 1));
-				
+				// check CRC16
+				crc_in = (*(uint8_t *) (FIRMWARE_COPY_ADDR + 3)) << 8 | (*(uint8_t *) (FIRMWARE_COPY_ADDR + 2));				
+				crc_comp = Crc16((uint8_t*)FIRMWARE_COPY_ADDR + 60, firmware_len);				
+				if (crc_in == crc_comp && crc_comp != 0)
 				{
-					// TODO: crc check
+					bootloader = 1;
 				}
-				
-				// jump to bootloader
-				bootloader = 1;
-				
 			}
 			else break;
 			

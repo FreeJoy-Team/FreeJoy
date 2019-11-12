@@ -443,6 +443,11 @@
               <FilePath>..\Src\flash.c</FilePath>
             </File>
             <File>
+              <FileName>crc16.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\crc16.c</FilePath>
+            </File>
+            <File>
               <FileName>common_defines.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\Inc\common_defines.h</FilePath>
@@ -1157,6 +1162,11 @@
               <FileName>flash.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\flash.c</FilePath>
+            </File>
+            <File>
+              <FileName>crc16.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\crc16.c</FilePath>
             </File>
             <File>
               <FileName>common_defines.h</FileName>

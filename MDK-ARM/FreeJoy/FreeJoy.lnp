@@ -10,6 +10,7 @@
 "freejoy\buttons.o"
 "freejoy\analog.o"
 "freejoy\flash.o"
+"freejoy\crc16.o"
 "freejoy\stm32f1xx_hal_msp.o"
 "freejoy\stm32f1xx_hal_gpio_ex.o"
 "freejoy\stm32f1xx_hal_pcd.o"
