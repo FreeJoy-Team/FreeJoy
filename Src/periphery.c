@@ -148,7 +148,7 @@ void GPIO_Init (app_config_t * p_config)
 		if (p_config->pins[i] == BUTTON_GND)
 		{
 			GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-			GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+			GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
 			GPIO_InitStruct.Pin = pin_config[i].pin;
 			GPIO_InitStruct.Pull = GPIO_PULLUP;
 			HAL_GPIO_Init(pin_config[i].port, &GPIO_InitStruct);
@@ -156,7 +156,7 @@ void GPIO_Init (app_config_t * p_config)
 		else if (p_config->pins[i] == BUTTON_VCC)
 		{
 			GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-			GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+			GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
 			GPIO_InitStruct.Pin = pin_config[i].pin;
 			GPIO_InitStruct.Pull = GPIO_PULLDOWN;
 			HAL_GPIO_Init(pin_config[i].port, &GPIO_InitStruct);
@@ -164,7 +164,7 @@ void GPIO_Init (app_config_t * p_config)
 		else if (p_config->pins[i] == BUTTON_ROW)
 		{
 			GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-			GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+			GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
 			GPIO_InitStruct.Pin = pin_config[i].pin;
 			GPIO_InitStruct.Pull = GPIO_PULLUP;
 			HAL_GPIO_Init(pin_config[i].port, &GPIO_InitStruct);
@@ -172,35 +172,15 @@ void GPIO_Init (app_config_t * p_config)
 		else if (p_config->pins[i] == BUTTON_COLUMN)
 		{
 			GPIO_InitStruct.Pin = pin_config[i].pin;
-			GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+			GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
 			GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
 			GPIO_InitStruct.Pull = GPIO_NOPULL;
 			HAL_GPIO_Init(pin_config[i].port, &GPIO_InitStruct);
-		}
-		
-		// encoders
-		else if (p_config->pins[i] == ENCODER_SINGLE_INPUT || p_config->pins[i] == ENCODER_CHAINED_INPUT)
-		{
-			GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-			GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-			GPIO_InitStruct.Pin = pin_config[i].pin;
-			GPIO_InitStruct.Pull = GPIO_PULLUP;
-			HAL_GPIO_Init(pin_config[i].port, &GPIO_InitStruct);
-		}
-		// encoders
-		else if (p_config->pins[i] == ENCODER_CHAINED_COMMON)
-		{
-			GPIO_InitStruct.Pin = pin_config[i].pin;
-			GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-			GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
-			GPIO_InitStruct.Pull = GPIO_NOPULL;
-			HAL_GPIO_Init(pin_config[i].port, &GPIO_InitStruct);
-		}
-		
+		}		
 		else if (p_config->pins[i] == AXIS_ANALOG || p_config->pins[i] == AXIS_TO_BUTTONS)
 		{
 			GPIO_InitStruct.Pin = pin_config[i].pin;
-			GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+			GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
 			GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
 			HAL_GPIO_Init(pin_config[i].port, &GPIO_InitStruct);
 		}
@@ -208,13 +188,17 @@ void GPIO_Init (app_config_t * p_config)
 
 #ifdef DEBUG
 	GPIO_InitStruct.Pin = GPIO_PIN_12;
-	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 #endif
 }
 
+void Encoders_Init(void)
+{
+	
+}
 
 
 

@@ -428,6 +428,11 @@
               <FilePath>..\Src\periphery.c</FilePath>
             </File>
             <File>
+              <FileName>encoders.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\encoders.c</FilePath>
+            </File>
+            <File>
               <FileName>buttons.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\buttons.c</FilePath>
@@ -927,7 +932,7 @@
               <OCR_RVCT4>
                 <Type>1</Type>
                 <StartAddress>0x800d000</StartAddress>
-                <Size>0x3000</Size>
+                <Size>0x2c00</Size>
               </OCR_RVCT4>
               <OCR_RVCT5>
                 <Type>1</Type>
@@ -1147,6 +1152,11 @@
               <FileName>periphery.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\periphery.c</FilePath>
+            </File>
+            <File>
+              <FileName>encoders.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\encoders.c</FilePath>
             </File>
             <File>
               <FileName>buttons.c</FileName>

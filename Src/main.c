@@ -52,9 +52,11 @@ int main(void)
 		ConfigSet((app_config_t *) &init_config);
 		ConfigGet(&config);
 	}
+	
 
 	GPIO_Init(&config);
-	ADC_Init(&config);  
+	ADC_Init(&config); 
+	EncodersInit(&config);	
 
   while (1)
   {
@@ -130,7 +132,6 @@ int main(void)
 				case 8:
 					memcpy(&tmp_buf[pos], (uint8_t *) &(config.buttons[124]), 4);
 				
-					memcpy(&tmp_buf[63-sizeof(config.encoders)], (uint8_t *) &(config.encoders), sizeof(config.encoders));
 					break;
 				
 				case 9:
@@ -183,9 +184,7 @@ int main(void)
 			
 			joy_report.id = REPORT_ID_JOY;
 			
-			ButtonsGet(joy_report.button_data);
-			AnalogGet(joy_report.axis_data, joy_report.raw_axis_data);	
-			POVsGet(joy_report.pov_data);
+			
 			
 			USBD_CUSTOM_HID_SendReport(	&hUsbDeviceFS, (uint8_t *)&(joy_report.id), sizeof(joy_report)-sizeof(joy_report.dummy));
 		}
@@ -195,6 +194,10 @@ int main(void)
 		{
 			EnterBootloader();
 		}
+		
+		ButtonsGet(joy_report.button_data);
+		AnalogGet(joy_report.axis_data, joy_report.raw_axis_data);	
+		POVsGet(joy_report.pov_data);
   }
 }
 

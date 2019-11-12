@@ -28,16 +28,26 @@ static const app_config_t init_config =
 	.device_name[4] = 'J',
 	.device_name[5] = 'o',
 	.device_name[6] = 'y',
-	.device_name[7] = ' ',
-	.device_name[8] = ' ',
-	.device_name[9] = 0,			
+	.device_name[7] = 0,
+	.device_name[8] = 0,
+	.device_name[9] = 0,
+	.device_name[10] = 0,
+	.device_name[11] = 0,
+	.device_name[12] = 0,
+	.device_name[13] = 0,
+	.device_name[14] = 0,
+	.device_name[15] = 0,
+	.device_name[16] = 0,
+	.device_name[17] = 0,
+	.device_name[18] = 0,
+	.device_name[19] = 0,			
 	
 	.button_debounce_ms = 30,					// debounce time for all buttons
 	
 	.toggle_press_time_ms = 200,			// amount of millisecods virtual button 
 																		// will be pressed at toggle switch event
 	
-	.encoder_press_time_ms = 100,			// amount of millisecods virtual button 
+	.encoder_press_time_ms = 30,			// amount of millisecods virtual button 
 																		// will be pressed at encoder increment/decrement
 																		
 	.exchange_period_ms = 10,					// amount of millisecond between joystick data sending
@@ -224,67 +234,6 @@ static const app_config_t init_config =
 	.
 	.buttons[127] = BUTTON_NORMAL,
 */
-
-	
-	.encoders[0].pin_a = 0xFF,
-	.encoders[0].pin_b = 0xFF,
-	.encoders[0].pin_c = 0xFF,
-	.encoders[0].type = ENCODER_1_1,
-	
-	.encoders[1].pin_a = 0xFF,
-	.encoders[1].pin_b = 0xFF,
-	.encoders[1].pin_c = 0xFF,
-	.encoders[1].type = ENCODER_1_1,
-	
-	.encoders[2].pin_a = 0xFF,
-	.encoders[2].pin_b = 0xFF,
-	.encoders[2].pin_c = 0xFF,
-	.encoders[2].type = ENCODER_1_1,
-	
-	.encoders[3].pin_a = 0xFF,
-	.encoders[3].pin_b = 0xFF,
-	.encoders[3].pin_c = 0xFF,
-	.encoders[3].type = ENCODER_1_1,
-	
-	.encoders[4].pin_a = 0xFF,
-	.encoders[4].pin_b = 0xFF,
-	.encoders[4].pin_c = 0xFF,
-	.encoders[4].type = ENCODER_1_1,
-	
-	.encoders[5].pin_a = 0xFF,
-	.encoders[5].pin_b = 0xFF,
-	.encoders[5].pin_c = 0xFF,
-	.encoders[5].type = ENCODER_1_1,
-	
-	.encoders[6].pin_a = 0xFF,
-	.encoders[6].pin_b = 0xFF,
-	.encoders[6].pin_c = 0xFF,
-	.encoders[6].type = ENCODER_1_1,
-	
-	.encoders[7].pin_a = 0,
-	.encoders[7].pin_b = 1,
-	.encoders[7].pin_c = 0xFF,
-	.encoders[7].type = ENCODER_1_1,
-	
-	.encoders[8].pin_a = 0xFF,
-	.encoders[8].pin_b = 0xFF,
-	.encoders[8].pin_c = 0xFF,
-	.encoders[8].type = ENCODER_1_1,
-	
-	.encoders[9].pin_a = 0,
-	.encoders[9].pin_b = 1,
-	.encoders[9].pin_c = 0xFF,
-	.encoders[9].type = ENCODER_1_1,
-	
-	.encoders[10].pin_a = 0xFF,
-	.encoders[10].pin_b = 0xFF,
-	.encoders[10].pin_c = 0xFF,
-	.encoders[10].type = ENCODER_1_1,
-	
-	.encoders[11].pin_a = 0xFF,
-	.encoders[11].pin_b = 0xFF,
-	.encoders[11].pin_c = 0xFF,
-	.encoders[11].type = ENCODER_1_1,
 
 
 };

@@ -7,6 +7,7 @@
 "freejoy\usbd_custom_hid_if.o"
 "freejoy\stm32f1xx_it.o"
 "freejoy\periphery.o"
+"freejoy\encoders.o"
 "freejoy\buttons.o"
 "freejoy\analog.o"
 "freejoy\flash.o"

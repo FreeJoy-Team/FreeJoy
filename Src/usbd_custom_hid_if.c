@@ -323,13 +323,13 @@ static int8_t CUSTOM_HID_OutEvent_FS(uint8_t event_idx, uint8_t state)
 				case 1:
 					{
 //					memcpy((uint8_t *) &(tmp_config.firmware_version), &hhid->Report_buf[pos], sizeof(tmp_config.firmware_version));
-					pos += sizeof(tmp_config.firmware_version);
-					memcpy((uint8_t *) &(tmp_config.device_name), &hhid->Report_buf[pos], sizeof(tmp_config.device_name));
-					pos += sizeof(tmp_config.device_name);
-					memcpy((uint8_t *) &(tmp_config.button_debounce_ms), &hhid->Report_buf[pos], 8);
-					pos += 8;
-					
-					memcpy((uint8_t *) &(tmp_config.pins), &hhid->Report_buf[63-sizeof(tmp_config.pins)], sizeof(tmp_config.pins));
+						pos += sizeof(tmp_config.firmware_version);
+						memcpy((uint8_t *) &(tmp_config.device_name), &hhid->Report_buf[pos], sizeof(tmp_config.device_name));
+						pos += sizeof(tmp_config.device_name);
+						memcpy((uint8_t *) &(tmp_config.button_debounce_ms), &hhid->Report_buf[pos], 8);
+						pos += 8;
+						
+						memcpy((uint8_t *) &(tmp_config.pins), &hhid->Report_buf[63-sizeof(tmp_config.pins)], sizeof(tmp_config.pins));
 					}
 				break;
 				
@@ -392,8 +392,6 @@ static int8_t CUSTOM_HID_OutEvent_FS(uint8_t event_idx, uint8_t state)
 				case 8:
 				{
 					memcpy((uint8_t *) &(tmp_config.buttons[124]), &hhid->Report_buf[pos], 4);
-				
-					memcpy((uint8_t *) &(tmp_config.encoders), &hhid->Report_buf[63-sizeof(tmp_config.encoders)], sizeof(tmp_config.encoders));
 				}
 				break;
 				
@@ -418,7 +416,8 @@ static int8_t CUSTOM_HID_OutEvent_FS(uint8_t event_idx, uint8_t state)
 			{
 				tmp_config.firmware_version = config.firmware_version;
 				ConfigSet(&tmp_config);
-				//ConfigGet(&config);
+				
+				//ConfigGet(&config);	
 				HAL_NVIC_SystemReset();
 			}
 		}

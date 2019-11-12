@@ -61,10 +61,6 @@ enum
 	
 	AXIS_ANALOG,
 	AXIS_TO_BUTTONS,
-	
-	ENCODER_SINGLE_INPUT,
-	ENCODER_CHAINED_INPUT,
-	ENCODER_CHAINED_COMMON,
 };
 typedef uint8_t pin_t;
 
@@ -94,11 +90,26 @@ enum
 	POV4_DOWN,
 	POV4_LEFT,
 	
+	ENCODER_INPUT_A,
+	ENCODER_INPUT_B,
+	
 	BUTTON_TO_ANALOG,
 	BUTTON_SHIFT,
 	
 };
 typedef uint8_t button_t;
+
+typedef struct buttons_state_t
+{
+	uint8_t pin_state;
+	uint8_t pin_prev_state;
+	uint8_t prev_state;
+	uint8_t current_state;
+	uint8_t changed;
+	uint64_t time_last;	
+	uint8_t cnt;
+	
+} buttons_state_t;
 
 
 enum
@@ -111,10 +122,12 @@ typedef uint8_t encoder_type_t;
 
 typedef struct
 {
-	uint8_t 				pin_a;
-	uint8_t 				pin_b;
-	uint8_t 				pin_c;
-	encoder_type_t 	type;
+	uint8_t 				state_cw;
+	uint8_t 				state_ccw;
+	uint64_t 				time_last;	
+	int16_t 				cnt;	
+	int8_t 					pin_a;
+	int8_t 					pin_b;
 	
 } encoder_t;
 
@@ -122,7 +135,7 @@ typedef struct
 {
 	// config 1
 	uint16_t 				firmware_version;
-	char 						device_name[10];
+	char 						device_name[20];
 	uint16_t				button_debounce_ms;
 	uint16_t				toggle_press_time_ms;
 	uint16_t				encoder_press_time_ms;
@@ -132,11 +145,9 @@ typedef struct
 	// config 2-5
 	axis_config_t 	axis_config[MAX_AXIS_NUM];
 
-	// config 6-7
+	// config 6-7-8
 	button_t 				buttons[MAX_BUTTONS_NUM];
-
-	// config 8
-	encoder_t 			encoders[MAX_ENCODERS_NUM];
+	uint8_t					reserved_0[58];
 	
 	// config 9-10
 	uint8_t					reserved_1[62];
