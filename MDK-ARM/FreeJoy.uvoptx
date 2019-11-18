@@ -163,7 +163,7 @@
         <Ww>
           <count>2</count>
           <WinNumber>1</WinNumber>
-          <ItemText>axis_data</ItemText>
+          <ItemText>axis_data,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>3</count>
@@ -189,6 +189,16 @@
           <count>7</count>
           <WinNumber>1</WinNumber>
           <ItemText>encoders_state,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>8</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>filter_buffer,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>9</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>adc_data,0x0A</ItemText>
         </Ww>
       </WatchWindow1>
       <MemoryWindow1>

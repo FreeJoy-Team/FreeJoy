@@ -13,6 +13,10 @@
 #include "common_types.h"
 #include "periphery.h"
 
+#define FILTER_LOW_SIZE				5
+#define FILTER_MED_SIZE				10
+#define FILTER_HIGH_SIZE			20
+
 typedef struct
 {
 	uint32_t 	channel;

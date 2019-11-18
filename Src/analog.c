@@ -15,6 +15,12 @@ TIM_HandleTypeDef htim3;
 uint16_t adc_data[MAX_AXIS_NUM];
 analog_data_t axis_data[MAX_AXIS_NUM];
 
+uint8_t FILTER_LOW_COEFF[FILTER_LOW_SIZE] = {45, 30, 15, 5, 5};
+uint8_t FILTER_MED_COEFF[FILTER_MED_SIZE] = {30, 20, 10, 10, 10, 6, 6, 4, 2, 2};
+uint8_t FILTER_HIGH_COEFF[FILTER_HIGH_SIZE] = {25, 15, 10, 10, 5, 5, 5, 5, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1};
+
+uint16_t filter_buffer[MAX_AXIS_NUM][FILTER_HIGH_SIZE];
+
 adc_channel_config_t channel_config[MAX_AXIS_NUM] =
 {
 	{ADC_CHANNEL_0, 0}, {ADC_CHANNEL_1, 1}, 
@@ -52,7 +58,53 @@ static uint32_t map(uint32_t x,
 	return ret;
 }
 
-
+uint16_t filter (uint16_t value, uint16_t * filter_buf, filter_t filter_lvl)
+{
+	uint32_t tmp32;
+	
+	switch (filter_lvl)
+	{
+		default:
+		case FILTER_NO:
+			return value;
+		
+		case FILTER_LOW:
+			tmp32 = value * FILTER_LOW_COEFF[0];
+			for (uint8_t i=FILTER_LOW_SIZE-1; i>0; i--)
+			{
+				filter_buf[i] = filter_buf[i-1];
+				
+				tmp32 += filter_buf[i] * FILTER_LOW_COEFF[i];
+			}
+		break;
+		
+		case FILTER_MEDIUM:
+			tmp32 = value * FILTER_MED_COEFF[0];
+			for (uint8_t i=FILTER_MED_SIZE-1; i>0; i--)
+			{
+				filter_buf[i] = filter_buf[i-1];
+				
+				tmp32 += filter_buf[i] * FILTER_MED_COEFF[i];
+			}
+		break;
+		
+		case FILTER_HIGH:
+			tmp32 = value * FILTER_HIGH_COEFF[0];
+			for (uint8_t i=FILTER_HIGH_SIZE-1; i>0; i--)
+			{
+				filter_buf[i] = filter_buf[i-1];
+				
+				tmp32 += filter_buf[i] * FILTER_HIGH_COEFF[i];
+			}
+			
+		break;
+	}
+	
+	filter_buf[0] = (uint16_t)(tmp32/100);
+	
+	
+	return filter_buf[0];
+}
 
 /* ADC init function */
 void ADC_Init (app_config_t * p_config)
@@ -164,8 +216,11 @@ void AnalogProcess (app_config_t * p_config)
 			}
 		}
 		
+		// filter
+		tmp16 = filter(adc_data[i], filter_buffer[i], p_config->axis_config[i].filter);
+		
 		// Scale output data
-		tmp16 = map(	adc_data[i], 
+		tmp16 = map(	tmp16, 
 									p_config->axis_config[i].calib_min,
 									p_config->axis_config[i].calib_center,		
 									p_config->axis_config[i].calib_max, 
