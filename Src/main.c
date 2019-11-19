@@ -24,6 +24,7 @@ volatile uint8_t config_out_cnt;
 volatile uint16_t firmware_in_cnt;
 volatile uint8_t bootloader = 0;
 joy_report_t joy_report;
+uint8_t tmp_buf[64];
 
 //uint8_t report_data[64];
 
@@ -64,7 +65,7 @@ int main(void)
 		
 		if ((config_in_cnt > 0) & (config_in_cnt <= 10))
 		{		
-			uint8_t tmp_buf[64];
+			
 			uint8_t pos = 2;
 			uint8_t i;
 			

@@ -13,20 +13,20 @@
 #include "common_defines.h"
 
 
-typedef struct
-{
-	int8_t point1;
-	int8_t point2;
-	int8_t point3;
-	int8_t point4;
-	int8_t point5;
-	int8_t point6;
-	int8_t point7;
-	int8_t point8;
-	int8_t point9;
-	int8_t point10;
-	
-}curve_shape_t;
+//typedef struct
+//{
+//	int8_t point1;
+//	int8_t point2;
+//	int8_t point3;
+//	int8_t point4;
+//	int8_t point5;
+//	int8_t point6;
+//	int8_t point7;
+//	int8_t point8;
+//	int8_t point9;
+//	int8_t point10;
+//	
+//}curve_shape_t;
 
 enum
 {
@@ -46,7 +46,7 @@ typedef struct
 	uint8_t 				autocalib;
 	uint8_t					inverted;
 	filter_t 				filter;
-	curve_shape_t 	curve_shape;
+	int8_t				 	curve_shape[10];
 	uint8_t					reserved[10];
 } axis_config_t;
 
