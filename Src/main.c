@@ -9,6 +9,7 @@
 #include "main.h"
 #include "usb_device.h"
 #include "usbd_customhid.h"
+#include "usbd_desc.h"
 #include "periphery.h"
 #include "flash.h"
 #include "analog.h"
@@ -43,9 +44,6 @@ int main(void)
 	
 	SystemClock_Config();
 	
-	MX_USB_DEVICE_Init();
-	
-	
 	ConfigGet(&config);
 	// set default config at first startup
 	if (config.firmware_version == 0xFFFF)
@@ -53,7 +51,10 @@ int main(void)
 		ConfigSet((app_config_t *) &init_config);
 		ConfigGet(&config);
 	}
+	// set HID name
+	memcpy(USBD_PRODUCT_STRING_FS, config.device_name, sizeof(USBD_PRODUCT_STRING_FS));
 	
+	MX_USB_DEVICE_Init();
 
 	GPIO_Init(&config);
 	ADC_Init(&config); 

@@ -95,7 +95,6 @@
 #define USBD_LANGID_STRING     1033
 #define USBD_MANUFACTURER_STRING     "STMicroelectronics"
 #define USBD_PID_FS     0x2619
-#define USBD_PRODUCT_STRING_FS     "FreeJoy"
 #define USBD_SERIALNUMBER_STRING_FS     "00000000001A"
 #define USBD_CONFIGURATION_STRING_FS     "Custom HID Config"
 #define USBD_INTERFACE_STRING_FS     "Custom HID Interface"
@@ -109,7 +108,7 @@
   */
 
 /* USER CODE BEGIN 0 */
-
+char USBD_PRODUCT_STRING_FS[20] =  "FreeJoy";
 /* USER CODE END 0 */
 
 /** @defgroup USBD_DESC_Private_Macros USBD_DESC_Private_Macros
