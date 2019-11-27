@@ -13,29 +13,30 @@
 #include "common_defines.h"
 
 
-typedef struct
-{
-	int8_t point1;
-	int8_t point2;
-	int8_t point3;
-	int8_t point4;
-	int8_t point5;
-	int8_t point6;
-	int8_t point7;
-	int8_t point8;
-	int8_t point9;
-	int8_t point10;
-	
-}curve_shape_t;
+//typedef struct
+//{
+//	int8_t point1;
+//	int8_t point2;
+//	int8_t point3;
+//	int8_t point4;
+//	int8_t point5;
+//	int8_t point6;
+//	int8_t point7;
+//	int8_t point8;
+//	int8_t point9;
+//	int8_t point10;
+//	
+//}curve_shape_t;
 
-typedef enum
+enum
 {
 	FILTER_NO = 0,
 	FILTER_LOW,
 	FILTER_MEDIUM,
 	FILTER_HIGH,
 	
-} filter_t;
+}; 
+typedef uint8_t filter_t;
 
 typedef struct
 {
@@ -44,12 +45,12 @@ typedef struct
 	uint16_t 				calib_max;
 	uint8_t 				autocalib;
 	uint8_t					inverted;
-	curve_shape_t 	curve_shape;
 	filter_t 				filter;
-	
+	int8_t				 	curve_shape[10];
+	uint8_t					reserved[10];
 } axis_config_t;
 
-typedef enum
+enum
 {
 	NOT_USED = 0,
 	
@@ -60,14 +61,10 @@ typedef enum
 	
 	AXIS_ANALOG,
 	AXIS_TO_BUTTONS,
-	
-	ENCODER_SINGLE_INPUT,
-	ENCODER_CHAINED_INPUT,
-	ENCODER_CHAINED_COMMON,
-	
-}	pin_t;
+};
+typedef uint8_t pin_t;
 
-typedef enum
+enum
 {
 	BUTTON_NORMAL = 0,
 	BUTTON_INVERTED,
@@ -93,40 +90,68 @@ typedef enum
 	POV4_DOWN,
 	POV4_LEFT,
 	
+	ENCODER_INPUT_A,
+	ENCODER_INPUT_B,
+	
 	BUTTON_TO_ANALOG,
 	BUTTON_SHIFT,
 	
-} button_t;
+};
+typedef uint8_t button_t;
 
-typedef enum
+typedef struct buttons_state_t
+{
+	uint8_t pin_state;
+	uint8_t pin_prev_state;
+	uint8_t prev_state;
+	uint8_t current_state;
+	uint8_t changed;
+	uint64_t time_last;	
+	uint8_t cnt;
+	
+} buttons_state_t;
+
+
+enum
 {
 	ENCODER_1_1 = 0,
 	ENCODER_1_2,
 	ENCODER_1_4,
-	
-}	encoder_type_t;
+};	
+typedef uint8_t encoder_type_t;
 
 typedef struct
 {
-	uint8_t 				pin_a;
-	uint8_t 				pin_b;
-	uint8_t 				pin_c;
-	encoder_type_t 	type;
+	uint8_t 				state_cw;
+	uint8_t 				state_ccw;
+	uint64_t 				time_last;	
+	int16_t 				cnt;	
+	int8_t 					pin_a;
+	int8_t 					pin_b;
 	
 } encoder_t;
 
 typedef struct 
 {
+	// config 1
 	uint16_t 				firmware_version;
-	axis_config_t 	axis_config[MAX_AXIS_NUM];
-	pin_t 					pins[USED_PINS_NUM];
-	button_t 				buttons[MAX_BUTTONS_NUM];		
-	encoder_t 			encoders[MAX_ENCODERS_NUM];
-	char 						device_name[10];
+	char 						device_name[20];
 	uint16_t				button_debounce_ms;
 	uint16_t				toggle_press_time_ms;
 	uint16_t				encoder_press_time_ms;
+	uint16_t 				exchange_period_ms;	
+	pin_t 					pins[USED_PINS_NUM];
 	
+	// config 2-5
+	axis_config_t 	axis_config[MAX_AXIS_NUM];
+
+	// config 6-7-8
+	button_t 				buttons[MAX_BUTTONS_NUM];
+	uint8_t					reserved_0[58];
+	
+	// config 9-10
+	uint8_t					reserved_1[62];
+	uint8_t					reserved_2[62];
 }app_config_t;
 
 typedef struct
@@ -136,6 +161,7 @@ typedef struct
 	uint8_t 		button_data[MAX_BUTTONS_NUM/8];
 	uint16_t 		axis_data[MAX_AXIS_NUM];
 	uint8_t 		pov_data[MAX_POVS_NUM];
+	uint16_t		raw_axis_data[MAX_AXIS_NUM];
 	
 } joy_report_t;
 

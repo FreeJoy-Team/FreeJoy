@@ -22,7 +22,7 @@ TARGET = FreeJoy
 # debug build?
 DEBUG = 1
 # optimization
-OPT = -Og
+OPT = -O3
 
 
 #######################################
@@ -38,6 +38,8 @@ BUILD_DIR = build
 C_SOURCES =  \
 Src/analog.c \
 Src/buttons.c \
+Src/crc16.c \
+Src/encoders.c \
 Src/flash.c \
 Src/main.c \
 Src/periphery.c \

@@ -1,17 +1,61 @@
+# Created by https://www.gitignore.io/api/keil
+# Edit at https://www.gitignore.io/?templates=keil
+
+### Keil ###
+# something maybe need to add
+# *.bat  # generate batch file
+# output/project_name # uv project generate without file ext
+# *.SRC # generate source file
+# *.src
+
 DebugConfig
-*build
-*/Listings
-*.tmp
-*.a
-*.o
+
+# Prerequisites
 *.d
-*.crf
-*.lnk
-*.map
-*/Objects/*
-!*/Objects/*.hex
 *.dep
-*.log
+# Object files
+*.o
+*.obj
+*.OBJ
+*.crf
+*.htm
+
+# Listing Files
 *.axf
-*.TMP
-*.uvguix*
+*.COD
+*.cod
+*.[Ii]
+*.LST
+*.lst
+*.MAP
+*.map
+*.[Mm]51
+*.[Mm]66
+*.SCR
+*.scr
+
+# LINK output
+*.ABS
+
+# Libraries
+*.lib
+*.LIB
+
+
+# uv output
+*.lnp
+*.build_log.htm
+*.HEX
+*.hex
+*.bin
+
+
+# Build Files
+*._IA
+*.__[Ii]
+*._[Ii][Ii]
+*build
+
+# project
+*.uvgui.*
+*.uvguix.*

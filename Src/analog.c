@@ -13,7 +13,13 @@ ADC_HandleTypeDef hadc1;
 DMA_HandleTypeDef hdma_adc1;
 TIM_HandleTypeDef htim3;
 uint16_t adc_data[MAX_AXIS_NUM];
-analog_data_t analog_data[MAX_AXIS_NUM];
+analog_data_t axis_data[MAX_AXIS_NUM];
+
+uint8_t FILTER_LOW_COEFF[FILTER_LOW_SIZE] = {45, 30, 15, 5, 5};
+uint8_t FILTER_MED_COEFF[FILTER_MED_SIZE] = {30, 20, 10, 10, 10, 6, 6, 4, 2, 2};
+uint8_t FILTER_HIGH_COEFF[FILTER_HIGH_SIZE] = {25, 15, 10, 10, 5, 5, 5, 5, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1};
+
+uint16_t filter_buffer[MAX_AXIS_NUM][FILTER_HIGH_SIZE];
 
 adc_channel_config_t channel_config[MAX_AXIS_NUM] =
 {
@@ -23,14 +29,12 @@ adc_channel_config_t channel_config[MAX_AXIS_NUM] =
 	{ADC_CHANNEL_6, 6}, {ADC_CHANNEL_7, 7}, 
 };
 
-// Map function with separate action for each half of axis
-static uint32_t map(uint32_t x, 
-										uint32_t in_min, 
-										uint32_t in_center, 
-										uint32_t in_max, 
-										uint32_t out_min,
-										uint32_t out_center,
-										uint32_t out_max)
+// Map function 
+static uint32_t map2(	uint32_t x, 
+											uint32_t in_min, 
+											uint32_t in_max, 
+											uint32_t out_min,
+											uint32_t out_max)
 {
 	uint32_t tmp8;
 	uint32_t ret;
@@ -38,8 +42,30 @@ static uint32_t map(uint32_t x,
 	tmp8 = x;
 	
 	
-	if (tmp8 < in_min)	tmp8 = in_min;
-	if (tmp8 > in_max)	tmp8 = in_max;
+	if (tmp8 < in_min)	return in_min;
+	if (tmp8 > in_max)	return in_max;
+		
+	ret = (tmp8 - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+	
+	return ret;
+}
+// Map function with separate action for each half of axis
+static uint32_t map3(	uint32_t x, 
+											uint32_t in_min, 
+											uint32_t in_center, 
+											uint32_t in_max, 
+											uint32_t out_min,
+											uint32_t out_center,
+											uint32_t out_max)
+{
+	uint32_t tmp8;
+	uint32_t ret;
+	
+	tmp8 = x;
+	
+	
+	if (tmp8 < in_min)	return in_min;
+	if (tmp8 > in_max)	return in_max;
 	
 	if (tmp8 < in_center)
 	{
@@ -52,7 +78,78 @@ static uint32_t map(uint32_t x,
 	return ret;
 }
 
+// FIR function
+uint16_t Filter (uint16_t value, uint16_t * filter_buf, filter_t filter_lvl)
+{
+	uint32_t tmp32;
+	
+	switch (filter_lvl)
+	{
+		default:
+		case FILTER_NO:
+			return value;
+		
+		case FILTER_LOW:
+			tmp32 = value * FILTER_LOW_COEFF[0];
+			for (uint8_t i=FILTER_LOW_SIZE-1; i>0; i--)
+			{
+				filter_buf[i] = filter_buf[i-1];
+				
+				tmp32 += filter_buf[i] * FILTER_LOW_COEFF[i];
+			}
+		break;
+		
+		case FILTER_MEDIUM:
+			tmp32 = value * FILTER_MED_COEFF[0];
+			for (uint8_t i=FILTER_MED_SIZE-1; i>0; i--)
+			{
+				filter_buf[i] = filter_buf[i-1];
+				
+				tmp32 += filter_buf[i] * FILTER_MED_COEFF[i];
+			}
+		break;
+		
+		case FILTER_HIGH:
+			tmp32 = value * FILTER_HIGH_COEFF[0];
+			for (uint8_t i=FILTER_HIGH_SIZE-1; i>0; i--)
+			{
+				filter_buf[i] = filter_buf[i-1];
+				
+				tmp32 += filter_buf[i] * FILTER_HIGH_COEFF[i];
+			}
+			
+		break;
+	}
+	
+	filter_buf[0] = (uint16_t)(tmp32/100);
+	
+	
+	return filter_buf[0];
+}
 
+// Shaping function for axes
+uint16_t ShapeFunc (axis_config_t * p_axis_cfg,  uint16_t value, uint16_t fullscale, uint8_t point_cnt)
+{
+	uint32_t out_min, out_max, step;
+	uint16_t in_min, in_max;
+	uint8_t min_index;
+	uint16_t ret;
+	
+	step = fullscale/(point_cnt-1);
+	min_index = value/step;
+	
+	if (min_index == 9) min_index = 8; 	// case of input 4095
+	
+	in_min = min_index*step;
+	in_max = (min_index+1)*step;
+	
+	out_min = p_axis_cfg->curve_shape[min_index] * fullscale/200 + fullscale/2;
+	out_max = p_axis_cfg->curve_shape[min_index+1] * fullscale/200 + fullscale/2;
+	
+	ret = map2(value, in_min, in_max, out_min, out_max);
+	
+	return(ret);
+}
 
 /* ADC init function */
 void ADC_Init (app_config_t * p_config)
@@ -164,8 +261,11 @@ void AnalogProcess (app_config_t * p_config)
 			}
 		}
 		
+		// filter
+		tmp16 = Filter(adc_data[i], filter_buffer[i], p_config->axis_config[i].filter);
+		
 		// Scale output data
-		tmp16 = map(	adc_data[i], 
+		tmp16 = map3(	tmp16, 
 									p_config->axis_config[i].calib_min,
 									p_config->axis_config[i].calib_center,		
 									p_config->axis_config[i].calib_max, 
@@ -173,9 +273,10 @@ void AnalogProcess (app_config_t * p_config)
 									2047,
 									4095);
 		
-		// TODO: Shapes
-		// analog_data[i] = ShapeFunc(i, tmp16);
-		analog_data[i] = tmp16;
+		// Shaping
+		tmp16 = ShapeFunc(&p_config->axis_config[i], tmp16, 4095, 10);
+		
+		axis_data[i] = tmp16;
 	}	
 }
 
@@ -185,11 +286,15 @@ void AxisResetCalibration (app_config_t * p_config, uint8_t axis_num)
 	p_config->axis_config[axis_num].calib_min = 4095;
 }
 
-void AnalogGet (analog_data_t * data)
+void AnalogGet (analog_data_t * scaled_data, analog_data_t * raw_data)
 {
-	if (data != NULL)
+	if (scaled_data != NULL)
 	{
-		memcpy(data, analog_data, sizeof(analog_data));
+		memcpy(scaled_data, axis_data, sizeof(axis_data));
+	}
+	if (raw_data != NULL)
+	{
+		memcpy(raw_data, adc_data, sizeof(adc_data));
 	}
 }
 

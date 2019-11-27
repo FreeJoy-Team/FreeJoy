@@ -118,7 +118,7 @@
 extern USBD_DescriptorsTypeDef FS_Desc;
 
 /* USER CODE BEGIN EXPORTED_VARIABLES */
-
+extern char USBD_PRODUCT_STRING_FS[20];
 /* USER CODE END EXPORTED_VARIABLES */
 
 /**

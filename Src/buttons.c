@@ -18,15 +18,15 @@ pin_config_t * 		p_pin_config;
 
 void ButtonProcess (uint8_t pin_num, app_config_t * p_config)
 {	
-	uint8_t state;
 	uint32_t millis;
 	
 	// get port state
-	state = !HAL_GPIO_ReadPin(p_pin_config[pin_num].port, p_pin_config[pin_num].pin);
+	buttons_state[pos].pin_prev_state = buttons_state[pos].pin_state;
+	buttons_state[pos].pin_state = !HAL_GPIO_ReadPin(p_pin_config[pin_num].port, p_pin_config[pin_num].pin);
 	// inverse logic signal
 	if (p_config->pins[pin_num] == BUTTON_VCC)
 	{
-		state = !state;
+		buttons_state[pos].pin_state = !buttons_state[pos].pin_state;
 	}
 	// get timestamp
 	millis = HAL_GetTick();
@@ -36,27 +36,23 @@ void ButtonProcess (uint8_t pin_num, app_config_t * p_config)
 	{		
 		case BUTTON_INVERTED:
 			// invert state for inverted button
-			state = !state;						
+			buttons_state[pos].pin_state = !buttons_state[pos].pin_state;						
 		case BUTTON_NORMAL:
 			
 			// set timestamp if state changed
-			if (!buttons_state[pos].changed && state != buttons_state[pos].prev_state)		
+			if (!buttons_state[pos].changed && buttons_state[pos].pin_state != buttons_state[pos].prev_state)		
 			{
 				buttons_state[pos].time_last = millis;
 				buttons_state[pos].changed = 1;
 			}
 			// set state after debounce if state have not changed
-			else if (	buttons_state[pos].changed && state != buttons_state[pos].prev_state &&
+			else if (	buttons_state[pos].changed && buttons_state[pos].pin_state != buttons_state[pos].prev_state &&
 								millis - buttons_state[pos].time_last > p_config->button_debounce_ms)
 			{
 				buttons_state[pos].changed = 0;
-				buttons_state[pos].current_state = state;
+				buttons_state[pos].current_state = buttons_state[pos].pin_state;
 				buttons_state[pos].prev_state = buttons_state[pos].current_state;
 				buttons_state[pos].cnt += buttons_state[pos].current_state;
-				
-				// set bit in buttons data
-				buttons_data[(pos & 0xF8)>>3] &= !(1 << (pos & 0x07));
-				buttons_data[(pos & 0xF8)>>3] |= (buttons_state[pos].current_state << (pos & 0x07));
 			}
 			// reset if state changed during debounce period
 			else if (	buttons_state[pos].changed && 
@@ -69,26 +65,22 @@ void ButtonProcess (uint8_t pin_num, app_config_t * p_config)
 		case BUTTON_TOGGLE:
 			// set timestamp if state changed to HIGH
 			if (!buttons_state[pos].changed && 
-					state > buttons_state[pos].prev_state)		
+					buttons_state[pos].pin_state > buttons_state[pos].prev_state)		
 			{
 				buttons_state[pos].time_last = millis;
 				buttons_state[pos].changed = 1;
 			}
 			// set state after debounce if state have not changed
-			else if (	buttons_state[pos].changed && state &&
+			else if (	buttons_state[pos].changed && buttons_state[pos].pin_state &&
 								millis - buttons_state[pos].time_last > p_config->button_debounce_ms)
 			{
 				buttons_state[pos].changed = 0;
 				buttons_state[pos].prev_state = 1;
 				buttons_state[pos].current_state = !buttons_state[pos].current_state;
 				buttons_state[pos].cnt++;
-				
-				// set bit in buttons data
-				buttons_data[(pos & 0xF8)>>3] &= !(1 << (pos & 0x07));
-				buttons_data[(pos & 0xF8)>>3] |= (buttons_state[pos].current_state << (pos & 0x07));
 			}
 			// reset if state changed during debounce period
-			else if (!state && millis - buttons_state[pos].time_last > p_config->button_debounce_ms)
+			else if (!buttons_state[pos].pin_state && millis - buttons_state[pos].time_last > p_config->button_debounce_ms)
 			{
 				buttons_state[pos].changed = 0;
 				buttons_state[pos].prev_state = 0;
@@ -97,23 +89,19 @@ void ButtonProcess (uint8_t pin_num, app_config_t * p_config)
 			
 		case TOGGLE_SWITCH:
 			// set timestamp if state changed
-			if (!buttons_state[pos].changed && state != buttons_state[pos].prev_state)		
+			if (!buttons_state[pos].changed && buttons_state[pos].pin_state != buttons_state[pos].prev_state)		
 			{
 				buttons_state[pos].time_last = millis;
 				buttons_state[pos].changed = 1;
 			}
 			// set state after debounce if state have not changed
-			else if (	buttons_state[pos].changed && state != buttons_state[pos].prev_state &&
+			else if (	buttons_state[pos].changed && buttons_state[pos].pin_state != buttons_state[pos].prev_state &&
 								millis - buttons_state[pos].time_last > p_config->button_debounce_ms)
 			{
 				buttons_state[pos].changed = 0;
 				buttons_state[pos].current_state = 1;
-				buttons_state[pos].prev_state = state;
+				buttons_state[pos].prev_state = buttons_state[pos].pin_state;
 				buttons_state[pos].cnt++;
-				
-				// set bit in buttons data
-				buttons_data[(pos & 0xF8)>>3] &= !(1 << (pos & 0x07));
-				buttons_data[(pos & 0xF8)>>3] |= (buttons_state[pos].current_state << (pos & 0x07));
 			}
 			// release button after push time
 			else if (	millis - buttons_state[pos].time_last > p_config->toggle_press_time_ms)
@@ -125,28 +113,24 @@ void ButtonProcess (uint8_t pin_num, app_config_t * p_config)
 		
 		case TOGGLE_SWITCH_ON:
 			// set timestamp if state changed
-			if (!buttons_state[pos].changed && state != buttons_state[pos].prev_state)		
+			if (!buttons_state[pos].changed && buttons_state[pos].pin_state != buttons_state[pos].prev_state)		
 			{
 				buttons_state[pos].time_last = millis;
 				buttons_state[pos].changed = 1;
 			}
 			// set state after debounce if state have not changed
-			else if (	buttons_state[pos].changed && state > buttons_state[pos].prev_state &&
+			else if (	buttons_state[pos].changed && buttons_state[pos].pin_state > buttons_state[pos].prev_state &&
 								millis - buttons_state[pos].time_last > p_config->button_debounce_ms)
 			{
 				buttons_state[pos].changed = 0;
 				buttons_state[pos].current_state = 1;
-				buttons_state[pos].prev_state = state;
+				buttons_state[pos].prev_state = buttons_state[pos].pin_state;
 				buttons_state[pos].cnt++;
-				
-				// set bit in buttons data
-				buttons_data[(pos & 0xF8)>>3] &= !(1 << (pos & 0x07));
-				buttons_data[(pos & 0xF8)>>3] |= (buttons_state[pos].current_state << (pos & 0x07));
 			}
 			// release button after push time
 			else if (	millis - buttons_state[pos].time_last > p_config->toggle_press_time_ms)
 			{
-				buttons_state[pos].prev_state = state;
+				buttons_state[pos].prev_state = buttons_state[pos].pin_state;
 				buttons_state[pos].current_state = 0;
 				buttons_state[pos].changed = 0;
 			}
@@ -154,28 +138,24 @@ void ButtonProcess (uint8_t pin_num, app_config_t * p_config)
 		
 		case TOGGLE_SWITCH_OFF:
 			// set timestamp if state changed
-			if (!buttons_state[pos].changed && state != buttons_state[pos].prev_state)		
+			if (!buttons_state[pos].changed && buttons_state[pos].pin_state != buttons_state[pos].prev_state)		
 			{
 				buttons_state[pos].time_last = millis;
 				buttons_state[pos].changed = 1;
 			}
 			// set state after debounce if state have not changed
-			else if (	buttons_state[pos].changed && state < buttons_state[pos].prev_state &&
+			else if (	buttons_state[pos].changed && buttons_state[pos].pin_state < buttons_state[pos].prev_state &&
 								millis - buttons_state[pos].time_last > p_config->button_debounce_ms)
 			{
 				buttons_state[pos].changed = 0;
 				buttons_state[pos].current_state = 1;
-				buttons_state[pos].prev_state = state;
+				buttons_state[pos].prev_state = buttons_state[pos].pin_state;
 				buttons_state[pos].cnt++;
-				
-				// set bit in buttons data
-				buttons_data[(pos & 0xF8)>>3] &= !(1 << (pos & 0x07));
-				buttons_data[(pos & 0xF8)>>3] |= (buttons_state[pos].current_state << (pos & 0x07));
 			}
 			// release button after push time
 			else if (	millis - buttons_state[pos].time_last > p_config->toggle_press_time_ms)
 			{
-				buttons_state[pos].prev_state = state;
+				buttons_state[pos].prev_state = buttons_state[pos].pin_state;
 				buttons_state[pos].current_state = 0;
 				buttons_state[pos].changed = 0;
 			}
@@ -186,17 +166,17 @@ void ButtonProcess (uint8_t pin_num, app_config_t * p_config)
 		case POV1_DOWN:
 		case POV1_LEFT:
 			// set timestamp if state changed
-			if (!buttons_state[pos].changed && state != buttons_state[pos].prev_state)		
+			if (!buttons_state[pos].changed && buttons_state[pos].pin_state != buttons_state[pos].prev_state)		
 			{
 				buttons_state[pos].time_last = millis;
 				buttons_state[pos].changed = 1;
 			}
 			// set state after debounce if state have not changed
-			else if (	buttons_state[pos].changed && state != buttons_state[pos].prev_state &&
+			else if (	buttons_state[pos].changed && buttons_state[pos].pin_state != buttons_state[pos].prev_state &&
 								millis - buttons_state[pos].time_last > p_config->button_debounce_ms)
 			{
 				buttons_state[pos].changed = 0;
-				buttons_state[pos].current_state = state;
+				buttons_state[pos].current_state = buttons_state[pos].pin_state;
 				buttons_state[pos].prev_state = buttons_state[pos].current_state;
 				buttons_state[pos].cnt += buttons_state[pos].current_state;
 				
@@ -235,17 +215,17 @@ void ButtonProcess (uint8_t pin_num, app_config_t * p_config)
 		case POV2_DOWN:
 		case POV2_LEFT:
 			// set timestamp if state changed
-			if (!buttons_state[pos].changed && state != buttons_state[pos].prev_state)		
+			if (!buttons_state[pos].changed && buttons_state[pos].pin_state != buttons_state[pos].prev_state)		
 			{
 				buttons_state[pos].time_last = millis;
 				buttons_state[pos].changed = 1;
 			}
 			// set state after debounce if state have not changed
-			else if (	buttons_state[pos].changed && state != buttons_state[pos].prev_state &&
+			else if (	buttons_state[pos].changed && buttons_state[pos].pin_state != buttons_state[pos].prev_state &&
 								millis - buttons_state[pos].time_last > p_config->button_debounce_ms)
 			{
 				buttons_state[pos].changed = 0;
-				buttons_state[pos].current_state = state;
+				buttons_state[pos].current_state = buttons_state[pos].pin_state;
 				buttons_state[pos].prev_state = buttons_state[pos].current_state;
 				buttons_state[pos].cnt += buttons_state[pos].current_state;
 				
@@ -284,17 +264,17 @@ void ButtonProcess (uint8_t pin_num, app_config_t * p_config)
 		case POV3_DOWN:
 		case POV3_LEFT:
 			// set timestamp if state changed
-			if (!buttons_state[pos].changed && state != buttons_state[pos].prev_state)		
+			if (!buttons_state[pos].changed && buttons_state[pos].pin_state != buttons_state[pos].prev_state)		
 			{
 				buttons_state[pos].time_last = millis;
 				buttons_state[pos].changed = 1;
 			}
 			// set state after debounce if state have not changed
-			else if (	buttons_state[pos].changed && state != buttons_state[pos].prev_state &&
+			else if (	buttons_state[pos].changed && buttons_state[pos].pin_state != buttons_state[pos].prev_state &&
 								millis - buttons_state[pos].time_last > p_config->button_debounce_ms)
 			{
 				buttons_state[pos].changed = 0;
-				buttons_state[pos].current_state = state;
+				buttons_state[pos].current_state = buttons_state[pos].pin_state;
 				buttons_state[pos].prev_state = buttons_state[pos].current_state;
 				buttons_state[pos].cnt += buttons_state[pos].current_state;
 				
@@ -333,17 +313,17 @@ void ButtonProcess (uint8_t pin_num, app_config_t * p_config)
 		case POV4_DOWN:
 		case POV4_LEFT:
 			// set timestamp if state changed
-			if (!buttons_state[pos].changed && state != buttons_state[pos].prev_state)		
+			if (!buttons_state[pos].changed && buttons_state[pos].pin_state != buttons_state[pos].prev_state)		
 			{
 				buttons_state[pos].time_last = millis;
 				buttons_state[pos].changed = 1;
 			}
 			// set state after debounce if state have not changed
-			else if (	buttons_state[pos].changed && state != buttons_state[pos].prev_state &&
+			else if (	buttons_state[pos].changed && buttons_state[pos].pin_state != buttons_state[pos].prev_state &&
 								millis - buttons_state[pos].time_last > p_config->button_debounce_ms)
 			{
 				buttons_state[pos].changed = 0;
-				buttons_state[pos].current_state = state;
+				buttons_state[pos].current_state = buttons_state[pos].pin_state;
 				buttons_state[pos].prev_state = buttons_state[pos].current_state;
 				buttons_state[pos].cnt += buttons_state[pos].current_state;
 				
@@ -376,7 +356,6 @@ void ButtonProcess (uint8_t pin_num, app_config_t * p_config)
 				buttons_state[pos].changed = 0;
 			}
 			break;
-			
 			
 		// TODO: Special button modes (analog, shift, etc.)
 		case BUTTON_TO_ANALOG:
@@ -433,6 +412,15 @@ void ButtonsCheck (app_config_t * p_config)
 			HAL_GPIO_WritePin(p_pin_config[i].port, p_pin_config[i].pin, GPIO_PIN_SET);
 		}
 	}
+	
+	EncoderProcess(buttons_state, p_config);
+	
+	// convert data to report format
+	for (int i=0;i<pos;i++)
+		{
+			buttons_data[(i & 0xF8)>>3] &= ~(1 << (i & 0x07));
+			buttons_data[(i & 0xF8)>>3] |= (buttons_state[i].current_state << (i & 0x07));
+		}
 	
 	for (int i=0; i<MAX_POVS_NUM; i++)
 	{
