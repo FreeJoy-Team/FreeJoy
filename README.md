@@ -1,5 +1,7 @@
 # FreeJoy
-FreeJoy implements USB HID joystick device with flexible configuration. It is based on STM32F103C8 microcontroller and supports up to 8 analog axis, 128 digital inputs (buttons, toggle switches, etc.) and 4 POVs.
+FreeJoy implements USB HID joystick device with flexible configuration. It is based on STM32F103C8 microcontroller and supports up to 8 analog axis, 128 digital inputs (buttons, toggle switches, etc.) and 4 POVs. It is targeting a cheap BluePill board based on 32-bit STM32F103 microcontroller.
+
+![alt text](https://radikal.ru][img]https://d.radikal.ru/d33/1911/e8/a8ff2119cfc7.jpg)
 
 ## Flexibility
 FreeJoy supports the following external periphery:
