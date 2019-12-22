@@ -180,7 +180,7 @@ void ADC_Init (app_config_t * p_config)
 	// Count ADC channels
 	for (int i=0; i<USED_PINS_NUM; i++)
 	{
-		if (p_config->pins[i] == AXIS_ANALOG || p_config->pins[i] == AXIS_ANALOG)
+		if (p_config->pins[i] == AXIS_ANALOG || p_config->pins[i] == AXIS_TO_BUTTONS)
 		{
 			channels_cnt++;
 		}
@@ -209,7 +209,7 @@ void ADC_Init (app_config_t * p_config)
 	// Configure ADC channels
 	for (int i=0; i<USED_PINS_NUM; i++)
 	{
-		if (p_config->pins[i] == AXIS_ANALOG || p_config->pins[i] == AXIS_ANALOG)
+		if (p_config->pins[i] == AXIS_ANALOG || p_config->pins[i] == AXIS_TO_BUTTONS)
 		{
 			sConfig.Channel = channel_config[i].channel;
 			sConfig.Rank = channel_config[i].number+1;

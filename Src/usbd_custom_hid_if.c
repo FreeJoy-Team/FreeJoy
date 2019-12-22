@@ -392,11 +392,24 @@ static int8_t CUSTOM_HID_OutEvent_FS(uint8_t event_idx, uint8_t state)
 				case 8:
 				{
 					memcpy((uint8_t *) &(tmp_config.buttons[124]), &hhid->Report_buf[pos], 4);
+					pos += 4;
+					i = 0;
+					while(64 - pos > sizeof(axis_to_buttons_t))
+					{
+						memcpy((uint8_t *) &(tmp_config.axes_to_buttons[i++]), &hhid->Report_buf[pos], sizeof(axis_to_buttons_t));
+						pos += sizeof(axis_to_buttons_t);
+					}
 				}
 				break;
 				
 				case 9:
 				{
+					i = 4;
+					while(64 - pos > sizeof(axis_to_buttons_t))
+					{
+						memcpy((uint8_t *) &(tmp_config.axes_to_buttons[i++]), &hhid->Report_buf[pos], sizeof(axis_to_buttons_t));
+						pos += sizeof(axis_to_buttons_t);
+					}
 				}					
 					break;
 				

@@ -17,8 +17,8 @@ void EncoderProcess (buttons_state_t * button_state_buf, app_config_t * p_config
 	{
 		uint32_t millis = HAL_GetTick();
 		
-		if (encoders_state[i].pin_a < MAX_BUTTONS_NUM && 
-				encoders_state[i].pin_b < MAX_BUTTONS_NUM && 
+		if (encoders_state[i].pin_a >= 0 && 
+				encoders_state[i].pin_b >= 0 && 
 				button_state_buf[encoders_state[i].pin_b].pin_state &&
 				!button_state_buf[encoders_state[i].pin_b].pin_prev_state &&
 				button_state_buf[encoders_state[i].pin_a].pin_state)							// CW
@@ -29,8 +29,8 @@ void EncoderProcess (buttons_state_t * button_state_buf, app_config_t * p_config
 				
 			button_state_buf[encoders_state[i].pin_a].current_state = 1;		
 		}
-		if (encoders_state[i].pin_a < MAX_BUTTONS_NUM && 
-				encoders_state[i].pin_b < MAX_BUTTONS_NUM && 
+		if (encoders_state[i].pin_a >= 0 && 
+				encoders_state[i].pin_b >= 0 && 
 				button_state_buf[encoders_state[i].pin_a].pin_state &&
 				!button_state_buf[encoders_state[i].pin_a].pin_prev_state &&
 				button_state_buf[encoders_state[i].pin_b].pin_state)							// CCW

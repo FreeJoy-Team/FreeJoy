@@ -10,6 +10,7 @@
 "freejoy\encoders.o"
 "freejoy\buttons.o"
 "freejoy\analog.o"
+"freejoy\axis_to_buttons.o"
 "freejoy\flash.o"
 "freejoy\crc16.o"
 "freejoy\stm32f1xx_hal_msp.o"

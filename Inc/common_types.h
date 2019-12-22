@@ -93,8 +93,7 @@ enum
 	ENCODER_INPUT_A,
 	ENCODER_INPUT_B,
 	
-	BUTTON_TO_ANALOG,
-	BUTTON_SHIFT,
+	//BUTTON_SHIFT,
 	
 };
 typedef uint8_t button_t;
@@ -131,27 +130,37 @@ typedef struct
 	
 } encoder_t;
 
+typedef struct
+{
+	int8_t points[12];
+	uint8_t buttons_cnt;
+	uint8_t is_analog_enabled;
+	
+} axis_to_buttons_t;
+
 typedef struct 
 {
 	// config 1
-	uint16_t 				firmware_version;
-	char 						device_name[20];
-	uint16_t				button_debounce_ms;
-	uint16_t				toggle_press_time_ms;
-	uint16_t				encoder_press_time_ms;
-	uint16_t 				exchange_period_ms;	
-	pin_t 					pins[USED_PINS_NUM];
+	uint16_t 						firmware_version;
+	char 								device_name[20];
+	uint16_t						button_debounce_ms;
+	uint16_t						toggle_press_time_ms;
+	uint16_t						encoder_press_time_ms;
+	uint16_t 						exchange_period_ms;	
+	pin_t 							pins[USED_PINS_NUM];
 	
 	// config 2-5
-	axis_config_t 	axis_config[MAX_AXIS_NUM];
+	axis_config_t 			axis_config[MAX_AXIS_NUM];
 
 	// config 6-7-8
-	button_t 				buttons[MAX_BUTTONS_NUM];
-	uint8_t					reserved_0[58];
+	button_t 						buttons[MAX_BUTTONS_NUM];
 	
-	// config 9-10
-	uint8_t					reserved_1[62];
-	uint8_t					reserved_2[62];
+	// config 8-9
+	axis_to_buttons_t		axes_to_buttons[MAX_AXIS_NUM];
+	uint8_t							reserved_0[30];
+	
+	// config 10	
+	uint8_t							reserved_1[62];
 }app_config_t;
 
 typedef struct

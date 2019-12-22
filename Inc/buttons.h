@@ -13,6 +13,7 @@
 #include "common_types.h"
 #include "periphery.h"
 #include "encoders.h"
+#include "axis_to_buttons.h"
 
 typedef uint8_t button_data_t;
 typedef uint8_t pov_data_t;

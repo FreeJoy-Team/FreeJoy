@@ -358,11 +358,11 @@ void ButtonProcess (uint8_t pin_num, app_config_t * p_config)
 			break;
 			
 		// TODO: Special button modes (analog, shift, etc.)
-		case BUTTON_TO_ANALOG:
-			break;
-		
-		case BUTTON_SHIFT:
-			break;
+//		case BUTTON_TO_ANALOG:
+//			break;
+//		
+//		case BUTTON_SHIFT:
+//			break;
 		
 		default:
 			break;
@@ -413,6 +413,7 @@ void ButtonsCheck (app_config_t * p_config)
 		}
 	}
 	
+	AxesToButtonsProcess(buttons_state, p_config, pos);
 	EncoderProcess(buttons_state, p_config);
 	
 	// convert data to report format

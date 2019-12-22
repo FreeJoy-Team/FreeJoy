@@ -133,11 +133,23 @@ int main(void)
 				
 				case 8:
 					memcpy(&tmp_buf[pos], (uint8_t *) &(config.buttons[124]), 4);
+					pos += 4;
 				
+					i = 0;
+					while(sizeof(tmp_buf) - pos > sizeof(axis_to_buttons_t))
+					{
+						memcpy(&tmp_buf[pos], (uint8_t *) &(config.axes_to_buttons[i++]), sizeof(axis_to_buttons_t));
+						pos += sizeof(axis_to_buttons_t);
+					}
 					break;
 				
 				case 9:
-					
+					i = 4;
+					while(sizeof(tmp_buf) - pos > sizeof(axis_to_buttons_t))
+					{
+						memcpy(&tmp_buf[pos], (uint8_t *) &(config.axes_to_buttons[i++]), sizeof(axis_to_buttons_t));
+						pos += sizeof(axis_to_buttons_t);
+					}
 					break;
 				
 				case 10:
