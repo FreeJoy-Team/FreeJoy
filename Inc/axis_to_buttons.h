@@ -17,7 +17,7 @@
 #define AXIS_FULLSCALE			4095
 
 
-void AxesToButtonsProcess (buttons_state_t * button_state_buf, app_config_t * p_config, uint8_t start_index);
+void AxesToButtonsProcess (buttons_state_t * button_state_buf, app_config_t * p_config, uint8_t * pos);
 
 #endif 	/* __AXIS_TO_BUTTONS_H__ */
 
