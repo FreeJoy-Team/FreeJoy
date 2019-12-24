@@ -215,7 +215,7 @@ void ADC_Init (app_config_t * p_config)
 		{
 			sConfig.Channel = channel_config[i].channel;
 			sConfig.Rank = rank++;
-			sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
+			sConfig.SamplingTime = ADC_SAMPLETIME_239CYCLES_5;
 			if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
 			{
 				_Error_Handler(__FILE__, __LINE__);

@@ -92,7 +92,7 @@ static const app_config_t init_config =
 	.pins[29] = NOT_USED,							// PC15
 	
 	/*
-		Configuration of anlog axes
+		Configuration of analog axes
 	*/
 	.axis_config[0].calib_min = 0,
 	.axis_config[0].calib_center = 2047,
