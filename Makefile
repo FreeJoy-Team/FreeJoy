@@ -37,6 +37,7 @@ BUILD_DIR = build
 # C sources
 C_SOURCES =  \
 Src/analog.c \
+Src/axis_to_buttons.c \
 Src/buttons.c \
 Src/crc16.c \
 Src/encoders.c \
