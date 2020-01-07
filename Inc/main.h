@@ -16,7 +16,7 @@
 
 static const app_config_t init_config =
 {
-	.firmware_version = 0,		// do not change
+	.firmware_version = 0x0101,		// do not change
 	
 	/* 
 		Name of device in devices dispatcher
@@ -33,7 +33,7 @@ static const app_config_t init_config =
 	.device_name[9] = '1',
 	.device_name[10] = '.',
 	.device_name[11] = '0',
-	.device_name[12] = 0,
+	.device_name[12] = '1',
 	.device_name[13] = 0,
 	.device_name[14] = 0,
 	.device_name[15] = 0,
@@ -92,7 +92,7 @@ static const app_config_t init_config =
 	.pins[29] = NOT_USED,							// PC15
 	
 	/*
-		Configuration of anlog axes
+		Configuration of analog axes
 	*/
 	.axis_config[0].calib_min = 0,
 	.axis_config[0].calib_center = 2047,
@@ -265,7 +265,57 @@ static const app_config_t init_config =
 	.buttons[127] = BUTTON_NORMAL,
 */
 
-
+	/*
+		AxesToButtons configuration
+	*/
+	.axes_to_buttons[0].points[0] = 0,
+	.axes_to_buttons[0].points[1] = 50,
+	.axes_to_buttons[0].points[2] = 100,
+	.axes_to_buttons[0].buttons_cnt = 2,
+	.axes_to_buttons[0].is_analog_enabled = 1,
+	
+	.axes_to_buttons[1].points[0] = 0,
+	.axes_to_buttons[1].points[1] = 50,
+	.axes_to_buttons[1].points[2] = 100,
+	.axes_to_buttons[1].buttons_cnt = 2,
+	.axes_to_buttons[1].is_analog_enabled = 1,
+	
+	.axes_to_buttons[2].points[0] = 0,
+	.axes_to_buttons[2].points[1] = 50,
+	.axes_to_buttons[2].points[2] = 100,
+	.axes_to_buttons[2].buttons_cnt = 2,
+	.axes_to_buttons[2].is_analog_enabled = 1,
+	
+	.axes_to_buttons[3].points[0] = 0,
+	.axes_to_buttons[3].points[1] = 50,
+	.axes_to_buttons[3].points[2] = 100,
+	.axes_to_buttons[3].buttons_cnt = 2,
+	.axes_to_buttons[3].is_analog_enabled = 1,
+	
+	.axes_to_buttons[4].points[0] = 0,
+	.axes_to_buttons[4].points[1] = 50,
+	.axes_to_buttons[4].points[2] = 100,
+	.axes_to_buttons[4].buttons_cnt = 2,
+	.axes_to_buttons[4].is_analog_enabled = 1,
+	
+	.axes_to_buttons[5].points[0] = 0,
+	.axes_to_buttons[5].points[1] = 50,
+	.axes_to_buttons[5].points[2] = 100,
+	.axes_to_buttons[5].buttons_cnt = 2,
+	.axes_to_buttons[5].is_analog_enabled = 1,
+	
+	.axes_to_buttons[6].points[0] = 0,
+	.axes_to_buttons[6].points[1] = 50,
+	.axes_to_buttons[6].points[2] = 100,
+	.axes_to_buttons[6].buttons_cnt = 2,
+	.axes_to_buttons[6].is_analog_enabled = 1,
+	
+	.axes_to_buttons[7].points[0] = 0,
+	.axes_to_buttons[7].points[1] = 50,
+	.axes_to_buttons[7].points[2] = 100,
+	.axes_to_buttons[7].buttons_cnt = 2,
+	.axes_to_buttons[7].is_analog_enabled = 1,
+		
 };
 
 

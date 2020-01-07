@@ -14,10 +14,11 @@ DMA_HandleTypeDef hdma_adc1;
 TIM_HandleTypeDef htim3;
 uint16_t adc_data[MAX_AXIS_NUM];
 analog_data_t axis_data[MAX_AXIS_NUM];
+analog_data_t raw_axis_data[MAX_AXIS_NUM];
 
-uint8_t FILTER_LOW_COEFF[FILTER_LOW_SIZE] = {45, 30, 15, 5, 5};
+uint8_t FILTER_LOW_COEFF[FILTER_LOW_SIZE] = {40, 30, 15, 10, 5};
 uint8_t FILTER_MED_COEFF[FILTER_MED_SIZE] = {30, 20, 10, 10, 10, 6, 6, 4, 2, 2};
-uint8_t FILTER_HIGH_COEFF[FILTER_HIGH_SIZE] = {25, 15, 10, 10, 5, 5, 5, 5, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1};
+uint8_t FILTER_HIGH_COEFF[FILTER_HIGH_SIZE] = {20, 20, 10, 10, 5, 5, 5, 5, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1};
 
 uint16_t filter_buffer[MAX_AXIS_NUM][FILTER_HIGH_SIZE];
 
@@ -155,6 +156,7 @@ uint16_t ShapeFunc (axis_config_t * p_axis_cfg,  uint16_t value, uint16_t fullsc
 void ADC_Init (app_config_t * p_config)
 {
 	uint8_t channels_cnt = 0;
+	uint8_t rank = 1;
   ADC_ChannelConfTypeDef sConfig;
 
 	 /* DMA controller clock enable */
@@ -180,7 +182,7 @@ void ADC_Init (app_config_t * p_config)
 	// Count ADC channels
 	for (int i=0; i<USED_PINS_NUM; i++)
 	{
-		if (p_config->pins[i] == AXIS_ANALOG || p_config->pins[i] == AXIS_ANALOG)
+		if (p_config->pins[i] == AXIS_ANALOG || p_config->pins[i] == AXIS_TO_BUTTONS)
 		{
 			channels_cnt++;
 		}
@@ -209,11 +211,11 @@ void ADC_Init (app_config_t * p_config)
 	// Configure ADC channels
 	for (int i=0; i<USED_PINS_NUM; i++)
 	{
-		if (p_config->pins[i] == AXIS_ANALOG || p_config->pins[i] == AXIS_ANALOG)
+		if (p_config->pins[i] == AXIS_ANALOG || p_config->pins[i] == AXIS_TO_BUTTONS)
 		{
 			sConfig.Channel = channel_config[i].channel;
-			sConfig.Rank = channel_config[i].number+1;
-			sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
+			sConfig.Rank = rank++;
+			sConfig.SamplingTime = ADC_SAMPLETIME_239CYCLES_5;
 			if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
 			{
 				_Error_Handler(__FILE__, __LINE__);
@@ -236,47 +238,53 @@ void ADC_Init (app_config_t * p_config)
 void AnalogProcess (app_config_t * p_config)
 {
 	uint16_t tmp16;
+	uint8_t channel = 0;
 	
 	for (int i=0; i<MAX_AXIS_NUM; i++)
 	{
-		tmp16 = adc_data[i];
-		
-		if (p_config->axis_config[i].autocalib)
+		if (p_config->pins[i] == AXIS_ANALOG || p_config->pins[i] == AXIS_TO_BUTTONS)
 		{
-			// Update calib data
-			if (tmp16 > p_config->axis_config[i].calib_max)
+			tmp16 = adc_data[channel];
+		
+			if (p_config->axis_config[i].autocalib)
 			{
-				p_config->axis_config[i].calib_max = tmp16;
-			}
-			else if (tmp16 < p_config->axis_config[i].calib_min)
-			{
-				p_config->axis_config[i].calib_min = tmp16;
+				// Update calib data
+				if (tmp16 > p_config->axis_config[i].calib_max)
+				{
+					p_config->axis_config[i].calib_max = tmp16;
+				}
+				else if (tmp16 < p_config->axis_config[i].calib_min)
+				{
+					p_config->axis_config[i].calib_min = tmp16;
+				}
+				
+				tmp16 = (p_config->axis_config[i].calib_max + p_config->axis_config[i].calib_min)/2;
+				
+				if (p_config->axis_config[i].calib_center != tmp16 )
+				{				
+					p_config->axis_config[i].calib_center = tmp16;
+				}
 			}
 			
-			tmp16 = (p_config->axis_config[i].calib_max + p_config->axis_config[i].calib_min)/2;
+			// filter
+			tmp16 = Filter(adc_data[channel], filter_buffer[i], p_config->axis_config[i].filter);
 			
-			if (p_config->axis_config[i].calib_center != tmp16 )
-			{				
-				p_config->axis_config[i].calib_center = tmp16;
-			}
+			// Scale output data
+			tmp16 = map3(	tmp16, 
+										p_config->axis_config[i].calib_min,
+										p_config->axis_config[i].calib_center,		
+										p_config->axis_config[i].calib_max, 
+										0,
+										2047,
+										4095);
+			
+			// Shaping
+			tmp16 = ShapeFunc(&p_config->axis_config[i], tmp16, 4095, 10);
+			
+			axis_data[i] = tmp16;
+			raw_axis_data[i] = adc_data[channel];
+			channel++;
 		}
-		
-		// filter
-		tmp16 = Filter(adc_data[i], filter_buffer[i], p_config->axis_config[i].filter);
-		
-		// Scale output data
-		tmp16 = map3(	tmp16, 
-									p_config->axis_config[i].calib_min,
-									p_config->axis_config[i].calib_center,		
-									p_config->axis_config[i].calib_max, 
-									0,
-									2047,
-									4095);
-		
-		// Shaping
-		tmp16 = ShapeFunc(&p_config->axis_config[i], tmp16, 4095, 10);
-		
-		axis_data[i] = tmp16;
 	}	
 }
 
@@ -294,7 +302,7 @@ void AnalogGet (analog_data_t * scaled_data, analog_data_t * raw_data)
 	}
 	if (raw_data != NULL)
 	{
-		memcpy(raw_data, adc_data, sizeof(adc_data));
+		memcpy(raw_data, raw_axis_data, sizeof(raw_axis_data));
 	}
 }
 
