@@ -26,6 +26,7 @@ volatile uint16_t firmware_in_cnt;
 volatile uint8_t bootloader = 0;
 joy_report_t joy_report;
 uint8_t tmp_buf[64];
+uint32_t uid[3];
 
 //uint8_t report_data[64];
 
@@ -51,8 +52,12 @@ int main(void)
 		ConfigSet((app_config_t *) &init_config);
 		ConfigGet(&config);
 	}
-	// set HID name
+	// set HID name and S/N
 	memcpy(USBD_PRODUCT_STRING_FS, config.device_name, sizeof(USBD_PRODUCT_STRING_FS));
+	
+	HAL_GetUID(uid);
+	uid[0] = uid[0] ^ uid[1] ^ uid[2]; 
+	sprintf(USBD_SERIALNUMBER_STRING_FS, "%012X", uid[0]); 
 	
 	MX_USB_DEVICE_Init();
 

@@ -61,6 +61,7 @@ enum
 	
 	AXIS_ANALOG,
 	AXIS_TO_BUTTONS,
+
 };
 typedef uint8_t pin_t;
 
@@ -92,8 +93,6 @@ enum
 	
 	ENCODER_INPUT_A,
 	ENCODER_INPUT_B,
-	
-	//BUTTON_SHIFT,
 	
 };
 typedef uint8_t button_t;
@@ -138,6 +137,15 @@ typedef struct
 	
 } axis_to_buttons_t;
 
+typedef struct
+{	
+	int8_t 					cnt;	
+	int8_t					pin_ce;
+	int8_t 					pin_pl;
+	uint8_t 				reserved;
+	
+} shift_reg_t;
+
 typedef struct 
 {
 	// config 1
@@ -157,7 +165,9 @@ typedef struct
 	
 	// config 8-9
 	axis_to_buttons_t		axes_to_buttons[MAX_AXIS_NUM];
-	uint8_t							reserved_0[30];
+	shift_reg_t					shift_registers[4];
+	
+	uint8_t							reserved_0[14];
 	
 	// config 10	
 	uint8_t							reserved_1[62];
