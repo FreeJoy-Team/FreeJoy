@@ -139,10 +139,11 @@ typedef struct
 
 typedef struct
 {	
-	int8_t 					cnt;	
-	int8_t					pin_ce;
-	int8_t 					pin_pl;
+	int8_t 					button_cnt;	
+	int8_t					pin_latch;
+	int8_t 					pin_clk;
 	uint8_t 				reserved;
+	
 	
 } shift_reg_t;
 

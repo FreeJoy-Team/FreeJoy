@@ -195,10 +195,6 @@ void GPIO_Init (app_config_t * p_config)
 #endif
 }
 
-void Encoders_Init(void)
-{
-	
-}
 
 
 

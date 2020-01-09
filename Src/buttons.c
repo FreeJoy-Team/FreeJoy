@@ -176,30 +176,30 @@ void ButtonProcess (uint8_t pin_num, app_config_t * p_config)
 								millis - buttons_state[pos].time_last > p_config->button_debounce_ms)
 			{
 				buttons_state[pos].changed = 0;
-				buttons_state[pos].current_state = buttons_state[pos].pin_state;
-				buttons_state[pos].prev_state = buttons_state[pos].current_state;
-				buttons_state[pos].cnt += buttons_state[pos].current_state;
+				//buttons_state[pos].current_state = buttons_state[pos].pin_state;
+				buttons_state[pos].prev_state = buttons_state[pos].pin_state;
+				buttons_state[pos].cnt += buttons_state[pos].pin_state;
 				
 				// set bit in povs data
 				if (p_config->buttons[pos] == POV1_UP)
 				{
 					pov_pos[0] &= !(1 << 3);
-					pov_pos[0] |= (buttons_state[pos].current_state << 3);
+					pov_pos[0] |= (buttons_state[pos].pin_state << 3);
 				}
 				else if (p_config->buttons[pos] == POV1_RIGHT)
 				{
 					pov_pos[0] &= !(1 << 2);
-					pov_pos[0] |= (buttons_state[pos].current_state << 2);
+					pov_pos[0] |= (buttons_state[pos].pin_state << 2);
 				}
 				else if (p_config->buttons[pos] == POV1_DOWN)
 				{
 					pov_pos[0] &= !(1 << 1);
-					pov_pos[0] |= (buttons_state[pos].current_state << 1);
+					pov_pos[0] |= (buttons_state[pos].pin_state << 1);
 				}
 				else
 				{
 					pov_pos[0] &= !(1 << 0);
-					pov_pos[0] |= (buttons_state[pos].current_state << 0);
+					pov_pos[0] |= (buttons_state[pos].pin_state << 0);
 				}
 			}
 			// reset if state changed during debounce period
@@ -225,30 +225,30 @@ void ButtonProcess (uint8_t pin_num, app_config_t * p_config)
 								millis - buttons_state[pos].time_last > p_config->button_debounce_ms)
 			{
 				buttons_state[pos].changed = 0;
-				buttons_state[pos].current_state = buttons_state[pos].pin_state;
-				buttons_state[pos].prev_state = buttons_state[pos].current_state;
-				buttons_state[pos].cnt += buttons_state[pos].current_state;
+				//buttons_state[pos].current_state = buttons_state[pos].pin_state;
+				buttons_state[pos].prev_state = buttons_state[pos].pin_state;
+				buttons_state[pos].cnt += buttons_state[pos].pin_state;
 				
 				// set bit in povs data
 				if (p_config->buttons[pos] == POV2_UP)
 				{
 					pov_pos[1] &= !(1 << 3);
-					pov_pos[1] |= (buttons_state[pos].current_state << 3);
+					pov_pos[1] |= (buttons_state[pos].pin_state << 3);
 				}
 				else if (p_config->buttons[pos] == POV2_RIGHT)
 				{
 					pov_pos[1] &= !(1 << 2);
-					pov_pos[1] |= (buttons_state[pos].current_state << 2);
+					pov_pos[1] |= (buttons_state[pos].pin_state << 2);
 				}
 				else if (p_config->buttons[pos] == POV2_DOWN)
 				{
 					pov_pos[1] &= !(1 << 1);
-					pov_pos[1] |= (buttons_state[pos].current_state << 1);
+					pov_pos[1] |= (buttons_state[pos].pin_state << 1);
 				}
 				else
 				{
 					pov_pos[1] &= !(1 << 0);
-					pov_pos[1] |= (buttons_state[pos].current_state << 0);
+					pov_pos[1] |= (buttons_state[pos].pin_state << 0);
 				}
 			}
 			// reset if state changed during debounce period
@@ -274,30 +274,30 @@ void ButtonProcess (uint8_t pin_num, app_config_t * p_config)
 								millis - buttons_state[pos].time_last > p_config->button_debounce_ms)
 			{
 				buttons_state[pos].changed = 0;
-				buttons_state[pos].current_state = buttons_state[pos].pin_state;
-				buttons_state[pos].prev_state = buttons_state[pos].current_state;
-				buttons_state[pos].cnt += buttons_state[pos].current_state;
+				//buttons_state[pos].current_state = buttons_state[pos].pin_state;
+				buttons_state[pos].prev_state = buttons_state[pos].pin_state;
+				buttons_state[pos].cnt += buttons_state[pos].pin_state;
 				
 				// set bit in povs data
 				if (p_config->buttons[pos] == POV3_UP)
 				{
 					pov_pos[2] &= !(1 << 3);
-					pov_pos[2] |= (buttons_state[pos].current_state << 3);
+					pov_pos[2] |= (buttons_state[pos].pin_state << 3);
 				}
 				else if (p_config->buttons[pos] == POV3_RIGHT)
 				{
 					pov_pos[2] &= !(1 << 2);
-					pov_pos[2] |= (buttons_state[pos].current_state << 2);
+					pov_pos[2] |= (buttons_state[pos].pin_state << 2);
 				}
 				else if (p_config->buttons[pos] == POV3_DOWN)
 				{
 					pov_pos[2] &= !(1 << 1);
-					pov_pos[2] |= (buttons_state[pos].current_state << 1);
+					pov_pos[2] |= (buttons_state[pos].pin_state << 1);
 				}
 				else
 				{
 					pov_pos[2] &= !(1 << 0);
-					pov_pos[2] |= (buttons_state[pos].current_state << 0);
+					pov_pos[2] |= (buttons_state[pos].pin_state << 0);
 				}
 			}
 			// reset if state changed during debounce period
@@ -323,30 +323,30 @@ void ButtonProcess (uint8_t pin_num, app_config_t * p_config)
 								millis - buttons_state[pos].time_last > p_config->button_debounce_ms)
 			{
 				buttons_state[pos].changed = 0;
-				buttons_state[pos].current_state = buttons_state[pos].pin_state;
-				buttons_state[pos].prev_state = buttons_state[pos].current_state;
-				buttons_state[pos].cnt += buttons_state[pos].current_state;
+				//buttons_state[pos].current_state = buttons_state[pos].pin_state;
+				buttons_state[pos].prev_state = buttons_state[pos].pin_state;
+				buttons_state[pos].cnt += buttons_state[pos].pin_state;
 				
 				// set bit in povs data
 				if (p_config->buttons[pos] == POV4_UP)
 				{
 					pov_pos[3] &= !(1 << 3);
-					pov_pos[3] |= (buttons_state[pos].current_state << 3);
+					pov_pos[3] |= (buttons_state[pos].pin_state << 3);
 				}
 				else if (p_config->buttons[pos] == POV4_RIGHT)
 				{
 					pov_pos[3] &= !(1 << 2);
-					pov_pos[3] |= (buttons_state[pos].current_state << 2);
+					pov_pos[3] |= (buttons_state[pos].pin_state << 2);
 				}
 				else if (p_config->buttons[pos] == POV4_DOWN)
 				{
 					pov_pos[3] &= !(1 << 1);
-					pov_pos[3] |= (buttons_state[pos].current_state << 1);
+					pov_pos[3] |= (buttons_state[pos].pin_state << 1);
 				}
 				else
 				{
 					pov_pos[3] &= !(1 << 0);
-					pov_pos[3] |= (buttons_state[pos].current_state << 0);
+					pov_pos[3] |= (buttons_state[pos].pin_state << 0);
 				}
 			}
 			// reset if state changed during debounce period
