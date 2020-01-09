@@ -11,6 +11,7 @@ FreeJoy supports the following external periphery:
 * Toggle switches
 * POV hats
 * Incremental encoders
+* Converting analog inputs to buttons (up to 10 buttons per axis)
 
 ## Analog inputs
 FreeJoy supports up to 8 analog inputs at pins A0-A7. Every axis have its settings as:
