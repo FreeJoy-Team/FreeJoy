@@ -228,7 +228,7 @@ void ADC_Init (app_config_t * p_config)
 			}
 		}
 	}
-	
+
 	if (channels_cnt > 0)
 	{
 		if(HAL_ADC_Start_DMA(&hadc1,(uint32_t*)&adc_data[0],channels_cnt) != HAL_OK) 

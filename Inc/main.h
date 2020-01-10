@@ -50,7 +50,7 @@ static const app_config_t init_config =
 	.encoder_press_time_ms = 30,			// amount of millisecods virtual button 
 																		// will be pressed at encoder increment/decrement
 																		
-	.exchange_period_ms = 10,					// amount of millisecond between joystick data sending
+	.exchange_period_ms = 2,					// amount of millisecond between joystick data sending
 
 	/*
 		Device pins configuration. Available values:
