@@ -205,6 +205,11 @@
           <WinNumber>1</WinNumber>
           <ItemText>USBD_SERIALNUMBER_STRING_FS</ItemText>
         </Ww>
+        <Ww>
+          <count>11</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>tmp16,0x0A</ItemText>
+        </Ww>
       </WatchWindow1>
       <MemoryWindow1>
         <Mm>
