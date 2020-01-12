@@ -35,4 +35,6 @@ FreeJoy allows you to connect up to 128 digital inputs as single inputs (tied to
 ## Exrenal configuration tool 
 FreeJoy configuration is possible both by changing definitions in source code and by using external [utility](https://github.com/vostrenkov/FreeJoyConfigurator).
 
+<img src="https://b.radikal.ru/b12/2001/56/821d02d9e447.png"/>
+
 For information how to configure your device check [wiki page](https://github.com/vostrenkov/FreeJoy/wiki)
