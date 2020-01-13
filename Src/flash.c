@@ -19,7 +19,8 @@ void ConfigSet (app_config_t * p_config)
 	if (p_config == NULL)
 		return;
 
-	prog_addr = FLASH_BASE + (*(uint16_t *)FLASHSIZE_BASE - 1)*1024;		// last page
+	//prog_addr = FLASH_BASE + (*(uint16_t *)FLASHSIZE_BASE - 1)*1024;		// last page
+	prog_addr = CONFIG_ADDR;
 	
 	FLASH_EraseInitStruct.TypeErase = FLASH_TYPEERASE_PAGES;
 	FLASH_EraseInitStruct.NbPages = 1;
@@ -43,7 +44,8 @@ void ConfigGet (app_config_t * p_config)
 	if (p_config == NULL)
 		return;
 	
-	read_addr = FLASH_BASE + (*(uint16_t *)FLASHSIZE_BASE - 1)*1024;		// last page
+	//read_addr = FLASH_BASE + (*(uint16_t *)FLASHSIZE_BASE - 1)*1024;		// last page
+	read_addr = CONFIG_ADDR;
 	for (int i=0; i<sizeof(app_config_t); i+=4)
 	{
 		*(uint32_t *)(data_addr + i) = *(uint32_t *) (read_addr+i);

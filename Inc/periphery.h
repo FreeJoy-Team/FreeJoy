@@ -14,6 +14,7 @@
 #include "common_types.h"
 
 
+
 typedef struct 
 {
 	GPIO_TypeDef * 	port;
@@ -22,8 +23,10 @@ typedef struct
 	
 }	pin_config_t;
 
+extern SPI_HandleTypeDef hspi1;
+extern pin_config_t pin_config[USED_PINS_NUM];
 
-void GetPinConfig (pin_config_t ** p_config);
+//void GetPinConfig (pin_config_t ** p_config);
 void SystemClock_Config(void);
 void GPIO_Init (app_config_t * p_config);
 

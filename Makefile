@@ -44,6 +44,7 @@ Src/encoders.c \
 Src/flash.c \
 Src/main.c \
 Src/periphery.c \
+Src/sensors.c \
 Src/usb_device.c \
 Src/usbd_conf.c \
 Src/usbd_desc.c \

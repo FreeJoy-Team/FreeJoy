@@ -16,7 +16,7 @@
 
 static const app_config_t init_config =
 {
-	.firmware_version = 0x0101,		// do not change
+	.firmware_version = 0x0102,		// do not change
 	
 	/* 
 		Name of device in devices dispatcher
@@ -33,7 +33,7 @@ static const app_config_t init_config =
 	.device_name[9] = '1',
 	.device_name[10] = '.',
 	.device_name[11] = '0',
-	.device_name[12] = '1',
+	.device_name[12] = '2',
 	.device_name[13] = 0,
 	.device_name[14] = 0,
 	.device_name[15] = 0,

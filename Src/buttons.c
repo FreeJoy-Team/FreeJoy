@@ -13,7 +13,7 @@ button_data_t 		buttons_data[MAX_BUTTONS_NUM/8];
 pov_data_t 				pov_data[MAX_POVS_NUM];
 uint8_t						pov_pos[MAX_POVS_NUM];
 uint8_t 					pos = 0;
-pin_config_t * 		p_pin_config;
+//pin_config_t * 		p_pin_config;
 
 
 void ButtonProcess (uint8_t pin_num, app_config_t * p_config)
@@ -22,7 +22,7 @@ void ButtonProcess (uint8_t pin_num, app_config_t * p_config)
 	
 	// get port state
 	buttons_state[pos].pin_prev_state = buttons_state[pos].pin_state;
-	buttons_state[pos].pin_state = !HAL_GPIO_ReadPin(p_pin_config[pin_num].port, p_pin_config[pin_num].pin);
+	buttons_state[pos].pin_state = !HAL_GPIO_ReadPin(pin_config[pin_num].port, pin_config[pin_num].pin);
 	// inverse logic signal
 	if (p_config->pins[pin_num] == BUTTON_VCC)
 	{
@@ -367,7 +367,7 @@ void ButtonProcess (uint8_t pin_num, app_config_t * p_config)
 void ButtonsCheck (app_config_t * p_config)
 {
 	pos = 0;
-	GetPinConfig(&p_pin_config);
+	//GetPinConfig(&p_pin_config);
 	
 	// check single buttons
 	for (int i=0; i<USED_PINS_NUM; i++)
@@ -386,7 +386,7 @@ void ButtonsCheck (app_config_t * p_config)
 		if (p_config->pins[i] == BUTTON_COLUMN)
 		{
 			// tie Column pin to ground
-			HAL_GPIO_WritePin(p_pin_config[i].port, p_pin_config[i].pin, GPIO_PIN_RESET);
+			HAL_GPIO_WritePin(pin_config[i].port, pin_config[i].pin, GPIO_PIN_RESET);
 			
 			// check states at Rows
 			for (int k=0; k<USED_PINS_NUM; k++)
@@ -402,7 +402,7 @@ void ButtonsCheck (app_config_t * p_config)
 				}
 			}
 			// return Column pin to Hi-Z state
-			HAL_GPIO_WritePin(p_pin_config[i].port, p_pin_config[i].pin, GPIO_PIN_SET);
+			HAL_GPIO_WritePin(pin_config[i].port, pin_config[i].pin, GPIO_PIN_SET);
 		}
 	}
 	

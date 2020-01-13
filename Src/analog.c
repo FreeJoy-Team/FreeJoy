@@ -7,7 +7,8 @@
 
 #include "analog.h"
 #include <string.h>
-#include "flash.h"
+//#include "flash.h"
+#include "sensors.h"
 
 ADC_HandleTypeDef hadc1;
 DMA_HandleTypeDef hdma_adc1;
@@ -31,14 +32,14 @@ adc_channel_config_t channel_config[MAX_AXIS_NUM] =
 };
 
 // Map function 
-static uint32_t map2(	uint32_t x, 
-											uint32_t in_min, 
-											uint32_t in_max, 
-											uint32_t out_min,
-											uint32_t out_max)
+static float map2(	float x, 
+											float in_min, 
+											float in_max, 
+											float out_min,
+											float out_max)
 {
-	uint32_t tmp8;
-	uint32_t ret;
+	float tmp8;
+	float ret;
 	
 	tmp8 = x;
 	
@@ -51,16 +52,16 @@ static uint32_t map2(	uint32_t x,
 	return ret;
 }
 // Map function with separate action for each half of axis
-static uint32_t map3(	uint32_t x, 
-											uint32_t in_min, 
-											uint32_t in_center, 
-											uint32_t in_max, 
-											uint32_t out_min,
-											uint32_t out_center,
-											uint32_t out_max)
+static float map3(	float x, 
+											float in_min, 
+											float in_center, 
+											float in_max, 
+											float out_min,
+											float out_center,
+											float out_max)
 {
-	uint32_t tmp8;
-	uint32_t ret;
+	float tmp8;
+	float ret;
 	
 	tmp8 = x;
 	
@@ -152,10 +153,11 @@ uint16_t ShapeFunc (axis_config_t * p_axis_cfg,  uint16_t value, uint16_t fullsc
 	return(ret);
 }
 
-/* ADC init function */
-void ADC_Init (app_config_t * p_config)
+/* Axes init function */
+void AxesInit (app_config_t * p_config)
 {
 	uint8_t channels_cnt = 0;
+	uint8_t sensors_cnt = 0;
 	uint8_t rank = 1;
   ADC_ChannelConfTypeDef sConfig;
 
@@ -182,12 +184,18 @@ void ADC_Init (app_config_t * p_config)
 	// Count ADC channels
 	for (int i=0; i<USED_PINS_NUM; i++)
 	{
-		if (p_config->pins[i] == AXIS_ANALOG || p_config->pins[i] == AXIS_TO_BUTTONS)
+		if (p_config->pins[i] == AXIS_ANALOG || 
+				p_config->pins[i] == AXIS_TO_BUTTONS)
 		{
 			channels_cnt++;
 		}
+		else if (p_config->pins[i] == TLE5011_CS)
+		{
+			sensors_cnt++;
+		}
 	}
-	if (channels_cnt > MAX_AXIS_NUM)
+	
+	if ((channels_cnt + sensors_cnt) > MAX_AXIS_NUM)
 	{
 		_Error_Handler(__FILE__, __LINE__);
 	}
@@ -208,10 +216,19 @@ void ADC_Init (app_config_t * p_config)
 		}
 	}
 	
-	// Configure ADC channels
+	uint8_t sensor_num = 0;
 	for (int i=0; i<USED_PINS_NUM; i++)
 	{
-		if (p_config->pins[i] == AXIS_ANALOG || p_config->pins[i] == AXIS_TO_BUTTONS)
+		// Configure Sensors channels		
+		if (p_config->pins[i] == TLE5011_CS)
+		{
+			// reset precalibrated values at startup if autocalibration set
+			if (p_config->axis_config[sensor_num++].autocalib)
+			{
+				AxisResetCalibration(p_config, channel_config[i].number);
+			}
+		}
+		else if (p_config->pins[i] == AXIS_ANALOG || p_config->pins[i] == AXIS_TO_BUTTONS)		// Configure ADC channels
 		{
 			sConfig.Channel = channel_config[i].channel;
 			sConfig.Rank = rank++;
@@ -227,6 +244,7 @@ void ADC_Init (app_config_t * p_config)
 				AxisResetCalibration(p_config, channel_config[i].number);
 			}
 		}
+		
 	}
 
 	if (channels_cnt > 0)
@@ -238,15 +256,26 @@ void ADC_Init (app_config_t * p_config)
 	}
 }
 
-void AnalogProcess (app_config_t * p_config)
+void AxesProcess (app_config_t * p_config)
 {
 	uint16_t tmp16;
 	uint8_t channel = 0;
 	
-	for (int i=0; i<MAX_AXIS_NUM; i++)
+	for (int i=0; i<USED_PINS_NUM; i++)
 	{
-		if (p_config->pins[i] == AXIS_ANALOG || p_config->pins[i] == AXIS_TO_BUTTONS)
+		if (p_config->pins[i] == TLE5011_CS || 
+				p_config->pins[i] == AXIS_ANALOG || 
+				p_config->pins[i] == AXIS_TO_BUTTONS)
 		{
+			// get Sensors data
+			if (p_config->pins[i] == TLE5011_CS)
+			{			
+				float tmpf;
+				TLE501x_Get(&pin_config[i], &tmpf);
+				adc_data[channel] = map2(tmpf, -180, 180, 0, 4095);
+			}
+		
+			// Process data
 			tmp16 = adc_data[channel];
 		
 			if (p_config->axis_config[i].autocalib)
@@ -287,6 +316,7 @@ void AnalogProcess (app_config_t * p_config)
 			axis_data[i] = tmp16;
 			raw_axis_data[i] = adc_data[channel];
 			channel++;
+		
 		}
 	}	
 }

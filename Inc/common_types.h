@@ -12,22 +12,6 @@
 #include "stdint.h"
 #include "common_defines.h"
 
-
-//typedef struct
-//{
-//	int8_t point1;
-//	int8_t point2;
-//	int8_t point3;
-//	int8_t point4;
-//	int8_t point5;
-//	int8_t point6;
-//	int8_t point7;
-//	int8_t point8;
-//	int8_t point9;
-//	int8_t point10;
-//	
-//}curve_shape_t;
-
 enum
 {
 	FILTER_NO = 0,
@@ -61,6 +45,15 @@ enum
 	
 	AXIS_ANALOG,
 	AXIS_TO_BUTTONS,
+	
+	SPI_SCK,
+
+  TLE5011_CS,
+  TLE5011_DATA,
+  TLE5011_GEN,
+
+  SHIFT_REG_CS,
+  SHIFT_REG_DATA,
 
 };
 typedef uint8_t pin_t;
@@ -110,14 +103,6 @@ typedef struct buttons_state_t
 } buttons_state_t;
 
 
-enum
-{
-	ENCODER_1_1 = 0,
-	ENCODER_1_2,
-	ENCODER_1_4,
-};	
-typedef uint8_t encoder_type_t;
-
 typedef struct
 {
 	uint8_t 				state_cw;
@@ -137,15 +122,21 @@ typedef struct
 	
 } axis_to_buttons_t;
 
+enum
+{
+	HC165 = 0,
+	CD4021 = 1,
+};	
+typedef uint8_t shift_register_type_t;
+
 typedef struct
 {	
+	uint8_t 				type;
 	int8_t 					button_cnt;	
-	int8_t					pin_latch;
-	int8_t 					pin_clk;
-	uint8_t 				reserved;
+	uint8_t 				reserved[2];
 	
 	
-} shift_reg_t;
+} shift_register_t;
 
 typedef struct 
 {
@@ -156,22 +147,23 @@ typedef struct
 	uint16_t						toggle_press_time_ms;
 	uint16_t						encoder_press_time_ms;
 	uint16_t 						exchange_period_ms;	
+	uint8_t							reserved_1[2];
 	pin_t 							pins[USED_PINS_NUM];
+	
 	
 	// config 2-5
 	axis_config_t 			axis_config[MAX_AXIS_NUM];
-
+	uint8_t							reserved_5[8];
 	// config 6-7-8
 	button_t 						buttons[MAX_BUTTONS_NUM];
 	
 	// config 8-9
 	axis_to_buttons_t		axes_to_buttons[MAX_AXIS_NUM];
-	shift_reg_t					shift_registers[4];
-	
-	uint8_t							reserved_0[14];
+	uint8_t							reserved_9[8];
 	
 	// config 10	
-	uint8_t							reserved_1[62];
+	shift_register_t		shift_registers[4];
+	uint8_t							reserved_10[46];
 }app_config_t;
 
 typedef struct

@@ -25,8 +25,7 @@ volatile uint8_t config_out_cnt;
 volatile uint16_t firmware_in_cnt;
 volatile uint8_t bootloader = 0;
 joy_report_t joy_report;
-uint8_t tmp_buf[64];
-uint32_t uid[3];
+
 
 //uint8_t report_data[64];
 
@@ -39,7 +38,9 @@ uint32_t uid[3];
   */
 int main(void)
 {
-	int32_t millis =0, joy_millis=0;
+	uint8_t tmp_buf[64];
+	uint32_t uid[3];
+	int32_t millis =0, last_millis=0, joy_millis=0;
 	
   HAL_Init();
 	
@@ -62,7 +63,7 @@ int main(void)
 	MX_USB_DEVICE_Init();
 
 	GPIO_Init(&config);
-	ADC_Init(&config); 
+	AxesInit(&config); 
 	EncodersInit(&config);	
 
   while (1)
@@ -158,7 +159,11 @@ int main(void)
 					break;
 				
 				case 10:
-					
+					for (i=0; i<4; i++)
+					{
+						memcpy(&tmp_buf[pos], (uint8_t *) &(config.shift_registers[i]), sizeof(shift_register_t));
+						pos += sizeof(shift_register_t);
+					}
 					break;
 					
 				default:
@@ -214,9 +219,15 @@ int main(void)
 			EnterBootloader();
 		}
 		
-		ButtonsGet(joy_report.button_data);
-		AnalogGet(joy_report.axis_data, joy_report.raw_axis_data);	
-		POVsGet(joy_report.pov_data);
+		if (millis > last_millis)
+		{
+			ButtonsCheck(&config);
+			AxesProcess(&config);
+			
+			ButtonsGet(joy_report.button_data);
+			AnalogGet(joy_report.axis_data, joy_report.raw_axis_data);	
+			POVsGet(joy_report.pov_data);
+		}
   }
 }
 

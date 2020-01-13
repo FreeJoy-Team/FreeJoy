@@ -16,7 +16,15 @@ int main(void)
 	FLASH_EraseInitStruct.NbPages = 24;
 	FLASH_EraseInitStruct.PageAddress = 0x8000000;
 	
+	// erase program
 	HAL_FLASH_Unlock();
+	HAL_FLASHEx_Erase(&FLASH_EraseInitStruct, &PageError);
+	
+	// erase config
+	FLASH_EraseInitStruct.TypeErase = FLASH_TYPEERASE_PAGES;
+	FLASH_EraseInitStruct.NbPages = 1;
+	FLASH_EraseInitStruct.PageAddress = CONFIG_ADDR;
+	
 	HAL_FLASHEx_Erase(&FLASH_EraseInitStruct, &PageError);
 	
 	for (uint16_t i=0; i<program_size; i+=sizeof(uint32_t))

@@ -6,7 +6,7 @@
   */
 
 #include "encoders.h"
-#include "string.h"
+//#include "string.h"
 
 
 encoder_t encoders_state[MAX_ENCODERS_NUM];

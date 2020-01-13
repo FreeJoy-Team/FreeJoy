@@ -7,9 +7,6 @@
 
 #include "axis_to_buttons.h"
 
-analog_data_t 		scaled_axes_data[MAX_AXIS_NUM];
-buttons_state_t 	buttons[MAX_AXIS_NUM * 11];
-
 uint8_t GetPressedFromAxis (analog_data_t axis_data, uint8_t btn_num, axis_to_buttons_t axis_to_btn)
 {
 	if (axis_data >= (uint32_t) axis_to_btn.points[0] * AXIS_FULLSCALE / 100
@@ -94,7 +91,9 @@ uint8_t GetPressedFromAxis (analog_data_t axis_data, uint8_t btn_num, axis_to_bu
 
 void AxesToButtonsProcess (buttons_state_t * button_state_buf, app_config_t * p_config, uint8_t * pos)
 {
-	uint32_t millis;
+	uint32_t 					millis;
+	analog_data_t 		scaled_axes_data[MAX_AXIS_NUM];
+	
 	// get axes data
 	AnalogGet(scaled_axes_data, NULL);
 	// get timestamp
