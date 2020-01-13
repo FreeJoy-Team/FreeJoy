@@ -63,27 +63,26 @@ void TLE501x_Write(uint8_t * data, uint8_t addr, uint8_t length)
 
 void TLE501x_Get(pin_config_t * p_cs_pin_config, float * data)
 {
-	uint8_t cmd = 0x00;
-	uint8_t tmp_buf[5];
+	uint8_t tmp_buf[6];
 	int16_t x_value, y_value;
 	float angle;
 	
 	
 	// Update command
+	tmp_buf[0] = 0x00;
 	HAL_GPIO_WritePin(p_cs_pin_config->port, p_cs_pin_config->pin, GPIO_PIN_RESET);		
-	TLE501x_Write(&cmd, 0x00, 0);	
-	HAL_GPIO_WritePin(p_cs_pin_config->port, p_cs_pin_config->pin, GPIO_PIN_SET);
+	TLE501x_Write(&tmp_buf[0], 0x00, 0);	
+	//HAL_GPIO_WritePin(p_cs_pin_config->port, p_cs_pin_config->pin, GPIO_PIN_SET);
 	
 	// Get sensor data
 	HAL_GPIO_WritePin(p_cs_pin_config->port, p_cs_pin_config->pin, GPIO_PIN_RESET);		
-	TLE501x_Read(&tmp_buf[0], 0x01, 4);	
+	TLE501x_Read(&tmp_buf[1], 0x01, 4);	
 	HAL_GPIO_WritePin(p_cs_pin_config->port, p_cs_pin_config->pin, GPIO_PIN_SET);
 	
-	// TODO: CRC check
-	//if (CheckCrc(tmp_buf, tmp_buf[4], 0xFB, 4))
+	if (CheckCrc(&tmp_buf[1], tmp_buf[5], 0xFB, 4))
 	{
-		x_value = tmp_buf[1]<<8 | tmp_buf[0];
-		y_value = tmp_buf[3]<<8 | tmp_buf[2];
+		x_value = tmp_buf[2]<<8 | tmp_buf[1];
+		y_value = tmp_buf[4]<<8 | tmp_buf[3];
 		
 		angle = atan2(y_value, x_value)/ PI * 180;
 		
