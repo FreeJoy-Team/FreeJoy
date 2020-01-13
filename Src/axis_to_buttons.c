@@ -6,6 +6,7 @@
   */
 
 #include "axis_to_buttons.h"
+#include "buttons.h"
 
 uint8_t GetPressedFromAxis (analog_data_t axis_data, uint8_t btn_num, axis_to_buttons_t axis_to_btn)
 {
@@ -89,7 +90,7 @@ uint8_t GetPressedFromAxis (analog_data_t axis_data, uint8_t btn_num, axis_to_bu
 	return 0;
 }
 
-void AxesToButtonsProcess (buttons_state_t * button_state_buf, app_config_t * p_config, uint8_t * pos)
+void AxesToButtonsProcess (buttons_state_t * button_state_buf, uint8_t * pov_buf, app_config_t * p_config, uint8_t * pos)
 {
 	uint32_t 					millis;
 	analog_data_t 		scaled_axes_data[MAX_AXIS_NUM];
@@ -105,144 +106,16 @@ void AxesToButtonsProcess (buttons_state_t * button_state_buf, app_config_t * p_
 		{
 			for (uint8_t j=0; j<p_config->axes_to_buttons[i].buttons_cnt; j++)
 			{
-				// get raw button state from axis
-				button_state_buf[*pos].pin_state = GetPressedFromAxis(scaled_axes_data[i], j, p_config->axes_to_buttons[i]);
-				
-				// choose config for current button
-				switch (p_config->buttons[*pos])
-				{		
-					case BUTTON_INVERTED:
-						// invert state for inverted button
-						button_state_buf[*pos].pin_state = !button_state_buf[*pos].pin_state;						
-					case BUTTON_NORMAL:
-						
-						// set timestamp if state changed
-						if (!button_state_buf[*pos].changed && button_state_buf[*pos].pin_state != button_state_buf[*pos].prev_state)		
-						{
-							button_state_buf[*pos].time_last = millis;
-							button_state_buf[*pos].changed = 1;
-						}
-						// set state after debounce if state have not changed
-						else if (	button_state_buf[*pos].changed && button_state_buf[*pos].pin_state != button_state_buf[*pos].prev_state &&
-											millis - button_state_buf[*pos].time_last > p_config->button_debounce_ms)
-						{
-							button_state_buf[*pos].changed = 0;
-							button_state_buf[*pos].current_state = button_state_buf[*pos].pin_state;
-							button_state_buf[*pos].prev_state = button_state_buf[*pos].current_state;
-							button_state_buf[*pos].cnt += button_state_buf[*pos].current_state;
-						}
-						// reset if state changed during debounce period
-						else if (	button_state_buf[*pos].changed && 
-											millis - button_state_buf[*pos].time_last > p_config->button_debounce_ms)
-						{
-							button_state_buf[*pos].changed = 0;
-						}
-						break;
-						
-					case BUTTON_TOGGLE:
-						// set timestamp if state changed to HIGH
-						if (!button_state_buf[*pos].changed && 
-								button_state_buf[*pos].pin_state > button_state_buf[*pos].prev_state)		
-						{
-							button_state_buf[*pos].time_last = millis;
-							button_state_buf[*pos].changed = 1;
-						}
-						// set state after debounce if state have not changed
-						else if (	button_state_buf[*pos].changed && button_state_buf[*pos].pin_state &&
-											millis - button_state_buf[*pos].time_last > p_config->button_debounce_ms)
-						{
-							button_state_buf[*pos].changed = 0;
-							button_state_buf[*pos].prev_state = 1;
-							button_state_buf[*pos].current_state = !button_state_buf[*pos].current_state;
-							button_state_buf[*pos].cnt++;
-						}
-						// reset if state changed during debounce period
-						else if (!button_state_buf[*pos].pin_state && millis - button_state_buf[*pos].time_last > p_config->button_debounce_ms)
-						{
-							button_state_buf[*pos].changed = 0;
-							button_state_buf[*pos].prev_state = 0;
-						}
-						break;
-						
-					case TOGGLE_SWITCH:
-						// set timestamp if state changed
-						if (!button_state_buf[*pos].changed && button_state_buf[*pos].pin_state != button_state_buf[*pos].prev_state)		
-						{
-							button_state_buf[*pos].time_last = millis;
-							button_state_buf[*pos].changed = 1;
-						}
-						// set state after debounce if state have not changed
-						else if (	button_state_buf[*pos].changed && button_state_buf[*pos].pin_state != button_state_buf[*pos].prev_state &&
-											millis - button_state_buf[*pos].time_last > p_config->button_debounce_ms)
-						{
-							button_state_buf[*pos].changed = 0;
-							button_state_buf[*pos].current_state = 1;
-							button_state_buf[*pos].prev_state = button_state_buf[*pos].pin_state;
-							button_state_buf[*pos].cnt++;
-						}
-						// release button after push time
-						else if (	millis - button_state_buf[*pos].time_last > p_config->toggle_press_time_ms)
-						{
-							button_state_buf[*pos].current_state = 0;
-							button_state_buf[*pos].changed = 0;
-						}
-						break;
+				if (*pos < MAX_BUTTONS_NUM)
+				{
+					// get raw button state from axis
+					button_state_buf[*pos].pin_state = GetPressedFromAxis(scaled_axes_data[i], j, p_config->axes_to_buttons[i]);
 					
-					case TOGGLE_SWITCH_ON:
-						// set timestamp if state changed
-						if (!button_state_buf[*pos].changed && button_state_buf[*pos].pin_state != button_state_buf[*pos].prev_state)		
-						{
-							button_state_buf[*pos].time_last = millis;
-							button_state_buf[*pos].changed = 1;
-						}
-						// set state after debounce if state have not changed
-						else if (	button_state_buf[*pos].changed && button_state_buf[*pos].pin_state > button_state_buf[*pos].prev_state &&
-											millis - button_state_buf[*pos].time_last > p_config->button_debounce_ms)
-						{
-							button_state_buf[*pos].changed = 0;
-							button_state_buf[*pos].current_state = 1;
-							button_state_buf[*pos].prev_state = button_state_buf[*pos].pin_state;
-							button_state_buf[*pos].cnt++;
-						}
-						// release button after push time
-						else if (	millis - button_state_buf[*pos].time_last > p_config->toggle_press_time_ms)
-						{
-							button_state_buf[*pos].prev_state = button_state_buf[*pos].pin_state;
-							button_state_buf[*pos].current_state = 0;
-							button_state_buf[*pos].changed = 0;
-						}
-						break;
-					
-					case TOGGLE_SWITCH_OFF:
-						// set timestamp if state changed
-						if (!button_state_buf[*pos].changed && button_state_buf[*pos].pin_state != button_state_buf[*pos].prev_state)		
-						{
-							button_state_buf[*pos].time_last = millis;
-							button_state_buf[*pos].changed = 1;
-						}
-						// set state after debounce if state have not changed
-						else if (	button_state_buf[*pos].changed && button_state_buf[*pos].pin_state < button_state_buf[*pos].prev_state &&
-											millis - button_state_buf[*pos].time_last > p_config->button_debounce_ms)
-						{
-							button_state_buf[*pos].changed = 0;
-							button_state_buf[*pos].current_state = 1;
-							button_state_buf[*pos].prev_state = button_state_buf[*pos].pin_state;
-							button_state_buf[*pos].cnt++;
-						}
-						// release button after push time
-						else if (	millis - button_state_buf[*pos].time_last > p_config->toggle_press_time_ms)
-						{
-							button_state_buf[*pos].prev_state = button_state_buf[*pos].pin_state;
-							button_state_buf[*pos].current_state = 0;
-							button_state_buf[*pos].changed = 0;
-						}
-						break;
-						
-					
-					default:
-						break;
+					ButtonProcessState(&button_state_buf[*pos], pov_buf, p_config, pos);
+
+					(*pos)++;
 				}
-				(*pos)++;
+				else break;
 			}
 		}
 	}	

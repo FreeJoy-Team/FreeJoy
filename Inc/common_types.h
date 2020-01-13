@@ -127,16 +127,16 @@ enum
 	HC165 = 0,
 	CD4021 = 1,
 };	
-typedef uint8_t shift_register_type_t;
+typedef uint8_t shift_reg_config_type_t;
 
 typedef struct
 {	
 	uint8_t 				type;
 	int8_t 					button_cnt;	
-	uint8_t 				reserved[2];
+	uint8_t 				pin_cs;
+	uint8_t 				pin_data;
 	
-	
-} shift_register_t;
+} shift_reg_config_t;
 
 typedef struct 
 {
@@ -162,7 +162,7 @@ typedef struct
 	uint8_t							reserved_9[8];
 	
 	// config 10	
-	shift_register_t		shift_registers[4];
+	shift_reg_config_t	shift_registers[4];
 	uint8_t							reserved_10[46];
 }app_config_t;
 

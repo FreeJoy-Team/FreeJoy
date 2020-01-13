@@ -17,6 +17,7 @@
 #define MAX_BUTTONS_NUM						128					// power of 2, max 128
 #define MAX_POVS_NUM							4						// max 4
 #define MAX_ENCODERS_NUM					64					// max 64
+#define MAX_SHIFT_REG_NUM					4						// max 4
 
 #define CONFIG_ADDR								(0x0800FC00)
 #define FIRMWARE_COPY_ADDR				(0x8000000 + 0x7000)

@@ -13,7 +13,7 @@
 ADC_HandleTypeDef hadc1;
 DMA_HandleTypeDef hdma_adc1;
 TIM_HandleTypeDef htim3;
-uint16_t adc_data[MAX_AXIS_NUM];
+uint16_t input_data[MAX_AXIS_NUM];
 analog_data_t axis_data[MAX_AXIS_NUM];
 analog_data_t raw_axis_data[MAX_AXIS_NUM];
 
@@ -249,7 +249,7 @@ void AxesInit (app_config_t * p_config)
 
 	if (channels_cnt > 0)
 	{
-		if(HAL_ADC_Start_DMA(&hadc1,(uint32_t*)&adc_data[0],channels_cnt) != HAL_OK) 
+		if(HAL_ADC_Start_DMA(&hadc1,(uint32_t*)&input_data[0],channels_cnt) != HAL_OK) 
 		{
 			Error_Handler();
 		}
@@ -272,11 +272,11 @@ void AxesProcess (app_config_t * p_config)
 			{			
 				float tmpf;
 				TLE501x_Get(&pin_config[i], &tmpf);
-				adc_data[channel] = map2(tmpf, -180, 180, 0, 4095);
+				input_data[channel] = map2(tmpf, -180, 180, 0, 4095);
 			}
 		
 			// Process data
-			tmp16 = adc_data[channel];
+			tmp16 = input_data[channel];
 		
 			if (p_config->axis_config[i].autocalib)
 			{
@@ -299,7 +299,7 @@ void AxesProcess (app_config_t * p_config)
 			}
 			
 			// filter
-			tmp16 = Filter(adc_data[channel], filter_buffer[i], p_config->axis_config[i].filter);
+			tmp16 = Filter(input_data[channel], filter_buffer[i], p_config->axis_config[i].filter);
 			
 			// Scale output data
 			tmp16 = map3(	tmp16, 
@@ -314,7 +314,7 @@ void AxesProcess (app_config_t * p_config)
 			tmp16 = ShapeFunc(&p_config->axis_config[i], tmp16, 4095, 10);
 			
 			axis_data[i] = tmp16;
-			raw_axis_data[i] = adc_data[channel];
+			raw_axis_data[i] = input_data[channel];
 			channel++;
 		
 		}

@@ -438,6 +438,11 @@
               <FilePath>..\Src\encoders.c</FilePath>
             </File>
             <File>
+              <FileName>shift_registers.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\shift_registers.c</FilePath>
+            </File>
+            <File>
               <FileName>buttons.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\buttons.c</FilePath>
@@ -1187,6 +1192,11 @@
               <FileName>encoders.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\encoders.c</FilePath>
+            </File>
+            <File>
+              <FileName>shift_registers.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\shift_registers.c</FilePath>
             </File>
             <File>
               <FileName>buttons.c</FileName>

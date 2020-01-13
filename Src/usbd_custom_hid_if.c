@@ -417,8 +417,8 @@ static int8_t CUSTOM_HID_OutEvent_FS(uint8_t event_idx, uint8_t state)
 				{
 					for (i=0; i<4; i++)
 					{
-						memcpy((uint8_t *) &(tmp_config.shift_registers[i]), &hhid->Report_buf[pos], sizeof(shift_register_t));
-						pos += sizeof(shift_register_t);
+						memcpy((uint8_t *) &(tmp_config.shift_registers[i]), &hhid->Report_buf[pos], sizeof(shift_reg_config_t));
+						pos += sizeof(shift_reg_config_t);
 					}
 				}					
 					break;

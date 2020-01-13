@@ -161,8 +161,8 @@ int main(void)
 				case 10:
 					for (i=0; i<4; i++)
 					{
-						memcpy(&tmp_buf[pos], (uint8_t *) &(config.shift_registers[i]), sizeof(shift_register_t));
-						pos += sizeof(shift_register_t);
+						memcpy(&tmp_buf[pos], (uint8_t *) &(config.shift_registers[i]), sizeof(shift_reg_config_t));
+						pos += sizeof(shift_reg_config_t);
 					}
 					break;
 					
