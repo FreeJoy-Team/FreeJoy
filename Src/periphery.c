@@ -271,13 +271,13 @@ void GPIO_Init (app_config_t * p_config)
 			GPIO_InitStruct.Pull = GPIO_NOPULL;
 			HAL_GPIO_Init(pin_config[i].port, &GPIO_InitStruct);
 		}		
-		else if (p_config->pins[i] == AXIS_ANALOG || p_config->pins[i] == AXIS_TO_BUTTONS)
-		{
-			GPIO_InitStruct.Pin = pin_config[i].pin;
-			GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-			GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
-			HAL_GPIO_Init(pin_config[i].port, &GPIO_InitStruct);
-		}
+//		else if (p_config->pins[i] == AXIS_ANALOG || p_config->pins[i] == AXIS_TO_BUTTONS)
+//		{
+//			GPIO_InitStruct.Pin = pin_config[i].pin;
+//			GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+//			GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+//			HAL_GPIO_Init(pin_config[i].port, &GPIO_InitStruct);
+//		}
 		else if (p_config->pins[i] == SPI_SCK  && i == 14)
 		{
 			SPI1_Init();		// Half duplex SPI

@@ -44,9 +44,9 @@ enum
 	BUTTON_COLUMN,
 	
 	AXIS_ANALOG,
-	AXIS_TO_BUTTONS,
+	//AXIS_TO_BUTTONS,
 	
-	SPI_SCK,
+	SPI_SCK = 7,
 
   TLE5011_CS,
   TLE5011_DATA,
@@ -116,9 +116,9 @@ typedef struct
 
 typedef struct
 {
-	int8_t points[12];
+	int8_t points[13];
 	uint8_t buttons_cnt;
-	uint8_t is_analog_enabled;
+	uint8_t is_enabled;
 	
 } axis_to_buttons_t;
 
@@ -159,7 +159,6 @@ typedef struct
 	
 	// config 8-9
 	axis_to_buttons_t		axes_to_buttons[MAX_AXIS_NUM];
-	uint8_t							reserved_9[8];
 	
 	// config 10	
 	shift_reg_config_t	shift_registers[4];

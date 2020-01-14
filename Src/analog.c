@@ -184,8 +184,7 @@ void AxesInit (app_config_t * p_config)
 	// Count ADC channels
 	for (int i=0; i<USED_PINS_NUM; i++)
 	{
-		if (p_config->pins[i] == AXIS_ANALOG || 
-				p_config->pins[i] == AXIS_TO_BUTTONS)
+		if (p_config->pins[i] == AXIS_ANALOG)
 		{
 			channels_cnt++;
 		}
@@ -231,7 +230,7 @@ void AxesInit (app_config_t * p_config)
 	}
 	for (int i=0; i<USED_PINS_NUM; i++)
 	{ 
-		if (p_config->pins[i] == AXIS_ANALOG || p_config->pins[i] == AXIS_TO_BUTTONS)		// Configure ADC channels
+		if (p_config->pins[i] == AXIS_ANALOG)		// Configure ADC channels
 		{
 			sConfig.Channel = channel_config[i].channel;
 			sConfig.Rank = rank++;
@@ -280,8 +279,7 @@ void AxesProcess (app_config_t * p_config)
 	// adc data
 	for (int i=0; i<USED_PINS_NUM; i++)
 	{
-		if (p_config->pins[i] == AXIS_ANALOG || 
-				p_config->pins[i] == AXIS_TO_BUTTONS)
+		if (p_config->pins[i] == AXIS_ANALOG)
 		{
 			tmp16 = input_data[channel++];
 		}

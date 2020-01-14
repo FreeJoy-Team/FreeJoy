@@ -87,6 +87,14 @@ uint8_t GetPressedFromAxis (analog_data_t axis_data, uint8_t btn_num, axis_to_bu
 		return 1;
 	}
 	
+	if (axis_data > (uint32_t) axis_to_btn.points[11] * AXIS_FULLSCALE / 100
+			&& axis_data <= (uint32_t) axis_to_btn.points[12] * AXIS_FULLSCALE / 100
+			&& btn_num == 11)
+	{
+		return 1;
+	}
+
+	
 	return 0;
 }
 
@@ -102,7 +110,7 @@ void AxesToButtonsProcess (buttons_state_t * button_state_buf, uint8_t * pov_buf
 	
 	for (uint8_t i=0; i<MAX_AXIS_NUM; i++)
 	{
-		if (p_config->pins[i] == AXIS_TO_BUTTONS)
+		if (p_config->axes_to_buttons[i].is_enabled)
 		{
 			for (uint8_t j=0; j<p_config->axes_to_buttons[i].buttons_cnt; j++)
 			{
