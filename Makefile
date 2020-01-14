@@ -45,6 +45,7 @@ Src/flash.c \
 Src/main.c \
 Src/periphery.c \
 Src/sensors.c \
+Src/shift_registers.c \
 Src/usb_device.c \
 Src/usbd_conf.c \
 Src/usbd_desc.c \

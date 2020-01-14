@@ -228,7 +228,10 @@ void AxesInit (app_config_t * p_config)
 				AxisResetCalibration(p_config, channel_config[i].number);
 			}
 		}
-		else if (p_config->pins[i] == AXIS_ANALOG || p_config->pins[i] == AXIS_TO_BUTTONS)		// Configure ADC channels
+	}
+	for (int i=0; i<USED_PINS_NUM; i++)
+	{ 
+		if (p_config->pins[i] == AXIS_ANALOG || p_config->pins[i] == AXIS_TO_BUTTONS)		// Configure ADC channels
 		{
 			sConfig.Channel = channel_config[i].channel;
 			sConfig.Rank = rank++;
@@ -249,7 +252,7 @@ void AxesInit (app_config_t * p_config)
 
 	if (channels_cnt > 0)
 	{
-		if(HAL_ADC_Start_DMA(&hadc1,(uint32_t*)&input_data[0],channels_cnt) != HAL_OK) 
+		if(HAL_ADC_Start_DMA(&hadc1,(uint32_t*)&input_data[sensors_cnt],channels_cnt) != HAL_OK) 
 		{
 			Error_Handler();
 		}
@@ -259,25 +262,36 @@ void AxesInit (app_config_t * p_config)
 void AxesProcess (app_config_t * p_config)
 {
 	uint16_t tmp16;
+	float tmpf;
 	uint8_t channel = 0;
 	
+	// sensors data
 	for (int i=0; i<USED_PINS_NUM; i++)
 	{
-		if (p_config->pins[i] == TLE5011_CS || 
-				p_config->pins[i] == AXIS_ANALOG || 
+		if (p_config->pins[i] == TLE5011_CS)
+		{
+			tmpf = 0;
+			if (TLE501x_Get(&pin_config[i], &tmpf) == HAL_OK)
+			{
+				input_data[channel++] = map2(tmpf, -180, 180, 0, 4095);
+			}
+		}
+	}
+	// adc data
+	for (int i=0; i<USED_PINS_NUM; i++)
+	{
+		if (p_config->pins[i] == AXIS_ANALOG || 
 				p_config->pins[i] == AXIS_TO_BUTTONS)
 		{
-			// get Sensors data
-			if (p_config->pins[i] == TLE5011_CS)
-			{			
-				float tmpf;
-				TLE501x_Get(&pin_config[i], &tmpf);
-				input_data[channel] = map2(tmpf, -180, 180, 0, 4095);
-			}
-		
+			tmp16 = input_data[channel++];
+		}
+	}
+	
+	
+	
 			// Process data
-			tmp16 = input_data[channel];
-		
+	for (int i=0; i<channel; i++)
+	{
 			if (p_config->axis_config[i].autocalib)
 			{
 				// Update calib data
@@ -299,7 +313,7 @@ void AxesProcess (app_config_t * p_config)
 			}
 			
 			// filter
-			tmp16 = Filter(input_data[channel], filter_buffer[i], p_config->axis_config[i].filter);
+			tmp16 = Filter(input_data[i], filter_buffer[i], p_config->axis_config[i].filter);
 			
 			// Scale output data
 			tmp16 = map3(	tmp16, 
@@ -314,10 +328,8 @@ void AxesProcess (app_config_t * p_config)
 			tmp16 = ShapeFunc(&p_config->axis_config[i], tmp16, 4095, 10);
 			
 			axis_data[i] = tmp16;
-			raw_axis_data[i] = input_data[channel];
-			channel++;
+			raw_axis_data[i] = input_data[i];		
 		
-		}
 	}	
 }
 

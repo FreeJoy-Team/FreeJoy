@@ -131,10 +131,10 @@ typedef uint8_t shift_reg_config_type_t;
 
 typedef struct
 {	
-	uint8_t 				type;
-	int8_t 					button_cnt;	
-	uint8_t 				pin_cs;
-	uint8_t 				pin_data;
+	uint8_t 			type;
+	uint8_t 			button_cnt;	
+	int8_t 				pin_cs;
+	int8_t 				pin_data;
 	
 } shift_reg_config_t;
 

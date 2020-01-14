@@ -17,17 +17,17 @@ void ShiftRegistersInit(app_config_t * p_config)
 	
 	for (int i=0; i<MAX_SHIFT_REG_NUM; i++)
 	{
-		p_config->shift_registers[pos].pin_cs = -1;
-		p_config->shift_registers[pos].pin_cs = -1;
+		p_config->shift_registers[i].pin_cs = -1;
+		p_config->shift_registers[i].pin_data = -1;
 	}
 	
 	for (int i=0; i<USED_PINS_NUM; i++)
 	{
-		if (p_config->buttons[i] == SHIFT_REG_CS && i > prev_cs)
+		if (p_config->pins[i] == SHIFT_REG_CS && i > prev_cs)
 		{
 			for (int j=0; j<USED_PINS_NUM; j++)
 			{
-				if (p_config->buttons[j] == SHIFT_REG_DATA && j > prev_data)
+				if (p_config->pins[j] == SHIFT_REG_DATA && j > prev_data)
 				{
 					p_config->shift_registers[pos].pin_cs = i;
 					p_config->shift_registers[pos].pin_data = j;

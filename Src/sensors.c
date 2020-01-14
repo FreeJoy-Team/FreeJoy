@@ -61,7 +61,7 @@ void TLE501x_Write(uint8_t * data, uint8_t addr, uint8_t length)
 	}
 }
 
-void TLE501x_Get(pin_config_t * p_cs_pin_config, float * data)
+int TLE501x_Get(pin_config_t * p_cs_pin_config, float * data)
 {
 	uint8_t tmp_buf[6];
 	int16_t x_value, y_value;
@@ -72,10 +72,8 @@ void TLE501x_Get(pin_config_t * p_cs_pin_config, float * data)
 	tmp_buf[0] = 0x00;
 	HAL_GPIO_WritePin(p_cs_pin_config->port, p_cs_pin_config->pin, GPIO_PIN_RESET);		
 	TLE501x_Write(&tmp_buf[0], 0x00, 0);	
-	//HAL_GPIO_WritePin(p_cs_pin_config->port, p_cs_pin_config->pin, GPIO_PIN_SET);
 	
-	// Get sensor data
-	HAL_GPIO_WritePin(p_cs_pin_config->port, p_cs_pin_config->pin, GPIO_PIN_RESET);		
+	// Get sensor data	
 	TLE501x_Read(&tmp_buf[1], 0x01, 4);	
 	HAL_GPIO_WritePin(p_cs_pin_config->port, p_cs_pin_config->pin, GPIO_PIN_SET);
 	
@@ -88,6 +86,11 @@ void TLE501x_Get(pin_config_t * p_cs_pin_config, float * data)
 		
 		
 		*data = angle;
+		return 0;
+	}
+	else
+	{
+		return -1;
 	}
 	
 }
