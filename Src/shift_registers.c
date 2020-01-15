@@ -101,11 +101,8 @@ void ShiftRegisterGet(shift_reg_config_t * shift_register, uint8_t * data)
 
 void ShiftRegistersProcess (buttons_state_t * button_state_buf, uint8_t * pov_buf, app_config_t * p_config, uint8_t * pos)
 {	
-	uint32_t 					millis;
 	uint8_t 					input_data[16];
-	
-	
-	
+
 	for (uint8_t i=0; i<MAX_SHIFT_REG_NUM; i++)
 	{
 		if (p_config->shift_registers[i].pin_cs >=0 && p_config->shift_registers[i].pin_data >=0)
@@ -114,12 +111,12 @@ void ShiftRegistersProcess (buttons_state_t * button_state_buf, uint8_t * pov_bu
 			
 			for (uint8_t j=0; j<p_config->shift_registers[i].button_cnt; j++)
 			{
-				if (*pos <128)
+				if ((*pos) <128)
 				{
-					button_state_buf[*pos].pin_prev_state = button_state_buf[*pos].pin_state;
-					button_state_buf[*pos].pin_state = (input_data[(i & 0xF8)>>3] & (1<<(i & 0x07))) > 0 ? 1 : 0;
+					button_state_buf[(*pos)].pin_prev_state = button_state_buf[(*pos)].pin_state;
+					button_state_buf[(*pos)].pin_state = (input_data[(i & 0xF8)>>3] & (1<<(i & 0x07))) > 0 ? 1 : 0;
 					
-					ButtonProcessState(&button_state_buf[*pos], pov_buf, p_config, pos);				
+					ButtonProcessState(&button_state_buf[(*pos)], pov_buf, p_config, pos);				
 					(*pos)++;
 				}
 				else break;

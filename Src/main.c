@@ -15,8 +15,8 @@
 #include "analog.h"
 #include "buttons.h"
 
-#define REPORT_LEN_16			MAX_AXIS_NUM + MAX_BUTTONS_NUM/16
-#define REPORT_LEN_8			REPORT_LEN_16 * 2
+#define REPORT_LEN_16			(MAX_AXIS_NUM + MAX_BUTTONS_NUM/16)
+#define REPORT_LEN_8			(REPORT_LEN_16 * 2)
 
 /* Private variables ---------------------------------------------------------*/
 app_config_t config;
@@ -35,9 +35,7 @@ volatile int32_t millis =0, last_millis=0, joy_millis=0;
   */
 int main(void)
 {
-	uint8_t tmp_buf[64];
 	uint32_t uid[3];
-	
 	
   HAL_Init();
 	

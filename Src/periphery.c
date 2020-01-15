@@ -114,8 +114,6 @@ void SystemClock_Config(void)
   */
 void SPI1_Init(void)
 {
-	GPIO_InitTypeDef GPIO_InitStruct = {0};
-	
 	/* Peripheral clock enable */
   __HAL_RCC_SPI1_CLK_ENABLE(); 
 	

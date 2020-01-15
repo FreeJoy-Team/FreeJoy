@@ -352,8 +352,6 @@ void ButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_buf, ap
 
 void DirectButtonProcess (uint8_t pin_num, app_config_t * p_config, uint8_t * pos)
 {	
-	uint32_t millis;
-	
 	// get port state
 	buttons_state[*pos].pin_prev_state = buttons_state[*pos].pin_state;
 	buttons_state[*pos].pin_state = !HAL_GPIO_ReadPin(pin_config[pin_num].port, pin_config[pin_num].pin);
@@ -362,8 +360,6 @@ void DirectButtonProcess (uint8_t pin_num, app_config_t * p_config, uint8_t * po
 	{
 		buttons_state[*pos].pin_state = !buttons_state[*pos].pin_state;
 	}
-	// get timestamp
-	millis = HAL_GetTick();
 	
 	ButtonProcessState(&buttons_state[*pos], pov_pos, p_config, pos);
 	

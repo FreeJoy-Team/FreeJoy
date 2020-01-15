@@ -156,7 +156,7 @@ uint16_t ShapeFunc (axis_config_t * p_axis_cfg,  uint16_t value, uint16_t fullsc
 /* Axes init function */
 void AxesInit (app_config_t * p_config)
 {
-	uint8_t channels_cnt = 0;
+	uint8_t adc_cnt = 0;
 	uint8_t sensors_cnt = 0;
 	uint8_t rank = 1;
   ADC_ChannelConfTypeDef sConfig;
@@ -186,7 +186,7 @@ void AxesInit (app_config_t * p_config)
 	{
 		if (p_config->pins[i] == AXIS_ANALOG)
 		{
-			channels_cnt++;
+			adc_cnt++;
 		}
 		else if (p_config->pins[i] == TLE5011_CS)
 		{
@@ -194,13 +194,13 @@ void AxesInit (app_config_t * p_config)
 		}
 	}
 	
-	if ((channels_cnt + sensors_cnt) > MAX_AXIS_NUM)
+	if ((adc_cnt + sensors_cnt) > MAX_AXIS_NUM)
 	{
 		_Error_Handler(__FILE__, __LINE__);
 	}
 	
 	// Init ADC
-	if (channels_cnt > 0)
+	if (adc_cnt > 0)
 	{
 		hadc1.Instance = ADC1;
 		hadc1.Init.ScanConvMode = ADC_SCAN_ENABLE;
@@ -208,27 +208,28 @@ void AxesInit (app_config_t * p_config)
 		hadc1.Init.DiscontinuousConvMode = DISABLE;
 		hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
 		hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-		hadc1.Init.NbrOfConversion = channels_cnt;
+		hadc1.Init.NbrOfConversion = adc_cnt;
 		if (HAL_ADC_Init(&hadc1) != HAL_OK)
 		{
 			_Error_Handler(__FILE__, __LINE__);
 		}
 	}
 	
-	uint8_t sensor_num = 0;
+	uint8_t axis_num = 0;
 	for (int i=0; i<USED_PINS_NUM; i++)
 	{
 		// Configure Sensors channels		
 		if (p_config->pins[i] == TLE5011_CS)
 		{
 			// reset precalibrated values at startup if autocalibration set
-			if (p_config->axis_config[sensor_num++].autocalib)
+			if (p_config->axis_config[axis_num].autocalib)
 			{
-				AxisResetCalibration(p_config, channel_config[i].number);
+				AxisResetCalibration(p_config, axis_num);
 			}
+			axis_num++;
 		}
 	}
-	for (int i=0; i<USED_PINS_NUM; i++)
+	for (int i=0; i<MAX_AXIS_NUM; i++)
 	{ 
 		if (p_config->pins[i] == AXIS_ANALOG)		// Configure ADC channels
 		{
@@ -241,17 +242,18 @@ void AxesInit (app_config_t * p_config)
 			}
 			
 			// reset precalibrated values at startup if autocalibration set
-			if (p_config->axis_config[channel_config[i].number].autocalib)
+			if (p_config->axis_config[axis_num].autocalib)
 			{
-				AxisResetCalibration(p_config, channel_config[i].number);
+				AxisResetCalibration(p_config, axis_num);
 			}
+			axis_num++;
 		}
 		
 	}
 
-	if (channels_cnt > 0)
+	if (adc_cnt > 0)
 	{
-		if(HAL_ADC_Start_DMA(&hadc1,(uint32_t*)&input_data[sensors_cnt],channels_cnt) != HAL_OK) 
+		if(HAL_ADC_Start_DMA(&hadc1,(uint32_t*)&input_data[sensors_cnt], adc_cnt) != HAL_OK) 
 		{
 			Error_Handler();
 		}
@@ -272,16 +274,18 @@ void AxesProcess (app_config_t * p_config)
 			tmpf = 0;
 			if (TLE501x_Get(&pin_config[i], &tmpf) == HAL_OK)
 			{
-				input_data[channel++] = map2(tmpf, -180, 180, 0, 4095);
+				input_data[channel] = map2(tmpf, -180, 180, 0, 4095);
 			}
+			channel++;
 		}
 	}
 	// adc data
-	for (int i=0; i<USED_PINS_NUM; i++)
+	for (int i=0; i<MAX_AXIS_NUM; i++)
 	{
 		if (p_config->pins[i] == AXIS_ANALOG)
 		{
-			tmp16 = input_data[channel++];
+			tmp16 = input_data[channel];
+			channel++;
 		}
 	}
 	

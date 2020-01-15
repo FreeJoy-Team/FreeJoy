@@ -66,7 +66,7 @@ void EncodersInit(app_config_t * p_config)
 	
 	for (int i=0; i<MAX_BUTTONS_NUM; i++)
 	{
-		if (p_config->buttons[i] == ENCODER_INPUT_A && i > prev_a)
+		if (p_config->buttons[i] == ENCODER_INPUT_A &&  i > prev_a)
 		{
 			for (int j=0; j<MAX_BUTTONS_NUM; j++)
 			{
