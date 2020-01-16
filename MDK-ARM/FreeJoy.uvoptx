@@ -235,6 +235,11 @@
           <WinNumber>1</WinNumber>
           <ItemText>axis_data</ItemText>
         </Ww>
+        <Ww>
+          <count>17</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>data</ItemText>
+        </Ww>
       </WatchWindow1>
       <MemoryWindow1>
         <Mm>

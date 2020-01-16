@@ -48,7 +48,6 @@ void ShiftRegisterGet(shift_reg_config_t * shift_register, uint8_t * data)
 {
 	GPIO_InitTypeDef GPIO_InitStruct;
 	uint8_t reg_cnt;
-	uint8_t tmp8;
 	
 	// Configure SPI_SCK Pin as output PP
 	GPIO_InitStruct.Pin = GPIO_PIN_3;
@@ -63,33 +62,39 @@ void ShiftRegisterGet(shift_reg_config_t * shift_register, uint8_t * data)
 	{
 		// Latch impulse
 		HAL_GPIO_WritePin(pin_config[shift_register->pin_cs].port, pin_config[shift_register->pin_cs].pin, GPIO_PIN_SET);
-		for (int i=0; i<10; i++) __NOP();
+		for (int i=0; i<5; i++) __NOP();
 		HAL_GPIO_WritePin(pin_config[shift_register->pin_cs].port, pin_config[shift_register->pin_cs].pin, GPIO_PIN_RESET);
+			
 	}
 	else if (shift_register->type == HC165)		// negative polarity
 	{
 		// Latch impulse
 		HAL_GPIO_WritePin(pin_config[shift_register->pin_cs].port, pin_config[shift_register->pin_cs].pin, GPIO_PIN_RESET);
-		for (int i=0; i<10; i++) __NOP();
-		HAL_GPIO_WritePin(pin_config[shift_register->pin_cs].port, pin_config[shift_register->pin_cs].pin, GPIO_PIN_SET);
+		for (int i=0; i<5; i++) __NOP();
+		HAL_GPIO_WritePin(pin_config[shift_register->pin_cs].port, pin_config[shift_register->pin_cs].pin, GPIO_PIN_SET);			
 	}
 	
 	
 	reg_cnt = (uint8_t) ((float)shift_register->button_cnt/8.0);		// number of data bytes to read
 	for (uint8_t i=0; i<reg_cnt; i++)
 	{
+		uint8_t mask = 0x80;
+		
 		data[i] = 0;
-		for (uint8_t clk=0; clk<8; clk++)
+		do
 		{
 			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_SET);
-			for (int i=0; i<10; i++) __NOP();
+			for (int i=0; i<5; i++) __NOP();
 			
-			tmp8 = HAL_GPIO_ReadPin(pin_config[shift_register->pin_data].port, pin_config[shift_register->pin_data].pin);
-			data[i] |= (tmp8 << clk); 
-			
+			if(HAL_GPIO_ReadPin(pin_config[shift_register->pin_data].port, pin_config[shift_register->pin_data].pin) == GPIO_PIN_RESET)
+			{
+				data[i] |= mask; 
+			}
 			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_RESET);
-			for (int i=0; i<10; i++) __NOP();
-		}
+			for (int i=0; i<5; i++) __NOP();
+			
+			mask = mask >> 1;
+		} while (mask);
 	}
 	
 	// Configure SPI_SCK Pin back to AF PP
@@ -101,26 +106,27 @@ void ShiftRegisterGet(shift_reg_config_t * shift_register, uint8_t * data)
 
 void ShiftRegistersProcess (buttons_state_t * button_state_buf, uint8_t * pov_buf, app_config_t * p_config, uint8_t * pos)
 {	
-	uint8_t 					input_data[16];
+	uint8_t input_data[16];
 
-	for (uint8_t i=0; i<MAX_SHIFT_REG_NUM; i++)
+	for (uint8_t i=0, k=0; i<MAX_SHIFT_REG_NUM; i++)
 	{
 		if (p_config->shift_registers[i].pin_cs >=0 && p_config->shift_registers[i].pin_data >=0)
 		{
-			ShiftRegisterGet(&p_config->shift_registers[i], input_data);
+			ShiftRegisterGet(&p_config->shift_registers[k], input_data);
 			
-			for (uint8_t j=0; j<p_config->shift_registers[i].button_cnt; j++)
+			for (uint8_t j=0; j<p_config->shift_registers[k].button_cnt; j++)
 			{
 				if ((*pos) <128)
 				{
 					button_state_buf[(*pos)].pin_prev_state = button_state_buf[(*pos)].pin_state;
-					button_state_buf[(*pos)].pin_state = (input_data[(i & 0xF8)>>3] & (1<<(i & 0x07))) > 0 ? 1 : 0;
+					button_state_buf[(*pos)].pin_state = (input_data[(k & 0xF8)>>3] & (1<<(j & 0x07))) > 0 ? 1 : 0;
 					
 					ButtonProcessState(&button_state_buf[(*pos)], pov_buf, p_config, pos);				
 					(*pos)++;
 				}
 				else break;
 			}
+			k++;
 		}
 	}
 }
