@@ -562,7 +562,7 @@ static int8_t CUSTOM_HID_OutEvent_FS(uint8_t event_idx, uint8_t state)
 				{
 				
 				FLASH_EraseInitStruct.TypeErase = FLASH_TYPEERASE_PAGES;
-				FLASH_EraseInitStruct.NbPages = 24;
+				FLASH_EraseInitStruct.NbPages = 28;
 				FLASH_EraseInitStruct.PageAddress = FIRMWARE_COPY_ADDR;
 				
 				HAL_FLASH_Unlock();

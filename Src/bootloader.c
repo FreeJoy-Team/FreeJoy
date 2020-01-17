@@ -13,7 +13,7 @@ int main(void)
 	program_size = *(uint16_t*) (FIRMWARE_COPY_ADDR);
 	
 	FLASH_EraseInitStruct.TypeErase = FLASH_TYPEERASE_PAGES;
-	FLASH_EraseInitStruct.NbPages = 24;
+	FLASH_EraseInitStruct.NbPages = 28;
 	FLASH_EraseInitStruct.PageAddress = 0x8000000;
 	
 	// erase program
