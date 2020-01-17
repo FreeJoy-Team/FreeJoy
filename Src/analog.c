@@ -7,7 +7,6 @@
 
 #include "analog.h"
 #include <string.h>
-//#include "flash.h"
 #include "sensors.h"
 
 ADC_HandleTypeDef hadc1;
@@ -344,8 +343,7 @@ void AxesProcess (app_config_t * p_config)
 										p_config->axis_config[i].calib_max, 
 										0,
 										2047,
-										4095);
-			
+										4095);		
 			// Shaping
 			tmp16 = ShapeFunc(&p_config->axis_config[i], tmp16, 4095, 10);
 			// Lowing resolution if needed

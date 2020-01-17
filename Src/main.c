@@ -24,8 +24,6 @@ volatile uint8_t bootloader = 0;
 joy_report_t joy_report;
 volatile int32_t millis =0, last_millis=0, joy_millis=0;
 
-//uint8_t report_data[64];
-
 /* Private function prototypes -----------------------------------------------*/
 
 /**

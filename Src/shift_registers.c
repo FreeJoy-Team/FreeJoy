@@ -56,7 +56,7 @@ void ShiftRegisterGet(shift_reg_config_t * shift_register, uint8_t * data)
 	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 	
 	// set SCK low
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_SET);
 	
 	if (shift_register->type == CD4021)		// positive polarity
 	{
@@ -83,14 +83,14 @@ void ShiftRegisterGet(shift_reg_config_t * shift_register, uint8_t * data)
 		data[i] = 0;
 		do
 		{
-			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_SET);
+			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_RESET);
 			for (int i=0; i<5; i++) __NOP();
 			
 			if(HAL_GPIO_ReadPin(pin_config[shift_register->pin_data].port, pin_config[shift_register->pin_data].pin) == GPIO_PIN_RESET)
 			{
 				data[i] |= mask; 
 			}
-			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_RESET);
+			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_SET);
 			for (int i=0; i<5; i++) __NOP();
 			
 			mask = mask >> 1;
@@ -107,26 +107,24 @@ void ShiftRegisterGet(shift_reg_config_t * shift_register, uint8_t * data)
 void ShiftRegistersProcess (buttons_state_t * button_state_buf, uint8_t * pov_buf, app_config_t * p_config, uint8_t * pos)
 {	
 	uint8_t input_data[16];
-
-	for (uint8_t i=0, k=0; i<MAX_SHIFT_REG_NUM; i++)
+	for (uint8_t i=0; i<MAX_SHIFT_REG_NUM; i++)
 	{
 		if (p_config->shift_registers[i].pin_cs >=0 && p_config->shift_registers[i].pin_data >=0)
 		{
-			ShiftRegisterGet(&p_config->shift_registers[k], input_data);
-			
-			for (uint8_t j=0; j<p_config->shift_registers[k].button_cnt; j++)
+			ShiftRegisterGet(&p_config->shift_registers[i], input_data);
+			for (uint8_t j=0; j<p_config->shift_registers[i].button_cnt; j++)
 			{
 				if ((*pos) <128)
 				{
 					button_state_buf[(*pos)].pin_prev_state = button_state_buf[(*pos)].pin_state;
-					button_state_buf[(*pos)].pin_state = (input_data[(k & 0xF8)>>3] & (1<<(j & 0x07))) > 0 ? 1 : 0;
+					button_state_buf[(*pos)].pin_state = (input_data[(j & 0xF8)>>3] & (1<<(j & 0x07))) > 0 ? 1 : 0;
 					
 					ButtonProcessState(&button_state_buf[(*pos)], pov_buf, p_config, pos);				
 					(*pos)++;
 				}
 				else break;
 			}
-			k++;
+
 		}
 	}
 }

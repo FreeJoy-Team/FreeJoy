@@ -7,8 +7,6 @@
 
 #include "encoders.h"
 
-
-
 int8_t enc_array [16] =
 {
 0,  0,  0,  0,
@@ -92,7 +90,6 @@ void EncodersInit(app_config_t * p_config)
 					break;
 				}
 			}
-		}
-		
+		}	
 	}
 }

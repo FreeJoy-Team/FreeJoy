@@ -46,7 +46,8 @@ enum
 	BUTTON_COLUMN,
 	
 	AXIS_ANALOG,
-	//AXIS_TO_BUTTONS,
+	
+//	RESERVED,
 	
 	SPI_SCK = 7,
 
@@ -108,8 +109,6 @@ typedef struct buttons_state_t
 typedef struct
 {
   uint64_t 				time_last;
-//	uint8_t 				state_cw;
-//	uint8_t 				state_ccw;
 	uint8_t 				state;
 	int16_t 				cnt;	
 	int8_t 					pin_a;
