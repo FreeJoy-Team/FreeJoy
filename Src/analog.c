@@ -14,8 +14,10 @@ ADC_HandleTypeDef hadc1;
 DMA_HandleTypeDef hdma_adc1;
 TIM_HandleTypeDef htim3;
 uint16_t input_data[MAX_AXIS_NUM];
-analog_data_t axis_data[MAX_AXIS_NUM];
+
+analog_data_t scaled_axis_data[MAX_AXIS_NUM];
 analog_data_t raw_axis_data[MAX_AXIS_NUM];
+analog_data_t out_axis_data[MAX_AXIS_NUM];
 
 uint8_t FILTER_LOW_COEFF[FILTER_LOW_SIZE] = {40, 30, 15, 10, 5};
 uint8_t FILTER_MED_COEFF[FILTER_MED_SIZE] = {30, 20, 10, 10, 10, 6, 6, 4, 2, 2};
@@ -77,6 +79,24 @@ static float map3(	float x,
 	{
 		ret = ((tmp8 - in_center) * (out_max - out_center) / (in_max - in_center) + out_center);
 	}
+	return ret;
+}
+
+uint16_t SetResolutioin (uint16_t value, uint8_t resolution)
+{
+	uint16_t tmp = 0;
+	uint16_t ret = 0;
+	
+	if (resolution >= 12)
+	{
+		return value;
+	}
+	else if (resolution > 0)
+	{
+		tmp = value >> (12 - resolution);		// using tmp variable because optimizer 
+		ret = tmp << (12 - resolution);
+	}
+	
 	return ret;
 }
 
@@ -328,9 +348,15 @@ void AxesProcess (app_config_t * p_config)
 			
 			// Shaping
 			tmp16 = ShapeFunc(&p_config->axis_config[i], tmp16, 4095, 10);
+			// Lowing resolution if needed
+			tmp16 = SetResolutioin(tmp16, p_config->axis_config[i].resolution);
 			
-			axis_data[i] = tmp16;
-			raw_axis_data[i] = input_data[i];		
+			// setting technical axis data
+			scaled_axis_data[i] = tmp16;
+			raw_axis_data[i] = input_data[i];
+			// setting output axis data
+			if (p_config->axis_config[i].out_enabled)	out_axis_data[i] = tmp16;
+			else	out_axis_data[i] = 0;
 		
 	}	
 }
@@ -341,15 +367,19 @@ void AxisResetCalibration (app_config_t * p_config, uint8_t axis_num)
 	p_config->axis_config[axis_num].calib_min = 4095;
 }
 
-void AnalogGet (analog_data_t * scaled_data, analog_data_t * raw_data)
+void AnalogGet (analog_data_t * out_data, analog_data_t * scaled_data, analog_data_t * raw_data)
 {
 	if (scaled_data != NULL)
 	{
-		memcpy(scaled_data, axis_data, sizeof(axis_data));
+		memcpy(scaled_data, scaled_axis_data, sizeof(scaled_axis_data));
 	}
 	if (raw_data != NULL)
 	{
 		memcpy(raw_data, raw_axis_data, sizeof(raw_axis_data));
+	}
+	if (raw_data != NULL)
+	{
+		memcpy(out_data, out_axis_data, sizeof(raw_axis_data));
 	}
 }
 

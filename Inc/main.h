@@ -109,6 +109,8 @@ static const app_config_t init_config =
 	.axis_config[0].curve_shape[8] = 77,
 	.axis_config[0].curve_shape[9] = 100,
 	.axis_config[0].filter = FILTER_NO,
+	.axis_config[0].out_enabled = 1,
+	.axis_config[0].resolution = 12,
 	
 	.axis_config[1].calib_min = 0,
 	.axis_config[1].calib_center = 2047,
@@ -125,6 +127,8 @@ static const app_config_t init_config =
 	.axis_config[1].curve_shape[8] = 77,
 	.axis_config[1].curve_shape[9] = 100,
 	.axis_config[1].filter = FILTER_NO,
+	.axis_config[1].out_enabled = 1,
+	.axis_config[1].resolution = 12,
 	
 	.axis_config[2].calib_min = 0,
 	.axis_config[2].calib_center = 2047,
@@ -141,6 +145,8 @@ static const app_config_t init_config =
 	.axis_config[2].curve_shape[8] = 77,
 	.axis_config[2].curve_shape[9] = 100,
 	.axis_config[2].filter = FILTER_NO,
+	.axis_config[2].out_enabled = 1,
+	.axis_config[2].resolution = 12,
 	
 	.axis_config[3].calib_min = 0,
 	.axis_config[3].calib_center = 2047,
@@ -157,6 +163,8 @@ static const app_config_t init_config =
 	.axis_config[3].curve_shape[8] = 77,
 	.axis_config[3].curve_shape[9] = 100,
 	.axis_config[3].filter = FILTER_NO,
+	.axis_config[3].out_enabled = 1,
+	.axis_config[3].resolution = 12,
 	
 	.axis_config[4].calib_min = 0,
 	.axis_config[4].calib_center = 2047,
@@ -173,6 +181,8 @@ static const app_config_t init_config =
 	.axis_config[4].curve_shape[8] = 77,
 	.axis_config[4].curve_shape[9] = 100,
 	.axis_config[4].filter = FILTER_NO,
+	.axis_config[4].out_enabled = 1,
+	.axis_config[4].resolution = 12,
 	
 	.axis_config[5].calib_min = 0,
 	.axis_config[5].calib_center = 2047,
@@ -189,6 +199,8 @@ static const app_config_t init_config =
 	.axis_config[5].curve_shape[8] = 77,
 	.axis_config[5].curve_shape[9] = 100,
 	.axis_config[5].filter = FILTER_NO,
+	.axis_config[5].out_enabled = 1,
+	.axis_config[5].resolution = 12,
 	
 	.axis_config[6].calib_min = 0,
 	.axis_config[6].calib_center = 2047,
@@ -205,6 +217,8 @@ static const app_config_t init_config =
 	.axis_config[6].curve_shape[8] = 77,
 	.axis_config[6].curve_shape[9] = 100,
 	.axis_config[6].filter = FILTER_NO,
+	.axis_config[6].out_enabled = 1,
+	.axis_config[6].resolution = 12,
 	
 	.axis_config[7].calib_min = 0,
 	.axis_config[7].calib_center = 2047,
@@ -221,6 +235,8 @@ static const app_config_t init_config =
 	.axis_config[7].curve_shape[8] = 77,
 	.axis_config[7].curve_shape[9] = 100,
 	.axis_config[7].filter = FILTER_NO,
+	.axis_config[7].out_enabled = 1,
+	.axis_config[7].resolution = 12,
 	
 	/*
 		Buttons configuration. Available values:

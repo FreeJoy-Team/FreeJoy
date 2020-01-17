@@ -31,7 +31,9 @@ typedef struct
 	uint8_t					inverted;
 	filter_t 				filter;
 	int8_t				 	curve_shape[10];
-	uint8_t					reserved[10];
+	uint8_t 				out_enabled;
+	uint8_t					resolution;
+	uint8_t					reserved[8];
 } axis_config_t;
 
 enum

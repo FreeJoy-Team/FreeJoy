@@ -88,7 +88,7 @@ int main(void)
 			AxesProcess(&config);
 			
 			ButtonsGet(joy_report.button_data);
-			AnalogGet(joy_report.axis_data, joy_report.raw_axis_data);	
+			AnalogGet(joy_report.axis_data, NULL, joy_report.raw_axis_data);	
 			POVsGet(joy_report.pov_data);
 		}
   }

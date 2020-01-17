@@ -97,7 +97,7 @@ void AxesToButtonsProcess (buttons_state_t * button_state_buf, uint8_t * pov_buf
 	analog_data_t 		scaled_axes_data[MAX_AXIS_NUM];
 	
 	// get axes data
-	AnalogGet(scaled_axes_data, NULL);
+	AnalogGet(NULL, scaled_axes_data, NULL);
 	
 	for (uint8_t i=0; i<MAX_AXIS_NUM; i++)
 	{
