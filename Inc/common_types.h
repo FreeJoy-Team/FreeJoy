@@ -94,7 +94,7 @@ typedef uint8_t button_t;
 
 typedef struct buttons_state_t
 {
-     uint64_t time_last;	
+  uint64_t time_last;	
 	uint8_t pin_state;
 	uint8_t pin_prev_state;
 	uint8_t prev_state;
@@ -107,9 +107,10 @@ typedef struct buttons_state_t
 
 typedef struct
 {
-    uint64_t 				time_last;
-	uint8_t 				state_cw;
-	uint8_t 				state_ccw;		
+  uint64_t 				time_last;
+//	uint8_t 				state_cw;
+//	uint8_t 				state_ccw;
+	uint8_t 				state;
 	int16_t 				cnt;	
 	int8_t 					pin_a;
 	int8_t 					pin_b;

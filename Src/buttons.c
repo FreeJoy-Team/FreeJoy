@@ -380,11 +380,7 @@ void ButtonsCheck (app_config_t * p_config)
 			// check states at Rows
 			for (int k=0; k<USED_PINS_NUM; k++)
 			{
-				if (pos > MAX_BUTTONS_NUM)
-				{
-					_Error_Handler(__FILE__, __LINE__);
-				}
-				if (p_config->pins[k] == BUTTON_ROW)
+				if (p_config->pins[k] == BUTTON_ROW && pos < MAX_BUTTONS_NUM)
 				{ 
 					DirectButtonProcess(k, p_config, &pos);
 					pos++;

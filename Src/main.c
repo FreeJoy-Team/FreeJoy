@@ -80,6 +80,7 @@ int main(void)
 			EnterBootloader();
 		}
 		
+		
 		if (millis > last_millis)
 		{
 			last_millis = millis;
