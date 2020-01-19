@@ -312,28 +312,8 @@ void AxesProcess (app_config_t * p_config)
 	
 			// Process data
 	for (int i=0; i<channel; i++)
-	{
-			if (p_config->axis_config[i].autocalib)
-			{
-				// Update calib data
-				if (tmp16 > p_config->axis_config[i].calib_max)
-				{
-					p_config->axis_config[i].calib_max = tmp16;
-				}
-				else if (tmp16 < p_config->axis_config[i].calib_min)
-				{
-					p_config->axis_config[i].calib_min = tmp16;
-				}
-				
-				tmp16 = (p_config->axis_config[i].calib_max + p_config->axis_config[i].calib_min)/2;
-				
-				if (p_config->axis_config[i].calib_center != tmp16 )
-				{				
-					p_config->axis_config[i].calib_center = tmp16;
-				}
-			}
-			
-			// filter
+	{				
+			// Filtering
 			tmp16 = Filter(input_data[i], filter_buffer[i], p_config->axis_config[i].filter);
 			
 			// Scale output data
@@ -348,6 +328,12 @@ void AxesProcess (app_config_t * p_config)
 			tmp16 = ShapeFunc(&p_config->axis_config[i], tmp16, 4095, 10);
 			// Lowing resolution if needed
 			tmp16 = SetResolutioin(tmp16, p_config->axis_config[i].resolution);
+		
+			// Invertion
+			if (p_config->axis_config[i].inverted > 0)
+			{
+				tmp16 = 4095 - tmp16;
+			}
 			
 			// setting technical axis data
 			scaled_axis_data[i] = tmp16;
