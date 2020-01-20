@@ -27,7 +27,7 @@ typedef struct
 	uint16_t 				calib_min;
 	uint16_t				calib_center;
 	uint16_t 				calib_max;
-	uint8_t 				dummy;
+	uint8_t 				magnet_offset;
 	uint8_t					inverted;
 	filter_t 				filter;
 	int8_t				 	curve_shape[10];

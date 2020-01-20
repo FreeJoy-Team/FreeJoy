@@ -170,6 +170,11 @@
           <WinNumber>1</WinNumber>
           <ItemText>data[1]</ItemText>
         </Ww>
+        <Ww>
+          <count>4</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>tmpf</ItemText>
+        </Ww>
       </WatchWindow1>
       <WatchWindow2>
         <Ww>

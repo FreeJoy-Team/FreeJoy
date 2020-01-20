@@ -240,11 +240,6 @@ void AxesInit (app_config_t * p_config)
 		// Configure Sensors channels		
 		if (p_config->pins[i] == TLE5011_CS)
 		{
-			// reset precalibrated values at startup if autocalibration set
-			if (p_config->axis_config[axis_num].autocalib)
-			{
-				AxisResetCalibration(p_config, axis_num);
-			}
 			axis_num++;
 		}
 	}
@@ -258,12 +253,6 @@ void AxesInit (app_config_t * p_config)
 			if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
 			{
 				_Error_Handler(__FILE__, __LINE__);
-			}
-			
-			// reset precalibrated values at startup if autocalibration set
-			if (p_config->axis_config[axis_num].autocalib)
-			{
-				AxisResetCalibration(p_config, axis_num);
 			}
 			axis_num++;
 		}
@@ -293,6 +282,12 @@ void AxesProcess (app_config_t * p_config)
 			tmpf = 0;
 			if (TLE501x_Get(&pin_config[i], &tmpf) == HAL_OK)
 			{
+				if (p_config->axis_config[channel].magnet_offset)
+				{
+					tmpf -= 180;
+					if (tmpf < -180) tmpf += 360;
+					else if (tmpf > 180) tmpf -= 360;
+				}
 				input_data[channel] = map2(tmpf, -180, 180, 0, 4095);
 			}
 			channel++;
