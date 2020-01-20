@@ -12,22 +12,6 @@
 #include "stdint.h"
 #include "common_defines.h"
 
-
-//typedef struct
-//{
-//	int8_t point1;
-//	int8_t point2;
-//	int8_t point3;
-//	int8_t point4;
-//	int8_t point5;
-//	int8_t point6;
-//	int8_t point7;
-//	int8_t point8;
-//	int8_t point9;
-//	int8_t point10;
-//	
-//}curve_shape_t;
-
 enum
 {
 	FILTER_NO = 0,
@@ -43,11 +27,13 @@ typedef struct
 	uint16_t 				calib_min;
 	uint16_t				calib_center;
 	uint16_t 				calib_max;
-	uint8_t 				autocalib;
+	uint8_t 				magnet_offset;
 	uint8_t					inverted;
 	filter_t 				filter;
 	int8_t				 	curve_shape[10];
-	uint8_t					reserved[10];
+	uint8_t 				out_enabled;
+	uint8_t					resolution;
+	uint8_t					reserved[8];
 } axis_config_t;
 
 enum
@@ -60,7 +46,17 @@ enum
 	BUTTON_COLUMN,
 	
 	AXIS_ANALOG,
-	AXIS_TO_BUTTONS,
+	
+//	RESERVED,
+	
+	SPI_SCK = 7,
+
+  TLE5011_CS,
+  TLE5011_DATA,
+  TLE5011_GEN,
+
+  SHIFT_REG_CS,
+  SHIFT_REG_DATA,
 
 };
 typedef uint8_t pin_t;
@@ -99,30 +95,21 @@ typedef uint8_t button_t;
 
 typedef struct buttons_state_t
 {
+  uint64_t time_last;	
 	uint8_t pin_state;
 	uint8_t pin_prev_state;
 	uint8_t prev_state;
 	uint8_t current_state;
-	uint8_t changed;
-	uint64_t time_last;	
+	uint8_t changed;	
 	uint8_t cnt;
 	
 } buttons_state_t;
 
 
-enum
-{
-	ENCODER_1_1 = 0,
-	ENCODER_1_2,
-	ENCODER_1_4,
-};	
-typedef uint8_t encoder_type_t;
-
 typedef struct
 {
-	uint8_t 				state_cw;
-	uint8_t 				state_ccw;
-	uint64_t 				time_last;	
+  uint64_t 				time_last;
+	uint8_t 				state;
 	int16_t 				cnt;	
 	int8_t 					pin_a;
 	int8_t 					pin_b;
@@ -131,21 +118,27 @@ typedef struct
 
 typedef struct
 {
-	int8_t points[12];
+	int8_t points[13];
 	uint8_t buttons_cnt;
-	uint8_t is_analog_enabled;
+	uint8_t is_enabled;
 	
 } axis_to_buttons_t;
 
+enum
+{
+	HC165 = 0,
+	CD4021 = 1,
+};	
+typedef uint8_t shift_reg_config_type_t;
+
 typedef struct
 {	
-	int8_t 					button_cnt;	
-	int8_t					pin_latch;
-	int8_t 					pin_clk;
-	uint8_t 				reserved;
+	uint8_t 			type;
+	uint8_t 			button_cnt;	
+	int8_t 				pin_cs;
+	int8_t 				pin_data;
 	
-	
-} shift_reg_t;
+} shift_reg_config_t;
 
 typedef struct 
 {
@@ -156,22 +149,22 @@ typedef struct
 	uint16_t						toggle_press_time_ms;
 	uint16_t						encoder_press_time_ms;
 	uint16_t 						exchange_period_ms;	
+	uint8_t							reserved_1[2];
 	pin_t 							pins[USED_PINS_NUM];
+	
 	
 	// config 2-5
 	axis_config_t 			axis_config[MAX_AXIS_NUM];
-
+	uint8_t							reserved_5[8];
 	// config 6-7-8
 	button_t 						buttons[MAX_BUTTONS_NUM];
 	
 	// config 8-9
 	axis_to_buttons_t		axes_to_buttons[MAX_AXIS_NUM];
-	shift_reg_t					shift_registers[4];
-	
-	uint8_t							reserved_0[14];
 	
 	// config 10	
-	uint8_t							reserved_1[62];
+	shift_reg_config_t	shift_registers[4];
+	uint8_t							reserved_10[46];
 }app_config_t;
 
 typedef struct

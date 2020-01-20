@@ -7,7 +7,8 @@
 
 #include "periphery.h"
 
-
+SPI_HandleTypeDef hspi1;
+TIM_HandleTypeDef htim4;
 
 pin_config_t pin_config[USED_PINS_NUM] =
 {
@@ -43,10 +44,10 @@ pin_config_t pin_config[USED_PINS_NUM] =
 	{GPIOC, GPIO_PIN_15, 15},				// 29
 };
 
-void GetPinConfig (pin_config_t ** p_config)
-{
-	*p_config = pin_config;
-}
+//void GetPinConfig (pin_config_t ** p_config)
+//{
+//	*p_config = pin_config;
+//}
 
 /**
   * @brief System Clock Configuration
@@ -106,6 +107,97 @@ void SystemClock_Config(void)
   HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
 }
 
+/**
+  * @brief SPI1 Initialization Function
+  * @param None
+  * @retval None
+  */
+void SPI1_Init(void)
+{
+	/* Peripheral clock enable */
+  __HAL_RCC_SPI1_CLK_ENABLE(); 
+	
+  /* SPI1 parameter configuration*/
+  hspi1.Instance = SPI1;
+  hspi1.Init.Mode = SPI_MODE_MASTER;
+  hspi1.Init.Direction = SPI_DIRECTION_1LINE;
+  hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
+  hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
+  hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
+  hspi1.Init.NSS = SPI_NSS_SOFT;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_128;
+  hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
+  hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
+  hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+  hspi1.Init.CRCPolynomial = 10;
+  if (HAL_SPI_Init(&hspi1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+	
+  __HAL_AFIO_REMAP_SPI1_ENABLE();
+}
+
+/**
+  * @brief TIM4 Initialization Function
+  * @param None
+  * @retval None
+  */
+void TIM4_Init(void)
+{
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+  TIM_OC_InitTypeDef sConfigOC = {0};
+
+	__HAL_RCC_TIM4_CLK_ENABLE();
+	
+  htim4.Instance = TIM4;
+  htim4.Init.Prescaler = 0;
+  htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim4.Init.Period = 18-1;
+  htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+  if (HAL_TIM_Base_Init(&htim4) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim4, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_PWM_Init(&htim4) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim4, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 9;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  if (HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+  __HAL_RCC_GPIOB_CLK_ENABLE();
+  /**TIM4 GPIO Configuration    
+  PB6     ------> TIM4_CH1 
+  */
+  GPIO_InitStruct.Pin = GPIO_PIN_6;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+	
+	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
+
+}
 
 /* GPIO init function */
 void GPIO_Init (app_config_t * p_config)
@@ -177,13 +269,53 @@ void GPIO_Init (app_config_t * p_config)
 			GPIO_InitStruct.Pull = GPIO_NOPULL;
 			HAL_GPIO_Init(pin_config[i].port, &GPIO_InitStruct);
 		}		
-		else if (p_config->pins[i] == AXIS_ANALOG || p_config->pins[i] == AXIS_TO_BUTTONS)
+		else if (p_config->pins[i] == AXIS_ANALOG)
 		{
 			GPIO_InitStruct.Pin = pin_config[i].pin;
 			GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
 			GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
 			HAL_GPIO_Init(pin_config[i].port, &GPIO_InitStruct);
 		}
+		else if (p_config->pins[i] == SPI_SCK  && i == 14)
+		{
+			SPI1_Init();		// Half duplex SPI
+			/**SPI1 GPIO Configuration    
+			PB3     ------> SPI1_SCK
+			*/
+			GPIO_InitStruct.Pin = GPIO_PIN_3;
+			GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+			GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+			HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+		}
+		else if (p_config->pins[i] == TLE5011_DATA && i == 16)
+		{
+			//PB5     ------> SPI1_MOSI 
+			GPIO_InitStruct.Pin = GPIO_PIN_5;
+			GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+			GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+			HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+		}
+		else if (p_config->pins[i] == TLE5011_CS || p_config->pins[i] == SHIFT_REG_CS)
+		{
+			GPIO_InitStruct.Pin = pin_config[i].pin;
+			GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+			GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+			HAL_GPIO_Init(pin_config[i].port, &GPIO_InitStruct);
+			HAL_GPIO_WritePin(pin_config[i].port, pin_config[i].pin, GPIO_PIN_SET);
+		}
+		else if (p_config->pins[i] == TLE5011_GEN  && i == 17)
+		{
+			TIM4_Init();	// 4MHz output at PB6 pin
+		}
+		else if (p_config->pins[i] == SHIFT_REG_DATA)
+		{
+			GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+			GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+			GPIO_InitStruct.Pin = pin_config[i].pin;
+			GPIO_InitStruct.Pull = GPIO_PULLUP;
+			HAL_GPIO_Init(pin_config[i].port, &GPIO_InitStruct);
+		}
+		
 	}
 
 #ifdef DEBUG

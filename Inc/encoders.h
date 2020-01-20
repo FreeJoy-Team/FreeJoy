@@ -14,7 +14,6 @@
 #include "periphery.h"
 
 
-
 void EncoderProcess (buttons_state_t * button_state_buf, app_config_t * p_config);
 void EncodersInit (app_config_t * p_config);
 

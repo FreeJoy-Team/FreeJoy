@@ -43,9 +43,9 @@
 
 /* External variables --------------------------------------------------------*/
 extern PCD_HandleTypeDef hpcd_USB_FS;
-extern DMA_HandleTypeDef hdma_adc1;
-extern volatile uint8_t adc_data_ready;
-extern app_config_t config;
+//extern DMA_HandleTypeDef hdma_adc1;
+//extern volatile uint8_t adc_data_ready;
+//extern app_config_t config;
 
 /******************************************************************************/
 /*            Cortex-M3 Processor Interruption and Exception Handlers         */ 
@@ -182,8 +182,7 @@ void SysTick_Handler(void)
 {
   /* USER CODE BEGIN SysTick_IRQn 0 */
 	
-	ButtonsCheck(&config);
-	AnalogProcess(&config);
+	
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();
   HAL_SYSTICK_IRQHandler();

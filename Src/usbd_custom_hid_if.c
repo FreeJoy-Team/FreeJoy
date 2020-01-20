@@ -62,11 +62,8 @@
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
 
-extern app_config_t config;
-volatile extern uint8_t config_in_cnt;
-volatile extern uint8_t config_out_cnt;
-volatile extern uint16_t firmware_in_cnt;
 volatile extern uint8_t bootloader;
+volatile extern int32_t joy_millis;
 /* USER CODE END PV */
 
 /** @addtogroup STM32_USB_OTG_DEVICE_LIBRARY
@@ -299,12 +296,19 @@ static int8_t CUSTOM_HID_DeInit_FS(void)
 static int8_t CUSTOM_HID_OutEvent_FS(uint8_t event_idx, uint8_t state)
 {
   /* USER CODE BEGIN 6 */
-	static app_config_t tmp_config;
-	static uint16_t firmware_len = 0;
+	static  app_config_t tmp_config;
+	static  uint16_t firmware_len = 0;
+	
+	uint8_t config_in_cnt;
+	uint8_t config_out_cnt;
+	uint8_t tmp_buf[64];
 	uint8_t i;
 	uint8_t pos = 2;
 	uint8_t repotId;
 	USBD_CUSTOM_HID_HandleTypeDef * hhid = (USBD_CUSTOM_HID_HandleTypeDef*)hUsbDeviceFS.pClassData;
+
+	// 2 second delay for joy report
+	joy_millis = HAL_GetTick() + 2000;
 	
 	repotId = hhid->Report_buf[0];
 	
@@ -313,6 +317,107 @@ static int8_t CUSTOM_HID_OutEvent_FS(uint8_t event_idx, uint8_t state)
 		case REPORT_ID_CONFIG_IN:
 		{
 			config_in_cnt = hhid->Report_buf[1];			// requested config packet number
+			
+			if ((config_in_cnt > 0) & (config_in_cnt <= 10))
+			{		
+				
+				uint8_t pos = 2;
+				uint8_t i;
+				
+				ConfigGet(&tmp_config);
+				
+				memset(tmp_buf, 0, sizeof(tmp_buf));			
+				tmp_buf[0] = REPORT_ID_CONFIG_IN;					
+				tmp_buf[1] = config_in_cnt;
+				
+				switch(config_in_cnt)
+				{
+						case 1:	
+							memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.firmware_version), sizeof(tmp_config.firmware_version));
+							pos += sizeof(tmp_config.firmware_version);
+							memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.device_name), sizeof(tmp_config.device_name));
+							pos += sizeof(tmp_config.device_name);
+							memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.button_debounce_ms), 8);
+							pos += 8;
+							
+							memcpy(&tmp_buf[63-sizeof(tmp_config.pins)], (uint8_t *) &(tmp_config.pins), sizeof(tmp_config.pins));
+						break;
+					
+					case 2:
+						i = 0;
+						while(sizeof(tmp_buf) - pos > sizeof(axis_config_t))
+						{
+							memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.axis_config[i++]), sizeof(axis_config_t));
+							pos += sizeof(axis_config_t);
+						}
+						break;
+					
+					case 3:
+						i = 2;
+						while(sizeof(tmp_buf) - pos > sizeof(axis_config_t))
+						{
+							memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.axis_config[i++]), sizeof(axis_config_t));
+							pos += sizeof(axis_config_t);
+						}
+						break;
+					
+					case 4:
+						i = 4;
+						while(sizeof(tmp_buf) - pos > sizeof(axis_config_t))
+						{
+							memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.axis_config[i++]), sizeof(axis_config_t));
+							pos += sizeof(axis_config_t);
+						}
+						break;
+
+					case 5:
+						i = 6;
+						while(sizeof(tmp_buf) - pos > sizeof(axis_config_t))
+						{
+							memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.axis_config[i++]), sizeof(axis_config_t));
+							pos += sizeof(axis_config_t);
+						}
+						break;
+					
+					case 6:
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.buttons[0]), 62);
+						break;
+					
+					case 7:
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.buttons[62]), 62);
+						break;
+					
+					case 8:
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.buttons[124]), 4);
+						pos += 4*sizeof(button_t);
+					
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.axes_to_buttons[0]), sizeof(tmp_buf) - pos);
+						
+						break;
+					
+					case 9:
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.axes_to_buttons[3].buttons_cnt), 2);
+						pos += 2*sizeof(button_t);
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.axes_to_buttons[3]), sizeof(tmp_buf) - pos);
+
+						break;
+					
+					case 10:
+						for (i=0; i<4; i++)
+						{
+							memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.shift_registers[i]), sizeof(shift_reg_config_t));
+							pos += sizeof(shift_reg_config_t);
+						}
+						break;
+						
+					default:
+						break;
+					
+				}
+					
+				USBD_CUSTOM_HID_SendReport(	&hUsbDeviceFS, (uint8_t *)&(tmp_buf), 64);
+				config_in_cnt = 0;	
+			}
 		}
 		break;
 		
@@ -392,29 +497,26 @@ static int8_t CUSTOM_HID_OutEvent_FS(uint8_t event_idx, uint8_t state)
 				case 8:
 				{
 					memcpy((uint8_t *) &(tmp_config.buttons[124]), &hhid->Report_buf[pos], 4);
-					pos += 4;
-					i = 0;
-					while(64 - pos > sizeof(axis_to_buttons_t))
-					{
-						memcpy((uint8_t *) &(tmp_config.axes_to_buttons[i++]), &hhid->Report_buf[pos], sizeof(axis_to_buttons_t));
-						pos += sizeof(axis_to_buttons_t);
-					}
+					pos += 4*sizeof(button_t);
+					
+					memcpy((uint8_t *) &(tmp_config.axes_to_buttons[0]), &hhid->Report_buf[pos], 64 - pos);
 				}
 				break;
 				
 				case 9:
 				{
-					i = 4;
-					while(64 - pos > sizeof(axis_to_buttons_t))
-					{
-						memcpy((uint8_t *) &(tmp_config.axes_to_buttons[i++]), &hhid->Report_buf[pos], sizeof(axis_to_buttons_t));
-						pos += sizeof(axis_to_buttons_t);
-					}
-				}					
+					memcpy((uint8_t *) &(tmp_config.axes_to_buttons[3].buttons_cnt), &hhid->Report_buf[pos], 2);
+					pos += 2*sizeof(button_t);
+					memcpy((uint8_t *) &(tmp_config.axes_to_buttons[4]), &hhid->Report_buf[pos], 64 - pos);
 					break;
-				
+				}
 				case 10:
 				{
+					for (i=0; i<4; i++)
+					{
+						memcpy((uint8_t *) &(tmp_config.shift_registers[i]), &hhid->Report_buf[pos], sizeof(shift_reg_config_t));
+						pos += sizeof(shift_reg_config_t);
+					}
 				}					
 					break;
 				
@@ -424,13 +526,19 @@ static int8_t CUSTOM_HID_OutEvent_FS(uint8_t event_idx, uint8_t state)
 			if (hhid->Report_buf[1] < 10)		// request new packet
 			{
 				config_out_cnt = hhid->Report_buf[1] + 1;
+				
+				uint8_t tmp_buf[2];
+				tmp_buf[0] = REPORT_ID_CONFIG_OUT;
+				tmp_buf[1] = config_out_cnt;
+				
+				USBD_CUSTOM_HID_SendReport(	&hUsbDeviceFS, (uint8_t *)&(tmp_buf), 2);
 			}
 			else // last packet received
 			{
-				tmp_config.firmware_version = config.firmware_version;
+				tmp_config.firmware_version = FIRMWARE_VERSION;
 				ConfigSet(&tmp_config);
 				
-				//ConfigGet(&config);	
+				//ConfigGet(&tmp_config);	
 				HAL_NVIC_SystemReset();
 			}
 		}
@@ -442,6 +550,7 @@ static int8_t CUSTOM_HID_OutEvent_FS(uint8_t event_idx, uint8_t state)
 			uint32_t PageError = 0;
 			uint16_t crc_in = 0;
 			uint16_t crc_comp = 0;
+			uint16_t firmware_in_cnt = 0;
 			
 			uint16_t cnt = hhid->Report_buf[1]<<8 | hhid->Report_buf[2];
 			
@@ -449,11 +558,11 @@ static int8_t CUSTOM_HID_OutEvent_FS(uint8_t event_idx, uint8_t state)
 			{
 				firmware_len = hhid->Report_buf[5]<<8 | hhid->Report_buf[4];
 				
-				if (firmware_len <= 0x6400)	// check new firmware size
+				if (firmware_len <= 0x7000)	// check new firmware size
 				{
 				
 				FLASH_EraseInitStruct.TypeErase = FLASH_TYPEERASE_PAGES;
-				FLASH_EraseInitStruct.NbPages = 24;
+				FLASH_EraseInitStruct.NbPages = 28;
 				FLASH_EraseInitStruct.PageAddress = FIRMWARE_COPY_ADDR;
 				
 				HAL_FLASH_Unlock();
@@ -502,7 +611,14 @@ static int8_t CUSTOM_HID_OutEvent_FS(uint8_t event_idx, uint8_t state)
 			}
 			else break;
 			
-			
+			if (firmware_in_cnt > 0)
+			{
+				uint8_t tmp_buf[3];
+				tmp_buf[0] = REPORT_ID_FIRMWARE;
+				tmp_buf[1] = (firmware_in_cnt)>>8;
+				tmp_buf[2] = (firmware_in_cnt)&0xFF;
+				USBD_CUSTOM_HID_SendReport(	&hUsbDeviceFS, (uint8_t *)&(tmp_buf), 3);
+			}
 			
 		}
 		break;
@@ -514,7 +630,7 @@ static int8_t CUSTOM_HID_OutEvent_FS(uint8_t event_idx, uint8_t state)
   return (USBD_OK);
   /* USER CODE END 6 */
  }
-
+ 
 /* USER CODE BEGIN 7 */
 /**
   * @brief  Send the report to the Host
