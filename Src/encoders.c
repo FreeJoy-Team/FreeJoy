@@ -22,7 +22,7 @@ void EncoderProcess (buttons_state_t * button_state_buf, app_config_t * p_config
 {	
 	for (int i=0; i<MAX_ENCODERS_NUM; i++)
 	{
-		uint32_t millis = HAL_GetTick();
+		uint32_t millis = GetTick();
 		
 		{
 			int8_t stt;

@@ -9,27 +9,26 @@
 #include <string.h>
 #include "sensors.h"
 
-ADC_HandleTypeDef hadc1;
-DMA_HandleTypeDef hdma_adc1;
-TIM_HandleTypeDef htim3;
-uint16_t input_data[MAX_AXIS_NUM];
+analog_data_t input_data[MAX_AXIS_NUM];
 
 analog_data_t scaled_axis_data[MAX_AXIS_NUM];
 analog_data_t raw_axis_data[MAX_AXIS_NUM];
 analog_data_t out_axis_data[MAX_AXIS_NUM];
 
-uint8_t FILTER_LOW_COEFF[FILTER_LOW_SIZE] = {40, 30, 15, 10, 5};
-uint8_t FILTER_MED_COEFF[FILTER_MED_SIZE] = {30, 20, 10, 10, 10, 6, 6, 4, 2, 2};
-uint8_t FILTER_HIGH_COEFF[FILTER_HIGH_SIZE] = {20, 20, 10, 10, 5, 5, 5, 5, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1};
+analog_data_t FILTER_LOW_COEFF[FILTER_LOW_SIZE] = {40, 30, 15, 10, 5};
+analog_data_t FILTER_MED_COEFF[FILTER_MED_SIZE] = {30, 20, 10, 10, 10, 6, 6, 4, 2, 2};
+analog_data_t FILTER_HIGH_COEFF[FILTER_HIGH_SIZE] = {20, 20, 10, 10, 5, 5, 5, 5, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1};
 
-uint16_t filter_buffer[MAX_AXIS_NUM][FILTER_HIGH_SIZE];
+analog_data_t filter_buffer[MAX_AXIS_NUM][FILTER_HIGH_SIZE];
+	
+uint32_t err_cnt = 0;
 
 adc_channel_config_t channel_config[MAX_AXIS_NUM] =
 {
-	{ADC_CHANNEL_0, 0}, {ADC_CHANNEL_1, 1}, 
-	{ADC_CHANNEL_2, 2}, {ADC_CHANNEL_3, 3},
-	{ADC_CHANNEL_4, 4}, {ADC_CHANNEL_5, 5}, 
-	{ADC_CHANNEL_6, 6}, {ADC_CHANNEL_7, 7}, 
+	{ADC_Channel_0, 0}, {ADC_Channel_1, 1}, 
+	{ADC_Channel_2, 2}, {ADC_Channel_3, 3},
+	{ADC_Channel_4, 4}, {ADC_Channel_5, 5}, 
+	{ADC_Channel_6, 6}, {ADC_Channel_7, 7}, 
 };
 
 // Map function 
@@ -39,16 +38,16 @@ static float map2(	float x,
 											float out_min,
 											float out_max)
 {
-	float tmp8;
+	float tmp;
 	float ret;
 	
-	tmp8 = x;
+	tmp = x;
 	
 	
-	if (tmp8 < in_min)	return out_min;
-	if (tmp8 > in_max)	return out_max;
+	if (tmp < in_min)	return out_min;
+	if (tmp > in_max)	return out_max;
 		
-	ret = (tmp8 - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+	ret = (tmp - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 	
 	return ret;
 }
@@ -61,46 +60,52 @@ static float map3(	float x,
 											float out_center,
 											float out_max)
 {
-	float tmp8;
+	float tmp;
 	float ret;
 	
-	tmp8 = x;
+	tmp = x;
 	
 	
-	if (tmp8 < in_min)	return out_min;
-	if (tmp8 > in_max)	return out_max;
+	if (tmp < in_min)	return out_min;
+	if (tmp > in_max)	return out_max;
 	
-	if (tmp8 < in_center)
+	if (tmp < in_center)
 	{
-		ret = ((tmp8 - in_min) * (out_center - out_min) / (in_center - in_min) + out_min);
+		ret = ((tmp - in_min) * (out_center - out_min) / (in_center - in_min) + out_min);
   }
 	else
 	{
-		ret = ((tmp8 - in_center) * (out_max - out_center) / (in_max - in_center) + out_center);
+		ret = ((tmp - in_center) * (out_max - out_center) / (in_max - in_center) + out_center);
 	}
 	return ret;
 }
 
-uint16_t SetResolutioin (uint16_t value, uint8_t resolution)
+analog_data_t SetResolutioin (analog_data_t value, uint8_t resolution)
 {
-	uint16_t tmp = 0;
-	uint16_t ret = 0;
+	int32_t tmp = 0;
+	int32_t ret = 0;
+	uint32_t fullscale = AXIS_MAX_VALUE - AXIS_MIN_VALUE;
+	float step;
 	
-	if (resolution >= 12)
+	if (resolution >= 16)
 	{
 		return value;
 	}
 	else if (resolution > 0)
 	{
-		tmp = value >> (12 - resolution);		// using tmp variable because optimizer 
-		ret = tmp << (12 - resolution);
+		tmp = fullscale >> (16 - resolution);
+		step = (float)fullscale/tmp;
+		
+		tmp = value;
+		tmp = (tmp - AXIS_MIN_VALUE)  >> (16 - resolution);
+		ret = step * tmp + AXIS_MIN_VALUE;
 	}
 	
 	return ret;
 }
 
 // FIR function
-uint16_t Filter (uint16_t value, uint16_t * filter_buf, filter_t filter_lvl)
+analog_data_t Filter (analog_data_t value, analog_data_t * filter_buf, filter_t filter_lvl)
 {
 	uint32_t tmp32;
 	
@@ -149,23 +154,26 @@ uint16_t Filter (uint16_t value, uint16_t * filter_buf, filter_t filter_lvl)
 }
 
 // Shaping function for axes
-uint16_t ShapeFunc (axis_config_t * p_axis_cfg,  uint16_t value, uint16_t fullscale, uint8_t point_cnt)
+analog_data_t ShapeFunc (axis_config_t * p_axis_cfg,  analog_data_t value, uint8_t point_cnt)
 {
-	uint32_t out_min, out_max, step;
-	uint16_t in_min, in_max;
+	float out_min, out_max, step;
+	float in_min, in_max;
 	uint8_t min_index;
-	uint16_t ret;
+	analog_data_t ret;
 	
-	step = fullscale/(point_cnt-1);
-	min_index = value/step;
+	int32_t tmp = value - AXIS_MIN_VALUE;
+	int32_t fullscale = AXIS_MAX_VALUE - AXIS_MIN_VALUE;
 	
-	if (min_index == 9) min_index = 8; 	// case of input 4095
+	step = (float)fullscale/((float)point_cnt-1.0f);
+	min_index = tmp/step;
 	
-	in_min = min_index*step;
-	in_max = (min_index+1)*step;
+	if (min_index == point_cnt-1) min_index = point_cnt-2;
 	
-	out_min = p_axis_cfg->curve_shape[min_index] * fullscale/200 + fullscale/2;
-	out_max = p_axis_cfg->curve_shape[min_index+1] * fullscale/200 + fullscale/2;
+	in_min = AXIS_MIN_VALUE + min_index*step;
+	in_max = AXIS_MIN_VALUE + (min_index+1)*step;
+	
+	out_min = ((float)p_axis_cfg->curve_shape[min_index] * (float)fullscale/200.0f + (float)AXIS_CENTER_VALUE);
+	out_max = ((float)p_axis_cfg->curve_shape[min_index+1] * (float)fullscale/200.0f + (float)AXIS_CENTER_VALUE);
 	
 	ret = map2(value, in_min, in_max, out_min, out_max);
 	
@@ -178,26 +186,13 @@ void AxesInit (app_config_t * p_config)
 	uint8_t adc_cnt = 0;
 	uint8_t sensors_cnt = 0;
 	uint8_t rank = 1;
-  ADC_ChannelConfTypeDef sConfig;
+	
+  ADC_InitTypeDef ADC_InitStructure;
+	DMA_InitTypeDef DMA_InitStructure;
 
-	 /* DMA controller clock enable */
-  __HAL_RCC_DMA1_CLK_ENABLE();
-	
-	__HAL_RCC_ADC1_CLK_ENABLE();
-	
-	hdma_adc1.Instance = DMA1_Channel1;
-  hdma_adc1.Init.Direction = DMA_PERIPH_TO_MEMORY;
-  hdma_adc1.Init.PeriphInc = DMA_PINC_DISABLE;
-  hdma_adc1.Init.MemInc = DMA_MINC_ENABLE;
-  hdma_adc1.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
-  hdma_adc1.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
-  hdma_adc1.Init.Mode = DMA_CIRCULAR;
-  hdma_adc1.Init.Priority = DMA_PRIORITY_MEDIUM;
-  if (HAL_DMA_Init(&hdma_adc1) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
-  __HAL_LINKDMA(&hadc1,DMA_Handle,hdma_adc1);
+	 /* DMA and ADC controller clock enable */
+  RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1 | RCC_APB2Periph_GPIOC, ENABLE);
 	
 	
 	// Count ADC channels
@@ -215,23 +210,25 @@ void AxesInit (app_config_t * p_config)
 	
 	if ((adc_cnt + sensors_cnt) > MAX_AXIS_NUM)
 	{
-		_Error_Handler(__FILE__, __LINE__);
+		// Error
+		adc_cnt = 0;
+		sensors_cnt = 0;
 	}
 	
 	// Init ADC
 	if (adc_cnt > 0)
 	{
-		hadc1.Instance = ADC1;
-		hadc1.Init.ScanConvMode = ADC_SCAN_ENABLE;
-		hadc1.Init.ContinuousConvMode = ENABLE;
-		hadc1.Init.DiscontinuousConvMode = DISABLE;
-		hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
-		hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-		hadc1.Init.NbrOfConversion = adc_cnt;
-		if (HAL_ADC_Init(&hadc1) != HAL_OK)
-		{
-			_Error_Handler(__FILE__, __LINE__);
-		}
+		/* ADC1 configuration ------------------------------------------------------*/
+		ADC_InitStructure.ADC_Mode = ADC_Mode_Independent;
+		ADC_InitStructure.ADC_ScanConvMode = ENABLE;
+		ADC_InitStructure.ADC_ContinuousConvMode = ENABLE;
+		ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_None;
+		ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;
+		ADC_InitStructure.ADC_NbrOfChannel = adc_cnt;
+		ADC_Init(ADC1, &ADC_InitStructure);
+
+		/* Enable ADC1 DMA */
+		ADC_DMACmd(ADC1, ENABLE);
 	}
 	
 	uint8_t axis_num = 0;
@@ -247,13 +244,8 @@ void AxesInit (app_config_t * p_config)
 	{ 
 		if (p_config->pins[i] == AXIS_ANALOG)		// Configure ADC channels
 		{
-			sConfig.Channel = channel_config[i].channel;
-			sConfig.Rank = rank++;
-			sConfig.SamplingTime = ADC_SAMPLETIME_239CYCLES_5;
-			if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
-			{
-				_Error_Handler(__FILE__, __LINE__);
-			}
+			/* ADC1 regular channel configuration */ 
+			ADC_RegularChannelConfig(ADC1, channel_config[i].channel, rank++, ADC_SampleTime_239Cycles5);
 			axis_num++;
 		}
 		
@@ -261,17 +253,45 @@ void AxesInit (app_config_t * p_config)
 
 	if (adc_cnt > 0)
 	{
-		if(HAL_ADC_Start_DMA(&hadc1,(uint32_t*)&input_data[sensors_cnt], adc_cnt) != HAL_OK) 
-		{
-			Error_Handler();
-		}
+		/* DMA1 channel1 configuration ----------------------------------------------*/
+		DMA_DeInit(DMA1_Channel1);
+		DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&ADC1->DR;
+		DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t) &input_data[sensors_cnt];
+		DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
+		DMA_InitStructure.DMA_BufferSize = adc_cnt;
+		DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+		DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+		DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
+		DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;
+		DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
+		DMA_InitStructure.DMA_Priority = DMA_Priority_High;
+		DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
+		DMA_Init(DMA1_Channel1, &DMA_InitStructure);
+			
+			/* Enable DMA1 channel1 */
+		DMA_Cmd(DMA1_Channel1, ENABLE);
+			/* Enable ADC1 */
+		ADC_Cmd(ADC1, ENABLE);
+			
+			/* Enable ADC1 reset calibration register */   
+		ADC_ResetCalibration(ADC1);
+		/* Check the end of ADC1 reset calibration register */
+		while(ADC_GetResetCalibrationStatus(ADC1));
+
+		/* Start ADC1 calibration */
+		ADC_StartCalibration(ADC1);
+		/* Check the end of ADC1 calibration */
+		while(ADC_GetCalibrationStatus(ADC1));
+			 
+		/* Start ADC1 Software Conversion */ 
+		ADC_SoftwareStartConvCmd(ADC1, ENABLE);
 	}
 }
 
 void AxesProcess (app_config_t * p_config)
 {
-	uint16_t tmp16;
-	float tmpf;
+	int32_t tmp;
+	double tmpf;
 	uint8_t channel = 0;
 	
 	// sensors data
@@ -280,7 +300,7 @@ void AxesProcess (app_config_t * p_config)
 		if (p_config->pins[i] == TLE5011_CS)
 		{
 			tmpf = 0;
-			if (TLE501x_Get(&pin_config[i], &tmpf) == HAL_OK)
+			if (TLE501x_Get(&pin_config[i], &tmpf) == 0)
 			{
 				if (p_config->axis_config[channel].magnet_offset)
 				{
@@ -288,7 +308,11 @@ void AxesProcess (app_config_t * p_config)
 					if (tmpf < -180) tmpf += 360;
 					else if (tmpf > 180) tmpf -= 360;
 				}
-				input_data[channel] = map2(tmpf, -180, 180, 0, 4095);
+				raw_axis_data[channel] = map2(tmpf, -180, 180, AXIS_MIN_VALUE, AXIS_MAX_VALUE);
+			}
+			else
+			{
+				err_cnt++;
 			}
 			channel++;
 		}
@@ -298,43 +322,40 @@ void AxesProcess (app_config_t * p_config)
 	{
 		if (p_config->pins[i] == AXIS_ANALOG)
 		{
-			tmp16 = input_data[channel];
+			raw_axis_data[channel] = map2(input_data[channel], 0, 4095, AXIS_MIN_VALUE, AXIS_MAX_VALUE);
 			channel++;
 		}
 	}
-	
-	
 	
 			// Process data
 	for (int i=0; i<channel; i++)
 	{				
 			// Filtering
-			tmp16 = Filter(input_data[i], filter_buffer[i], p_config->axis_config[i].filter);
+			tmp = Filter(raw_axis_data[i], filter_buffer[i], p_config->axis_config[i].filter);
 			
 			// Scale output data
-			tmp16 = map3(	tmp16, 
+			tmp = map3(	tmp, 
 										p_config->axis_config[i].calib_min,
 										p_config->axis_config[i].calib_center,		
 										p_config->axis_config[i].calib_max, 
-										0,
-										2047,
-										4095);		
+										AXIS_MIN_VALUE,
+										AXIS_CENTER_VALUE,
+										AXIS_MAX_VALUE);		
 			// Shaping
-			tmp16 = ShapeFunc(&p_config->axis_config[i], tmp16, 4095, 10);
+			tmp = ShapeFunc(&p_config->axis_config[i], tmp, 11);
 			// Lowing resolution if needed
-			tmp16 = SetResolutioin(tmp16, p_config->axis_config[i].resolution);
+			tmp = SetResolutioin(tmp, p_config->axis_config[i].resolution);
 		
 			// Invertion
 			if (p_config->axis_config[i].inverted > 0)
 			{
-				tmp16 = 4095 - tmp16;
+				tmp = 0 - tmp;
 			}
 			
 			// setting technical axis data
-			scaled_axis_data[i] = tmp16;
-			raw_axis_data[i] = input_data[i];
+			scaled_axis_data[i] = tmp;
 			// setting output axis data
-			if (p_config->axis_config[i].out_enabled)	out_axis_data[i] = tmp16;
+			if (p_config->axis_config[i].out_enabled)	out_axis_data[i] = tmp;
 			else	out_axis_data[i] = 0;
 		
 	}	
@@ -342,8 +363,9 @@ void AxesProcess (app_config_t * p_config)
 
 void AxisResetCalibration (app_config_t * p_config, uint8_t axis_num)
 {
-	p_config->axis_config[axis_num].calib_max = 0;
-	p_config->axis_config[axis_num].calib_min = 4095;
+	p_config->axis_config[axis_num].calib_max = AXIS_MIN_VALUE;
+	p_config->axis_config[axis_num].calib_center = AXIS_CENTER_VALUE;
+	p_config->axis_config[axis_num].calib_min = AXIS_MAX_VALUE;
 }
 
 void AnalogGet (analog_data_t * out_data, analog_data_t * scaled_data, analog_data_t * raw_data)

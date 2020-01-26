@@ -17,7 +17,7 @@ void ButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_buf, ap
 {
 	uint32_t 	millis;
 	
-	millis = HAL_GetTick();
+	millis = GetTick();
 	// choose config for current button
 	switch (p_config->buttons[*pos])
 	{		
@@ -354,7 +354,7 @@ void DirectButtonProcess (uint8_t pin_num, app_config_t * p_config, uint8_t * po
 {	
 	// get port state
 	buttons_state[*pos].pin_prev_state = buttons_state[*pos].pin_state;
-	buttons_state[*pos].pin_state = !HAL_GPIO_ReadPin(pin_config[pin_num].port, pin_config[pin_num].pin);
+	buttons_state[*pos].pin_state = !GPIO_ReadInputDataBit(pin_config[pin_num].port, pin_config[pin_num].pin);
 	// inverse logic signal
 	if (p_config->pins[pin_num] == BUTTON_VCC)
 	{
@@ -375,7 +375,7 @@ void ButtonsCheck (app_config_t * p_config)
 		if ((p_config->pins[i] == BUTTON_COLUMN) && (pos < MAX_BUTTONS_NUM))
 		{
 			// tie Column pin to ground
-			HAL_GPIO_WritePin(pin_config[i].port, pin_config[i].pin, GPIO_PIN_RESET);
+			GPIO_WriteBit(pin_config[i].port, pin_config[i].pin, Bit_RESET);
 			
 			// check states at Rows
 			for (int k=0; k<USED_PINS_NUM; k++)
@@ -387,7 +387,7 @@ void ButtonsCheck (app_config_t * p_config)
 				}
 			}
 			// return Column pin to Hi-Z state
-			HAL_GPIO_WritePin(pin_config[i].port, pin_config[i].pin, GPIO_PIN_SET);
+			GPIO_WriteBit(pin_config[i].port, pin_config[i].pin, Bit_SET);
 		}
 	}
 	

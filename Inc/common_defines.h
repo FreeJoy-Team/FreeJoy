@@ -19,6 +19,10 @@
 #define MAX_ENCODERS_NUM					64					// max 64
 #define MAX_SHIFT_REG_NUM					4						// max 4
 
+#define AXIS_MIN_VALUE						(-32767)
+#define AXIS_MAX_VALUE						(32767)
+#define AXIS_CENTER_VALUE					(AXIS_MIN_VALUE + (AXIS_MAX_VALUE-AXIS_MIN_VALUE)/2)
+
 #define CONFIG_ADDR								(0x0800FC00)
 #define FIRMWARE_COPY_ADDR				(0x8000000 + 0x7000)
 #define BOOTLOADER_ADDR						(0x0800F400)

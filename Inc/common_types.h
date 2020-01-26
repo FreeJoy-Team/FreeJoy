@@ -22,18 +22,20 @@ enum
 }; 
 typedef uint8_t filter_t;
 
+typedef int16_t analog_data_t;
+
 typedef struct
 {
-	uint16_t 				calib_min;
-	uint16_t				calib_center;
-	uint16_t 				calib_max;
+	analog_data_t 	calib_min;
+	analog_data_t		calib_center;
+	analog_data_t 	calib_max;
 	uint8_t 				magnet_offset;
 	uint8_t					inverted;
 	filter_t 				filter;
-	int8_t				 	curve_shape[10];
+	int8_t				 	curve_shape[11];
 	uint8_t 				out_enabled;
 	uint8_t					resolution;
-	uint8_t					reserved[8];
+	uint8_t					reserved[7];
 } axis_config_t;
 
 enum
@@ -52,7 +54,7 @@ enum
 	SPI_SCK = 7,
 
   TLE5011_CS,
-  TLE5011_DATA,
+  SPI_DATA,
   TLE5011_GEN,
 
   SHIFT_REG_CS,
@@ -169,12 +171,12 @@ typedef struct
 
 typedef struct
 {
-	uint8_t 		dummy;
-	uint8_t 		id;
-	uint8_t 		button_data[MAX_BUTTONS_NUM/8];
-	uint16_t 		axis_data[MAX_AXIS_NUM];
-	uint8_t 		pov_data[MAX_POVS_NUM];
-	uint16_t		raw_axis_data[MAX_AXIS_NUM];
+	uint8_t 				dummy;
+	uint8_t 				id;
+	uint8_t 				button_data[MAX_BUTTONS_NUM/8];
+	int16_t			 		axis_data[MAX_AXIS_NUM];
+	uint8_t 				pov_data[MAX_POVS_NUM];
+	int16_t					raw_axis_data[MAX_AXIS_NUM];
 	
 } joy_report_t;
 

@@ -46,32 +46,32 @@ void ShiftRegistersInit(app_config_t * p_config)
 // binbanging shift registers
 void ShiftRegisterGet(shift_reg_config_t * shift_register, uint8_t * data)
 {
-	GPIO_InitTypeDef GPIO_InitStruct;
+//	GPIO_InitTypeDef GPIO_InitStruct;
 	uint8_t reg_cnt;
 	
-	// Configure SPI_SCK Pin as output PP
-	GPIO_InitStruct.Pin = GPIO_PIN_3;
-	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+//	// Configure SPI_SCK Pin as output PP
+//	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_3;
+//	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_Out_PP;
+//	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
+//	GPIO_Init(GPIOB, &GPIO_InitStruct);
 	
 	// set SCK low
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_SET);
+	GPIO_WriteBit(GPIOB, GPIO_Pin_3, Bit_SET);
 	
 	if (shift_register->type == CD4021)		// positive polarity
 	{
 		// Latch impulse
-		HAL_GPIO_WritePin(pin_config[shift_register->pin_cs].port, pin_config[shift_register->pin_cs].pin, GPIO_PIN_SET);
+		GPIO_WriteBit(pin_config[shift_register->pin_cs].port, pin_config[shift_register->pin_cs].pin, Bit_SET);
 		for (int i=0; i<5; i++) __NOP();
-		HAL_GPIO_WritePin(pin_config[shift_register->pin_cs].port, pin_config[shift_register->pin_cs].pin, GPIO_PIN_RESET);
+		GPIO_WriteBit(pin_config[shift_register->pin_cs].port, pin_config[shift_register->pin_cs].pin, Bit_RESET);
 			
 	}
 	else if (shift_register->type == HC165)		// negative polarity
 	{
 		// Latch impulse
-		HAL_GPIO_WritePin(pin_config[shift_register->pin_cs].port, pin_config[shift_register->pin_cs].pin, GPIO_PIN_RESET);
+		GPIO_WriteBit(pin_config[shift_register->pin_cs].port, pin_config[shift_register->pin_cs].pin, Bit_RESET);
 		for (int i=0; i<5; i++) __NOP();
-		HAL_GPIO_WritePin(pin_config[shift_register->pin_cs].port, pin_config[shift_register->pin_cs].pin, GPIO_PIN_SET);			
+		GPIO_WriteBit(pin_config[shift_register->pin_cs].port, pin_config[shift_register->pin_cs].pin, Bit_SET);			
 	}
 	
 	
@@ -83,14 +83,14 @@ void ShiftRegisterGet(shift_reg_config_t * shift_register, uint8_t * data)
 		data[i] = 0;
 		do
 		{
-			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_RESET);
+			GPIO_WriteBit(GPIOB, GPIO_Pin_3, Bit_RESET);
 			for (int i=0; i<5; i++) __NOP();
 			
-			if(HAL_GPIO_ReadPin(pin_config[shift_register->pin_data].port, pin_config[shift_register->pin_data].pin) == GPIO_PIN_RESET)
+			if(GPIO_ReadInputDataBit(pin_config[shift_register->pin_data].port, pin_config[shift_register->pin_data].pin) == Bit_RESET)
 			{
 				data[i] |= mask; 
 			}
-			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_SET);
+			GPIO_WriteBit(GPIOB, GPIO_Pin_3, Bit_SET);
 			for (int i=0; i<5; i++) __NOP();
 			
 			mask = mask >> 1;
@@ -98,10 +98,10 @@ void ShiftRegisterGet(shift_reg_config_t * shift_register, uint8_t * data)
 	}
 	
 	// Configure SPI_SCK Pin back to AF PP
-	GPIO_InitStruct.Pin = GPIO_PIN_3;
-	GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+//	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_3;
+//	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF_PP;
+//	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
+//	GPIO_Init(GPIOB, &GPIO_InitStruct);
 }
 
 void ShiftRegistersProcess (buttons_state_t * button_state_buf, uint8_t * pov_buf, app_config_t * p_config, uint8_t * pos)

@@ -9,8 +9,8 @@
 #include "buttons.h"
 
 
-#pragma push
-#pragma O0			// i don't know why, but this function can not work with optimization
+//#pragma push
+//#pragma O0			// i don't know why, but this function can not work with optimization
 uint8_t GetPressedFromAxis (analog_data_t axis_data, uint8_t btn_num, axis_to_buttons_t * axis_to_btn)
 {
 	uint8_t ret = 0;
@@ -90,7 +90,7 @@ uint8_t GetPressedFromAxis (analog_data_t axis_data, uint8_t btn_num, axis_to_bu
 	
 	return ret;
 }
-#pragma pop
+//#pragma pop
 
 void AxesToButtonsProcess (buttons_state_t * button_state_buf, uint8_t * pov_buf, app_config_t * p_config, uint8_t * pos)
 {

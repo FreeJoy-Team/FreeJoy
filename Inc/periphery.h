@@ -10,9 +10,16 @@
 #ifndef __PERIPHERY_H__
 #define __PERIPHERY_H__
 
-#include "stm32f1xx_hal.h"
+#include "stm32f10x.h"
+#include "stm32f10x_conf.h"
 #include "common_types.h"
 
+#include "string.h"
+
+#define MAX_TIMERS_NUM			10
+
+extern volatile uint64_t Ticks;
+extern volatile uint32_t TimingDelay;
 
 
 typedef struct 
@@ -23,13 +30,16 @@ typedef struct
 	
 }	pin_config_t;
 
-extern SPI_HandleTypeDef hspi1;
 extern pin_config_t pin_config[USED_PINS_NUM];
 
-//void GetPinConfig (pin_config_t ** p_config);
-void SystemClock_Config(void);
-void GPIO_Init (app_config_t * p_config);
+void SysTick_Init(void);
+uint64_t GetTick(void);
 
+void IO_Init (app_config_t * p_config);
+
+void SoftSPI_Init(void);
+void SoftSPI_HalfDuplex_Transmit(uint8_t * data, uint16_t length);
+void SoftSPI_HalfDuplex_Receive(uint8_t * data, uint16_t length);
 
 
 

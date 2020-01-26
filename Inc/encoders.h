@@ -9,7 +9,6 @@
 #ifndef __ENCODERS_H__
 #define __ENCODERS_H__
 
-#include "stm32f1xx_hal.h"
 #include "common_types.h"
 #include "periphery.h"
 
