@@ -14,75 +14,76 @@
 uint8_t GetPressedFromAxis (analog_data_t axis_data, uint8_t btn_num, axis_to_buttons_t * axis_to_btn)
 {
 	uint8_t ret = 0;
+	int32_t tmp = (int32_t)axis_data - AXIS_MIN_VALUE;
 	
-	if (axis_data >= (uint32_t) (axis_to_btn->points[0] * AXIS_FULLSCALE) / 100 &&
-			axis_data <= (uint32_t) (axis_to_btn->points[1] * AXIS_FULLSCALE) / 100 - SWICTH_DEAD_ZONE &&
+	if (tmp >= (uint32_t) (axis_to_btn->points[0] * AXIS_FULLSCALE) / 100 &&
+			tmp <= (uint32_t) (axis_to_btn->points[1] * AXIS_FULLSCALE) / 100 - A2B_SWICTH_DEAD_ZONE &&
 			btn_num == 0)
 	{
 		ret =  1;
 	}	
-	else if (axis_data > (uint32_t) axis_to_btn->points[1] * AXIS_FULLSCALE / 100 && 
-			axis_data <= (uint32_t) axis_to_btn->points[2] * AXIS_FULLSCALE / 100 - SWICTH_DEAD_ZONE && 
+	else if (tmp > (uint32_t) (axis_to_btn->points[1] * AXIS_FULLSCALE ) / 100 && 
+			tmp <= (uint32_t) (axis_to_btn->points[2] * AXIS_FULLSCALE) / 100 - A2B_SWICTH_DEAD_ZONE && 
 			btn_num == 1)
 	{
 		ret =  1;
 	}
-	else if (axis_data > (uint32_t) axis_to_btn->points[2] * AXIS_FULLSCALE / 100 && 
-			axis_data <= (uint32_t) axis_to_btn->points[3] * AXIS_FULLSCALE / 100 - SWICTH_DEAD_ZONE && 
+	else if (tmp > (uint32_t) (axis_to_btn->points[2] * AXIS_FULLSCALE) / 100 && 
+			tmp <= (uint32_t) (axis_to_btn->points[3] * AXIS_FULLSCALE) / 100 - A2B_SWICTH_DEAD_ZONE && 
 			btn_num == 2)
 	{
 		ret =  1;
 	}
-	else if (axis_data > (uint32_t) axis_to_btn->points[3] * AXIS_FULLSCALE / 100 && 
-			axis_data <= (uint32_t) axis_to_btn->points[4] * AXIS_FULLSCALE / 100 - SWICTH_DEAD_ZONE && 
+	else if (tmp > (uint32_t) (axis_to_btn->points[3] * AXIS_FULLSCALE) / 100 && 
+			tmp <= (uint32_t) (axis_to_btn->points[4] * AXIS_FULLSCALE) / 100 - A2B_SWICTH_DEAD_ZONE && 
 			btn_num == 3)
 	{
 		ret =  1;
 	}
-	else if (axis_data > (uint32_t) axis_to_btn->points[4] * AXIS_FULLSCALE / 100 && 
-			axis_data <= (uint32_t) axis_to_btn->points[5] * AXIS_FULLSCALE / 100 - SWICTH_DEAD_ZONE && 
+	else if (tmp > (uint32_t) (axis_to_btn->points[4] * AXIS_FULLSCALE) / 100 && 
+			tmp <= (uint32_t) (axis_to_btn->points[5] * AXIS_FULLSCALE) / 100 - A2B_SWICTH_DEAD_ZONE && 
 			btn_num == 4)
 	{
 		ret =  1;
 	}
-	else if (axis_data > (uint32_t) axis_to_btn->points[5] * AXIS_FULLSCALE / 100 && 
-			axis_data <= (uint32_t) axis_to_btn->points[6] * AXIS_FULLSCALE / 100 - SWICTH_DEAD_ZONE && 
+	else if (tmp > (uint32_t) (axis_to_btn->points[5] * AXIS_FULLSCALE) / 100 && 
+			tmp <= (uint32_t) (axis_to_btn->points[6] * AXIS_FULLSCALE) / 100 - A2B_SWICTH_DEAD_ZONE && 
 			btn_num == 5)
 	{
 		ret =  1;
 	}
-	else if (axis_data > (uint32_t) axis_to_btn->points[6] * AXIS_FULLSCALE / 100 && 
-			axis_data <= (uint32_t) axis_to_btn->points[7] * AXIS_FULLSCALE / 100 - SWICTH_DEAD_ZONE && 
+	else if (tmp > (uint32_t) (axis_to_btn->points[6] * AXIS_FULLSCALE) / 100 && 
+			tmp <= (uint32_t) (axis_to_btn->points[7] * AXIS_FULLSCALE) / 100 - A2B_SWICTH_DEAD_ZONE && 
 			btn_num == 6)
 	{
 		ret =  1;
 	}
-	else if (axis_data > (uint32_t) axis_to_btn->points[7] * AXIS_FULLSCALE / 100 && 
-			axis_data <= (uint32_t) axis_to_btn->points[8] * AXIS_FULLSCALE / 100 - SWICTH_DEAD_ZONE && 
+	else if (tmp > (uint32_t) (axis_to_btn->points[7] * AXIS_FULLSCALE) / 100 && 
+			tmp <= (uint32_t) (axis_to_btn->points[8] * AXIS_FULLSCALE) / 100 - A2B_SWICTH_DEAD_ZONE && 
 			btn_num == 7)
 	{
 		ret =  1;
 	}
-	else if (axis_data > (uint32_t) axis_to_btn->points[8] * AXIS_FULLSCALE / 100 && 
-			axis_data <= (uint32_t) axis_to_btn->points[9] * AXIS_FULLSCALE / 100 - SWICTH_DEAD_ZONE && 
+	else if (tmp > (uint32_t) (axis_to_btn->points[8] * AXIS_FULLSCALE) / 100 && 
+			tmp <= (uint32_t) (axis_to_btn->points[9] * AXIS_FULLSCALE) / 100 - A2B_SWICTH_DEAD_ZONE && 
 			btn_num == 8)
 	{
 		ret =  1;
 	}
-	else if (axis_data > (uint32_t) axis_to_btn->points[9] * AXIS_FULLSCALE / 100 && 
-			axis_data <= (uint32_t) axis_to_btn->points[10] * AXIS_FULLSCALE / 100 - SWICTH_DEAD_ZONE && 
+	else if (tmp > (uint32_t) (axis_to_btn->points[9] * AXIS_FULLSCALE) / 100 && 
+			tmp <= (uint32_t) (axis_to_btn->points[10] * AXIS_FULLSCALE) / 100 - A2B_SWICTH_DEAD_ZONE && 
 			btn_num == 9)
 	{
 		ret =  1;
 	}
-	else if (axis_data > (uint32_t) axis_to_btn->points[10] * AXIS_FULLSCALE / 100 && 
-			axis_data <= (uint32_t) axis_to_btn->points[11] * AXIS_FULLSCALE / 100 - SWICTH_DEAD_ZONE && 
+	else if (tmp > (uint32_t) (axis_to_btn->points[10] * AXIS_FULLSCALE) / 100 && 
+			tmp <= (uint32_t) (axis_to_btn->points[11] * AXIS_FULLSCALE ) / 100 - A2B_SWICTH_DEAD_ZONE && 
 			btn_num == 10)
 	{
 		ret =  1;
 	}
-	else if (axis_data > (uint32_t) axis_to_btn->points[11] * AXIS_FULLSCALE / 100 && 
-			axis_data <= (uint32_t) axis_to_btn->points[12] * AXIS_FULLSCALE / 100 && 
+	else if (tmp > (uint32_t) (axis_to_btn->points[11] * AXIS_FULLSCALE) / 100 && 
+			tmp <= (uint32_t) (axis_to_btn->points[12] * AXIS_FULLSCALE) / 100 && 
 			btn_num == 11)
 	{
 		ret =  1;

@@ -107,7 +107,7 @@ analog_data_t SetResolutioin (analog_data_t value, uint8_t resolution)
 // FIR function
 analog_data_t Filter (analog_data_t value, analog_data_t * filter_buf, filter_t filter_lvl)
 {
-	uint32_t tmp32;
+	int32_t tmp32;
 	
 	switch (filter_lvl)
 	{
@@ -322,7 +322,18 @@ void AxesProcess (app_config_t * p_config)
 	{
 		if (p_config->pins[i] == AXIS_ANALOG)
 		{
-			raw_axis_data[channel] = map2(input_data[channel], 0, 4095, AXIS_MIN_VALUE, AXIS_MAX_VALUE);
+			if (p_config->axis_config[channel].magnet_offset)
+			{
+					tmp = input_data[channel] - 2047;
+					if (tmp < 0) tmp += 4095;
+					else if (tmp > 4095) tmp -= 4095;
+			}
+			else
+			{
+				tmp = input_data[channel];
+			}
+			
+			raw_axis_data[channel] = map2(tmp, 0, 4095, AXIS_MIN_VALUE, AXIS_MAX_VALUE);
 			channel++;
 		}
 	}

@@ -13,8 +13,7 @@
 #include "periphery.h"
 #include "analog.h"
 
-#define AXIS_FULLSCALE			65535
-#define SWICTH_DEAD_ZONE		15
+
 
 void AxesToButtonsProcess (buttons_state_t * button_state_buf, uint8_t * pov_buf, app_config_t * p_config, uint8_t * pos);
 
