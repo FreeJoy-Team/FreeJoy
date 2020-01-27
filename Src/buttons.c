@@ -366,22 +366,16 @@ void ButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_buf, ap
 	* @param  pos: Pointer to button counter variable
   * @retval None
   */
-void DirectButtonProcess (uint8_t pin_num, app_config_t * p_config, uint8_t * pos)
+void DirectButtonGet (uint8_t pin_num, app_config_t * p_config, uint8_t * pos)
 {	
-	// get port state
-//	buttons_state[*pos].pin_prev_state = buttons_state[*pos].pin_state;
-//	buttons_state[*pos].pin_state = !GPIO_ReadInputDataBit(pin_config[pin_num].port, pin_config[pin_num].pin);
-	raw_buttons_data[*pos] = !GPIO_ReadInputDataBit(pin_config[pin_num].port, pin_config[pin_num].pin);
-		
-	// inverse logic signal
 	if (p_config->pins[pin_num] == BUTTON_VCC)
 	{
-		//buttons_state[*pos].pin_state = !buttons_state[*pos].pin_state;
-		raw_buttons_data[*pos] = !raw_buttons_data[*pos];
+		raw_buttons_data[*pos] = GPIO_ReadInputDataBit(pin_config[pin_num].port, pin_config[pin_num].pin);
 	}
-	
-	//ButtonProcessState(&buttons_state[*pos], pov_pos, p_config, pos);
-	
+	else 
+	{
+		raw_buttons_data[*pos] = !GPIO_ReadInputDataBit(pin_config[pin_num].port, pin_config[pin_num].pin);
+	}	
 }
 
 /**
@@ -393,7 +387,7 @@ void ButtonsCheck (app_config_t * p_config)
 {
 	uint8_t pos = 0;
 	
-	// check matrix buttons
+	// get matrix buttons
 	for (int i=0; i<USED_PINS_NUM; i++)
 	{
 		if ((p_config->pins[i] == BUTTON_COLUMN) && (pos < MAX_BUTTONS_NUM))
@@ -401,12 +395,12 @@ void ButtonsCheck (app_config_t * p_config)
 			// tie Column pin to ground
 			GPIO_WriteBit(pin_config[i].port, pin_config[i].pin, Bit_RESET);
 			
-			// check states at Rows
+			// get states at Rows
 			for (int k=0; k<USED_PINS_NUM; k++)
 			{
 				if (p_config->pins[k] == BUTTON_ROW && pos < MAX_BUTTONS_NUM)
 				{ 
-					DirectButtonProcess(k, p_config, &pos);
+					DirectButtonGet(k, p_config, &pos);
 					pos++;
 				}
 			}
@@ -415,9 +409,8 @@ void ButtonsCheck (app_config_t * p_config)
 		}
 	}
 	
-	ShiftRegistersProcess(buttons_state, pov_pos, p_config, &pos);
-	
-	AxesToButtonsProcess(buttons_state, pov_pos, p_config, &pos);
+	ShiftRegistersGet(raw_buttons_data, pov_pos, p_config, &pos);
+	AxesToButtonsGet(raw_buttons_data, pov_pos, p_config, &pos);
 	
 	// check single buttons
 	for (int i=0; i<USED_PINS_NUM; i++)
@@ -427,7 +420,7 @@ void ButtonsCheck (app_config_t * p_config)
 		{
 			if (pos < MAX_BUTTONS_NUM)
 			{
-				DirectButtonProcess(i, p_config, &pos);
+				DirectButtonGet(i, p_config, &pos);
 				pos++;
 			}
 			else break;

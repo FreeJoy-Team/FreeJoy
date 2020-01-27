@@ -44,17 +44,10 @@ void ShiftRegistersInit(app_config_t * p_config)
 }
 
 // binbanging shift registers
-void ShiftRegisterGet(shift_reg_config_t * shift_register, uint8_t * data)
+void ShiftRegisterRead(shift_reg_config_t * shift_register, uint8_t * data)
 {
-//	GPIO_InitTypeDef GPIO_InitStruct;
+
 	uint8_t reg_cnt;
-	
-//	// Configure SPI_SCK Pin as output PP
-//	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_3;
-//	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_Out_PP;
-//	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
-//	GPIO_Init(GPIOB, &GPIO_InitStruct);
-	
 	// set SCK low
 	GPIO_WriteBit(GPIOB, GPIO_Pin_3, Bit_SET);
 	
@@ -96,30 +89,22 @@ void ShiftRegisterGet(shift_reg_config_t * shift_register, uint8_t * data)
 			mask = mask >> 1;
 		} while (mask);
 	}
-	
-	// Configure SPI_SCK Pin back to AF PP
-//	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_3;
-//	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF_PP;
-//	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
-//	GPIO_Init(GPIOB, &GPIO_InitStruct);
 }
 
-void ShiftRegistersProcess (buttons_state_t * button_state_buf, uint8_t * pov_buf, app_config_t * p_config, uint8_t * pos)
+void ShiftRegistersGet (uint8_t * raw_button_data_buf, uint8_t * pov_buf, app_config_t * p_config, uint8_t * pos)
 {	
 	uint8_t input_data[16];
 	for (uint8_t i=0; i<MAX_SHIFT_REG_NUM; i++)
 	{
 		if (p_config->shift_registers[i].pin_cs >=0 && p_config->shift_registers[i].pin_data >=0)
 		{
-			ShiftRegisterGet(&p_config->shift_registers[i], input_data);
+			ShiftRegisterRead(&p_config->shift_registers[i], input_data);
 			for (uint8_t j=0; j<p_config->shift_registers[i].button_cnt; j++)
 			{
 				if ((*pos) <128)
 				{
-					button_state_buf[(*pos)].pin_prev_state = button_state_buf[(*pos)].pin_state;
-					button_state_buf[(*pos)].pin_state = (input_data[(j & 0xF8)>>3] & (1<<(j & 0x07))) > 0 ? 1 : 0;
-					
-					ButtonProcessState(&button_state_buf[(*pos)], pov_buf, p_config, pos);				
+					raw_button_data_buf[(*pos)] = (input_data[(j & 0xF8)>>3] & (1<<(j & 0x07))) > 0 ? 1 : 0;
+									
 					(*pos)++;
 				}
 				else break;

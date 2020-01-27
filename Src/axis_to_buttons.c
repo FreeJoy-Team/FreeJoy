@@ -93,7 +93,7 @@ uint8_t GetPressedFromAxis (analog_data_t axis_data, uint8_t btn_num, axis_to_bu
 }
 //#pragma pop
 
-void AxesToButtonsProcess (buttons_state_t * button_state_buf, uint8_t * pov_buf, app_config_t * p_config, uint8_t * pos)
+void AxesToButtonsGet (uint8_t * raw_button_data_buf, uint8_t * pov_buf, app_config_t * p_config, uint8_t * pos)
 {
 	analog_data_t 		scaled_axes_data[MAX_AXIS_NUM];
 	
@@ -109,9 +109,7 @@ void AxesToButtonsProcess (buttons_state_t * button_state_buf, uint8_t * pov_buf
 				if ((*pos) < MAX_BUTTONS_NUM)
 				{
 					// get raw button state from axis
-					button_state_buf[*pos].pin_state = GetPressedFromAxis(scaled_axes_data[i], j, &p_config->axes_to_buttons[i]);
-					
-					ButtonProcessState(&button_state_buf[*pos], pov_buf, p_config, pos);
+					raw_button_data_buf[*pos] = GetPressedFromAxis(scaled_axes_data[i], j, &p_config->axes_to_buttons[i]);
 
 					(*pos)++;
 				}

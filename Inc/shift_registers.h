@@ -13,7 +13,7 @@
 #include "periphery.h"
 
 void ShiftRegistersInit(app_config_t * p_config);
-void ShiftRegistersProcess (buttons_state_t * button_state_buf, uint8_t * pov_buf, app_config_t * p_config, uint8_t * pos);
+void ShiftRegistersGet (uint8_t * raw_button_data_buf, uint8_t * pov_buf, app_config_t * p_config, uint8_t * pos);
 
 #endif 	/* __SHIFT_REGISTERS_H__ */
 
