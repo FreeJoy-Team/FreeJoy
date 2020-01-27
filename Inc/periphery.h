@@ -35,6 +35,9 @@ extern pin_config_t pin_config[USED_PINS_NUM];
 void SysTick_Init(void);
 uint64_t GetTick(void);
 
+void Delay_ms(__IO uint32_t nTime);
+void Delay_us(__IO uint32_t nTime);
+
 void IO_Init (app_config_t * p_config);
 
 void SoftSPI_Init(void);

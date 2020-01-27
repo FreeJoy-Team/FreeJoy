@@ -12,7 +12,16 @@ buttons_state_t 	buttons_state[MAX_BUTTONS_NUM];
 button_data_t 		buttons_data[MAX_BUTTONS_NUM/8];
 pov_data_t 				pov_data[MAX_POVS_NUM];
 uint8_t						pov_pos[MAX_POVS_NUM];
+uint8_t						raw_buttons_data[MAX_BUTTONS_NUM];
 
+/**
+  * @brief  Getting button state accoring to its configuration
+  * @param  p_button_state:	Pointer to button state structure
+	* @param  pov_buf: Pointer to POV states buffer
+	* @param  p_config: Pointer to device configuration
+	* @param  pos: Pointer to button counter variable
+  * @retval None
+  */
 void ButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_buf, app_config_t * p_config, uint8_t * pos)
 {
 	uint32_t 	millis;
@@ -350,21 +359,36 @@ void ButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_buf, ap
 	}
 }
 
+/**
+  * @brief  Checking single button state
+  * @param  pin_num:	Number of pin where button is connected
+	* @param  p_config: Pointer to device configuration
+	* @param  pos: Pointer to button counter variable
+  * @retval None
+  */
 void DirectButtonProcess (uint8_t pin_num, app_config_t * p_config, uint8_t * pos)
 {	
 	// get port state
-	buttons_state[*pos].pin_prev_state = buttons_state[*pos].pin_state;
-	buttons_state[*pos].pin_state = !GPIO_ReadInputDataBit(pin_config[pin_num].port, pin_config[pin_num].pin);
+//	buttons_state[*pos].pin_prev_state = buttons_state[*pos].pin_state;
+//	buttons_state[*pos].pin_state = !GPIO_ReadInputDataBit(pin_config[pin_num].port, pin_config[pin_num].pin);
+	raw_buttons_data[*pos] = !GPIO_ReadInputDataBit(pin_config[pin_num].port, pin_config[pin_num].pin);
+		
 	// inverse logic signal
 	if (p_config->pins[pin_num] == BUTTON_VCC)
 	{
-		buttons_state[*pos].pin_state = !buttons_state[*pos].pin_state;
+		//buttons_state[*pos].pin_state = !buttons_state[*pos].pin_state;
+		raw_buttons_data[*pos] = !raw_buttons_data[*pos];
 	}
 	
-	ButtonProcessState(&buttons_state[*pos], pov_pos, p_config, pos);
+	//ButtonProcessState(&buttons_state[*pos], pov_pos, p_config, pos);
 	
 }
 
+/**
+  * @brief  Checking all buttons routine
+	* @param  p_config: Pointer to device configuration
+  * @retval None
+  */
 void ButtonsCheck (app_config_t * p_config)
 {
 	uint8_t pos = 0;
@@ -420,6 +444,7 @@ void ButtonsCheck (app_config_t * p_config)
 			buttons_data[(i & 0xF8)>>3] |= (buttons_state[i].current_state << (i & 0x07));
 		}
 	
+	// convert encoders data to report format
 	for (int i=0; i<MAX_POVS_NUM; i++)
 	{
 		switch (pov_pos[i])
@@ -455,14 +480,28 @@ void ButtonsCheck (app_config_t * p_config)
 	}
 }
 
-void ButtonsGet (button_data_t * data)
+/**
+  * @brief  Getting buttons data in report format
+	* @param  raw_data: Pointer to target buffer of physical buttons
+	* @param  data: Pointer to target buffer of logical buttons
+  * @retval None
+  */
+void ButtonsGet (uint8_t * raw_data, button_data_t * data)
 {
+	if (raw_data != NULL)
+	{
+		memcpy(raw_data, raw_buttons_data, sizeof(raw_buttons_data));
+	}
 	if (data != NULL)
 	{
 		memcpy(data, buttons_data, sizeof(buttons_data));
 	}
 }
-
+/**
+  * @brief  Getting POV data in report format
+	* @param  data: Pointer to target buffer
+  * @retval None
+  */
 void POVsGet (pov_data_t * data)
 {
 	if (data != NULL)

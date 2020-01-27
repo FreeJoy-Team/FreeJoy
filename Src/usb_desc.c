@@ -196,9 +196,17 @@ const uint8_t CustomHID_ReportDescriptor[CUSTOMHID_SIZ_REPORT_DESC] =
     0x95, MAX_AXIS_NUM,            //   REPORT_COUNT (MAX_AXIS_NUM)
     0x81, 0x00,                    //   INPUT (Data,Ary,Abs)
 		
+		// raw button serial data
+    0x09, 0x02,                    //   USAGE (Vendor Usage 2)
+    0x15, 0x00,                    //   LOGICAL_MINIMUM (0)
+    0x26, 0xff, 0x00,              //   LOGICAL_MAXIMUM (255)
+    0x75, 0x08,                    //   REPORT_SIZE (8)
+    0x95, 0x09,                    //   REPORT_COUNT (9)
+    0x81, 0x00,                    //   INPUT (Data,Ary,Abs)
+		
 		// config data
 		0x85, REPORT_ID_CONFIG_IN,     //   REPORT_ID (2)
-    0x09, 0x02,                    //   USAGE (Vendor Usage 2)
+    0x09, 0x03,                    //   USAGE (Vendor Usage 3)
     0x15, 0x00,                    //   LOGICAL_MINIMUM (0)
     0x26, 0xff, 0x00,              //   LOGICAL_MAXIMUM (255)
     0x75, 0x08,                    //   REPORT_SIZE (8)
@@ -231,6 +239,7 @@ const uint8_t CustomHID_ReportDescriptor[CUSTOMHID_SIZ_REPORT_DESC] =
     0x75, 0x08,                    //   REPORT_SIZE (8)
 		0x95, 0x3f,                    //   REPORT_COUNT (63)
 		0x91, 0x00,                    //   OUTPUT (Data,Ary,Abs)
+		
 		
 		0xc0,                           // END_COLLECTION
   }; /* CustomHID_ReportDescriptor */

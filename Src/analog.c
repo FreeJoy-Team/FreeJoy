@@ -31,7 +31,16 @@ adc_channel_config_t channel_config[MAX_AXIS_NUM] =
 	{ADC_Channel_6, 6}, {ADC_Channel_7, 7}, 
 };
 
-// Map function 
+
+/**
+  * @brief  Transform value from input range to value in output range
+	*	@param	x: Value to transform
+	*	@param	in_min:	Minimum value of input range
+	*	@param	in_max:	Maximum value of input range
+	*	@param	out_min: Minimum value of output range
+	*	@param	out_max: Maximum value of output range
+  * @retval Transformed value
+  */
 static float map2(	float x, 
 											float in_min, 
 											float in_max, 
@@ -51,7 +60,18 @@ static float map2(	float x,
 	
 	return ret;
 }
-// Map function with separate action for each half of axis
+
+/**
+  * @brief  Transform value from input range to value in output range 
+	*	@param	x: Value to transform
+	*	@param	in_min:	Minimum value of input range
+	*	@param	in_center: Center value of input range
+	*	@param	in_max:	Maximum value of input range
+	*	@param	out_min: Minimum value of output range
+	*	@param	out_center:	Center value of input range
+	*	@param	out_max: Maximum value of output range
+  * @retval Transformed value
+  */
 static float map3(	float x, 
 											float in_min, 
 											float in_center, 
@@ -80,6 +100,12 @@ static float map3(	float x,
 	return ret;
 }
 
+/**
+  * @brief  Lowing input data resolution
+	*	@param	value: Value to process
+	*	@param	resolution:	Desired resolution of value in bits
+  * @retval Resulting value
+  */
 analog_data_t SetResolutioin (analog_data_t value, uint8_t resolution)
 {
 	int32_t tmp = 0;
@@ -104,7 +130,14 @@ analog_data_t SetResolutioin (analog_data_t value, uint8_t resolution)
 	return ret;
 }
 
-// FIR function
+/**
+  * @brief  FIR filter for input data
+	*	@param	value: Value to process
+	*	@param	filter_buf:	Pointer to filter data buffer
+	*	@param	filter_lvl:	Desired filter level
+	*   This parameter can be 0-3 (where 0 is no filtration, 3 is high filtration level)
+  * @retval Resulting value
+  */
 analog_data_t Filter (analog_data_t value, analog_data_t * filter_buf, filter_t filter_lvl)
 {
 	int32_t tmp32;
@@ -153,7 +186,13 @@ analog_data_t Filter (analog_data_t value, analog_data_t * filter_buf, filter_t 
 	return filter_buf[0];
 }
 
-// Shaping function for axes
+/**
+  * @brief  Scaling input data accodring to set axis curve shape
+	*	@param	p_axis_cfg: Pointer to axis configuration structure
+	*	@param	value:	Value to process
+	*	@param	point_cnt:	Number of points in axis curve
+  * @retval Resulting value
+  */
 analog_data_t ShapeFunc (axis_config_t * p_axis_cfg,  analog_data_t value, uint8_t point_cnt)
 {
 	float out_min, out_max, step;
@@ -180,7 +219,11 @@ analog_data_t ShapeFunc (axis_config_t * p_axis_cfg,  analog_data_t value, uint8
 	return(ret);
 }
 
-/* Axes init function */
+/**
+  * @brief  Axes initialization after startup
+	*	@param	p_config: Pointer to device configuration structure
+  * @retval None
+  */
 void AxesInit (app_config_t * p_config)
 {
 	uint8_t adc_cnt = 0;
@@ -288,6 +331,11 @@ void AxesInit (app_config_t * p_config)
 	}
 }
 
+/**
+  * @brief  Axes data processing routine
+	*	@param	p_config: Pointer to device configuration structure
+  * @retval None
+  */
 void AxesProcess (app_config_t * p_config)
 {
 	int32_t tmp;
@@ -372,6 +420,12 @@ void AxesProcess (app_config_t * p_config)
 	}	
 }
 
+/**
+  * @brief  Resetting axis calibration values to the default
+	*	@param	p_config: Pointer to device configuration structure
+	*	@param	axis_num: Number of axis 
+  * @retval None
+  */
 void AxisResetCalibration (app_config_t * p_config, uint8_t axis_num)
 {
 	p_config->axis_config[axis_num].calib_max = AXIS_MIN_VALUE;
@@ -379,6 +433,13 @@ void AxisResetCalibration (app_config_t * p_config, uint8_t axis_num)
 	p_config->axis_config[axis_num].calib_min = AXIS_MAX_VALUE;
 }
 
+/**
+  * @brief  Getting axes data in report format
+	*	@param	out_data: Pointer to target buffer of axes output data (may be disabled in configuration)
+	*	@param	scaled_data: Pointer to target buffer of axes scaled output data
+	*	@param	raw_data: Pointer to target buffer of axes raw output data 
+  * @retval None
+  */
 void AnalogGet (analog_data_t * out_data, analog_data_t * scaled_data, analog_data_t * raw_data)
 {
 	if (scaled_data != NULL)
