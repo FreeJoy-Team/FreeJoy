@@ -91,7 +91,7 @@ void EP1_OUT_Callback(void)
 		{
 			config_in_cnt = hid_buf[1];			// requested config packet number
 			
-			if ((config_in_cnt > 0) & (config_in_cnt <= 10))
+			if ((config_in_cnt > 0) & (config_in_cnt <= 12))
 			{		
 				
 				uint8_t pos = 2;
@@ -157,25 +157,44 @@ void EP1_OUT_Callback(void)
 						break;
 					
 					case 7:
-						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.buttons[62]), 62);
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.buttons[31]), 62);
 						break;
 					
 					case 8:
-						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.buttons[124]), 4);
-						pos += 4*sizeof(button_t);
-					
-						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.axes_to_buttons[0]), sizeof(tmp_buf) - pos);
-						
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.buttons[62]), 62);
 						break;
 					
 					case 9:
-						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.axes_to_buttons[3].buttons_cnt), 2);
-						pos += 2*sizeof(button_t);
-						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.axes_to_buttons[3]), sizeof(tmp_buf) - pos);
-
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.buttons[93]), 62);
 						break;
 					
 					case 10:
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.buttons[124]), 4);
+						pos += 4*sizeof(button_t);
+					
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.axes_to_buttons[0]), sizeof(axis_to_buttons_t));	
+						pos += sizeof(axis_to_buttons_t);
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.axes_to_buttons[1]), sizeof(axis_to_buttons_t));	
+						pos += sizeof(axis_to_buttons_t);					
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.axes_to_buttons[2]), sizeof(axis_to_buttons_t));	
+						pos += sizeof(axis_to_buttons_t);		
+						break;
+					
+					case 11:
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.axes_to_buttons[3]), sizeof(axis_to_buttons_t));	
+						pos += sizeof(axis_to_buttons_t);
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.axes_to_buttons[4]), sizeof(axis_to_buttons_t));	
+						pos += sizeof(axis_to_buttons_t);					
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.axes_to_buttons[5]), sizeof(axis_to_buttons_t));	
+						pos += sizeof(axis_to_buttons_t);	
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.axes_to_buttons[6]), sizeof(axis_to_buttons_t));	
+						pos += sizeof(axis_to_buttons_t);	
+						break;
+					
+					case 12:
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.axes_to_buttons[7]), sizeof(axis_to_buttons_t));	
+						pos += sizeof(axis_to_buttons_t);	
+					
 						for (i=0; i<4; i++)
 						{
 							memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.shift_registers[i]), sizeof(shift_reg_config_t));
@@ -201,7 +220,7 @@ void EP1_OUT_Callback(void)
 			{
 				case 1:
 					{
-//					memcpy((uint8_t *) &(tmp_config.firmware_version), &hid_buf[pos], sizeof(tmp_config.firmware_version));
+						memcpy((uint8_t *) &(tmp_config.firmware_version), &hid_buf[pos], sizeof(tmp_config.firmware_version));
 						pos += sizeof(tmp_config.firmware_version);
 						memcpy((uint8_t *) &(tmp_config.device_name), &hid_buf[pos], sizeof(tmp_config.device_name));
 						pos += sizeof(tmp_config.device_name);
@@ -264,28 +283,53 @@ void EP1_OUT_Callback(void)
 				
 				case 7:
 				{
-					memcpy((uint8_t *) &(tmp_config.buttons[62]), &hid_buf[pos], 62);
+					memcpy((uint8_t *) &(tmp_config.buttons[31]), &hid_buf[pos], 62);
 				}
 				break;
 				
 				case 8:
 				{
-					memcpy((uint8_t *) &(tmp_config.buttons[124]), &hid_buf[pos], 4);
-					pos += 4*sizeof(button_t);
-					
-					memcpy((uint8_t *) &(tmp_config.axes_to_buttons[0]), &hid_buf[pos], 64 - pos);
+					memcpy((uint8_t *) &(tmp_config.buttons[62]), &hid_buf[pos], 62);
 				}
 				break;
 				
 				case 9:
 				{
-					memcpy((uint8_t *) &(tmp_config.axes_to_buttons[3].buttons_cnt), &hid_buf[pos], 2);
-					pos += 2*sizeof(button_t);
-					memcpy((uint8_t *) &(tmp_config.axes_to_buttons[4]), &hid_buf[pos], 64 - pos);
-					break;
+					memcpy((uint8_t *) &(tmp_config.buttons[93]), &hid_buf[pos], 62);
 				}
+				break;
+				
 				case 10:
 				{
+					memcpy((uint8_t *) &(tmp_config.buttons[124]), &hid_buf[pos], 4);
+					pos += 4*sizeof(button_t);
+					
+					memcpy((uint8_t *) &(tmp_config.axes_to_buttons[0]), &hid_buf[pos], sizeof(axis_to_buttons_t));
+					pos += sizeof(axis_to_buttons_t);
+					memcpy((uint8_t *) &(tmp_config.axes_to_buttons[1]), &hid_buf[pos], sizeof(axis_to_buttons_t));
+					pos += sizeof(axis_to_buttons_t);
+					memcpy((uint8_t *) &(tmp_config.axes_to_buttons[2]), &hid_buf[pos], sizeof(axis_to_buttons_t));
+					pos += sizeof(axis_to_buttons_t);
+				}
+				break;
+				
+				case 11:
+				{
+					memcpy((uint8_t *) &(tmp_config.axes_to_buttons[3]), &hid_buf[pos], sizeof(axis_to_buttons_t));
+					pos += sizeof(axis_to_buttons_t);
+					memcpy((uint8_t *) &(tmp_config.axes_to_buttons[4]), &hid_buf[pos], sizeof(axis_to_buttons_t));
+					pos += sizeof(axis_to_buttons_t);
+					memcpy((uint8_t *) &(tmp_config.axes_to_buttons[5]), &hid_buf[pos], sizeof(axis_to_buttons_t));
+					pos += sizeof(axis_to_buttons_t);
+					memcpy((uint8_t *) &(tmp_config.axes_to_buttons[6]), &hid_buf[pos], sizeof(axis_to_buttons_t));
+					pos += sizeof(axis_to_buttons_t);
+					break;
+				}
+				case 12:
+				{
+					memcpy((uint8_t *) &(tmp_config.axes_to_buttons[7]), &hid_buf[pos], sizeof(axis_to_buttons_t));
+					pos += sizeof(axis_to_buttons_t);
+					
 					for (i=0; i<4; i++)
 					{
 						memcpy((uint8_t *) &(tmp_config.shift_registers[i]), &hid_buf[pos], sizeof(shift_reg_config_t));
@@ -297,7 +341,7 @@ void EP1_OUT_Callback(void)
 				default:
 					break;
 			}
-			if (hid_buf[1] < 10)		// request new packet
+			if (hid_buf[1] < 12)		// request new packet
 			{
 				config_out_cnt = hid_buf[1] + 1;
 				
@@ -309,8 +353,29 @@ void EP1_OUT_Callback(void)
 			}
 			else // last packet received
 			{
-				tmp_config.firmware_version = FIRMWARE_VERSION;
-				ConfigSet(&tmp_config);
+				if (tmp_config.firmware_version != FIRMWARE_VERSION)
+				{
+					GPIO_InitTypeDef GPIO_InitStructure;
+					GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+					GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
+					GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13;
+					GPIO_Init(GPIOC, &GPIO_InitStructure);
+					
+					GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12;
+					GPIO_Init(GPIOB, &GPIO_InitStructure);
+					
+					for (uint8_t i=0; i<6; i++) 
+					{
+						// blink LED if firmware version doesnt match
+						GPIOB->ODR ^= GPIO_Pin_12;
+						GPIOC->ODR ^=	GPIO_Pin_13;
+						Delay_ms(200);
+					}
+				}
+				else
+				{
+					ConfigSet(&tmp_config);
+				}
 				
 				NVIC_SystemReset();
 			}

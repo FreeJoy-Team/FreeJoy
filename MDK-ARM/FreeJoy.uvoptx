@@ -163,25 +163,15 @@
         <Ww>
           <count>2</count>
           <WinNumber>1</WinNumber>
-          <ItemText>scaled_axis_data,0x0A</ItemText>
+          <ItemText>tmp_config</ItemText>
         </Ww>
         <Ww>
           <count>3</count>
           <WinNumber>1</WinNumber>
-          <ItemText>raw_axis_data,0x0A</ItemText>
+          <ItemText>hid_buf</ItemText>
         </Ww>
         <Ww>
           <count>4</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>input_data,0x10</ItemText>
-        </Ww>
-        <Ww>
-          <count>5</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>physical_buttons_data</ItemText>
-        </Ww>
-        <Ww>
-          <count>6</count>
           <WinNumber>1</WinNumber>
           <ItemText>raw_buttons_data</ItemText>
         </Ww>
@@ -197,7 +187,7 @@
         <Mm>
           <WinNumber>1</WinNumber>
           <SubType>0</SubType>
-          <ItemText>0x800F300</ItemText>
+          <ItemText>0x800FC00</ItemText>
           <AccSizeX>0</AccSizeX>
         </Mm>
       </MemoryWindow1>
@@ -260,6 +250,10 @@
       <pSingCmdsp></pSingCmdsp>
       <pMultCmdsp></pMultCmdsp>
       <SystemViewers>
+        <Entry>
+          <Name>System Viewer\GPIOA</Name>
+          <WinId>35904</WinId>
+        </Entry>
         <Entry>
           <Name>System Viewer\GPIOB</Name>
           <WinId>35905</WinId>

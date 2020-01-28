@@ -8,7 +8,11 @@
 #include "shift_registers.h"
 #include "buttons.h"
 
-
+/**
+  * @brief  Initializate shift registers states at startup
+	* @param  p_config: Pointer to device configuration
+  * @retval None
+  */
 void ShiftRegistersInit(app_config_t * p_config)
 {
 	uint8_t pos = 0;
@@ -43,7 +47,12 @@ void ShiftRegistersInit(app_config_t * p_config)
 	}
 }
 
-// binbanging shift registers
+/**
+  * @brief  Read bytes from shift registers
+	* @param  shift_register: Pointer to shift register configuration
+	* @param  data: Pointer to data buffer
+  * @retval None
+  */
 void ShiftRegisterRead(shift_reg_config_t * shift_register, uint8_t * data)
 {
 
@@ -91,7 +100,14 @@ void ShiftRegisterRead(shift_reg_config_t * shift_register, uint8_t * data)
 	}
 }
 
-void ShiftRegistersGet (uint8_t * raw_button_data_buf, uint8_t * pov_buf, app_config_t * p_config, uint8_t * pos)
+/**
+  * @brief  Getting buttons states from shift registers
+	* @param  raw_button_data_buf: Pointer to raw buttons data buffer
+	* @param  p_config: Pointer to device configuration
+	* @param  pos: Pointer to button position counter
+  * @retval None
+  */
+void ShiftRegistersGet (uint8_t * raw_button_data_buf, app_config_t * p_config, uint8_t * pos)
 {	
 	uint8_t input_data[16];
 	for (uint8_t i=0; i<MAX_SHIFT_REG_NUM; i++)

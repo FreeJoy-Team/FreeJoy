@@ -22,7 +22,6 @@
 app_config_t config;
 volatile uint8_t bootloader = 0;
 joy_report_t joy_report;
-btn_report_t btn_report;
 volatile int32_t millis =0, last_millis=0, joy_millis=0;
 uint8_t btn_num = 0;
 uint8_t	physical_buttons_data[MAX_BUTTONS_NUM];

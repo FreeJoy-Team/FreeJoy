@@ -12,6 +12,14 @@
 #include "stdint.h"
 #include "common_defines.h"
 
+
+#define SHIFT1_MASK					0x20
+#define SHIFT2_MASK					0x40
+#define SHIFT3_MASK					0x60
+#define SHIFT4_MASK					0x80
+
+#define BUTTON_TYPE_MASK		0x1F
+
 enum
 {
 	FILTER_NO = 0,
@@ -93,7 +101,14 @@ enum
 	ENCODER_INPUT_B,
 	
 };
-typedef uint8_t button_t;
+typedef uint8_t button_type_t;
+
+typedef struct button_t
+{
+	int8_t					physical_num;
+	button_type_t 	type;
+	
+}	button_t;
 
 typedef struct buttons_state_t
 {
@@ -180,14 +195,6 @@ typedef struct
 	uint8_t					raw_button_data[9];
 	
 } joy_report_t;
-
-typedef struct
-{
-	uint8_t 				dummy;
-	uint8_t 				id;
-	uint8_t 				button_data[MAX_BUTTONS_NUM/8];
-	
-} btn_report_t;
 
 
 

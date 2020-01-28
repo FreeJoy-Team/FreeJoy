@@ -28,7 +28,7 @@ void ButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_buf, ap
 	
 	millis = GetTick();
 	// choose config for current button
-	switch (p_config->buttons[*pos])
+	switch (p_config->buttons[*pos].type & BUTTON_TYPE_MASK)
 	{		
 		case BUTTON_INVERTED:
 			// invert state for inverted button
@@ -177,17 +177,17 @@ void ButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_buf, ap
 				p_button_state->cnt += p_button_state->pin_state;
 				
 				// set bit in povs data
-				if (p_config->buttons[*pos] == POV1_UP)
+				if ((p_config->buttons[*pos].type & BUTTON_TYPE_MASK) == POV1_UP)
 				{
 					pov_buf[0] &= !(1 << 3);
 					pov_buf[0] |= (p_button_state->pin_state << 3);
 				}
-				else if (p_config->buttons[*pos] == POV1_RIGHT)
+				else if ((p_config->buttons[*pos].type & BUTTON_TYPE_MASK) == POV1_RIGHT)
 				{
 					pov_buf[0] &= !(1 << 2);
 					pov_buf[0] |= (p_button_state->pin_state << 2);
 				}
-				else if (p_config->buttons[*pos] == POV1_DOWN)
+				else if ((p_config->buttons[*pos].type & BUTTON_TYPE_MASK) == POV1_DOWN)
 				{
 					pov_buf[0] &= !(1 << 1);
 					pov_buf[0] |= (p_button_state->pin_state << 1);
@@ -226,17 +226,17 @@ void ButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_buf, ap
 				p_button_state->cnt += p_button_state->pin_state;
 				
 				// set bit in povs data
-				if (p_config->buttons[*pos] == POV2_UP)
+				if ((p_config->buttons[*pos].type & BUTTON_TYPE_MASK) == POV2_UP)
 				{
 					pov_buf[1] &= !(1 << 3);
 					pov_buf[1] |= (p_button_state->pin_state << 3);
 				}
-				else if (p_config->buttons[*pos] == POV2_RIGHT)
+				else if ((p_config->buttons[*pos].type & BUTTON_TYPE_MASK) == POV2_RIGHT)
 				{
 					pov_buf[1] &= !(1 << 2);
 					pov_buf[1] |= (p_button_state->pin_state << 2);
 				}
-				else if (p_config->buttons[*pos] == POV2_DOWN)
+				else if ((p_config->buttons[*pos].type & BUTTON_TYPE_MASK) == POV2_DOWN)
 				{
 					pov_buf[1] &= !(1 << 1);
 					pov_buf[1] |= (p_button_state->pin_state << 1);
@@ -275,17 +275,17 @@ void ButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_buf, ap
 				p_button_state->cnt += p_button_state->pin_state;
 				
 				// set bit in povs data
-				if (p_config->buttons[*pos] == POV3_UP)
+				if ((p_config->buttons[*pos].type & BUTTON_TYPE_MASK) == POV3_UP)
 				{
 					pov_buf[2] &= !(1 << 3);
 					pov_buf[2] |= (p_button_state->pin_state << 3);
 				}
-				else if (p_config->buttons[*pos] == POV3_RIGHT)
+				else if ((p_config->buttons[*pos].type & BUTTON_TYPE_MASK) == POV3_RIGHT)
 				{
 					pov_buf[2] &= !(1 << 2);
 					pov_buf[2] |= (p_button_state->pin_state << 2);
 				}
-				else if (p_config->buttons[*pos] == POV3_DOWN)
+				else if ((p_config->buttons[*pos].type & BUTTON_TYPE_MASK) == POV3_DOWN)
 				{
 					pov_buf[2] &= !(1 << 1);
 					pov_buf[2] |= (p_button_state->pin_state << 1);
@@ -324,17 +324,17 @@ void ButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_buf, ap
 				p_button_state->cnt += p_button_state->pin_state;
 				
 				// set bit in povs data
-				if (p_config->buttons[*pos] == POV4_UP)
+				if ((p_config->buttons[*pos].type & BUTTON_TYPE_MASK) == POV4_UP)
 				{
 					pov_buf[3] &= !(1 << 3);
 					pov_buf[3] |= (p_button_state->pin_state << 3);
 				}
-				else if (p_config->buttons[*pos] == POV4_RIGHT)
+				else if ((p_config->buttons[*pos].type & BUTTON_TYPE_MASK) == POV4_RIGHT)
 				{
 					pov_buf[3] &= !(1 << 2);
 					pov_buf[3] |= (p_button_state->pin_state << 2);
 				}
-				else if (p_config->buttons[*pos] == POV4_DOWN)
+				else if ((p_config->buttons[*pos].type & BUTTON_TYPE_MASK) == POV4_DOWN)
 				{
 					pov_buf[3] &= !(1 << 1);
 					pov_buf[3] |= (p_button_state->pin_state << 1);
@@ -379,6 +379,60 @@ void DirectButtonGet (uint8_t pin_num, app_config_t * p_config, uint8_t * pos)
 }
 
 /**
+  * @brief  Getting buttons states of matrix buttons
+	* @param  p_config: Pointer to device configuration
+	* @param  pos: Pointer to button position counter
+  * @retval None
+  */
+void MaxtrixButtonsGet (app_config_t * p_config, uint8_t * pos)
+{
+	// get matrix buttons
+	for (int i=0; i<USED_PINS_NUM; i++)
+	{
+		if ((p_config->pins[i] == BUTTON_COLUMN) && ((*pos) < MAX_BUTTONS_NUM))
+		{
+			// tie Column pin to ground
+			GPIO_WriteBit(pin_config[i].port, pin_config[i].pin, Bit_RESET);
+			
+			// get states at Rows
+			for (int k=0; k<USED_PINS_NUM; k++)
+			{
+				if (p_config->pins[k] == BUTTON_ROW && (*pos) < MAX_BUTTONS_NUM)
+				{ 
+					DirectButtonGet(k, p_config, pos);
+					(*pos)++;
+				}
+			}
+			// return Column pin to Hi-Z state
+			GPIO_WriteBit(pin_config[i].port, pin_config[i].pin, Bit_SET);
+		}
+	}
+}
+
+/**
+  * @brief  Getting buttons states of single buttons
+	* @param  p_config: Pointer to device configuration
+	* @param  pos: Pointer to button position counter
+  * @retval None
+  */
+void SingleButtonsGet (app_config_t * p_config, uint8_t * pos)
+{
+	for (int i=0; i<USED_PINS_NUM; i++)
+	{
+		if (p_config->pins[i] == BUTTON_GND || 
+				p_config->pins[i] == BUTTON_VCC)
+		{
+			if ((*pos) < MAX_BUTTONS_NUM)
+			{
+				DirectButtonGet(i, p_config, pos);
+				(*pos)++;
+			}
+			else break;
+		}
+	}
+}
+
+/**
   * @brief  Checking all buttons routine
 	* @param  p_config: Pointer to device configuration
   * @retval None
@@ -387,45 +441,14 @@ void ButtonsCheck (app_config_t * p_config)
 {
 	uint8_t pos = 0;
 	
-	// get matrix buttons
-	for (int i=0; i<USED_PINS_NUM; i++)
-	{
-		if ((p_config->pins[i] == BUTTON_COLUMN) && (pos < MAX_BUTTONS_NUM))
-		{
-			// tie Column pin to ground
-			GPIO_WriteBit(pin_config[i].port, pin_config[i].pin, Bit_RESET);
-			
-			// get states at Rows
-			for (int k=0; k<USED_PINS_NUM; k++)
-			{
-				if (p_config->pins[k] == BUTTON_ROW && pos < MAX_BUTTONS_NUM)
-				{ 
-					DirectButtonGet(k, p_config, &pos);
-					pos++;
-				}
-			}
-			// return Column pin to Hi-Z state
-			GPIO_WriteBit(pin_config[i].port, pin_config[i].pin, Bit_SET);
-		}
-	}
+	// Getting physical buttons states
+	MaxtrixButtonsGet(p_config, &pos);
+	ShiftRegistersGet(raw_buttons_data, p_config, &pos);
+	AxesToButtonsGet(raw_buttons_data, p_config, &pos);
+	SingleButtonsGet(p_config, &pos);
 	
-	ShiftRegistersGet(raw_buttons_data, pov_pos, p_config, &pos);
-	AxesToButtonsGet(raw_buttons_data, pov_pos, p_config, &pos);
 	
-	// check single buttons
-	for (int i=0; i<USED_PINS_NUM; i++)
-	{
-		if (p_config->pins[i] == BUTTON_GND || 
-				p_config->pins[i] == BUTTON_VCC)
-		{
-			if (pos < MAX_BUTTONS_NUM)
-			{
-				DirectButtonGet(i, p_config, &pos);
-				pos++;
-			}
-			else break;
-		}
-	}
+	
 	
 	// convert encoders input
 	EncoderProcess(buttons_state, p_config);

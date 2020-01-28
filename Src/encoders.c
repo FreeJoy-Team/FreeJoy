@@ -75,11 +75,11 @@ void EncodersInit(app_config_t * p_config)
 	
 	for (int i=0; i<MAX_BUTTONS_NUM; i++)
 	{
-		if (p_config->buttons[i] == ENCODER_INPUT_A &&  i > prev_a)
+		if ((p_config->buttons[i].type & BUTTON_TYPE_MASK) == ENCODER_INPUT_A &&  i > prev_a)
 		{
 			for (int j=0; j<MAX_BUTTONS_NUM; j++)
 			{
-				if (p_config->buttons[j] == ENCODER_INPUT_B && j > prev_b)
+				if ((p_config->buttons[j].type & BUTTON_TYPE_MASK) == ENCODER_INPUT_B && j > prev_b)
 				{
 					encoders_state[pos].pin_a = i;
 					encoders_state[pos].pin_b = j;
