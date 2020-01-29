@@ -144,12 +144,12 @@ void EP1_OUT_Callback(void)
 						break;
 
 					case 5:
-						i = 6;
-						while(sizeof(tmp_buf) - pos > sizeof(axis_config_t))
-						{
-							memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.axis_config[i++]), sizeof(axis_config_t));
-							pos += sizeof(axis_config_t);
-						}
+
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.axis_config[6]), sizeof(axis_config_t));
+						pos += sizeof(axis_config_t);
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.axis_config[7]), sizeof(axis_config_t));
+						pos += sizeof(axis_config_t);
+						
 						break;
 					
 					case 6:
@@ -200,6 +200,18 @@ void EP1_OUT_Callback(void)
 							memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.shift_registers[i]), sizeof(shift_reg_config_t));
 							pos += sizeof(shift_reg_config_t);
 						}
+						
+						
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.shift_config[0]), sizeof(shift_modificator_t));
+						pos += sizeof(shift_modificator_t);
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.shift_config[1]), sizeof(shift_modificator_t));
+						pos += sizeof(shift_modificator_t);
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.shift_config[2]), sizeof(shift_modificator_t));
+						pos += sizeof(shift_modificator_t);
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.shift_config[3]), sizeof(shift_modificator_t));
+						pos += sizeof(shift_modificator_t);
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.shift_config[4]), sizeof(shift_modificator_t));
+						pos += sizeof(shift_modificator_t);
 						break;
 						
 					default:
@@ -266,12 +278,11 @@ void EP1_OUT_Callback(void)
 
 				case 5:
 				{
-					i = 6;
-					while(64 - pos > sizeof(axis_config_t))
-					{
-						memcpy((uint8_t *) &(tmp_config.axis_config[i++]), &hid_buf[pos], sizeof(axis_config_t));
-						pos += sizeof(axis_config_t);
-					}
+					memcpy((uint8_t *) &(tmp_config.axis_config[6]), &hid_buf[pos], sizeof(axis_config_t));
+					pos += sizeof(axis_config_t);
+					memcpy((uint8_t *) &(tmp_config.axis_config[7]), &hid_buf[pos], sizeof(axis_config_t));
+					pos += sizeof(axis_config_t);
+					
 				}
 				break;
 				
@@ -335,6 +346,18 @@ void EP1_OUT_Callback(void)
 						memcpy((uint8_t *) &(tmp_config.shift_registers[i]), &hid_buf[pos], sizeof(shift_reg_config_t));
 						pos += sizeof(shift_reg_config_t);
 					}
+					
+					
+					memcpy((uint8_t *) &(tmp_config.shift_config[0]), &hid_buf[pos], sizeof(shift_modificator_t));
+					pos += sizeof(shift_modificator_t);
+					memcpy((uint8_t *) &(tmp_config.shift_config[1]), &hid_buf[pos], sizeof(shift_modificator_t));
+					pos += sizeof(shift_modificator_t);
+					memcpy((uint8_t *) &(tmp_config.shift_config[2]), &hid_buf[pos], sizeof(shift_modificator_t));
+					pos += sizeof(shift_modificator_t);
+					memcpy((uint8_t *) &(tmp_config.shift_config[3]), &hid_buf[pos], sizeof(shift_modificator_t));
+					pos += sizeof(shift_modificator_t);
+					memcpy((uint8_t *) &(tmp_config.shift_config[4]), &hid_buf[pos], sizeof(shift_modificator_t));
+					pos += sizeof(shift_modificator_t);
 				}					
 					break;
 				

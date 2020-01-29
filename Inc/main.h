@@ -248,6 +248,12 @@ static const app_config_t init_config =
 	.axis_config[7].out_enabled = 1,
 	.axis_config[7].resolution = 12,
 	
+	.shift_config[0].button = -1,
+	.shift_config[1].button = -1,
+	.shift_config[2].button = -1,
+	.shift_config[3].button = -1,
+	.shift_config[4].button = -1,
+	
 	/*
 		Buttons configuration. Available values:
 		- BUTTON_NORMAL

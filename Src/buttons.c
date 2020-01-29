@@ -13,22 +13,23 @@ button_data_t 		buttons_data[MAX_BUTTONS_NUM/8];
 pov_data_t 				pov_data[MAX_POVS_NUM];
 uint8_t						pov_pos[MAX_POVS_NUM];
 uint8_t						raw_buttons_data[MAX_BUTTONS_NUM];
+uint8_t						shifts_state;
 
 /**
-  * @brief  Getting button state accoring to its configuration
+  * @brief  Getting logical button state accoring to its configuration
   * @param  p_button_state:	Pointer to button state structure
 	* @param  pov_buf: Pointer to POV states buffer
 	* @param  p_config: Pointer to device configuration
-	* @param  pos: Pointer to button counter variable
+	* @param  num: Button number
   * @retval None
   */
-void ButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_buf, app_config_t * p_config, uint8_t * pos)
+void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_buf, app_config_t * p_config, uint8_t num)
 {
 	uint32_t 	millis;
 	
 	millis = GetTick();
 	// choose config for current button
-	switch (p_config->buttons[*pos].type & BUTTON_TYPE_MASK)
+	switch (p_config->buttons[num].type & BUTTON_TYPE_MASK)
 	{		
 		case BUTTON_INVERTED:
 			// invert state for inverted button
@@ -177,17 +178,17 @@ void ButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_buf, ap
 				p_button_state->cnt += p_button_state->pin_state;
 				
 				// set bit in povs data
-				if ((p_config->buttons[*pos].type & BUTTON_TYPE_MASK) == POV1_UP)
+				if ((p_config->buttons[num].type & BUTTON_TYPE_MASK) == POV1_UP)
 				{
 					pov_buf[0] &= !(1 << 3);
 					pov_buf[0] |= (p_button_state->pin_state << 3);
 				}
-				else if ((p_config->buttons[*pos].type & BUTTON_TYPE_MASK) == POV1_RIGHT)
+				else if ((p_config->buttons[num].type & BUTTON_TYPE_MASK) == POV1_RIGHT)
 				{
 					pov_buf[0] &= !(1 << 2);
 					pov_buf[0] |= (p_button_state->pin_state << 2);
 				}
-				else if ((p_config->buttons[*pos].type & BUTTON_TYPE_MASK) == POV1_DOWN)
+				else if ((p_config->buttons[num].type & BUTTON_TYPE_MASK) == POV1_DOWN)
 				{
 					pov_buf[0] &= !(1 << 1);
 					pov_buf[0] |= (p_button_state->pin_state << 1);
@@ -226,17 +227,17 @@ void ButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_buf, ap
 				p_button_state->cnt += p_button_state->pin_state;
 				
 				// set bit in povs data
-				if ((p_config->buttons[*pos].type & BUTTON_TYPE_MASK) == POV2_UP)
+				if ((p_config->buttons[num].type & BUTTON_TYPE_MASK) == POV2_UP)
 				{
 					pov_buf[1] &= !(1 << 3);
 					pov_buf[1] |= (p_button_state->pin_state << 3);
 				}
-				else if ((p_config->buttons[*pos].type & BUTTON_TYPE_MASK) == POV2_RIGHT)
+				else if ((p_config->buttons[num].type & BUTTON_TYPE_MASK) == POV2_RIGHT)
 				{
 					pov_buf[1] &= !(1 << 2);
 					pov_buf[1] |= (p_button_state->pin_state << 2);
 				}
-				else if ((p_config->buttons[*pos].type & BUTTON_TYPE_MASK) == POV2_DOWN)
+				else if ((p_config->buttons[num].type & BUTTON_TYPE_MASK) == POV2_DOWN)
 				{
 					pov_buf[1] &= !(1 << 1);
 					pov_buf[1] |= (p_button_state->pin_state << 1);
@@ -275,17 +276,17 @@ void ButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_buf, ap
 				p_button_state->cnt += p_button_state->pin_state;
 				
 				// set bit in povs data
-				if ((p_config->buttons[*pos].type & BUTTON_TYPE_MASK) == POV3_UP)
+				if ((p_config->buttons[num].type & BUTTON_TYPE_MASK) == POV3_UP)
 				{
 					pov_buf[2] &= !(1 << 3);
 					pov_buf[2] |= (p_button_state->pin_state << 3);
 				}
-				else if ((p_config->buttons[*pos].type & BUTTON_TYPE_MASK) == POV3_RIGHT)
+				else if ((p_config->buttons[num].type & BUTTON_TYPE_MASK) == POV3_RIGHT)
 				{
 					pov_buf[2] &= !(1 << 2);
 					pov_buf[2] |= (p_button_state->pin_state << 2);
 				}
-				else if ((p_config->buttons[*pos].type & BUTTON_TYPE_MASK) == POV3_DOWN)
+				else if ((p_config->buttons[num].type & BUTTON_TYPE_MASK) == POV3_DOWN)
 				{
 					pov_buf[2] &= !(1 << 1);
 					pov_buf[2] |= (p_button_state->pin_state << 1);
@@ -324,17 +325,17 @@ void ButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_buf, ap
 				p_button_state->cnt += p_button_state->pin_state;
 				
 				// set bit in povs data
-				if ((p_config->buttons[*pos].type & BUTTON_TYPE_MASK) == POV4_UP)
+				if ((p_config->buttons[num].type & BUTTON_TYPE_MASK) == POV4_UP)
 				{
 					pov_buf[3] &= !(1 << 3);
 					pov_buf[3] |= (p_button_state->pin_state << 3);
 				}
-				else if ((p_config->buttons[*pos].type & BUTTON_TYPE_MASK) == POV4_RIGHT)
+				else if ((p_config->buttons[num].type & BUTTON_TYPE_MASK) == POV4_RIGHT)
 				{
 					pov_buf[3] &= !(1 << 2);
 					pov_buf[3] |= (p_button_state->pin_state << 2);
 				}
-				else if ((p_config->buttons[*pos].type & BUTTON_TYPE_MASK) == POV4_DOWN)
+				else if ((p_config->buttons[num].type & BUTTON_TYPE_MASK) == POV4_DOWN)
 				{
 					pov_buf[3] &= !(1 << 1);
 					pov_buf[3] |= (p_button_state->pin_state << 1);
@@ -446,20 +447,189 @@ void ButtonsCheck (app_config_t * p_config)
 	ShiftRegistersGet(raw_buttons_data, p_config, &pos);
 	AxesToButtonsGet(raw_buttons_data, p_config, &pos);
 	SingleButtonsGet(p_config, &pos);
+
+	// Process shift modificated buttons
+	for (uint8_t shift_num=0; shift_num<5; shift_num++)
+	{
+		if (shifts_state & (1<<shift_num))	// shift pressed
+		{
+			for (uint8_t i=0; i<MAX_BUTTONS_NUM; i++)
+			{
+				int8_t btn = p_config->buttons[i].physical_num;
+				
+				// we have matching shift modificator
+				if (btn >= 0 && (p_config->buttons[i].type>>5) == shift_num+1 &&
+					i != p_config->shift_config[shift_num].button)
+				{
+					buttons_state[i].pin_state = raw_buttons_data[p_config->buttons[i].physical_num];					
+					LogicalButtonProcessState(&buttons_state[i], pov_pos, p_config, i);
+				}
+			}
+		}
+		else	// shift released 
+		{
+			for (uint8_t i=0; i<MAX_BUTTONS_NUM; i++)
+			{
+				int8_t btn = p_config->buttons[i].physical_num;
+				
+				// we have matching shift modificator
+				if (btn >= 0 && (p_config->buttons[i].type>>5) == shift_num+1)
+				{
+					// disable button
+					if (buttons_state[i].current_state)	
+					{
+						buttons_state[i].prev_state = buttons_state[i].pin_state;
+						buttons_state[i].pin_state = !buttons_state[i].prev_state;			
+						buttons_state[i].changed = 1;
+						buttons_state[i].time_last = 0;			
+						LogicalButtonProcessState(&buttons_state[i], pov_pos, p_config, i);
+					}						
+				}
+			}
+		}
+	}
 	
-	
-	
+	// Process regular buttons
+	for (uint8_t i=0; i<pos; i++)
+	{
+		uint8_t shift_num = 0;
+		
+		// check logical buttons to not have shift modificators
+		for (uint8_t j=0; j<MAX_BUTTONS_NUM; j++)
+		{
+			int8_t btn = p_config->buttons[j].physical_num;
+			
+			if (btn == i && (p_config->buttons[j].type & 0xE0)) 
+			{
+				shift_num = p_config->buttons[j].type & 0xE0;
+				break;
+			}				
+		}
+		// we found not shift modificated physical button
+		if (shift_num == 0)
+		{
+			for (uint8_t j=0; j<MAX_BUTTONS_NUM; j++)
+			{
+				// check if it is not shift button 
+				if (p_config->buttons[j].physical_num == i)
+				{
+					buttons_state[j].pin_state = raw_buttons_data[i];				
+					LogicalButtonProcessState(&buttons_state[j], pov_pos, p_config, j);
+				}
+			}
+		}
+		else	// check if shift is released for modificated physical button
+		{
+			for (uint8_t j=0; j<MAX_BUTTONS_NUM; j++)
+			{
+				if (p_config->buttons[j].physical_num == i && (shifts_state) == 0 &&
+					(p_config->buttons[j].type & 0xE0) == 0)
+				{
+					buttons_state[j].pin_state = raw_buttons_data[i];				
+					LogicalButtonProcessState(&buttons_state[j], pov_pos, p_config, j);
+				}
+				// shift pressed
+				else if (p_config->buttons[j].physical_num == i && shifts_state & (1<<0) &&
+					(p_config->buttons[j].type & 0xE0) == 0)
+				{
+					// disable button
+					if (buttons_state[j].current_state)	
+					{
+						buttons_state[j].prev_state = buttons_state[j].pin_state;
+						buttons_state[j].pin_state = !buttons_state[j].prev_state;	
+						buttons_state[j].changed = 1;	
+						buttons_state[j].time_last = -1;
+						LogicalButtonProcessState(&buttons_state[j], pov_pos, p_config, j);
+					}	
+				}
+				else if (p_config->buttons[j].physical_num == i && shifts_state & (1<<1)	&&
+					(p_config->buttons[j].type & 0xE0) == 0)
+				{
+					// disable button
+					if (buttons_state[j].current_state)	
+					{
+						buttons_state[j].prev_state = buttons_state[j].pin_state;
+						buttons_state[j].pin_state = !buttons_state[j].prev_state;	
+						buttons_state[j].changed = 1;	
+						buttons_state[j].time_last = -1;						
+						LogicalButtonProcessState(&buttons_state[j], pov_pos, p_config, j);
+					}		
+				}
+				else if (p_config->buttons[j].physical_num == i && shifts_state & (1<<2) &&
+					(p_config->buttons[j].type & 0xE0) == 0)
+				{
+					// disable button
+					if (buttons_state[j].current_state)	
+					{
+						buttons_state[j].prev_state = buttons_state[j].pin_state;
+						buttons_state[j].pin_state = !buttons_state[j].prev_state;	
+						buttons_state[j].changed = 1;		
+						buttons_state[j].time_last = -1;						
+						LogicalButtonProcessState(&buttons_state[j], pov_pos, p_config, j);
+					}	
+				}
+				else if (p_config->buttons[j].physical_num == i && shifts_state & (1<<3) &&
+					(p_config->buttons[j].type & 0xE0) == 0)
+				{
+					// disable button
+					if (buttons_state[j].current_state)	
+					{
+						buttons_state[j].prev_state = buttons_state[j].pin_state;
+						buttons_state[j].pin_state = !buttons_state[j].prev_state;	
+						buttons_state[j].changed = 1;	
+						buttons_state[j].time_last = -1;									
+						LogicalButtonProcessState(&buttons_state[j], pov_pos, p_config, j);
+					}		
+				}
+				else if (p_config->buttons[j].physical_num == i && shifts_state & (1<<4) &&
+					(p_config->buttons[j].type & 0xE0) == 0)
+				{
+					// disable button
+					if (buttons_state[j].current_state)	
+					{
+						buttons_state[j].prev_state = buttons_state[j].pin_state;
+						buttons_state[j].pin_state = !buttons_state[j].prev_state;	
+						buttons_state[j].changed = 1;	
+						buttons_state[j].time_last = -1;									
+						LogicalButtonProcessState(&buttons_state[j], pov_pos, p_config, j);
+					}	
+				}
+			}
+		}
+	}	
 	
 	// convert encoders input
 	EncoderProcess(buttons_state, p_config);
 	
+	shifts_state = 0;
+	for (uint8_t i=0; i<5; i++)
+	{
+		if (p_config->shift_config[i].button >= 0)
+		{
+			for (uint8_t j=0; j<MAX_BUTTONS_NUM; j++)
+			{		
+				if (j == p_config->shift_config[i].button)
+				{									
+					shifts_state |= (buttons_state[j].current_state << i);
+				}
+			}
+		}
+	}
+	
 	// convert data to report format
 	for (int i=0;i<pos;i++)
-		{
+	{
 			buttons_data[(i & 0xF8)>>3] &= ~(1 << (i & 0x07));
-			buttons_data[(i & 0xF8)>>3] |= (buttons_state[i].current_state << (i & 0x07));
-		}
-	
+			
+			if (i != p_config->shift_config[0].button &&
+					i != p_config->shift_config[1].button &&
+					i != p_config->shift_config[2].button &&
+					i != p_config->shift_config[3].button &&
+					i != p_config->shift_config[4].button)
+			{
+				buttons_data[(i & 0xF8)>>3] |= (buttons_state[i].current_state << (i & 0x07));
+			}
+	}
 	// convert encoders data to report format
 	for (int i=0; i<MAX_POVS_NUM; i++)
 	{

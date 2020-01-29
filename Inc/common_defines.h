@@ -9,7 +9,7 @@
 #ifndef __COMMON_DEFINES_H__
 #define __COMMON_DEFINES_H__
 
-//#define DEBUG
+#define DEBUG
 
 #define FIRMWARE_VERSION					0x0103			// v1.01
 #define USED_PINS_NUM							30					// constant for BluePill and BlackPill boards

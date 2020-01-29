@@ -17,6 +17,7 @@
 #define SHIFT2_MASK					0x40
 #define SHIFT3_MASK					0x60
 #define SHIFT4_MASK					0x80
+#define SHIFT5_MASK					0xA0
 
 #define BUTTON_TYPE_MASK		0x1F
 
@@ -114,7 +115,7 @@ typedef struct buttons_state_t
 {
   uint64_t time_last;	
 	uint8_t pin_state;
-	uint8_t pin_prev_state;
+	//uint8_t pin_prev_state;
 	uint8_t prev_state;
 	uint8_t current_state;
 	uint8_t changed;	
@@ -157,6 +158,19 @@ typedef struct
 	
 } shift_reg_config_t;
 
+enum
+{
+	SHIFT_NORMAL = 0,
+	SHIFT_INVERTED,
+	
+};
+
+typedef struct 
+{
+	int8_t 				button;
+	
+} shift_modificator_t;
+
 typedef struct 
 {
 	// config 1
@@ -172,16 +186,17 @@ typedef struct
 	
 	// config 2-5
 	axis_config_t 			axis_config[MAX_AXIS_NUM];
-	uint8_t							reserved_5[8];
-	// config 6-7-8
+	
+	// config 6-7-8-9-10
 	button_t 						buttons[MAX_BUTTONS_NUM];
 	
-	// config 8-9
+	// config 10-11-12
 	axis_to_buttons_t		axes_to_buttons[MAX_AXIS_NUM];
 	
-	// config 10	
+	// config 12	
 	shift_reg_config_t	shift_registers[4];
-	uint8_t							reserved_10[46];
+	shift_modificator_t	shift_config[5];
+	uint8_t							reserved_10[31];
 }app_config_t;
 
 typedef struct

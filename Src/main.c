@@ -85,8 +85,10 @@ int main(void)
 		{
 			last_millis = millis;
 			
+			
 			// buttons routine
 			ButtonsCheck(&config);
+			
 			// axes routine
 			AxesProcess(&config);
 			
@@ -94,6 +96,8 @@ int main(void)
 			ButtonsGet(physical_buttons_data, joy_report.button_data);
 			AnalogGet(joy_report.axis_data, NULL, joy_report.raw_axis_data);	
 			POVsGet(joy_report.pov_data);
+			
+			
 		}
   }
 }
