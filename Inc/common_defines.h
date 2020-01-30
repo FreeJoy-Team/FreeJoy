@@ -9,14 +9,14 @@
 #ifndef __COMMON_DEFINES_H__
 #define __COMMON_DEFINES_H__
 
-#define DEBUG
+//#define DEBUG
 
 #define FIRMWARE_VERSION					0x0103			// v1.01
 #define USED_PINS_NUM							30					// constant for BluePill and BlackPill boards
 #define MAX_AXIS_NUM							8						// max 8
 #define MAX_BUTTONS_NUM						128					// power of 2, max 128
 #define MAX_POVS_NUM							4						// max 4
-#define MAX_ENCODERS_NUM					64					// max 64
+#define MAX_ENCODERS_NUM					8						// max 64
 #define MAX_SHIFT_REG_NUM					4						// max 4
 
 #define AXIS_MIN_VALUE						(-32767)

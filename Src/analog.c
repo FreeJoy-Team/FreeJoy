@@ -41,14 +41,14 @@ adc_channel_config_t channel_config[MAX_AXIS_NUM] =
 	*	@param	out_max: Maximum value of output range
   * @retval Transformed value
   */
-static float map2(	float x, 
-											float in_min, 
-											float in_max, 
-											float out_min,
-											float out_max)
+static int32_t map2(	int32_t x, 
+											int32_t in_min, 
+											int32_t in_max, 
+											int32_t out_min,
+											int32_t out_max)
 {
-	float tmp;
-	float ret;
+	int32_t tmp;
+	int32_t ret;
 	
 	tmp = x;
 	
@@ -57,6 +57,23 @@ static float map2(	float x,
 	if (tmp > in_max)	return out_max;
 		
 	ret = (tmp - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+	
+	return ret;
+}
+
+/**
+  * @brief  Transform value of input range -180000 to 180000 to range -32767 to 32767
+	*	@param	x: Value to transform
+  * @retval Transformed value
+  */
+static int32_t map_tle (int32_t x)
+{
+	int32_t tmp;
+	int32_t ret;
+	
+	tmp = x+180;
+	
+	ret = tmp * 100 / 549 - 32767;
 	
 	return ret;
 }
@@ -72,16 +89,16 @@ static float map2(	float x,
 	*	@param	out_max: Maximum value of output range
   * @retval Transformed value
   */
-static float map3(	float x, 
-											float in_min, 
-											float in_center, 
-											float in_max, 
-											float out_min,
-											float out_center,
-											float out_max)
+static int32_t map3(	int32_t x, 
+											int32_t in_min, 
+											int32_t in_center, 
+											int32_t in_max, 
+											int32_t out_min,
+											int32_t out_center,
+											int32_t out_max)
 {
-	float tmp;
-	float ret;
+	int32_t tmp;
+	int32_t ret;
 	
 	tmp = x;
 	
@@ -195,8 +212,8 @@ analog_data_t Filter (analog_data_t value, analog_data_t * filter_buf, filter_t 
   */
 analog_data_t ShapeFunc (axis_config_t * p_axis_cfg,  analog_data_t value, uint8_t point_cnt)
 {
-	float out_min, out_max, step;
-	float in_min, in_max;
+	int32_t out_min, out_max, step;
+	int32_t in_min, in_max;
 	uint8_t min_index;
 	analog_data_t ret;
 	
@@ -211,8 +228,8 @@ analog_data_t ShapeFunc (axis_config_t * p_axis_cfg,  analog_data_t value, uint8
 	in_min = AXIS_MIN_VALUE + min_index*step;
 	in_max = AXIS_MIN_VALUE + (min_index+1)*step;
 	
-	out_min = ((float)p_axis_cfg->curve_shape[min_index] * (float)fullscale/200.0f + (float)AXIS_CENTER_VALUE);
-	out_max = ((float)p_axis_cfg->curve_shape[min_index+1] * (float)fullscale/200.0f + (float)AXIS_CENTER_VALUE);
+	out_min = ((int32_t)p_axis_cfg->curve_shape[min_index] * (int32_t)fullscale/200 + (int32_t)AXIS_CENTER_VALUE);
+	out_max = ((int32_t)p_axis_cfg->curve_shape[min_index+1] * (int32_t)fullscale/200 + (int32_t)AXIS_CENTER_VALUE);
 	
 	ret = map2(value, in_min, in_max, out_min, out_max);
 	
@@ -339,7 +356,7 @@ void AxesInit (app_config_t * p_config)
 void AxesProcess (app_config_t * p_config)
 {
 	int32_t tmp;
-	double tmpf;
+	float tmpf;
 	uint8_t channel = 0;
 	
 	// sensors data
@@ -356,7 +373,9 @@ void AxesProcess (app_config_t * p_config)
 					if (tmpf < -180) tmpf += 360;
 					else if (tmpf > 180) tmpf -= 360;
 				}
-				raw_axis_data[channel] = map2(tmpf, -180, 180, AXIS_MIN_VALUE, AXIS_MAX_VALUE);
+				tmpf *= 1000;
+				//raw_axis_data[channel] = map2(tmpf, -180000, 180000, AXIS_MIN_VALUE, AXIS_MAX_VALUE);
+				raw_axis_data[channel] = map_tle(tmpf);
 			}
 			else
 			{

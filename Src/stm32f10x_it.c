@@ -38,7 +38,7 @@
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-volatile int32_t millis =0, last_millis=0, joy_millis=0;
+volatile int32_t millis =0, joy_millis=0;
 extern app_config_t config;
 joy_report_t joy_report;
 uint8_t btn_num = 0;
@@ -162,39 +162,63 @@ void SysTick_Handler(void)
 /*  file (startup_stm32f10x_xx.s).                                            */
 /******************************************************************************/
 
-void TIM4_IRQHandler(void)
+void TIM2_IRQHandler(void)
+{	
+	
+	if (TIM_GetITStatus(TIM2, TIM_IT_Update))
+	{
+		TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
+		
+		TIM_Cmd(TIM2, DISABLE);
+		NVIC_DisableIRQ(TIM2_IRQn);		
+		
+		NVIC_EnableIRQ(TIM3_IRQn);
+		NVIC_EnableIRQ(TIM1_UP_IRQn);
+	}
+}
+
+
+void TIM3_IRQHandler(void)
+{
+	if (TIM_GetITStatus(TIM3, TIM_IT_Update))
+	{
+		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
+		
+		AxesProcess(&config);
+	}	
+}
+
+void TIM1_UP_IRQHandler(void)
 {
 	
-	TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
-
-	millis = GetTick();
-	
-	
-	
-	// check if it is time to send joystick data
-	if (millis - joy_millis > config.exchange_period_ms )
+	if (TIM_GetITStatus(TIM1, TIM_IT_Update))
 	{
+		TIM_ClearITPendingBit(TIM1, TIM_IT_Update);
+
+		millis = GetTick();
+
+		// check if it is time to send joystick data
+		if (millis - joy_millis > config.exchange_period_ms )
+		{
 			joy_millis = millis;
+				
+			// getting fresh data to joystick report buffer
+			ButtonsGet(physical_buttons_data, joy_report.button_data);
+			AnalogGet(joy_report.axis_data, NULL, joy_report.raw_axis_data);	
+			POVsGet(joy_report.pov_data);
 			
 			joy_report.id = REPORT_ID_JOY;		
 			joy_report.raw_button_data[0] = btn_num;
 			for (uint8_t i=0; i<8; i++)	joy_report.raw_button_data[1+i] = physical_buttons_data[btn_num+i];
 			btn_num += 8;
 			btn_num = btn_num & 0x7F;
-						
+							
 			USB_CUSTOM_HID_SendReport((uint8_t *)&(joy_report.id), sizeof(joy_report)-sizeof(joy_report.dummy));
+		}
+	
+		EncoderProcess(buttons_state, &config);
 	}
 	
-	AxesProcess(&config);
-	EncoderProcess(buttons_state, &config);
-
-			
-	// getting fresh data to joystick report buffer
-	ButtonsGet(physical_buttons_data, joy_report.button_data);
-	AnalogGet(joy_report.axis_data, NULL, joy_report.raw_axis_data);	
-	POVsGet(joy_report.pov_data);
-	
-
 }
 
 /**

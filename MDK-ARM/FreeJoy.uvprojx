@@ -408,6 +408,11 @@
               <FilePath>..\Src\periphery.c</FilePath>
             </File>
             <File>
+              <FileName>spi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\spi.c</FilePath>
+            </File>
+            <File>
               <FileName>sensors.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\sensors.c</FilePath>
@@ -651,6 +656,11 @@
               <FileName>stm32f10x_rcc.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Drivers\STM32F10x_StdPeriph_Driver\src\stm32f10x_rcc.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f10x_spi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Drivers\STM32F10x_StdPeriph_Driver\src\stm32f10x_spi.c</FilePath>
             </File>
             <File>
               <FileName>stm32f10x_tim.c</FileName>
@@ -1238,6 +1248,11 @@
               <FilePath>..\Src\periphery.c</FilePath>
             </File>
             <File>
+              <FileName>spi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\spi.c</FilePath>
+            </File>
+            <File>
               <FileName>sensors.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\sensors.c</FilePath>
@@ -1685,6 +1700,11 @@
                   </Cads>
                 </FileArmAds>
               </FileOption>
+            </File>
+            <File>
+              <FileName>stm32f10x_spi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Drivers\STM32F10x_StdPeriph_Driver\src\stm32f10x_spi.c</FilePath>
             </File>
             <File>
               <FileName>stm32f10x_tim.c</FileName>

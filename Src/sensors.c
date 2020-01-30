@@ -43,10 +43,10 @@ void TLE501x_Read(uint8_t * data, uint8_t addr, uint8_t length)
 {
 	uint8_t cmd = 0x80 | (addr & 0x0F)<<3 | (length & 0x07);
 	
-	SoftSPI_HalfDuplex_Transmit(&cmd, 1);
+	UserSPI_HalfDuplex_Transmit(&cmd, 1);
 	if (length > 0)
 	{
-		SoftSPI_HalfDuplex_Receive(data, length+1);
+		UserSPI_HalfDuplex_Receive(data, length+1);
 	}
 
 }
@@ -54,18 +54,18 @@ void TLE501x_Read(uint8_t * data, uint8_t addr, uint8_t length)
 void TLE501x_Write(uint8_t * data, uint8_t addr, uint8_t length)
 {
 	uint8_t cmd = addr<<3 | (addr & 0x0F)<<3 | (length & 0x07);
-	SoftSPI_HalfDuplex_Transmit(&cmd, 1);
+	UserSPI_HalfDuplex_Transmit(&cmd, 1);
 	if (length > 0)
 	{
-		SoftSPI_HalfDuplex_Transmit(data, length);
+		UserSPI_HalfDuplex_Transmit(data, length);
 	}
 }
 
-int TLE501x_Get(pin_config_t * p_cs_pin_config, double * data)
+int TLE501x_Get(pin_config_t * p_cs_pin_config, float * data)
 {
 	uint8_t tmp_buf[6];
 	int16_t x_value, y_value;
-	double angle;
+	float angle = 0;
 	
 	
 	// Update command
@@ -82,7 +82,7 @@ int TLE501x_Get(pin_config_t * p_cs_pin_config, double * data)
 		x_value = tmp_buf[2]<<8 | tmp_buf[1];
 		y_value = tmp_buf[4]<<8 | tmp_buf[3];
 		
-		angle = atan2((double)y_value, (double)x_value)/ M_PI * (double)180.0;
+		angle = atan2f((float)y_value, (float)x_value)/ M_PI * (float)180.0;
 		
 		
 		*data = angle;

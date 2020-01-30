@@ -64,7 +64,7 @@ void ShiftRegisterRead(shift_reg_config_t * shift_register, uint8_t * data)
 	{
 		// Latch impulse
 		GPIO_WriteBit(pin_config[shift_register->pin_cs].port, pin_config[shift_register->pin_cs].pin, Bit_SET);
-		for (int i=0; i<3; i++) __NOP();
+		for (int i=0; i<SHIFTREG_TICK_DELAY; i++) __NOP();
 		GPIO_WriteBit(pin_config[shift_register->pin_cs].port, pin_config[shift_register->pin_cs].pin, Bit_RESET);
 			
 	}
@@ -72,7 +72,7 @@ void ShiftRegisterRead(shift_reg_config_t * shift_register, uint8_t * data)
 	{
 		// Latch impulse
 		GPIO_WriteBit(pin_config[shift_register->pin_cs].port, pin_config[shift_register->pin_cs].pin, Bit_RESET);
-		for (int i=0; i<3; i++) __NOP();
+		for (int i=0; i<SHIFTREG_TICK_DELAY; i++) __NOP();
 		GPIO_WriteBit(pin_config[shift_register->pin_cs].port, pin_config[shift_register->pin_cs].pin, Bit_SET);			
 	}
 	
@@ -86,14 +86,14 @@ void ShiftRegisterRead(shift_reg_config_t * shift_register, uint8_t * data)
 		do
 		{
 			GPIO_WriteBit(GPIOB, GPIO_Pin_3, Bit_RESET);
-			for (int i=0; i<3; i++) __NOP();
+			for (int i=0; i<SHIFTREG_TICK_DELAY; i++) __NOP();
 			
 			if(GPIO_ReadInputDataBit(pin_config[shift_register->pin_data].port, pin_config[shift_register->pin_data].pin) == Bit_RESET)
 			{
 				data[i] |= mask; 
 			}
 			GPIO_WriteBit(GPIOB, GPIO_Pin_3, Bit_SET);
-			for (int i=0; i<3; i++) __NOP();
+			for (int i=0; i<SHIFTREG_TICK_DELAY; i++) __NOP();
 			
 			mask = mask >> 1;
 		} while (mask);

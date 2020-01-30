@@ -56,7 +56,6 @@ int main(void)
 
   while (1)
   {
-		GPIOB->ODR ^= GPIO_Pin_12;
 		ButtonsReadLogical(&config);
 		// jump to bootloader if new firmware received
 		if (bootloader > 0)

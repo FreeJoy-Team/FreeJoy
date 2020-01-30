@@ -12,6 +12,8 @@
 #include "common_types.h"
 #include "periphery.h"
 
+#define SHIFTREG_TICK_DELAY			1
+
 void ShiftRegistersInit(app_config_t * p_config);
 void ShiftRegistersGet (uint8_t * raw_button_data_buf, app_config_t * p_config, uint8_t * pos);
 

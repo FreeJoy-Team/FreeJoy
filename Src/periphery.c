@@ -65,18 +65,69 @@ void Timers_Init(void)
 	RCC_ClocksTypeDef RCC_Clocks;
 	
 	RCC_GetClocksFreq(&RCC_Clocks);	
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
+	
+	// Encoders and HID timer
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);
+		
+	TIM_TimeBaseStructInit(&TIM_TimeBaseInitStructure);	
+	TIM_TimeBaseInitStructure.TIM_Prescaler = RCC_Clocks.PCLK2_Frequency/10000 - 1;
+	TIM_TimeBaseInitStructure.TIM_Period = 10 - 1;			// 1ms
+	TIM_TimeBaseInit(TIM1, &TIM_TimeBaseInitStructure);
+	
+	TIM_ITConfig(TIM1, TIM_IT_Update, ENABLE);	
+	NVIC_SetPriority(TIM1_UP_IRQn, 3);
+	NVIC_EnableIRQ(TIM1_UP_IRQn);
+
+	TIM_Cmd(TIM1, ENABLE);	
+	
+	// Axes timer
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
 		
 	TIM_TimeBaseStructInit(&TIM_TimeBaseInitStructure);	
 	TIM_TimeBaseInitStructure.TIM_Prescaler = RCC_Clocks.PCLK1_Frequency/10000 - 1;
-	TIM_TimeBaseInitStructure.TIM_Period = 20 - 1;
-	TIM_TimeBaseInit(TIM4, &TIM_TimeBaseInitStructure);
+	TIM_TimeBaseInitStructure.TIM_Period = 40 - 1;			// 2ms
+	TIM_TimeBaseInit(TIM3, &TIM_TimeBaseInitStructure);
 	
-	TIM_ITConfig(TIM4, TIM_IT_Update, ENABLE);	
-	NVIC_EnableIRQ(TIM4_IRQn);
+	TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
+	NVIC_SetPriority(TIM3_IRQn, 4);
+	NVIC_EnableIRQ(TIM3_IRQn);
 
-	TIM_Cmd(TIM4, ENABLE);	
+	TIM_Cmd(TIM3, ENABLE);	
 }
+
+/**
+  * @brief Timers Configuration
+	* @param ms: Milliseconds to pause
+  * @retval None
+  */
+void Timers_Pause(uint16_t ms)
+{
+	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure;	
+	RCC_ClocksTypeDef RCC_Clocks;
+	
+	RCC_GetClocksFreq(&RCC_Clocks);	
+	
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
+		
+	TIM_TimeBaseStructInit(&TIM_TimeBaseInitStructure);	
+	TIM_TimeBaseInitStructure.TIM_Prescaler = RCC_Clocks.PCLK1_Frequency/1000 - 1;
+	TIM_TimeBaseInitStructure.TIM_Period = 2*ms;
+	TIM_TimeBaseInitStructure.TIM_CounterMode = TIM_CounterMode_Down;
+	TIM_TimeBaseInitStructure.TIM_RepetitionCounter = 2*ms -1;
+	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseInitStructure);
+	
+	TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);	
+	NVIC_SetPriority(TIM2_IRQn, 5);
+	TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
+	NVIC_EnableIRQ(TIM2_IRQn);
+	
+	NVIC_DisableIRQ(TIM3_IRQn);
+	NVIC_DisableIRQ(TIM1_UP_IRQn);
+
+	TIM_Cmd(TIM2, ENABLE);
+}
+
+
 /**
   * @brief Get system ticks
   * @retval ticks
@@ -104,85 +155,6 @@ void Delay_ms(__IO uint32_t nTime)
 void Delay_us(__IO uint32_t nTime)
 {
   for (int i=0; i<5;i++) __NOP();
-}
-
-/**
-  * @brief Software SPI Initialization Function
-  * @param None
-  * @retval None
-  */
-void SoftSPI_Init(void)
-{
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB,ENABLE);
-
-	GPIO_InitTypeDef	GPIO_InitStructureure;	
-	GPIO_InitStructureure.GPIO_Pin = GPIO_Pin_3|GPIO_Pin_5;
-	GPIO_InitStructureure.GPIO_Mode = GPIO_Mode_Out_PP;
-	GPIO_InitStructureure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init (GPIOB,&GPIO_InitStructureure);
-}
-/**
-  * @brief Software SPI Send Half-Duplex Function
-  * @param None
-  * @retval None
-  */
-void SoftSPI_HalfDuplex_Transmit(uint8_t * data, uint16_t length)
-{
-	GPIO_InitTypeDef 					GPIO_InitStructureure;
-	
-	GPIO_InitStructureure.GPIO_Mode = GPIO_Mode_Out_PP;
-	GPIO_InitStructureure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_InitStructureure.GPIO_Pin = GPIO_Pin_5;
-	GPIO_Init(GPIOB, &GPIO_InitStructureure);
-	// Set SCK low
-	GPIO_WriteBit(GPIOB, GPIO_Pin_3, Bit_RESET);
-	
-	for (uint16_t i=0; i<length; i++)
-	{
-		int8_t j = 7;
-		do
-		{
-			GPIO_WriteBit(GPIOB, GPIO_Pin_5, (data[i] & (1<<j)) ? Bit_SET : Bit_RESET);
-			GPIO_WriteBit(GPIOB, GPIO_Pin_3, Bit_SET);
-			__NOP();
-			GPIO_WriteBit(GPIOB, GPIO_Pin_3, Bit_RESET);
-			__NOP();
-			
-			j--;
-		} while(j>=0);
-	}
-}
-/**
-  * @brief Software SPI Receive Half-Duplex Function
-  * @param None
-  * @retval None
-  */
-void SoftSPI_HalfDuplex_Receive(uint8_t * data, uint16_t length)
-{
-	GPIO_InitTypeDef 					GPIO_InitStructureure;
-	
-	GPIO_InitStructureure.GPIO_Mode = GPIO_Mode_IPU;
-	GPIO_InitStructureure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_InitStructureure.GPIO_Pin = GPIO_Pin_5;
-	GPIO_Init(GPIOB, &GPIO_InitStructureure);
-	// Set SCK low
-	GPIO_WriteBit(GPIOB, GPIO_Pin_3, Bit_RESET);
-	
-	for (uint16_t i=0; i<length; i++)
-	{
-		data[i] = 0;
-		int8_t j = 7;
-		do
-		{
-			GPIO_WriteBit(GPIOB, GPIO_Pin_3, Bit_SET);
-			__NOP();			
-			data[i] |= GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_5) << j;
-			GPIO_WriteBit(GPIOB, GPIO_Pin_3, Bit_RESET);
-			__NOP();
-			
-			j--;
-		} while(j>=0);
-	}
 }
 
 /**
@@ -296,22 +268,32 @@ void IO_Init (app_config_t * p_config)
 		}
 		else if (p_config->pins[i] == SPI_SCK)//  && i == 14)
 		{
-			//SoftSPI_Init();		// Half duplex SPI
-			/**SPI GPIO Configuration    
-			PB3     ------> SPI_SCK
-			*/
+#if USE_SOFT_SPI			
 			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 			GPIO_InitStructure.GPIO_Pin = pin_config[i].pin;
 			GPIO_Init(pin_config[i].port, &GPIO_InitStructure);
+#else 
+			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+			GPIO_InitStructure.GPIO_Pin = pin_config[i].pin;
+			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;	
+			GPIO_Init (GPIOB,&GPIO_InitStructure);
+#endif			
 		}
 		else if (p_config->pins[i] == SPI_DATA)// && i == 16)
 		{
-			//PB5     ------> SPI_MOSI 
+#if USE_SOFT_SPI	
 			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
 			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 			GPIO_InitStructure.GPIO_Pin = pin_config[i].pin;
 			GPIO_Init(pin_config[i].port, &GPIO_InitStructure);
+#else			
+			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+			GPIO_InitStructure.GPIO_Pin = pin_config[i].pin;
+			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;	
+			GPIO_Init (GPIOB,&GPIO_InitStructure);
+#endif
+			UserSPI_Init();
 		}
 		else if (p_config->pins[i] == TLE5011_CS || p_config->pins[i] == SHIFT_REG_CS)
 		{
@@ -337,9 +319,12 @@ void IO_Init (app_config_t * p_config)
 
 #ifdef DEBUG
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-			GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12;
-			GPIO_Init(GPIOB, &GPIO_InitStructure);
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12;
+	GPIO_Init(GPIOB, &GPIO_InitStructure);
+	
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13;
+	GPIO_Init(GPIOC, &GPIO_InitStructure);
 #endif
 }
 
