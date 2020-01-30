@@ -247,12 +247,7 @@ static const app_config_t init_config =
 	.axis_config[7].filter = FILTER_NO,
 	.axis_config[7].out_enabled = 1,
 	.axis_config[7].resolution = 12,
-	
-	.shift_config[0].button = -1,
-	.shift_config[1].button = -1,
-	.shift_config[2].button = -1,
-	.shift_config[3].button = -1,
-	.shift_config[4].button = -1,
+
 	
 	/*
 		Buttons configuration. Available values:
@@ -523,6 +518,7 @@ static const app_config_t init_config =
 	.buttons[118].type = BUTTON_NORMAL,
 	.buttons[119].physical_num = -1,
 	.buttons[119].type = BUTTON_NORMAL,
+	.buttons[120].physical_num = -1,
 	.buttons[120].type = BUTTON_NORMAL,
 	.buttons[121].physical_num = -1,
 	.buttons[121].type = BUTTON_NORMAL,
@@ -589,6 +585,13 @@ static const app_config_t init_config =
 	.axes_to_buttons[7].points[2] = 100,
 	.axes_to_buttons[7].buttons_cnt = 2,
 	.axes_to_buttons[7].is_enabled = 0,
+	
+	
+	.shift_config[0].button = -1,
+	.shift_config[1].button = -1,
+	.shift_config[2].button = -1,
+	.shift_config[3].button = -1,
+	.shift_config[4].button = -1,
 		
 };
 

@@ -7,6 +7,8 @@
 
 #include "encoders.h"
 
+uint8_t		physical_buttons_state[MAX_BUTTONS_NUM];
+
 int8_t enc_array [16] =
 {
 0,  0,  0,  0,
@@ -20,6 +22,10 @@ encoder_t encoders_state[MAX_ENCODERS_NUM];
 
 void EncoderProcess (buttons_state_t * button_state_buf, app_config_t * p_config)
 {	
+	
+	ButtonsReadPhysical(p_config, physical_buttons_state);
+	
+	
 	for (int i=0; i<MAX_ENCODERS_NUM; i++)
 	{
 		uint32_t millis = GetTick();
@@ -28,8 +34,8 @@ void EncoderProcess (buttons_state_t * button_state_buf, app_config_t * p_config
 			int8_t stt;
 			encoders_state[i].state <<= 2;			// shift prev state to clear space for new data
 			
-			if (button_state_buf[encoders_state[i].pin_a].pin_state)	encoders_state[i].state |= 0x01;		// Pin A high
-			if (button_state_buf[encoders_state[i].pin_b].pin_state)	encoders_state[i].state |= 0x02;		// Pin B high
+			if (physical_buttons_state[p_config->buttons[encoders_state[i].pin_a].physical_num])	encoders_state[i].state |= 0x01;		// Pin A high
+			if (physical_buttons_state[p_config->buttons[encoders_state[i].pin_b].physical_num])	encoders_state[i].state |= 0x02;		// Pin B high
 			
 			if ((encoders_state[i].state & 0x03) != ((encoders_state[i].state >> 2) & 0x03))							// Current state != Prev state
 			{

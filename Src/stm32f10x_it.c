@@ -24,7 +24,11 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
 #include "usb_istr.h"
+#include "usb_lib.h"
 #include "periphery.h"
+#include "analog.h"
+#include "encoders.h"
+
 
 /** @addtogroup STM32F10x_StdPeriph_Template
   * @{
@@ -34,6 +38,11 @@
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
+volatile int32_t millis =0, last_millis=0, joy_millis=0;
+extern app_config_t config;
+joy_report_t joy_report;
+uint8_t btn_num = 0;
+uint8_t	physical_buttons_data[MAX_BUTTONS_NUM];
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
@@ -152,6 +161,41 @@ void SysTick_Handler(void)
 /*  available peripheral interrupt handler's name please refer to the startup */
 /*  file (startup_stm32f10x_xx.s).                                            */
 /******************************************************************************/
+
+void TIM4_IRQHandler(void)
+{
+	
+	TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
+
+	millis = GetTick();
+	
+	
+	
+	// check if it is time to send joystick data
+	if (millis - joy_millis > config.exchange_period_ms )
+	{
+			joy_millis = millis;
+			
+			joy_report.id = REPORT_ID_JOY;		
+			joy_report.raw_button_data[0] = btn_num;
+			for (uint8_t i=0; i<8; i++)	joy_report.raw_button_data[1+i] = physical_buttons_data[btn_num+i];
+			btn_num += 8;
+			btn_num = btn_num & 0x7F;
+						
+			USB_CUSTOM_HID_SendReport((uint8_t *)&(joy_report.id), sizeof(joy_report)-sizeof(joy_report.dummy));
+	}
+	
+	AxesProcess(&config);
+	EncoderProcess(buttons_state, &config);
+
+			
+	// getting fresh data to joystick report buffer
+	ButtonsGet(physical_buttons_data, joy_report.button_data);
+	AnalogGet(joy_report.axis_data, NULL, joy_report.raw_axis_data);	
+	POVsGet(joy_report.pov_data);
+	
+
+}
 
 /**
 * @brief This function handles USB low priority or CAN RX0 interrupts.

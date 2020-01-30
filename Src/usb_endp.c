@@ -169,7 +169,7 @@ void EP1_OUT_Callback(void)
 						break;
 					
 					case 10:
-						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.buttons[124]), 4);
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.buttons[124]), 4*sizeof(button_t));
 						pos += 4*sizeof(button_t);
 					
 						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.axes_to_buttons[0]), sizeof(axis_to_buttons_t));	
@@ -312,7 +312,7 @@ void EP1_OUT_Callback(void)
 				
 				case 10:
 				{
-					memcpy((uint8_t *) &(tmp_config.buttons[124]), &hid_buf[pos], 4);
+					memcpy((uint8_t *) &(tmp_config.buttons[124]), &hid_buf[pos], 4*sizeof(button_t));
 					pos += 4*sizeof(button_t);
 					
 					memcpy((uint8_t *) &(tmp_config.axes_to_buttons[0]), &hid_buf[pos], sizeof(axis_to_buttons_t));

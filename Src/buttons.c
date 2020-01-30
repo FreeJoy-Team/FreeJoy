@@ -364,28 +364,28 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
   * @brief  Checking single button state
   * @param  pin_num:	Number of pin where button is connected
 	* @param  p_config: Pointer to device configuration
-	* @param  pos: Pointer to button counter variable
-  * @retval None
+  * @retval Buttons state
   */
-void DirectButtonGet (uint8_t pin_num, app_config_t * p_config, uint8_t * pos)
+uint8_t DirectButtonGet (uint8_t pin_num,  app_config_t * p_config)
 {	
 	if (p_config->pins[pin_num] == BUTTON_VCC)
 	{
-		raw_buttons_data[*pos] = GPIO_ReadInputDataBit(pin_config[pin_num].port, pin_config[pin_num].pin);
+		return GPIO_ReadInputDataBit(pin_config[pin_num].port, pin_config[pin_num].pin);
 	}
 	else 
 	{
-		raw_buttons_data[*pos] = !GPIO_ReadInputDataBit(pin_config[pin_num].port, pin_config[pin_num].pin);
+		return !GPIO_ReadInputDataBit(pin_config[pin_num].port, pin_config[pin_num].pin);
 	}	
 }
 
 /**
   * @brief  Getting buttons states of matrix buttons
+	* @param  raw_button_data_buf: Pointer to raw buttons data buffer
 	* @param  p_config: Pointer to device configuration
 	* @param  pos: Pointer to button position counter
   * @retval None
   */
-void MaxtrixButtonsGet (app_config_t * p_config, uint8_t * pos)
+void MaxtrixButtonsGet (uint8_t * raw_button_data_buf, app_config_t * p_config, uint8_t * pos)
 {
 	// get matrix buttons
 	for (int i=0; i<USED_PINS_NUM; i++)
@@ -400,7 +400,7 @@ void MaxtrixButtonsGet (app_config_t * p_config, uint8_t * pos)
 			{
 				if (p_config->pins[k] == BUTTON_ROW && (*pos) < MAX_BUTTONS_NUM)
 				{ 
-					DirectButtonGet(k, p_config, pos);
+					raw_button_data_buf[*pos] = DirectButtonGet(k, p_config);
 					(*pos)++;
 				}
 			}
@@ -412,11 +412,12 @@ void MaxtrixButtonsGet (app_config_t * p_config, uint8_t * pos)
 
 /**
   * @brief  Getting buttons states of single buttons
+	* @param  raw_button_data_buf: Pointer to raw buttons data buffer
 	* @param  p_config: Pointer to device configuration
 	* @param  pos: Pointer to button position counter
   * @retval None
   */
-void SingleButtonsGet (app_config_t * p_config, uint8_t * pos)
+void SingleButtonsGet (uint8_t * raw_button_data_buf, app_config_t * p_config, uint8_t * pos)
 {
 	for (int i=0; i<USED_PINS_NUM; i++)
 	{
@@ -425,7 +426,7 @@ void SingleButtonsGet (app_config_t * p_config, uint8_t * pos)
 		{
 			if ((*pos) < MAX_BUTTONS_NUM)
 			{
-				DirectButtonGet(i, p_config, pos);
+				raw_button_data_buf[*pos] = DirectButtonGet(i, p_config);
 				(*pos)++;
 			}
 			else break;
@@ -433,91 +434,72 @@ void SingleButtonsGet (app_config_t * p_config, uint8_t * pos)
 	}
 }
 
+
+uint8_t ButtonsReadPhysical(app_config_t * p_config, uint8_t * p_buf)
+{
+	uint8_t pos = 0;
+	// Getting physical buttons states
+	MaxtrixButtonsGet(p_buf, p_config, &pos);
+	ShiftRegistersGet(p_buf, p_config, &pos);
+	AxesToButtonsGet(p_buf, p_config, &pos);
+	SingleButtonsGet(p_buf, p_config, &pos);
+	
+	return pos;
+}
+
 /**
   * @brief  Checking all buttons routine
 	* @param  p_config: Pointer to device configuration
   * @retval None
   */
-void ButtonsCheck (app_config_t * p_config)
+void ButtonsReadLogical (app_config_t * p_config)
 {
 	uint8_t pos = 0;
 	
-	// Getting physical buttons states
-	MaxtrixButtonsGet(p_config, &pos);
-	ShiftRegistersGet(raw_buttons_data, p_config, &pos);
-	AxesToButtonsGet(raw_buttons_data, p_config, &pos);
-	SingleButtonsGet(p_config, &pos);
-
-	// Process shift modificated buttons
-	for (uint8_t shift_num=0; shift_num<5; shift_num++)
-	{
-		if (shifts_state & (1<<shift_num))	// shift pressed
-		{
-			for (uint8_t i=0; i<MAX_BUTTONS_NUM; i++)
-			{
-				int8_t btn = p_config->buttons[i].physical_num;
-				
-				// we have matching shift modificator
-				if (btn >= 0 && (p_config->buttons[i].type>>5) == shift_num+1 &&
-					i != p_config->shift_config[shift_num].button)
-				{
-					buttons_state[i].pin_state = raw_buttons_data[p_config->buttons[i].physical_num];					
-					LogicalButtonProcessState(&buttons_state[i], pov_pos, p_config, i);
-				}
-			}
-		}
-		else	// shift released 
-		{
-			for (uint8_t i=0; i<MAX_BUTTONS_NUM; i++)
-			{
-				int8_t btn = p_config->buttons[i].physical_num;
-				
-				// we have matching shift modificator
-				if (btn >= 0 && (p_config->buttons[i].type>>5) == shift_num+1)
-				{
-					// disable button
-					if (buttons_state[i].current_state)	
-					{
-						buttons_state[i].prev_state = buttons_state[i].pin_state;
-						buttons_state[i].pin_state = !buttons_state[i].prev_state;			
-						buttons_state[i].changed = 1;
-						buttons_state[i].time_last = 0;			
-						LogicalButtonProcessState(&buttons_state[i], pov_pos, p_config, i);
-					}						
-				}
-			}
-		}
-	}
+	pos = ButtonsReadPhysical(p_config, raw_buttons_data);
 	
 	// Process regular buttons
 	for (uint8_t i=0; i<pos; i++)
 	{
 		uint8_t shift_num = 0;
 		
-		// check logical buttons to not have shift modificators
+		// check logical buttons to have shift modificators
 		for (uint8_t j=0; j<MAX_BUTTONS_NUM; j++)
 		{
 			int8_t btn = p_config->buttons[j].physical_num;
 			
-			if (btn == i && (p_config->buttons[j].type & 0xE0)) 
+			if (btn == i && (p_config->buttons[j].type & 0xE0))				// we found button this shift modificator 
 			{
-				shift_num = p_config->buttons[j].type & 0xE0;
-				break;
+				shift_num = p_config->buttons[j].type>>5;
+				if (shifts_state & 1<<(shift_num-1))											// shift pressed for this button
+				{
+					buttons_state[j].pin_state = raw_buttons_data[p_config->buttons[j].physical_num];					
+					LogicalButtonProcessState(&buttons_state[j], pov_pos, p_config, j);
+				}
+				else if (buttons_state[j].current_state)	// shift released for this button
+				{
+					// disable button
+					buttons_state[j].prev_state = buttons_state[j].pin_state;
+					buttons_state[j].pin_state = !buttons_state[j].prev_state;			
+					buttons_state[j].changed = 1;
+					buttons_state[j].time_last = 0;			
+					LogicalButtonProcessState(&buttons_state[j], pov_pos, p_config, j);
+				}
 			}				
 		}
-		// we found not shift modificated physical button
-		if (shift_num == 0)
+		
+		if (shift_num == 0)		// we found not shift modificated physical button
 		{
 			for (uint8_t j=0; j<MAX_BUTTONS_NUM; j++)
 			{
-				// check if it is not shift button 
-				if (p_config->buttons[j].physical_num == i)
+				
+				if (p_config->buttons[j].physical_num == i)		// we found corresponding logical button
 				{
 					buttons_state[j].pin_state = raw_buttons_data[i];				
 					LogicalButtonProcessState(&buttons_state[j], pov_pos, p_config, j);
 				}
 			}
-		}
+		}		
 		else	// check if shift is released for modificated physical button
 		{
 			for (uint8_t j=0; j<MAX_BUTTONS_NUM; j++)
@@ -538,7 +520,7 @@ void ButtonsCheck (app_config_t * p_config)
 						buttons_state[j].prev_state = buttons_state[j].pin_state;
 						buttons_state[j].pin_state = !buttons_state[j].prev_state;	
 						buttons_state[j].changed = 1;	
-						buttons_state[j].time_last = -1;
+						buttons_state[j].time_last = 0;
 						LogicalButtonProcessState(&buttons_state[j], pov_pos, p_config, j);
 					}	
 				}
@@ -551,7 +533,7 @@ void ButtonsCheck (app_config_t * p_config)
 						buttons_state[j].prev_state = buttons_state[j].pin_state;
 						buttons_state[j].pin_state = !buttons_state[j].prev_state;	
 						buttons_state[j].changed = 1;	
-						buttons_state[j].time_last = -1;						
+						buttons_state[j].time_last = 0;						
 						LogicalButtonProcessState(&buttons_state[j], pov_pos, p_config, j);
 					}		
 				}
@@ -564,7 +546,7 @@ void ButtonsCheck (app_config_t * p_config)
 						buttons_state[j].prev_state = buttons_state[j].pin_state;
 						buttons_state[j].pin_state = !buttons_state[j].prev_state;	
 						buttons_state[j].changed = 1;		
-						buttons_state[j].time_last = -1;						
+						buttons_state[j].time_last = 0;						
 						LogicalButtonProcessState(&buttons_state[j], pov_pos, p_config, j);
 					}	
 				}
@@ -577,7 +559,7 @@ void ButtonsCheck (app_config_t * p_config)
 						buttons_state[j].prev_state = buttons_state[j].pin_state;
 						buttons_state[j].pin_state = !buttons_state[j].prev_state;	
 						buttons_state[j].changed = 1;	
-						buttons_state[j].time_last = -1;									
+						buttons_state[j].time_last = 0;									
 						LogicalButtonProcessState(&buttons_state[j], pov_pos, p_config, j);
 					}		
 				}
@@ -590,7 +572,7 @@ void ButtonsCheck (app_config_t * p_config)
 						buttons_state[j].prev_state = buttons_state[j].pin_state;
 						buttons_state[j].pin_state = !buttons_state[j].prev_state;	
 						buttons_state[j].changed = 1;	
-						buttons_state[j].time_last = -1;									
+						buttons_state[j].time_last = 0;									
 						LogicalButtonProcessState(&buttons_state[j], pov_pos, p_config, j);
 					}	
 				}
@@ -599,7 +581,7 @@ void ButtonsCheck (app_config_t * p_config)
 	}	
 	
 	// convert encoders input
-	EncoderProcess(buttons_state, p_config);
+	//EncoderProcess(buttons_state, p_config);
 	
 	shifts_state = 0;
 	for (uint8_t i=0; i<5; i++)
@@ -630,6 +612,7 @@ void ButtonsCheck (app_config_t * p_config)
 				buttons_data[(i & 0xF8)>>3] |= (buttons_state[i].current_state << (i & 0x07));
 			}
 	}
+	
 	// convert encoders data to report format
 	for (int i=0; i<MAX_POVS_NUM; i++)
 	{
@@ -664,6 +647,7 @@ void ButtonsCheck (app_config_t * p_config)
 				break;
 		}
 	}
+	
 }
 
 /**

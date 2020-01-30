@@ -54,6 +54,29 @@ void SysTick_Init(void)
 	RCC_GetClocksFreq(&RCC_Clocks);
 	SysTick_Config(RCC_Clocks.SYSCLK_Frequency/1000);	
 }
+
+/**
+  * @brief Timers Configuration
+  * @retval None
+  */
+void Timers_Init(void)
+{
+	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure;	
+	RCC_ClocksTypeDef RCC_Clocks;
+	
+	RCC_GetClocksFreq(&RCC_Clocks);	
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
+		
+	TIM_TimeBaseStructInit(&TIM_TimeBaseInitStructure);	
+	TIM_TimeBaseInitStructure.TIM_Prescaler = RCC_Clocks.PCLK1_Frequency/10000 - 1;
+	TIM_TimeBaseInitStructure.TIM_Period = 20 - 1;
+	TIM_TimeBaseInit(TIM4, &TIM_TimeBaseInitStructure);
+	
+	TIM_ITConfig(TIM4, TIM_IT_Update, ENABLE);	
+	NVIC_EnableIRQ(TIM4_IRQn);
+
+	TIM_Cmd(TIM4, ENABLE);	
+}
 /**
   * @brief Get system ticks
   * @retval ticks
