@@ -9,6 +9,7 @@
 
 uint8_t		physical_buttons_state[MAX_BUTTONS_NUM];
 
+#if (ENC_COUNT == 1)
 int8_t enc_array [16] =
 {
 0,  0,  0,  0,
@@ -16,7 +17,23 @@ int8_t enc_array [16] =
 1,  0,  0,  0,
 0,  0,  0,  0
 };
-
+#elif (ENC_COUNT == 2)
+int8_t enc_array [16] =
+{
+0,  0,  0,  0,
+-1,  0,  0,  1,
+1,  0,  0, -1,
+0,  0,  0,  0
+};
+#else
+int8_t enc_array [16] =
+{
+0,  1, -1,  0,
+-1,  0,  0,  1,
+1,  0,  0, -1,
+0, -1,  1,  0
+};
+#endif
 
 encoder_t encoders_state[MAX_ENCODERS_NUM];
 

@@ -55,25 +55,30 @@ void ShiftRegistersInit(app_config_t * p_config)
   */
 void ShiftRegisterRead(shift_reg_config_t * shift_register, uint8_t * data)
 {
-
 	uint8_t reg_cnt;
+	
+	GPIO_InitTypeDef 					GPIO_InitStructure;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;	
+	GPIO_Init (GPIOB,&GPIO_InitStructure);
 	// set SCK low
-	GPIO_WriteBit(GPIOB, GPIO_Pin_3, Bit_SET);
+	GPIOB->ODR &= ~GPIO_Pin_3;
 	
 	if (shift_register->type == CD4021)		// positive polarity
 	{
 		// Latch impulse
-		GPIO_WriteBit(pin_config[shift_register->pin_cs].port, pin_config[shift_register->pin_cs].pin, Bit_SET);
+		pin_config[shift_register->pin_cs].port->ODR |= pin_config[shift_register->pin_cs].pin;
 		for (int i=0; i<SHIFTREG_TICK_DELAY; i++) __NOP();
-		GPIO_WriteBit(pin_config[shift_register->pin_cs].port, pin_config[shift_register->pin_cs].pin, Bit_RESET);
+		pin_config[shift_register->pin_cs].port->ODR &= ~pin_config[shift_register->pin_cs].pin;
 			
 	}
 	else if (shift_register->type == HC165)		// negative polarity
 	{
 		// Latch impulse
-		GPIO_WriteBit(pin_config[shift_register->pin_cs].port, pin_config[shift_register->pin_cs].pin, Bit_RESET);
+		pin_config[shift_register->pin_cs].port->ODR &= ~pin_config[shift_register->pin_cs].pin;
 		for (int i=0; i<SHIFTREG_TICK_DELAY; i++) __NOP();
-		GPIO_WriteBit(pin_config[shift_register->pin_cs].port, pin_config[shift_register->pin_cs].pin, Bit_SET);			
+		pin_config[shift_register->pin_cs].port->ODR |= pin_config[shift_register->pin_cs].pin;			
 	}
 	
 	
@@ -85,15 +90,12 @@ void ShiftRegisterRead(shift_reg_config_t * shift_register, uint8_t * data)
 		data[i] = 0;
 		do
 		{
-			GPIO_WriteBit(GPIOB, GPIO_Pin_3, Bit_RESET);
-			for (int i=0; i<SHIFTREG_TICK_DELAY; i++) __NOP();
-			
-			if(GPIO_ReadInputDataBit(pin_config[shift_register->pin_data].port, pin_config[shift_register->pin_data].pin) == Bit_RESET)
+			GPIOB->ODR &= ~GPIO_Pin_3;			
+			if(pin_config[shift_register->pin_data].port->IDR & pin_config[shift_register->pin_data].pin)
 			{
 				data[i] |= mask; 
 			}
-			GPIO_WriteBit(GPIOB, GPIO_Pin_3, Bit_SET);
-			for (int i=0; i<SHIFTREG_TICK_DELAY; i++) __NOP();
+			GPIOB->ODR |= GPIO_Pin_3;
 			
 			mask = mask >> 1;
 		} while (mask);

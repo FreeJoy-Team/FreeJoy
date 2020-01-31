@@ -13,6 +13,9 @@
 #include "periphery.h"
 #include "buttons.h"
 
+#define   ENC_COUNT      1
+
+
 void EncoderProcess (buttons_state_t * button_state_buf, app_config_t * p_config);
 void EncodersInit (app_config_t * p_config);
 

@@ -53,12 +53,12 @@ void SoftSPI_HalfDuplex_Transmit(uint8_t * data, uint16_t length)
   */
 void SoftSPI_HalfDuplex_Receive(uint8_t * data, uint16_t length)
 {
-	GPIO_InitTypeDef 					GPIO_InitStructureure;
+	GPIO_InitTypeDef 					GPIO_InitStructure;
 	
-	GPIO_InitStructureure.GPIO_Mode = GPIO_Mode_IPU;
-	GPIO_InitStructureure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_InitStructureure.GPIO_Pin = GPIO_Pin_5;
-	GPIO_Init(GPIOB, &GPIO_InitStructureure);
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
+	GPIO_Init(GPIOB, &GPIO_InitStructure);
 	// Set SCK low
 	GPIO_WriteBit(GPIOB, GPIO_Pin_3, Bit_RESET);
 	
@@ -109,6 +109,12 @@ void HardSPI_Init(void)
   */
 void HardSPI_HalfDuplex_Transmit(uint8_t * data, uint16_t length)
 {	
+	GPIO_InitTypeDef 					GPIO_InitStructure;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;	
+	GPIO_Init (GPIOB,&GPIO_InitStructure);
+	
 	for (uint16_t i=0; i<length; i++)
 	{
 		while (SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_TXE) == RESET); //wait buffer empty
