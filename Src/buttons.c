@@ -29,7 +29,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 	
 	millis = GetTick();
 	// choose config for current button
-	switch (p_config->buttons[num].type & BUTTON_TYPE_MASK)
+	switch (p_config->buttons[num].type)
 	{		
 		case BUTTON_INVERTED:
 			// invert state for inverted button
@@ -470,7 +470,7 @@ void ButtonsReadLogical (app_config_t * p_config)
 			
 			if (btn == i && (p_config->buttons[j].type & 0xE0))				// we found button this shift modificator 
 			{
-				shift_num = p_config->buttons[j].type>>5;
+				shift_num = p_config->buttons[j].shift_modificator;
 				if (shifts_state & 1<<(shift_num-1))											// shift pressed for this button
 				{
 					buttons_state[j].pin_state = raw_buttons_data[p_config->buttons[j].physical_num];					
@@ -505,14 +505,14 @@ void ButtonsReadLogical (app_config_t * p_config)
 			for (uint8_t j=0; j<MAX_BUTTONS_NUM; j++)
 			{
 				if (p_config->buttons[j].physical_num == i && (shifts_state) == 0 &&
-					(p_config->buttons[j].type & 0xE0) == 0)
+					(p_config->buttons[j].shift_modificator) == 0)
 				{
 					buttons_state[j].pin_state = raw_buttons_data[i];				
 					LogicalButtonProcessState(&buttons_state[j], pov_pos, p_config, j);
 				}
 				// shift pressed
 				else if (p_config->buttons[j].physical_num == i && shifts_state & (1<<0) &&
-					(p_config->buttons[j].type & 0xE0) == 0)
+					(p_config->buttons[j].shift_modificator) == 0)
 				{
 					// disable button
 					if (buttons_state[j].current_state)	
@@ -525,7 +525,7 @@ void ButtonsReadLogical (app_config_t * p_config)
 					}	
 				}
 				else if (p_config->buttons[j].physical_num == i && shifts_state & (1<<1)	&&
-					(p_config->buttons[j].type & 0xE0) == 0)
+					(p_config->buttons[j].shift_modificator) == 0)
 				{
 					// disable button
 					if (buttons_state[j].current_state)	
@@ -538,7 +538,7 @@ void ButtonsReadLogical (app_config_t * p_config)
 					}		
 				}
 				else if (p_config->buttons[j].physical_num == i && shifts_state & (1<<2) &&
-					(p_config->buttons[j].type & 0xE0) == 0)
+					(p_config->buttons[j].shift_modificator) == 0)
 				{
 					// disable button
 					if (buttons_state[j].current_state)	
@@ -551,7 +551,7 @@ void ButtonsReadLogical (app_config_t * p_config)
 					}	
 				}
 				else if (p_config->buttons[j].physical_num == i && shifts_state & (1<<3) &&
-					(p_config->buttons[j].type & 0xE0) == 0)
+					(p_config->buttons[j].shift_modificator) == 0)
 				{
 					// disable button
 					if (buttons_state[j].current_state)	
@@ -564,7 +564,7 @@ void ButtonsReadLogical (app_config_t * p_config)
 					}		
 				}
 				else if (p_config->buttons[j].physical_num == i && shifts_state & (1<<4) &&
-					(p_config->buttons[j].type & 0xE0) == 0)
+					(p_config->buttons[j].shift_modificator) == 0)
 				{
 					// disable button
 					if (buttons_state[j].current_state)	

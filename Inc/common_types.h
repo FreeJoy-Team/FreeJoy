@@ -38,13 +38,25 @@ typedef struct
 	analog_data_t 	calib_min;
 	analog_data_t		calib_center;
 	analog_data_t 	calib_max;
-	uint8_t 				magnet_offset;
-	uint8_t					inverted;
-	filter_t 				filter;
+	uint8_t					out_enabled: 1;
+	uint8_t					magnet_offset: 1;
+	uint8_t					inverted: 1;
+	uint8_t 				filter: 3;
+	uint8_t					:0;
 	int8_t				 	curve_shape[11];
-	uint8_t 				out_enabled;
 	uint8_t					resolution;
-	uint8_t					reserved[7];
+	uint8_t					dead_zone;
+	
+	int8_t					source_main;
+	uint8_t					function:	2;
+	uint8_t					source_secondary: 6;
+	
+	int8_t					decrement_button;
+	int8_t					center_button;
+	int8_t					increment_button;
+	uint8_t					step;
+	uint8_t					reserved[5];
+	
 } axis_config_t;
 
 enum
@@ -107,7 +119,8 @@ typedef uint8_t button_type_t;
 typedef struct button_t
 {
 	int8_t					physical_num;
-	button_type_t 	type;
+	uint8_t					shift_modificator: 3;
+	button_type_t 	type : 5;
 	
 }	button_t;
 
