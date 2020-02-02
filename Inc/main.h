@@ -122,7 +122,7 @@ static const app_config_t init_config =
 	.axis_config[0].decrement_button = -1,
 	.axis_config[0].center_button = -1,
 	.axis_config[0].increment_button = -1,
-	.axis_config[0].step = 0,
+	.axis_config[0].step = 1,
 	
 	.axis_config[1].calib_min = AXIS_MIN_VALUE,
 	.axis_config[1].calib_center = AXIS_CENTER_VALUE,
@@ -150,7 +150,7 @@ static const app_config_t init_config =
 	.axis_config[1].decrement_button = -1,
 	.axis_config[1].center_button = -1,
 	.axis_config[1].increment_button = -1,
-	.axis_config[1].step = 0,
+	.axis_config[1].step = 1,
 	
 	.axis_config[2].calib_min = AXIS_MIN_VALUE,
 	.axis_config[2].calib_center = AXIS_CENTER_VALUE,
@@ -178,7 +178,7 @@ static const app_config_t init_config =
 	.axis_config[2].decrement_button = -1,
 	.axis_config[2].center_button = -1,
 	.axis_config[2].increment_button = -1,
-	.axis_config[2].step = 0,
+	.axis_config[2].step = 1,
 	
 	.axis_config[3].calib_min = AXIS_MIN_VALUE,
 	.axis_config[3].calib_center = AXIS_CENTER_VALUE,
@@ -206,7 +206,7 @@ static const app_config_t init_config =
 	.axis_config[3].decrement_button = -1,
 	.axis_config[3].center_button = -1,
 	.axis_config[3].increment_button = -1,
-	.axis_config[3].step = 0,
+	.axis_config[3].step = 1,
 	
 	.axis_config[4].calib_min = AXIS_MIN_VALUE,
 	.axis_config[4].calib_center = AXIS_CENTER_VALUE,
@@ -234,7 +234,7 @@ static const app_config_t init_config =
 	.axis_config[4].decrement_button = -1,
 	.axis_config[4].center_button = -1,
 	.axis_config[4].increment_button = -1,
-	.axis_config[4].step = 0,
+	.axis_config[4].step = 1,
 	
 	.axis_config[5].calib_min = AXIS_MIN_VALUE,
 	.axis_config[5].calib_center = AXIS_CENTER_VALUE,
@@ -262,7 +262,7 @@ static const app_config_t init_config =
 	.axis_config[5].decrement_button = -1,
 	.axis_config[5].center_button = -1,
 	.axis_config[5].increment_button = -1,
-	.axis_config[5].step = 0,
+	.axis_config[5].step = 1,
 	
 	.axis_config[6].calib_min = AXIS_MIN_VALUE,
 	.axis_config[6].calib_center = AXIS_CENTER_VALUE,
@@ -290,7 +290,7 @@ static const app_config_t init_config =
 	.axis_config[6].decrement_button = -1,
 	.axis_config[6].center_button = -1,
 	.axis_config[6].increment_button = -1,
-	.axis_config[6].step = 0,
+	.axis_config[6].step = 1,
 	
 	.axis_config[7].calib_min = AXIS_MIN_VALUE,
 	.axis_config[7].calib_center = AXIS_CENTER_VALUE,
@@ -318,7 +318,7 @@ static const app_config_t init_config =
 	.axis_config[7].decrement_button = -1,
 	.axis_config[7].center_button = -1,
 	.axis_config[7].increment_button = -1,
-	.axis_config[7].step = 0,
+	.axis_config[7].step = 1,
 
 	
 	/*

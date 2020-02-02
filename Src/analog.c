@@ -9,6 +9,7 @@
 #include <string.h>
 #include <math.h>
 #include "sensors.h"
+#include "buttons.h"
 
 analog_data_t input_data[MAX_AXIS_NUM];
 
@@ -21,6 +22,8 @@ analog_data_t FILTER_MED_COEFF[FILTER_MED_SIZE] = {30, 20, 10, 10, 10, 6, 6, 4, 
 analog_data_t FILTER_HIGH_COEFF[FILTER_HIGH_SIZE] = {20, 20, 10, 10, 5, 5, 5, 5, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1};
 
 analog_data_t filter_buffer[MAX_AXIS_NUM][FILTER_HIGH_SIZE];
+	
+buttons_state_t axes_buttons[MAX_AXIS_NUM][3];
 	
 uint32_t err_cnt = 0;
 
@@ -423,6 +426,38 @@ void AxesProcess (app_config_t * p_config)
 				raw_axis_data[i] = map2(tmp[i], 0, 4095, AXIS_MIN_VALUE, AXIS_MAX_VALUE);
 			}
 		}
+		// buttons/encoders source
+    else
+    {
+			
+			int32_t tmp32 = raw_axis_data[i];
+			
+			axes_buttons[i][0].prev_state = axes_buttons[i][0].current_state;
+			axes_buttons[i][1].prev_state = axes_buttons[i][1].current_state;
+			axes_buttons[i][2].prev_state = axes_buttons[i][2].current_state;
+			
+			axes_buttons[i][0].current_state = buttons_state[p_config->axis_config[i].decrement_button].current_state;
+			axes_buttons[i][1].current_state = buttons_state[p_config->axis_config[i].increment_button].current_state;
+			axes_buttons[i][2].current_state = buttons_state[p_config->axis_config[i].center_button].current_state;
+			
+      if (axes_buttons[i][0].current_state && !axes_buttons[i][0].prev_state)
+      {
+        tmp32 -= AXIS_FULLSCALE * p_config->axis_config[i].step / 100;
+      }
+      if (axes_buttons[i][1].current_state && !axes_buttons[i][1].prev_state)
+      {
+        tmp32 += AXIS_FULLSCALE * p_config->axis_config[i].step / 100;
+      }
+      if (axes_buttons[i][2].current_state && !axes_buttons[i][2].prev_state)
+      {
+        tmp32 = AXIS_CENTER_VALUE;
+      }
+			
+			if (tmp32 > AXIS_MAX_VALUE) tmp32 = AXIS_MAX_VALUE;
+			if (tmp32 < AXIS_MIN_VALUE) tmp32 = AXIS_MIN_VALUE;
+			
+			raw_axis_data[i] = (analog_data_t) tmp32;
+    }
 		
 		// Filtering
 		tmp[i] = Filter(raw_axis_data[i], filter_buffer[i], p_config->axis_config[i].filter);

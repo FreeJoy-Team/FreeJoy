@@ -128,8 +128,8 @@ typedef uint8_t button_type_t;
 typedef struct button_t
 {
 	int8_t					physical_num;
-	uint8_t					shift_modificator: 3;
 	button_type_t 	type : 5;
+	uint8_t					shift_modificator: 3;	
 	
 }	button_t;
 
