@@ -7,6 +7,7 @@
 
 #include "analog.h"
 #include <string.h>
+#include <math.h>
 #include "sensors.h"
 
 analog_data_t input_data[MAX_AXIS_NUM];
@@ -31,6 +32,15 @@ adc_channel_config_t channel_config[MAX_AXIS_NUM] =
 	{ADC_Channel_6, 6}, {ADC_Channel_7, 7}, 
 };
 
+///**
+//  * @brief 	Returns absolute value of input parameter
+//	*	@param	x: Input value
+//  * @retval Absolute value
+//  */
+//static int32_t abs (int32_t x)
+//{
+//	return (x > 0) ? x : -x;
+//}
 
 /**
   * @brief  Transform value from input range to value in output range
@@ -87,6 +97,7 @@ static int32_t map_tle (int32_t x)
 	*	@param	out_min: Minimum value of output range
 	*	@param	out_center:	Center value of input range
 	*	@param	out_max: Maximum value of output range
+	*	@param	dead_zone: Width of center dead zone
   * @retval Transformed value
   */
 static int32_t map3(	int32_t x, 
@@ -95,24 +106,33 @@ static int32_t map3(	int32_t x,
 											int32_t in_max, 
 											int32_t out_min,
 											int32_t out_center,
-											int32_t out_max)
+											int32_t out_max,
+											uint8_t dead_zone)
 {
 	int32_t tmp;
 	int32_t ret;
+	int32_t dead_zone_right;
+	int32_t dead_zone_left;
 	
 	tmp = x;
-	
+	dead_zone_right = ((in_max - in_center)*dead_zone)>>10;
+	dead_zone_left = ((in_center - in_min)*dead_zone)>>10;
 	
 	if (tmp < in_min)	return out_min;
-	if (tmp > in_max)	return out_max;
+	if (tmp > in_max)	return out_max; 
+	if ((tmp > in_center && (tmp - in_center) < dead_zone_right) || 
+			(tmp < in_center &&	(in_center - tmp) < dead_zone_left))
+	{
+		return in_center;
+	}		
 	
 	if (tmp < in_center)
 	{
-		ret = ((tmp - in_min) * (out_center - out_min) / (in_center - in_min) + out_min);
+		ret = ((tmp - in_min) * (out_center - out_min) / (in_center - dead_zone_left - in_min) + out_min);
   }
 	else
 	{
-		ret = ((tmp - in_center) * (out_max - out_center) / (in_max - in_center) + out_center);
+		ret = ((tmp - in_center - dead_zone_right) * (out_max - out_center) / (in_max - in_center - dead_zone_right) + out_center);
 	}
 	return ret;
 }
@@ -245,7 +265,6 @@ void AxesInit (app_config_t * p_config)
 {
 	uint8_t adc_cnt = 0;
 	uint8_t sensors_cnt = 0;
-	uint8_t rank = 1;
 	
   ADC_InitTypeDef ADC_InitStructure;
 	DMA_InitTypeDef DMA_InitStructure;
@@ -305,7 +324,7 @@ void AxesInit (app_config_t * p_config)
 		if (p_config->pins[i] == AXIS_ANALOG)		// Configure ADC channels
 		{
 			/* ADC1 regular channel configuration */ 
-			ADC_RegularChannelConfig(ADC1, channel_config[i].channel, rank++, ADC_SampleTime_239Cycles5);
+			ADC_RegularChannelConfig(ADC1, channel_config[i].channel, i, ADC_SampleTime_239Cycles5);
 			axis_num++;
 		}
 		
@@ -316,7 +335,7 @@ void AxesInit (app_config_t * p_config)
 		/* DMA1 channel1 configuration ----------------------------------------------*/
 		DMA_DeInit(DMA1_Channel1);
 		DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&ADC1->DR;
-		DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t) &input_data[sensors_cnt];
+		DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t) &input_data[0];
 		DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
 		DMA_InitStructure.DMA_BufferSize = adc_cnt;
 		DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
@@ -355,88 +374,117 @@ void AxesInit (app_config_t * p_config)
   */
 void AxesProcess (app_config_t * p_config)
 {
-	int32_t tmp;
+	int32_t tmp[MAX_AXIS_NUM];
 	float tmpf;
-	uint8_t channel = 0;
+	uint8_t analog_channel = 0;
 	
-	// sensors data
-	for (int i=0; i<USED_PINS_NUM; i++)
+	for (uint8_t i=0; i<MAX_AXIS_NUM; i++)
 	{
-		if (p_config->pins[i] == TLE5011_CS)
+		
+		int8_t source = p_config->axis_config[i].source_main;
+		
+		if (source >= 0)
 		{
-			tmpf = 0;
-			if (TLE501x_Get(&pin_config[i], &tmpf) == 0)
+			// source TLE501x
+			if (p_config->pins[source] == TLE5011_CS)
 			{
-				if (p_config->axis_config[channel].magnet_offset)
+				tmpf = 0;
+				if (TLE501x_Get(&pin_config[source], &tmpf) == 0)
 				{
-					tmpf -= 180;
-					if (tmpf < -180) tmpf += 360;
-					else if (tmpf > 180) tmpf -= 360;
+					if (p_config->axis_config[i].magnet_offset)
+					{
+						tmpf -= 180;
+						if (tmpf < -180) tmpf += 360;
+						else if (tmpf > 180) tmpf -= 360;
+					}
+					tmpf *= 1000;
+					//raw_axis_data[channel] = map2(tmpf, -180000, 180000, AXIS_MIN_VALUE, AXIS_MAX_VALUE);
+					raw_axis_data[i] = map_tle(tmpf);
 				}
-				tmpf *= 1000;
-				//raw_axis_data[channel] = map2(tmpf, -180000, 180000, AXIS_MIN_VALUE, AXIS_MAX_VALUE);
-				raw_axis_data[channel] = map_tle(tmpf);
+				else
+				{
+					err_cnt++;
+				}
 			}
-			else
+			// source analog
+			else if (p_config->pins[source] == AXIS_ANALOG)
 			{
-				err_cnt++;
+				if (p_config->axis_config[i].magnet_offset)
+				{
+						tmp[i] = input_data[analog_channel++] - 2047;
+						if (tmp < 0) tmp[i] += 4095;
+						else if (tmp[i] > 4095) tmp[i] -= 4095;
+				}
+				else
+				{
+					tmp[i] = input_data[analog_channel++];
+				}
+				
+				raw_axis_data[i] = map2(tmp[i], 0, 4095, AXIS_MIN_VALUE, AXIS_MAX_VALUE);
 			}
-			channel++;
 		}
-	}
-	// adc data
-	for (int i=0; i<MAX_AXIS_NUM; i++)
-	{
-		if (p_config->pins[i] == AXIS_ANALOG)
-		{
-			if (p_config->axis_config[channel].magnet_offset)
-			{
-					tmp = input_data[channel] - 2047;
-					if (tmp < 0) tmp += 4095;
-					else if (tmp > 4095) tmp -= 4095;
-			}
-			else
-			{
-				tmp = input_data[channel];
-			}
+		
+		// Filtering
+		tmp[i] = Filter(raw_axis_data[i], filter_buffer[i], p_config->axis_config[i].filter);
 			
-			raw_axis_data[channel] = map2(tmp, 0, 4095, AXIS_MIN_VALUE, AXIS_MAX_VALUE);
-			channel++;
+    // Scale output data
+    tmp[i] = map3( tmp[i], 
+                 p_config->axis_config[i].calib_min,
+                 p_config->axis_config[i].calib_center,    
+                 p_config->axis_config[i].calib_max, 
+                 AXIS_MIN_VALUE,
+                 AXIS_CENTER_VALUE,
+                 AXIS_MAX_VALUE,
+                 p_config->axis_config[i].dead_zone);    
+    // Shaping
+    tmp[i] = ShapeFunc(&p_config->axis_config[i], tmp[i], 11);
+    // Lowing resolution if needed
+    tmp[i] = SetResolutioin(tmp[i], p_config->axis_config[i].resolution);
+    
+    // Invertion
+    if (p_config->axis_config[i].inverted > 0)
+    {
+      tmp[i] = 0 - tmp[i];
+    }
+	}
+      
+	for (uint8_t i=0; i<MAX_AXIS_NUM; i++)
+	{
+		// Multi-axis process
+		if (p_config->axis_config[i].function != NO_FUNCTION)
+		{
+			{
+				switch (p_config->axis_config[i].function)
+				{
+					case FUNCTION_PLUS_ABS:
+						tmp[i] = tmp[i] + tmp[p_config->axis_config[i].source_secondary];
+						break;
+					case FUNCTION_PLUS_REL:
+						tmp[i] = tmp[i] + tmp[p_config->axis_config[i].source_secondary] - AXIS_MIN_VALUE;
+						break;
+					case FUNCTION_MINUS_ABS:
+						tmp[i] = tmp[i] - tmp[p_config->axis_config[i].source_secondary];
+						break;
+					case FUNCTION_MINUS_REL:
+						tmp[i] = tmp[i] - tmp[p_config->axis_config[i].source_secondary] + AXIS_MIN_VALUE;
+						break;
+					default:
+						break;
+				}
+			}
+			if (tmp[i] > AXIS_MAX_VALUE) tmp[i] = AXIS_MAX_VALUE;
+			else if (tmp[i] < AXIS_MIN_VALUE) tmp[i] = AXIS_MIN_VALUE;
 		}
+		
+		
+    // setting technical axis data
+    scaled_axis_data[i] = tmp[i];
+    // setting output axis data
+    if (p_config->axis_config[i].out_enabled)  out_axis_data[i] = tmp[i];
+    else  out_axis_data[i] = 0;
+		
 	}
 	
-			// Process data
-	for (int i=0; i<channel; i++)
-	{				
-			// Filtering
-			tmp = Filter(raw_axis_data[i], filter_buffer[i], p_config->axis_config[i].filter);
-			
-			// Scale output data
-			tmp = map3(	tmp, 
-										p_config->axis_config[i].calib_min,
-										p_config->axis_config[i].calib_center,		
-										p_config->axis_config[i].calib_max, 
-										AXIS_MIN_VALUE,
-										AXIS_CENTER_VALUE,
-										AXIS_MAX_VALUE);		
-			// Shaping
-			tmp = ShapeFunc(&p_config->axis_config[i], tmp, 11);
-			// Lowing resolution if needed
-			tmp = SetResolutioin(tmp, p_config->axis_config[i].resolution);
-		
-			// Invertion
-			if (p_config->axis_config[i].inverted > 0)
-			{
-				tmp = 0 - tmp;
-			}
-			
-			// setting technical axis data
-			scaled_axis_data[i] = tmp;
-			// setting output axis data
-			if (p_config->axis_config[i].out_enabled)	out_axis_data[i] = tmp;
-			else	out_axis_data[i] = 0;
-		
-	}	
 }
 
 /**

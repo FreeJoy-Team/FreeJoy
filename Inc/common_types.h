@@ -33,6 +33,15 @@ typedef uint8_t filter_t;
 
 typedef int16_t analog_data_t;
 
+enum
+{
+	NO_FUNCTION = 0,
+	FUNCTION_PLUS_ABS,
+	FUNCTION_PLUS_REL,
+	FUNCTION_MINUS_ABS,
+	FUNCTION_MINUS_REL,
+};
+
 typedef struct
 {
 	analog_data_t 	calib_min;
@@ -48,14 +57,14 @@ typedef struct
 	uint8_t					dead_zone;
 	
 	int8_t					source_main;
-	uint8_t					function:	2;
-	uint8_t					source_secondary: 6;
+	uint8_t					function:	3;
+	uint8_t					source_secondary: 5;
 	
 	int8_t					decrement_button;
 	int8_t					center_button;
 	int8_t					increment_button;
 	uint8_t					step;
-	uint8_t					reserved[5];
+	uint8_t					reserved[4];
 	
 } axis_config_t;
 
