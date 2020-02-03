@@ -28,7 +28,7 @@
 #include "periphery.h"
 #include "analog.h"
 #include "encoders.h"
-
+#include "sensors.h"
 
 /** @addtogroup STM32F10x_StdPeriph_Template
   * @{
@@ -185,6 +185,10 @@ void TIM3_IRQHandler(void)
 		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
 		
 		AxesProcess(&config);
+		
+		GPIOB->ODR |= GPIO_Pin_12;
+		
+		TLE501x_StartDMA(&sensors[0]);
 	}	
 }
 
@@ -219,6 +223,74 @@ void TIM1_UP_IRQHandler(void)
 		EncoderProcess(buttons_state, &config);
 	}
 	
+}
+
+// SPI Rx Complete
+void DMA1_Channel2_IRQHandler(void)
+{
+	uint8_t i=0;
+	
+	if (DMA_GetITStatus(DMA1_IT_TC2))
+	{
+		DMA_ClearITPendingBit(DMA1_IT_TC2);
+		DMA_Cmd(DMA1_Channel2, DISABLE);
+		
+		// wait SPI transfer to end
+		while(SPI1->SR & SPI_SR_BSY);
+		
+		// searching for active sensor
+		for (i=0; i<MAX_AXIS_NUM; i++)
+		{
+			if (sensors[i].cs_pin >= 0 && !sensors[i].rx_complete) break;
+		}
+		// Close connection to the sensor
+		if (i < MAX_AXIS_NUM)
+		{
+			TLE501x_StopDMA(&sensors[i++]);
+		}
+		// Enable other peripery IRQs
+		NVIC_EnableIRQ(TIM1_UP_IRQn);
+		NVIC_EnableIRQ(TIM3_IRQn);		
+		
+		// Process next sensor
+		for ( ;i<MAX_AXIS_NUM;i++)
+		{
+			if (sensors[i].cs_pin >= 0 && sensors[i].rx_complete && sensors[i].rx_complete)
+			{
+				TLE501x_StartDMA(&sensors[i]);
+				return;
+			}
+		}
+		
+		GPIOB->ODR ^= GPIO_Pin_12;
+	}
+}
+
+// SPI Tx Complete
+void DMA1_Channel3_IRQHandler(void)
+{
+	uint8_t i=0;
+	
+	if (DMA_GetITStatus(DMA1_IT_TC3))
+	{
+		DMA_ClearITPendingBit(DMA1_IT_TC3);
+		DMA_Cmd(DMA1_Channel3, DISABLE);
+		
+		// wait SPI transfer to end
+		while(SPI1->SR & SPI_SR_BSY);
+		
+		// searching for active sensor
+		for (i=0; i<MAX_AXIS_NUM; i++)
+		{
+			if (sensors[i].cs_pin >= 0 && !sensors[i].tx_complete)
+			{
+				sensors[i].tx_complete = 1;
+				sensors[i].rx_complete = 0;
+				UserSPI_HalfDuplex_Receive(&sensors[i].data[1], 5);
+				break;
+			}
+		}
+	}
 }
 
 /**

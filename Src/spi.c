@@ -1,5 +1,7 @@
 #include "spi.h"
 
+uint8_t spi_inbuf[10];
+uint8_t spi_outbuf[10];
 
 /**
   * @brief Software SPI Initialization Function
@@ -86,7 +88,9 @@ void HardSPI_Init(void)
 {
 	SPI_InitTypeDef SPI_InitStructure;
 	
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1,ENABLE);
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1,ENABLE);	
+	
+	GPIO_PinRemapConfig(GPIO_Remap_SPI1, ENABLE);
 	// SPI1 configuration
   SPI_InitStructure.SPI_Direction = SPI_Direction_1Line_Tx;
   SPI_InitStructure.SPI_Mode = SPI_Mode_Master;
@@ -98,9 +102,12 @@ void HardSPI_Init(void)
   SPI_InitStructure.SPI_FirstBit = SPI_FirstBit_MSB;
   SPI_InitStructure.SPI_CRCPolynomial = 7;
   SPI_Init(SPI1, &SPI_InitStructure);
+
+#if SPI_USE_DMA	
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
+	SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Tx|SPI_I2S_DMAReq_Rx, ENABLE);
+#endif	
   SPI_Cmd(SPI1, ENABLE);
-	
-	GPIO_PinRemapConfig(GPIO_Remap_SPI1, ENABLE);
 }
 /**
   * @brief Hardware SPI Send Half-Duplex Function
@@ -114,13 +121,39 @@ void HardSPI_HalfDuplex_Transmit(uint8_t * data, uint16_t length)
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;	
 	GPIO_Init (GPIOB,&GPIO_InitStructure);
+
+#if SPI_USE_DMA	
+	DMA_InitTypeDef DMA_InitStructure;
+		
+	DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t) data;
+	DMA_InitStructure.DMA_BufferSize = length;
+	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t) &SPI1->DR;
+	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
+	DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
+	DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
+	DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
+	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+	DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
+	DMA_InitStructure.DMA_Priority = DMA_Priority_Medium;
+	DMA_Init(DMA1_Channel3, &DMA_InitStructure);
 	
+	DMA_ITConfig(DMA1_Channel3, DMA_IT_TC, ENABLE);
+	NVIC_SetPriority(DMA1_Channel3_IRQn, 2);
+	NVIC_EnableIRQ(DMA1_Channel3_IRQn);
+	
+	SPI_BiDirectionalLineConfig(SPI1, SPI_Direction_Tx);
+	
+	DMA_Cmd(DMA1_Channel3, ENABLE);
+	
+#else
 	for (uint16_t i=0; i<length; i++)
 	{
 		while (SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_TXE) == RESET); //wait buffer empty
     SPI_I2S_SendData(SPI1, data[i]);
     while (SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_BSY) == SET); //wait finish sending
 	}
+#endif
 }
 /**
   * @brief Hardware SPI Receive Half-Duplex Function
@@ -129,6 +162,34 @@ void HardSPI_HalfDuplex_Transmit(uint8_t * data, uint16_t length)
   */
 void HardSPI_HalfDuplex_Receive(uint8_t * data, uint16_t length)
 {
+#if SPI_USE_DMA	
+	DMA_InitTypeDef DMA_InitStructure;
+		
+	DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t) data;
+	DMA_InitStructure.DMA_BufferSize = length;
+	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t) &SPI1->DR;
+	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
+	DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
+	DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
+	DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
+	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+	DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
+	DMA_InitStructure.DMA_Priority = DMA_Priority_Medium;
+	DMA_Init(DMA1_Channel2, &DMA_InitStructure);
+	
+	DMA_ITConfig(DMA1_Channel2, DMA_IT_TC, ENABLE);
+	NVIC_SetPriority(DMA1_Channel2_IRQn, 2);
+	NVIC_EnableIRQ(DMA1_Channel2_IRQn);
+	
+//	SPI_I2S_ITConfig(SPI1, SPI_I2S_IT_RXNE, ENABLE);
+//	NVIC_EnableIRQ(SPI1_IRQn);
+	
+	SPI_BiDirectionalLineConfig(SPI1, SPI_Direction_Rx);
+	
+	DMA_Cmd(DMA1_Channel2, ENABLE);
+	
+#else
 	for (uint16_t i=0; i<length; i++)
 	{
 		SPI_I2S_ReceiveData(SPI1);
@@ -137,6 +198,7 @@ void HardSPI_HalfDuplex_Receive(uint8_t * data, uint16_t length)
     SPI1->CR1 |= SPI_Direction_Tx;  // Set Tx mode to stop Rx clock
     data[i] = SPI_I2S_ReceiveData(SPI1);
 	}
+#endif
 }
 
 void UserSPI_Init(void)

@@ -68,6 +68,16 @@ typedef struct
 	
 } axis_config_t;
 
+typedef struct
+{
+	uint8_t 	data[6];
+	uint8_t 	rx_complete;
+	uint8_t 	tx_complete;
+	int8_t 		cs_pin;
+	uint32_t	ok_cnt;
+	uint32_t 	err_cnt;
+} tle_t;
+
 enum
 {
 	NOT_USED = 0,

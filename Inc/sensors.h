@@ -15,7 +15,9 @@
 #define M_PI							3.1415926535897932384626433832795
 #define TLE501x_TIMEOUT		100
 
-int TLE501x_Get(pin_config_t * p_cs_pin_config, float * data);
+void TLE501x_StartDMA(tle_t * sensor);
+void TLE501x_StopDMA(tle_t * sensor);
+int TLE501x_GetAngle(tle_t * sensor, float * angle);
 
 #endif 	/* __SENSORS_H__ */
 

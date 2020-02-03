@@ -11,6 +11,7 @@
 #include "sensors.h"
 #include "buttons.h"
 
+tle_t sensors[MAX_AXIS_NUM];
 analog_data_t input_data[MAX_AXIS_NUM];
 
 analog_data_t scaled_axis_data[MAX_AXIS_NUM];
@@ -24,8 +25,6 @@ analog_data_t FILTER_HIGH_COEFF[FILTER_HIGH_SIZE] = {20, 20, 10, 10, 5, 5, 5, 5,
 analog_data_t filter_buffer[MAX_AXIS_NUM][FILTER_HIGH_SIZE];
 	
 buttons_state_t axes_buttons[MAX_AXIS_NUM][3];
-	
-uint32_t err_cnt = 0;
 
 adc_channel_config_t channel_config[MAX_AXIS_NUM] =
 {
@@ -276,6 +275,12 @@ void AxesInit (app_config_t * p_config)
   RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1 | RCC_APB2Periph_GPIOC, ENABLE);
 	
+	for (int i = 0; i<MAX_AXIS_NUM; i++)
+	{
+		sensors[i].cs_pin = -1;
+		sensors[i].rx_complete = 1;
+		sensors[i].tx_complete = 1;
+	}
 	
 	// Count ADC channels
 	for (int i=0; i<USED_PINS_NUM; i++)
@@ -286,9 +291,15 @@ void AxesInit (app_config_t * p_config)
 		}
 		else if (p_config->pins[i] == TLE5011_CS)
 		{
+						
+			sensors[sensors_cnt].cs_pin = i;
 			sensors_cnt++;
 		}
 	}
+	
+#if SPI_USE_DMA	
+	if (sensors_cnt > 0) TLE501x_StartDMA(&sensors[0]);
+#endif
 	
 	if ((adc_cnt + sensors_cnt) > MAX_AXIS_NUM)
 	{
@@ -392,8 +403,16 @@ void AxesProcess (app_config_t * p_config)
 			if (p_config->pins[source] == TLE5011_CS)
 			{
 				tmpf = 0;
-				if (TLE501x_Get(&pin_config[source], &tmpf) == 0)
+				uint8_t k=0;
+				// search for needed sensor
+				for (k=0; k<MAX_AXIS_NUM; k++)
 				{
+					if (sensors[k].cs_pin == source) break;
+				}
+				// get angle data
+				if (TLE501x_GetAngle(&sensors[k], &tmpf) == 0)
+				{
+					sensors[k].ok_cnt++;
 					if (p_config->axis_config[i].magnet_offset)
 					{
 						tmpf -= 180;
@@ -406,7 +425,7 @@ void AxesProcess (app_config_t * p_config)
 				}
 				else
 				{
-					err_cnt++;
+					sensors[k].err_cnt++;
 				}
 			}
 			// source analog

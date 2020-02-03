@@ -17,7 +17,7 @@
 #define FILTER_MED_SIZE				10
 #define FILTER_HIGH_SIZE			20
 
-
+extern tle_t sensors[MAX_AXIS_NUM];
 
 typedef struct
 {

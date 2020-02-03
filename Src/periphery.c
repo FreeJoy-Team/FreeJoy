@@ -6,6 +6,7 @@
   */
 
 #include "periphery.h"
+#include "sensors.h"
 
 volatile uint64_t Ticks;
 volatile uint32_t TimingDelay;
@@ -295,7 +296,7 @@ void IO_Init (app_config_t * p_config)
 #endif
 			UserSPI_Init();
 		}
-		else if (p_config->pins[i] == TLE5011_CS || p_config->pins[i] == SHIFT_REG_CS)
+		else if (p_config->pins[i] == TLE5011_CS)
 		{
 			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
@@ -306,6 +307,14 @@ void IO_Init (app_config_t * p_config)
 		else if (p_config->pins[i] == TLE5011_GEN  && i == 17)
 		{
 			Generator_Init();	// 4MHz output at PB6 pin
+		}
+		else if (p_config->pins[i] == SHIFT_REG_CS)
+		{
+			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+			GPIO_InitStructure.GPIO_Pin = pin_config[i].pin;
+			GPIO_Init(pin_config[i].port, &GPIO_InitStructure);
+			GPIO_WriteBit(pin_config[i].port, pin_config[i].pin, Bit_SET);
 		}
 		else if (p_config->pins[i] == SHIFT_REG_DATA)
 		{
