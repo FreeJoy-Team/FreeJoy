@@ -49,7 +49,7 @@ static const app_config_t init_config =
 	.toggle_press_time_ms = 200,			// amount of millisecods virtual button 
 																		// will be pressed at toggle switch event
 	
-	.encoder_press_time_ms = 50,			// amount of millisecods virtual button 
+	.encoder_press_time_ms = 10,			// amount of millisecods virtual button 
 																		// will be pressed at encoder increment/decrement
 																		
 	.exchange_period_ms = 5,					// amount of millisecond between joystick data sending

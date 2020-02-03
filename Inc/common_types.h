@@ -153,6 +153,8 @@ typedef struct
 	int16_t 				cnt;	
 	int8_t 					pin_a;
 	int8_t 					pin_b;
+	int8_t					dir;
+	int8_t					last_dir;
 	
 } encoder_t;
 

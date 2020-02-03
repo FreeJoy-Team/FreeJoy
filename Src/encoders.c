@@ -62,11 +62,29 @@ void EncoderProcess (buttons_state_t * button_state_buf, app_config_t * p_config
 				{
 					if ((encoders_state[i].state & 0x03) != ((encoders_state[i].state >> 4) & 0x03))   // if encoder didnt come back
 					{
-						if (stt > 0)	button_state_buf[encoders_state[i].pin_a].current_state = 1;			// CW
-						else 					button_state_buf[encoders_state[i].pin_b].current_state = 1;			// CCW
-						
-						encoders_state[i].time_last = millis;
-						encoders_state[i].cnt += stt;
+						encoders_state[i].dir = stt > 0 ? 1 : -1;
+						if (millis - encoders_state[i].time_last > 50 || encoders_state[i].dir == encoders_state[i].last_dir)	// if direction didnt change too fast
+						{
+							if (stt > 0)	
+							{
+								button_state_buf[encoders_state[i].pin_a].current_state = 1;			// CW
+								encoders_state[i].last_dir = 1;
+							}
+							else
+							{
+								button_state_buf[encoders_state[i].pin_b].current_state = 1;			// CCW
+								encoders_state[i].last_dir = -1;
+							}						
+							encoders_state[i].time_last = millis;
+							encoders_state[i].cnt += stt;
+						}
+						else if (millis - encoders_state[i].time_last <= 200 && encoders_state[i].dir != encoders_state[i].last_dir)
+						{
+							encoders_state[i].time_last = millis;
+							encoders_state[i].cnt += encoders_state[i].last_dir;
+							if (encoders_state[i].last_dir > 0)	button_state_buf[encoders_state[i].pin_a].current_state = 1;
+							else button_state_buf[encoders_state[i].pin_b].current_state = 1;
+						}
 					}
 				}
 			}
@@ -98,14 +116,16 @@ void EncodersInit(app_config_t * p_config)
 	
 	for (int i=0; i<MAX_BUTTONS_NUM; i++)
 	{
-		if ((p_config->buttons[i].type & BUTTON_TYPE_MASK) == ENCODER_INPUT_A &&  i > prev_a)
+		if ((p_config->buttons[i].type) == ENCODER_INPUT_A &&  i > prev_a)
 		{
 			for (int j=0; j<MAX_BUTTONS_NUM; j++)
 			{
-				if ((p_config->buttons[j].type & BUTTON_TYPE_MASK) == ENCODER_INPUT_B && j > prev_b)
+				if ((p_config->buttons[j].type) == ENCODER_INPUT_B && j > prev_b && pos < MAX_ENCODERS_NUM)
 				{
 					encoders_state[pos].pin_a = i;
 					encoders_state[pos].pin_b = j;
+					encoders_state[pos].dir = 1;
+					encoders_state[pos].last_dir = 1;
 					
 					prev_a = i;
 					prev_b = j;
