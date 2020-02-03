@@ -183,12 +183,11 @@ void TIM3_IRQHandler(void)
 	if (TIM_GetITStatus(TIM3, TIM_IT_Update))
 	{
 		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
-		
+
 		AxesProcess(&config);
-		
-		GPIOB->ODR |= GPIO_Pin_12;
-		
+
 		TLE501x_StartDMA(&sensors[0]);
+		
 	}	
 }
 
@@ -200,7 +199,6 @@ void TIM1_UP_IRQHandler(void)
 		TIM_ClearITPendingBit(TIM1, TIM_IT_Update);
 
 		millis = GetTick();
-
 		// check if it is time to send joystick data
 		if (millis - joy_millis > config.exchange_period_ms )
 		{
@@ -261,8 +259,6 @@ void DMA1_Channel2_IRQHandler(void)
 				return;
 			}
 		}
-		
-		GPIOB->ODR ^= GPIO_Pin_12;
 	}
 }
 
@@ -287,7 +283,7 @@ void DMA1_Channel3_IRQHandler(void)
 				sensors[i].tx_complete = 1;
 				sensors[i].rx_complete = 0;
 				UserSPI_HalfDuplex_Receive(&sensors[i].data[1], 5);
-				break;
+				return;
 			}
 		}
 	}

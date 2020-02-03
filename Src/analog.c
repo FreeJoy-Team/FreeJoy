@@ -325,6 +325,7 @@ void AxesInit (app_config_t * p_config)
 	}
 	
 	uint8_t axis_num = 0;
+	uint8_t rank = 1;
 	for (int i=0; i<USED_PINS_NUM; i++)
 	{
 		// Configure Sensors channels		
@@ -338,7 +339,7 @@ void AxesInit (app_config_t * p_config)
 		if (p_config->pins[i] == AXIS_ANALOG)		// Configure ADC channels
 		{
 			/* ADC1 regular channel configuration */ 
-			ADC_RegularChannelConfig(ADC1, channel_config[i].channel, i, ADC_SampleTime_239Cycles5);
+			ADC_RegularChannelConfig(ADC1, channel_config[i].channel, rank++, ADC_SampleTime_239Cycles5);
 			axis_num++;
 		}
 		

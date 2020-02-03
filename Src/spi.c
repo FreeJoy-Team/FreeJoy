@@ -139,7 +139,7 @@ void HardSPI_HalfDuplex_Transmit(uint8_t * data, uint16_t length)
 	DMA_Init(DMA1_Channel3, &DMA_InitStructure);
 	
 	DMA_ITConfig(DMA1_Channel3, DMA_IT_TC, ENABLE);
-	NVIC_SetPriority(DMA1_Channel3_IRQn, 2);
+	NVIC_SetPriority(DMA1_Channel3_IRQn, 4);
 	NVIC_EnableIRQ(DMA1_Channel3_IRQn);
 	
 	SPI_BiDirectionalLineConfig(SPI1, SPI_Direction_Tx);
@@ -179,7 +179,7 @@ void HardSPI_HalfDuplex_Receive(uint8_t * data, uint16_t length)
 	DMA_Init(DMA1_Channel2, &DMA_InitStructure);
 	
 	DMA_ITConfig(DMA1_Channel2, DMA_IT_TC, ENABLE);
-	NVIC_SetPriority(DMA1_Channel2_IRQn, 2);
+	NVIC_SetPriority(DMA1_Channel2_IRQn, 4);
 	NVIC_EnableIRQ(DMA1_Channel2_IRQn);
 	
 //	SPI_I2S_ITConfig(SPI1, SPI_I2S_IT_RXNE, ENABLE);

@@ -39,14 +39,26 @@ encoder_t encoders_state[MAX_ENCODERS_NUM];
 
 void EncoderProcess (buttons_state_t * button_state_buf, app_config_t * p_config)
 {	
+	uint8_t encoders_present = 0;
 	
-	ButtonsReadPhysical(p_config, physical_buttons_state);
+	// search if there is at least one encoder present
+	for (int i=0; i<MAX_ENCODERS_NUM; i++)
+	{
+		if (encoders_state[i].pin_a >=0 && encoders_state[i].pin_b >=0) 
+		{
+			encoders_present = 1;
+			break;
+		}
+	}
+	if (!encoders_present) return;		// dont waste time if no encoders connected
+	
+	ButtonsReadPhysical(p_config, physical_buttons_state);		// read raw buttons state
 	
 	
 	for (int i=0; i<MAX_ENCODERS_NUM; i++)
 	{
 		uint32_t millis = GetTick();
-		
+		if (encoders_state[i].pin_a >=0 && encoders_state[i].pin_b >=0)
 		{
 			int8_t stt;
 			encoders_state[i].state <<= 2;			// shift prev state to clear space for new data

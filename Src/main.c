@@ -56,7 +56,6 @@ int main(void)
 
   while (1)
   {
-		
 		ButtonsReadLogical(&config);
 		// jump to bootloader if new firmware received
 		if (bootloader > 0)
