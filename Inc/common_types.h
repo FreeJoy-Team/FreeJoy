@@ -132,6 +132,11 @@ enum
 	ENCODER_INPUT_A,
 	ENCODER_INPUT_B,
 	
+	RADIO_BUTTON1,
+	RADIO_BUTTON2,
+	RADIO_BUTTON3,
+	RADIO_BUTTON4,
+	
 };
 typedef uint8_t button_type_t;
 

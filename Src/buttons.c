@@ -353,10 +353,66 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 				p_button_state->changed = 0;
 			}
 			break;
+			
+		case RADIO_BUTTON1:
+		case RADIO_BUTTON2:
+		case RADIO_BUTTON3:
+		case RADIO_BUTTON4:
+			// set timestamp if state changed to HIGH
+			if (!p_button_state->changed && 
+					p_button_state->pin_state > p_button_state->prev_state)		
+			{
+				p_button_state->time_last = millis;
+				p_button_state->changed = 1;
+			}
+			// set state after debounce if state have not changed
+			else if (	p_button_state->changed && p_button_state->pin_state &&
+								millis - p_button_state->time_last > p_config->button_debounce_ms)
+			{
+				p_button_state->changed = 0;
+				p_button_state->prev_state = 1;
+				p_button_state->current_state = 1;
+				p_button_state->cnt++;
+				
+				for (uint8_t i=0; i<MAX_BUTTONS_NUM; i++)
+				{
+					if (p_config->buttons[i].type == p_config->buttons[num].type && i != num)
+					{
+						buttons_state[i].current_state = 0;
+					}
+				}
+			}
+			// reset if state changed during debounce period
+			else if (!p_button_state->pin_state && millis - p_button_state->time_last > p_config->button_debounce_ms)
+			{
+				p_button_state->changed = 0;
+				p_button_state->prev_state = 0;
+			}
+			break;
 		
 		default:
 			break;
 		
+	}
+}
+
+/**
+  * @brief  Set initial states for radio buttons
+	* @param  p_config: Pointer to device configuration
+  * @retval None
+  */
+void RadioButtons_Init (app_config_t * p_config)
+{
+	for (uint8_t i=0; i<4; i++)
+	{
+		for (uint8_t j=0; j<MAX_BUTTONS_NUM; j++)
+		{
+			if (p_config->buttons[j].type == (RADIO_BUTTON1 + i))
+			{
+				buttons_state[j].current_state = 1;
+				break;
+			}
+		}
 	}
 }
 

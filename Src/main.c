@@ -51,6 +51,7 @@ int main(void)
 	AxesInit(&config); 
 	EncodersInit(&config);	
 	ShiftRegistersInit(&config);
+	RadioButtons_Init(&config);
 	
 	Timers_Init();
 

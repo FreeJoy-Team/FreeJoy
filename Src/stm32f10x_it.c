@@ -186,7 +186,15 @@ void TIM3_IRQHandler(void)
 
 		AxesProcess(&config);
 
-		TLE501x_StartDMA(&sensors[0]);
+		
+		for (uint8_t i=0; i<MAX_AXIS_NUM; i++)
+		{
+			if (sensors[i].cs_pin >= 0 && sensors[i].rx_complete && sensors[i].rx_complete)
+			{
+				TLE501x_StartDMA(&sensors[i]);
+				return;
+			}
+		}
 		
 	}	
 }
