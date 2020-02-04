@@ -1,22 +1,22 @@
 # FreeJoy
-FreeJoy implements USB HID joystick device with flexible configuration. It is based on STM32F103C8 microcontroller and supports up to 8 analog axis, 128 digital inputs (buttons, toggle switches, etc.), 4 POVs, shift registers, TLE5010/5011 sensors and axes to buttons feature. It is targeting a cheap BluePill board based on 32-bit STM32F103 microcontroller.
 
-<img src="https://d.radikal.ru/d33/1911/e8/a8ff2119cfc7.jpg" width="250">
+<img src="https://b.radikal.ru/b37/2002/06/7577d67b48a0.png">
 
-## Flexibility
+FreeJoy is widely configurable game device controller based on cheap STM32F103C8 microcontroller board. It allows you to create your own HOTAS, pedals, steering wheel device and customize a purchased one.
+
+## Features
 FreeJoy supports the following external periphery:
 
-* Analog inputs
-* Push buttons
-* Toggle switches
-* POV hats
+* 8 analog inputs
+* 128 push buttons or toggle switches
+* 4 POV hats
 * Incremental encoders
-* Converting analog inputs to buttons (up to 10 buttons per axis)
-* Shift registers 74HC165 and CD4021
-* TLE5010/TLE5011 sensors
+* Converting analog inputs to buttons (up to 12 buttons per axis)
+* Shift registers 74HC165 and CD4021 for extending inpits number
+* TLE5010/TLE5011 sensors as axes sources
 
-## Analog inputs
-FreeJoy supports up to 8 analog inputs at pins A0-A7. Every axis have its settings as:
+## Axes
+FreeJoy supports up to 8 analog inputs at pins A0-A7 and TLE5010/5011 sensors as axes sources. Every axis has its ouw settings as:
 
 * Output enabling/disabling
 * Resolution
@@ -26,12 +26,8 @@ FreeJoy supports up to 8 analog inputs at pins A0-A7. Every axis have its settin
 * Magnet offset option
 * Curve shaping
 
-## Axes to buttons
-
-Each axis can be used as source for convertion axis output to buttons signals. Up to 12 buttons per axis is supported.
-
 ## Buttons
-FreeJoy allows you to connect up to 128 digital inputs as single inputs (tied to VCC or GND) and matrix of buttons. Each input can be configured as:
+FreeJoy allows you to connect up to 128 digital inputs as single inputs (tied to VCC or GND), matrix of buttons, shift register inputs and axes to buttons inputs. Inputs can be configured as:
 
 * Regular push button
 * Inverted push button
