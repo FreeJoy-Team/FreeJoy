@@ -178,17 +178,17 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 				p_button_state->cnt += p_button_state->pin_state;
 				
 				// set bit in povs data
-				if ((p_config->buttons[num].type & BUTTON_TYPE_MASK) == POV1_UP)
+				if ((p_config->buttons[num].type) == POV1_UP)
 				{
 					pov_buf[0] &= !(1 << 3);
 					pov_buf[0] |= (p_button_state->pin_state << 3);
 				}
-				else if ((p_config->buttons[num].type & BUTTON_TYPE_MASK) == POV1_RIGHT)
+				else if ((p_config->buttons[num].type) == POV1_RIGHT)
 				{
 					pov_buf[0] &= !(1 << 2);
 					pov_buf[0] |= (p_button_state->pin_state << 2);
 				}
-				else if ((p_config->buttons[num].type & BUTTON_TYPE_MASK) == POV1_DOWN)
+				else if ((p_config->buttons[num].type) == POV1_DOWN)
 				{
 					pov_buf[0] &= !(1 << 1);
 					pov_buf[0] |= (p_button_state->pin_state << 1);
@@ -227,17 +227,17 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 				p_button_state->cnt += p_button_state->pin_state;
 				
 				// set bit in povs data
-				if ((p_config->buttons[num].type & BUTTON_TYPE_MASK) == POV2_UP)
+				if ((p_config->buttons[num].type) == POV2_UP)
 				{
 					pov_buf[1] &= !(1 << 3);
 					pov_buf[1] |= (p_button_state->pin_state << 3);
 				}
-				else if ((p_config->buttons[num].type & BUTTON_TYPE_MASK) == POV2_RIGHT)
+				else if ((p_config->buttons[num].type) == POV2_RIGHT)
 				{
 					pov_buf[1] &= !(1 << 2);
 					pov_buf[1] |= (p_button_state->pin_state << 2);
 				}
-				else if ((p_config->buttons[num].type & BUTTON_TYPE_MASK) == POV2_DOWN)
+				else if ((p_config->buttons[num].type) == POV2_DOWN)
 				{
 					pov_buf[1] &= !(1 << 1);
 					pov_buf[1] |= (p_button_state->pin_state << 1);
@@ -276,17 +276,17 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 				p_button_state->cnt += p_button_state->pin_state;
 				
 				// set bit in povs data
-				if ((p_config->buttons[num].type & BUTTON_TYPE_MASK) == POV3_UP)
+				if ((p_config->buttons[num].type) == POV3_UP)
 				{
 					pov_buf[2] &= !(1 << 3);
 					pov_buf[2] |= (p_button_state->pin_state << 3);
 				}
-				else if ((p_config->buttons[num].type & BUTTON_TYPE_MASK) == POV3_RIGHT)
+				else if ((p_config->buttons[num].type) == POV3_RIGHT)
 				{
 					pov_buf[2] &= !(1 << 2);
 					pov_buf[2] |= (p_button_state->pin_state << 2);
 				}
-				else if ((p_config->buttons[num].type & BUTTON_TYPE_MASK) == POV3_DOWN)
+				else if ((p_config->buttons[num].type) == POV3_DOWN)
 				{
 					pov_buf[2] &= !(1 << 1);
 					pov_buf[2] |= (p_button_state->pin_state << 1);
@@ -325,17 +325,17 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 				p_button_state->cnt += p_button_state->pin_state;
 				
 				// set bit in povs data
-				if ((p_config->buttons[num].type & BUTTON_TYPE_MASK) == POV4_UP)
+				if ((p_config->buttons[num].type) == POV4_UP)
 				{
 					pov_buf[3] &= !(1 << 3);
 					pov_buf[3] |= (p_button_state->pin_state << 3);
 				}
-				else if ((p_config->buttons[num].type & BUTTON_TYPE_MASK) == POV4_RIGHT)
+				else if ((p_config->buttons[num].type) == POV4_RIGHT)
 				{
 					pov_buf[3] &= !(1 << 2);
 					pov_buf[3] |= (p_button_state->pin_state << 2);
 				}
-				else if ((p_config->buttons[num].type & BUTTON_TYPE_MASK) == POV4_DOWN)
+				else if ((p_config->buttons[num].type) == POV4_DOWN)
 				{
 					pov_buf[3] &= !(1 << 1);
 					pov_buf[3] |= (p_button_state->pin_state << 1);
@@ -524,7 +524,7 @@ void ButtonsReadLogical (app_config_t * p_config)
 		{
 			int8_t btn = p_config->buttons[j].physical_num;
 			
-			if (btn == i && (p_config->buttons[j].type & 0xE0))				// we found button this shift modificator 
+			if (btn == i && (p_config->buttons[j].shift_modificator))				// we found button this shift modificator 
 			{
 				shift_num = p_config->buttons[j].shift_modificator;
 				if (shifts_state & 1<<(shift_num-1))											// shift pressed for this button
@@ -655,7 +655,7 @@ void ButtonsReadLogical (app_config_t * p_config)
 	}
 	
 	// convert data to report format
-	for (int i=0;i<pos;i++)
+	for (int i=0;i<MAX_BUTTONS_NUM;i++)
 	{
 			buttons_data[(i & 0xF8)>>3] &= ~(1 << (i & 0x07));
 			

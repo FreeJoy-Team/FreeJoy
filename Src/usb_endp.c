@@ -377,7 +377,7 @@ void EP1_OUT_Callback(void)
 			}
 			else // last packet received
 			{
-				if (tmp_config.firmware_version != FIRMWARE_VERSION)
+				if ((tmp_config.firmware_version &0xFFF0) != (FIRMWARE_VERSION & 0xFFF0))
 				{
 					GPIO_InitTypeDef GPIO_InitStructure;
 					GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
@@ -398,6 +398,7 @@ void EP1_OUT_Callback(void)
 				}
 				else
 				{
+					tmp_config.firmware_version = FIRMWARE_VERSION;
 					ConfigSet(&tmp_config);
 				}
 				

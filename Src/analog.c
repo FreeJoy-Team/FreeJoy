@@ -317,7 +317,7 @@ void AxesInit (app_config_t * p_config)
 		ADC_InitStructure.ADC_ContinuousConvMode = ENABLE;
 		ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_None;
 		ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;
-		ADC_InitStructure.ADC_NbrOfChannel = adc_cnt;
+		ADC_InitStructure.ADC_NbrOfChannel = MAX_AXIS_NUM;
 		ADC_Init(ADC1, &ADC_InitStructure);
 
 		/* Enable ADC1 DMA */
@@ -325,7 +325,6 @@ void AxesInit (app_config_t * p_config)
 	}
 	
 	uint8_t axis_num = 0;
-	uint8_t rank = 1;
 	for (int i=0; i<USED_PINS_NUM; i++)
 	{
 		// Configure Sensors channels		
@@ -339,7 +338,7 @@ void AxesInit (app_config_t * p_config)
 		if (p_config->pins[i] == AXIS_ANALOG)		// Configure ADC channels
 		{
 			/* ADC1 regular channel configuration */ 
-			ADC_RegularChannelConfig(ADC1, channel_config[i].channel, rank++, ADC_SampleTime_239Cycles5);
+			ADC_RegularChannelConfig(ADC1, channel_config[i].channel, i+1, ADC_SampleTime_239Cycles5);
 			axis_num++;
 		}
 		
@@ -352,7 +351,7 @@ void AxesInit (app_config_t * p_config)
 		DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&ADC1->DR;
 		DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t) &input_data[0];
 		DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
-		DMA_InitStructure.DMA_BufferSize = adc_cnt;
+		DMA_InitStructure.DMA_BufferSize = MAX_AXIS_NUM;
 		DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
 		DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
 		DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
@@ -391,7 +390,6 @@ void AxesProcess (app_config_t * p_config)
 {
 	int32_t tmp[MAX_AXIS_NUM];
 	float tmpf;
-	uint8_t analog_channel = 0;
 	
 	for (uint8_t i=0; i<MAX_AXIS_NUM; i++)
 	{
@@ -434,13 +432,13 @@ void AxesProcess (app_config_t * p_config)
 			{
 				if (p_config->axis_config[i].magnet_offset)
 				{
-						tmp[i] = input_data[analog_channel++] - 2047;
+						tmp[i] = input_data[source] - 2047;
 						if (tmp < 0) tmp[i] += 4095;
 						else if (tmp[i] > 4095) tmp[i] -= 4095;
 				}
 				else
 				{
-					tmp[i] = input_data[analog_channel++];
+					tmp[i] = input_data[source];
 				}
 				
 				raw_axis_data[i] = map2(tmp[i], 0, 4095, AXIS_MIN_VALUE, AXIS_MAX_VALUE);
@@ -512,13 +510,13 @@ void AxesProcess (app_config_t * p_config)
 				switch (p_config->axis_config[i].function)
 				{
 					case FUNCTION_PLUS_ABS:
-						tmp[i] = tmp[i] + tmp[p_config->axis_config[i].source_secondary];
+						tmp[i] = tmp[i]/2 + tmp[p_config->axis_config[i].source_secondary]/2;
 						break;
 					case FUNCTION_PLUS_REL:
 						tmp[i] = tmp[i] + tmp[p_config->axis_config[i].source_secondary] - AXIS_MIN_VALUE;
 						break;
 					case FUNCTION_MINUS_ABS:
-						tmp[i] = tmp[i] - tmp[p_config->axis_config[i].source_secondary];
+						tmp[i] = tmp[i]/2 - tmp[p_config->axis_config[i].source_secondary]/2;
 						break;
 					case FUNCTION_MINUS_REL:
 						tmp[i] = tmp[i] - tmp[p_config->axis_config[i].source_secondary] + AXIS_MIN_VALUE;

@@ -12,15 +12,6 @@
 #include "stdint.h"
 #include "common_defines.h"
 
-
-#define SHIFT1_MASK					0x20
-#define SHIFT2_MASK					0x40
-#define SHIFT3_MASK					0x60
-#define SHIFT4_MASK					0x80
-#define SHIFT5_MASK					0xA0
-
-#define BUTTON_TYPE_MASK		0x1F
-
 enum
 {
 	FILTER_NO = 0,
@@ -183,8 +174,10 @@ typedef struct
 
 enum
 {
-	HC165 = 0,
-	CD4021 = 1,
+	HC165_PULL_DOWN = 0,
+	CD4021_PULL_DOWN,
+	HC165_PULL_UP,
+	CD4021_PULL_UP,
 };	
 typedef uint8_t shift_reg_config_type_t;
 

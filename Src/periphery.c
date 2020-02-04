@@ -219,7 +219,7 @@ void IO_Init (app_config_t * p_config)
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13;
   GPIO_Init(GPIOC, &GPIO_InitStructure);
 	
-	while (p_config->firmware_version != FIRMWARE_VERSION)
+	while ((p_config->firmware_version & 0xFFF0) != (FIRMWARE_VERSION & 0xFFF0))
 	{
 		// blink LED if firmware version doesnt match
 		GPIOB->ODR ^= GPIO_Pin_12;

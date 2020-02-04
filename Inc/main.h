@@ -18,7 +18,7 @@
 
 static const app_config_t init_config =
 {
-	.firmware_version = 0x1322,		// do not change
+	.firmware_version = 0x1330,		// do not change
 	
 	/* 
 		Name of device in devices dispatcher
@@ -62,25 +62,25 @@ static const app_config_t init_config =
 		- BUTTON_COLUMN
 		- BUTTON_ROW
 	*/
-	.pins[0] = AXIS_ANALOG,						// PA0
-	.pins[1] = AXIS_ANALOG,						// PA1
-	.pins[2] = AXIS_ANALOG,						// PA2
-	.pins[3] = AXIS_ANALOG,						// PA3
-	.pins[4] = AXIS_ANALOG,						// PA4
-	.pins[5] = AXIS_ANALOG,						// PA5
-	.pins[6] = AXIS_ANALOG,						// PA6
-	.pins[7] = AXIS_ANALOG,						// PA7
-	.pins[8] = BUTTON_GND,						// PA8
-	.pins[9] = BUTTON_GND,						// PA9
-	.pins[10] = BUTTON_GND,						// PA10
+	.pins[0] 	= AXIS_ANALOG,					// PA0
+	.pins[1] 	= AXIS_ANALOG,					// PA1
+	.pins[2] 	= AXIS_ANALOG,					// PA2
+	.pins[3] 	= AXIS_ANALOG,					// PA3
+	.pins[4] 	= NOT_USED,							// PA4
+	.pins[5] 	= NOT_USED,							// PA5
+	.pins[6] 	= NOT_USED,							// PA6
+	.pins[7] 	= NOT_USED,							// PA7
+	.pins[8] 	= NOT_USED,							// PA8
+	.pins[9] 	= NOT_USED,							// PA9
+	.pins[10] = NOT_USED,							// PA10
 	.pins[11] = NOT_USED,							// PA15
 	.pins[12] = NOT_USED,							// PB0
 	.pins[13] = NOT_USED,							// PB1
-	.pins[14] = BUTTON_GND,						// PB3
-	.pins[15] = BUTTON_GND,						// PB4
-	.pins[16] = BUTTON_GND,						// PB5
-	.pins[17] = BUTTON_GND,						// PB6
-	.pins[18] = BUTTON_GND,						// PB7
+	.pins[14] = NOT_USED,							// PB3
+	.pins[15] = NOT_USED,							// PB4
+	.pins[16] = NOT_USED,							// PB5
+	.pins[17] = NOT_USED,							// PB6
+	.pins[18] = NOT_USED,							// PB7
 	.pins[19] = NOT_USED,							// PB8
 	.pins[20] = NOT_USED,							// PB9
 	.pins[21] = NOT_USED,							// PB10

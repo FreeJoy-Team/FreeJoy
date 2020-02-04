@@ -38,7 +38,7 @@ int main(void)
 	ConfigGet(&config);
 	
 	// set default config at first startup
-	if (config.firmware_version != FIRMWARE_VERSION)
+	if ((config.firmware_version & 0xFFF0) != (FIRMWARE_VERSION &0xFFF0))
 	{
 		ConfigSet((app_config_t *) &init_config);
 		ConfigGet(&config);

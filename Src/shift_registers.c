@@ -65,7 +65,7 @@ void ShiftRegisterRead(shift_reg_config_t * shift_register, uint8_t * data)
 	// set SCK low
 	GPIOB->ODR &= ~GPIO_Pin_3;
 	
-	if (shift_register->type == CD4021)		// positive polarity
+	if (shift_register->type == CD4021_PULL_DOWN || shift_register->type == CD4021_PULL_UP)		// positive polarity
 	{
 		// Latch impulse
 		pin_config[shift_register->pin_cs].port->ODR |= pin_config[shift_register->pin_cs].pin;
@@ -73,7 +73,7 @@ void ShiftRegisterRead(shift_reg_config_t * shift_register, uint8_t * data)
 		pin_config[shift_register->pin_cs].port->ODR &= ~pin_config[shift_register->pin_cs].pin;
 			
 	}
-	else if (shift_register->type == HC165)		// negative polarity
+	else	// HC165 negative polarity
 	{
 		// Latch impulse
 		pin_config[shift_register->pin_cs].port->ODR &= ~pin_config[shift_register->pin_cs].pin;
@@ -88,17 +88,35 @@ void ShiftRegisterRead(shift_reg_config_t * shift_register, uint8_t * data)
 		uint8_t mask = 0x80;
 		
 		data[i] = 0;
-		do
+		
+		if (shift_register->type == HC165_PULL_DOWN || shift_register->type == CD4021_PULL_DOWN)
 		{
-			GPIOB->ODR &= ~GPIO_Pin_3;			
-			if(pin_config[shift_register->pin_data].port->IDR & pin_config[shift_register->pin_data].pin)
+			do
 			{
-				data[i] |= mask; 
-			}
-			GPIOB->ODR |= GPIO_Pin_3;
-			
-			mask = mask >> 1;
-		} while (mask);
+				GPIOB->ODR &= ~GPIO_Pin_3;			
+				if(pin_config[shift_register->pin_data].port->IDR & pin_config[shift_register->pin_data].pin)
+				{
+					data[i] |= mask; 
+				}
+				GPIOB->ODR |= GPIO_Pin_3;
+				
+				mask = mask >> 1;
+			} while (mask);
+		}
+		else	// inverted connection
+		{
+			do
+			{
+				GPIOB->ODR &= ~GPIO_Pin_3;			
+				if(!(pin_config[shift_register->pin_data].port->IDR & pin_config[shift_register->pin_data].pin))
+				{
+					data[i] |= mask; 
+				}
+				GPIOB->ODR |= GPIO_Pin_3;
+				
+				mask = mask >> 1;
+			} while (mask);
+		}
 	}
 }
 
