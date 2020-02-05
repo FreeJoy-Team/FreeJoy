@@ -9,16 +9,18 @@
 #ifndef __SENSORS_H__
 #define __SENSORS_H__
 
-#include "stm32f1xx_hal.h"
 #include "common_types.h"
 #include "periphery.h"
 
-#define PI								3.1415926535
+#ifndef M_PI
+	#define M_PI							3.1415926535897932384626433832795
+#endif
+
 #define TLE501x_TIMEOUT		100
 
-int TLE501x_Get(pin_config_t * p_cs_pin_config, float * data);
-//void TLE501x_Read(uint8_t * data, uint8_t addr, uint8_t length);
-//void TLE501x_Write(uint8_t * data, uint8_t addr, uint8_t length);
+void TLE501x_StartDMA(tle_t * sensor);
+void TLE501x_StopDMA(tle_t * sensor);
+int TLE501x_GetAngle(tle_t * sensor, float * angle);
 
 #endif 	/* __SENSORS_H__ */
 

@@ -9,13 +9,15 @@
 #ifndef __ANALOG_H__
 #define __ANALOG_H__
 
-#include "stm32f1xx_hal.h"
+//#include "stm32f1xx_hal.h"
 #include "common_types.h"
 #include "periphery.h"
 
 #define FILTER_LOW_SIZE				5
 #define FILTER_MED_SIZE				10
 #define FILTER_HIGH_SIZE			20
+
+extern tle_t sensors[MAX_AXIS_NUM];
 
 typedef struct
 {
@@ -24,7 +26,7 @@ typedef struct
 	
 } adc_channel_config_t;
 
-typedef uint16_t analog_data_t;
+
 
 void AxesInit (app_config_t * p_config);
 void AxesProcess (app_config_t * p_config);

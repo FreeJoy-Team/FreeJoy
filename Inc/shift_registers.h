@@ -9,12 +9,13 @@
 #ifndef __SHIFT_REGISTERS_H__
 #define __SHIFT_REGISTERS_H__
 
-#include "stm32f1xx_hal.h"
 #include "common_types.h"
 #include "periphery.h"
 
+#define SHIFTREG_TICK_DELAY			1
+
 void ShiftRegistersInit(app_config_t * p_config);
-void ShiftRegistersProcess (buttons_state_t * button_state_buf, uint8_t * pov_buf, app_config_t * p_config, uint8_t * pos);
+void ShiftRegistersGet (uint8_t * raw_button_data_buf, app_config_t * p_config, uint8_t * pos);
 
 #endif 	/* __SHIFT_REGISTERS_H__ */
 

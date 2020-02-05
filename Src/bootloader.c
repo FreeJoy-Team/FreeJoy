@@ -1,37 +1,28 @@
 #include "bootloader.h"
 
 
-
 int main(void)
 {
-	FLASH_EraseInitTypeDef FLASH_EraseInitStruct;
-	uint32_t PageError = 0;
+
 	uint16_t program_size;
-	
-	HAL_Init();
 	
 	program_size = *(uint16_t*) (FIRMWARE_COPY_ADDR);
 	
-	FLASH_EraseInitStruct.TypeErase = FLASH_TYPEERASE_PAGES;
-	FLASH_EraseInitStruct.NbPages = 28;
-	FLASH_EraseInitStruct.PageAddress = 0x8000000;
-	
 	// erase program
-	HAL_FLASH_Unlock();
-	HAL_FLASHEx_Erase(&FLASH_EraseInitStruct, &PageError);
+	FLASH_Unlock();
+	for (uint8_t i=0; i<28; i++)
+	{
+		FLASH_ErasePage(0x8000000);
+	}
 	
 	// erase config
-	FLASH_EraseInitStruct.TypeErase = FLASH_TYPEERASE_PAGES;
-	FLASH_EraseInitStruct.NbPages = 1;
-	FLASH_EraseInitStruct.PageAddress = CONFIG_ADDR;
-	
-	HAL_FLASHEx_Erase(&FLASH_EraseInitStruct, &PageError);
+	FLASH_ErasePage(CONFIG_ADDR);
 	
 	for (uint16_t i=0; i<program_size; i+=sizeof(uint32_t))
 	{
-		HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, 0x8000000 + i, *(uint32_t*) (FIRMWARE_COPY_ADDR + 0x3C + i));
+		FLASH_ProgramHalfWord(0x8000000 + i, *(uint32_t*) (FIRMWARE_COPY_ADDR + 0x3C + i));
 	}
-	HAL_FLASH_Lock();
+	FLASH_Lock();
 	
 	EnterProgram();
 }

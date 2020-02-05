@@ -22,19 +22,52 @@ enum
 }; 
 typedef uint8_t filter_t;
 
+typedef int16_t analog_data_t;
+
+enum
+{
+	NO_FUNCTION = 0,
+	FUNCTION_PLUS_ABS,
+	FUNCTION_PLUS_REL,
+	FUNCTION_MINUS_ABS,
+	FUNCTION_MINUS_REL,
+};
+
 typedef struct
 {
-	uint16_t 				calib_min;
-	uint16_t				calib_center;
-	uint16_t 				calib_max;
-	uint8_t 				magnet_offset;
-	uint8_t					inverted;
-	filter_t 				filter;
-	int8_t				 	curve_shape[10];
-	uint8_t 				out_enabled;
+	analog_data_t 	calib_min;
+	analog_data_t		calib_center;
+	analog_data_t 	calib_max;
+	uint8_t					out_enabled: 1;
+	uint8_t					magnet_offset: 1;
+	uint8_t					inverted: 1;
+	uint8_t 				filter: 3;
+	uint8_t					:0;
+	int8_t				 	curve_shape[11];
 	uint8_t					resolution;
-	uint8_t					reserved[8];
+	uint8_t					dead_zone;
+	
+	int8_t					source_main;
+	uint8_t					function:	3;
+	uint8_t					source_secondary: 5;
+	
+	int8_t					decrement_button;
+	int8_t					center_button;
+	int8_t					increment_button;
+	uint8_t					step;
+	uint8_t					reserved[4];
+	
 } axis_config_t;
+
+typedef struct
+{
+	uint8_t 	data[6];
+	uint8_t 	rx_complete;
+	uint8_t 	tx_complete;
+	int8_t 		cs_pin;
+	uint32_t	ok_cnt;
+	uint32_t 	err_cnt;
+} tle_t;
 
 enum
 {
@@ -52,7 +85,7 @@ enum
 	SPI_SCK = 7,
 
   TLE5011_CS,
-  TLE5011_DATA,
+  SPI_DATA,
   TLE5011_GEN,
 
   SHIFT_REG_CS,
@@ -90,14 +123,27 @@ enum
 	ENCODER_INPUT_A,
 	ENCODER_INPUT_B,
 	
+	RADIO_BUTTON1,
+	RADIO_BUTTON2,
+	RADIO_BUTTON3,
+	RADIO_BUTTON4,
+	
 };
-typedef uint8_t button_t;
+typedef uint8_t button_type_t;
+
+typedef struct button_t
+{
+	int8_t					physical_num;
+	button_type_t 	type : 5;
+	uint8_t					shift_modificator: 3;	
+	
+}	button_t;
 
 typedef struct buttons_state_t
 {
   uint64_t time_last;	
 	uint8_t pin_state;
-	uint8_t pin_prev_state;
+	//uint8_t pin_prev_state;
 	uint8_t prev_state;
 	uint8_t current_state;
 	uint8_t changed;	
@@ -113,6 +159,8 @@ typedef struct
 	int16_t 				cnt;	
 	int8_t 					pin_a;
 	int8_t 					pin_b;
+	int8_t					dir;
+	int8_t					last_dir;
 	
 } encoder_t;
 
@@ -126,8 +174,10 @@ typedef struct
 
 enum
 {
-	HC165 = 0,
-	CD4021 = 1,
+	HC165_PULL_DOWN = 0,
+	CD4021_PULL_DOWN,
+	HC165_PULL_UP,
+	CD4021_PULL_UP,
 };	
 typedef uint8_t shift_reg_config_type_t;
 
@@ -139,6 +189,19 @@ typedef struct
 	int8_t 				pin_data;
 	
 } shift_reg_config_t;
+
+enum
+{
+	SHIFT_NORMAL = 0,
+	SHIFT_INVERTED,
+	
+};
+
+typedef struct 
+{
+	int8_t 				button;
+	
+} shift_modificator_t;
 
 typedef struct 
 {
@@ -155,30 +218,30 @@ typedef struct
 	
 	// config 2-5
 	axis_config_t 			axis_config[MAX_AXIS_NUM];
-	uint8_t							reserved_5[8];
-	// config 6-7-8
+	
+	// config 6-7-8-9-10
 	button_t 						buttons[MAX_BUTTONS_NUM];
 	
-	// config 8-9
+	// config 10-11-12
 	axis_to_buttons_t		axes_to_buttons[MAX_AXIS_NUM];
 	
-	// config 10	
+	// config 12	
 	shift_reg_config_t	shift_registers[4];
-	uint8_t							reserved_10[46];
+	shift_modificator_t	shift_config[5];
+	uint8_t							reserved_10[31];
 }app_config_t;
 
 typedef struct
 {
-	uint8_t 		dummy;
-	uint8_t 		id;
-	uint8_t 		button_data[MAX_BUTTONS_NUM/8];
-	uint16_t 		axis_data[MAX_AXIS_NUM];
-	uint8_t 		pov_data[MAX_POVS_NUM];
-	uint16_t		raw_axis_data[MAX_AXIS_NUM];
+	uint8_t 				dummy;
+	uint8_t 				id;
+	uint8_t 				button_data[MAX_BUTTONS_NUM/8];
+	int16_t			 		axis_data[MAX_AXIS_NUM];
+	uint8_t 				pov_data[MAX_POVS_NUM];
+	int16_t					raw_axis_data[MAX_AXIS_NUM];
+	uint8_t					raw_button_data[9];
 	
 } joy_report_t;
-
-
 
 
 

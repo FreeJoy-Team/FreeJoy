@@ -9,15 +9,20 @@
 #ifndef __COMMON_DEFINES_H__
 #define __COMMON_DEFINES_H__
 
-//#define DEBUG
+#define DEBUG
 
-#define FIRMWARE_VERSION					0x0102			// v1.01
+#define FIRMWARE_VERSION					0x1332			// v1.3.3b2
 #define USED_PINS_NUM							30					// constant for BluePill and BlackPill boards
 #define MAX_AXIS_NUM							8						// max 8
 #define MAX_BUTTONS_NUM						128					// power of 2, max 128
 #define MAX_POVS_NUM							4						// max 4
-#define MAX_ENCODERS_NUM					64					// max 64
+#define MAX_ENCODERS_NUM					16					// max 64
 #define MAX_SHIFT_REG_NUM					4						// max 4
+
+#define AXIS_MIN_VALUE						(-32767)
+#define AXIS_MAX_VALUE						(32767)
+#define AXIS_CENTER_VALUE					(AXIS_MIN_VALUE + (AXIS_MAX_VALUE-AXIS_MIN_VALUE)/2)
+#define AXIS_FULLSCALE						(AXIS_MAX_VALUE - AXIS_MIN_VALUE)
 
 #define CONFIG_ADDR								(0x0800FC00)
 #define FIRMWARE_COPY_ADDR				(0x8000000 + 0x7000)

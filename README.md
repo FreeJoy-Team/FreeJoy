@@ -10,7 +10,7 @@ FreeJoy supports the following external periphery:
 * 8 analog inputs
 * 128 push buttons or toggle switches
 * 4 POV hats
-* Incremental encoders
+* 16 Incremental encoders
 * Converting analog inputs to buttons (up to 12 buttons per axis)
 * Shift registers 74HC165 and CD4021 for extending inpits number
 * TLE5010/TLE5011 sensors as axes sources
@@ -18,13 +18,17 @@ FreeJoy supports the following external periphery:
 ## Axes
 FreeJoy supports up to 8 analog inputs at pins A0-A7 and TLE5010/5011 sensors as axes sources. Every axis has its ouw settings as:
 
+* Source/destination (X, Y, Z, Rx, Ry, Rz, Slider1, Slider2)
 * Output enabling/disabling
 * Resolution
 * Calibration (manual or automatical)
 * Smothing (4 levels of filtration)
 * Invertion
+* Dead zone
 * Magnet offset option
 * Curve shaping
+* Functions for combined axes
+* Axes from buttons/encoders
 
 ## Buttons
 FreeJoy allows you to connect up to 128 digital inputs as single inputs (tied to VCC or GND), matrix of buttons, shift register inputs and axes to buttons inputs. Inputs can be configured as:
@@ -36,6 +40,8 @@ FreeJoy allows you to connect up to 128 digital inputs as single inputs (tied to
 * Toggle switch OFF
 * POV hat button
 * Incremental encoder input
+* Radio buttons
+* 5 shifts
 
 ## Exrenal configuration tool 
 FreeJoy configuration is possible both by changing definitions in source code and by using external [utility](https://github.com/vostrenkov/FreeJoyConfigurator).
