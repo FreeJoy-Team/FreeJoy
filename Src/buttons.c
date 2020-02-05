@@ -657,13 +657,28 @@ void ButtonsReadLogical (app_config_t * p_config)
 	// convert data to report format
 	for (int i=0;i<MAX_BUTTONS_NUM;i++)
 	{
+			uint8_t is_button_to_axis = 0;
 			buttons_data[(i & 0xF8)>>3] &= ~(1 << (i & 0x07));
 			
-			if (i != p_config->shift_config[0].button &&
-					i != p_config->shift_config[1].button &&
-					i != p_config->shift_config[2].button &&
-					i != p_config->shift_config[3].button &&
-					i != p_config->shift_config[4].button)
+			// buttons is mapped to shift
+			if (i == p_config->shift_config[0].button ||
+					i == p_config->shift_config[1].button ||
+					i == p_config->shift_config[2].button ||
+					i == p_config->shift_config[3].button ||
+					i == p_config->shift_config[4].button)	continue;
+			
+			for (uint8_t j=0; j<MAX_AXIS_NUM; j++)
+			{
+				// button is mapped to axis
+				if (i == p_config->axis_config[j].decrement_button ||
+						i == p_config->axis_config[j].increment_button)
+				{
+					is_button_to_axis = 1;
+					break;
+				}
+			}
+
+			if (!is_button_to_axis)
 			{
 				buttons_data[(i & 0xF8)>>3] |= (buttons_state[i].current_state << (i & 0x07));
 			}

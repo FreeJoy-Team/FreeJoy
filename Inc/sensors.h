@@ -12,7 +12,10 @@
 #include "common_types.h"
 #include "periphery.h"
 
-#define M_PI							3.1415926535897932384626433832795
+#ifndef M_PI
+	#define M_PI							3.1415926535897932384626433832795
+#endif
+
 #define TLE501x_TIMEOUT		100
 
 void TLE501x_StartDMA(tle_t * sensor);

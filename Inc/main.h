@@ -18,7 +18,7 @@
 
 static const app_config_t init_config =
 {
-	.firmware_version = 0x1330,		// do not change
+	.firmware_version = 0x1332,		// do not change
 	
 	/* 
 		Name of device in devices dispatcher
@@ -44,7 +44,7 @@ static const app_config_t init_config =
 	.device_name[18] = 0,
 	.device_name[19] = 0,			
 	
-	.button_debounce_ms = 30,					// debounce time for all buttons
+	.button_debounce_ms = 50,					// debounce time for all buttons
 	
 	.toggle_press_time_ms = 200,			// amount of millisecods virtual button 
 																		// will be pressed at toggle switch event

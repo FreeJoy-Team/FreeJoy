@@ -424,8 +424,10 @@ void EP1_OUT_Callback(void)
 					FLASH_Unlock();
 					for (uint8_t i=0; i<28; i++)
 					{
-						FLASH_ErasePage(FIRMWARE_COPY_ADDR);
-					
+						if (FLASH_ErasePage(FIRMWARE_COPY_ADDR +i*0x400) != FLASH_COMPLETE)
+						{
+							firmware_in_cnt = 0xF003;	// flash erase error
+						}							
 					}
 					for (uint8_t i=0;i<60;i+=2)
 					{
@@ -437,7 +439,7 @@ void EP1_OUT_Callback(void)
 				}
 				else // firmware size error
 				{
-					
+					firmware_in_cnt = 0xF001;
 				}
 			}
 			else if ( (firmware_len > 0) && (cnt*60 < firmware_len) )		// body of firmware data
@@ -467,9 +469,13 @@ void EP1_OUT_Callback(void)
 				if (crc_in == crc_comp && crc_comp != 0)
 				{
 					bootloader = 1;
+					firmware_in_cnt = 0xF000;	// OK
+				}
+				else	// CRC error
+				{
+					firmware_in_cnt = 0xF002;
 				}
 			}
-			else break;
 			
 			if (firmware_in_cnt > 0)
 			{

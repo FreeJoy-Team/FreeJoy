@@ -61,6 +61,7 @@ int main(void)
 		// jump to bootloader if new firmware received
 		if (bootloader > 0)
 		{
+			Delay_ms(50);	// time to let HID end last transmission
 			EnterBootloader();
 		}
   }
