@@ -46,12 +46,14 @@
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
+uint16_t usb_vid = 0x0483;
+uint16_t usb_pid = 0x5750;
 /* Extern variables ----------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
 /* USB Standard Device Descriptor */
-const uint8_t CustomHID_DeviceDescriptor[CUSTOMHID_SIZ_DEVICE_DESC] =
+uint8_t CustomHID_DeviceDescriptor[CUSTOMHID_SIZ_DEVICE_DESC] =
   {
     0x12,                       /*bLength */
     USB_DEVICE_DESCRIPTOR_TYPE, /*bDescriptorType*/
@@ -61,10 +63,10 @@ const uint8_t CustomHID_DeviceDescriptor[CUSTOMHID_SIZ_DEVICE_DESC] =
     0x00,                       /*bDeviceSubClass*/
     0x00,                       /*bDeviceProtocol*/
     0x40,                       /*bMaxPacketSize40*/
-    0x83,                       /*idVendor (0x0483)*/
-    0x04,
-    0x50,                       /*idProduct = 0x5750*/
-    0x57,
+    0x04,            						/*idVendor = 0x0483 */
+    0x83,
+    0x57,						            /*idProduct = 0x5750*/
+    0x50,            
     0x00,                       /*bcdDevice rel. 2.00*/
     0x02,
     1,                          /*Index of string descriptor describing
@@ -80,7 +82,7 @@ const uint8_t CustomHID_DeviceDescriptor[CUSTOMHID_SIZ_DEVICE_DESC] =
 
 /* USB Configuration Descriptor */
 /*   All Descriptors (Configuration, Interface, Endpoint, Class, Vendor */
-const uint8_t CustomHID_ConfigDescriptor[CUSTOMHID_SIZ_CONFIG_DESC] =
+uint8_t CustomHID_ConfigDescriptor[CUSTOMHID_SIZ_CONFIG_DESC] =
   {
     0x09, /* bLength: Configuration Descriptor size */
     USB_CONFIGURATION_DESCRIPTOR_TYPE, /* bDescriptorType: Configuration */
@@ -140,7 +142,7 @@ const uint8_t CustomHID_ConfigDescriptor[CUSTOMHID_SIZ_CONFIG_DESC] =
     /* 41 */
   }
   ; /* CustomHID_ConfigDescriptor */
-const uint8_t CustomHID_ReportDescriptor[CUSTOMHID_SIZ_REPORT_DESC] =
+uint8_t CustomHID_ReportDescriptor[CUSTOMHID_SIZ_REPORT_DESC] =
   {                    
     0x05, 0x01,                    // USAGE_PAGE (Generic Desktop)
     0x09, 0x04,                    // USAGE (Joystick)
@@ -245,7 +247,7 @@ const uint8_t CustomHID_ReportDescriptor[CUSTOMHID_SIZ_REPORT_DESC] =
   }; /* CustomHID_ReportDescriptor */
 
 /* USB String Descriptors (optional) */
-const uint8_t CustomHID_StringLangID[CUSTOMHID_SIZ_STRING_LANGID] =
+uint8_t CustomHID_StringLangID[CUSTOMHID_SIZ_STRING_LANGID] =
   {
     CUSTOMHID_SIZ_STRING_LANGID,
     USB_STRING_DESCRIPTOR_TYPE,
@@ -254,7 +256,7 @@ const uint8_t CustomHID_StringLangID[CUSTOMHID_SIZ_STRING_LANGID] =
   }
   ; /* LangID = 0x0409: U.S. English */
 
-const uint8_t CustomHID_StringVendor[CUSTOMHID_SIZ_STRING_VENDOR] =
+uint8_t CustomHID_StringVendor[CUSTOMHID_SIZ_STRING_VENDOR] =
   {
     CUSTOMHID_SIZ_STRING_VENDOR, /* Size of Vendor string */
     USB_STRING_DESCRIPTOR_TYPE,  /* bDescriptorType*/

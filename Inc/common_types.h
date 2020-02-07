@@ -228,7 +228,9 @@ typedef struct
 	// config 12	
 	shift_reg_config_t	shift_registers[4];
 	shift_modificator_t	shift_config[5];
-	uint8_t							reserved_10[31];
+	uint16_t						vid;
+	uint16_t						pid;
+	uint8_t							reserved_10[27];
 }app_config_t;
 
 typedef struct

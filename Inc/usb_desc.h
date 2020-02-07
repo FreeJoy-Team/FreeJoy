@@ -66,11 +66,11 @@
 #define STANDARD_ENDPOINT_DESC_SIZE             0x09
 
 /* Exported functions ------------------------------------------------------- */
-extern const uint8_t CustomHID_DeviceDescriptor[CUSTOMHID_SIZ_DEVICE_DESC];
-extern const uint8_t CustomHID_ConfigDescriptor[CUSTOMHID_SIZ_CONFIG_DESC];
-extern const uint8_t CustomHID_ReportDescriptor[CUSTOMHID_SIZ_REPORT_DESC];
-extern const uint8_t CustomHID_StringLangID[CUSTOMHID_SIZ_STRING_LANGID];
-extern const uint8_t CustomHID_StringVendor[CUSTOMHID_SIZ_STRING_VENDOR];
+extern uint8_t CustomHID_DeviceDescriptor[CUSTOMHID_SIZ_DEVICE_DESC];
+extern uint8_t CustomHID_ConfigDescriptor[CUSTOMHID_SIZ_CONFIG_DESC];
+extern uint8_t CustomHID_ReportDescriptor[CUSTOMHID_SIZ_REPORT_DESC];
+extern uint8_t CustomHID_StringLangID[CUSTOMHID_SIZ_STRING_LANGID];
+extern uint8_t CustomHID_StringVendor[CUSTOMHID_SIZ_STRING_VENDOR];
 extern uint8_t CustomHID_StringProduct[CUSTOMHID_SIZ_STRING_PRODUCT];
 extern uint8_t CustomHID_StringSerial[CUSTOMHID_SIZ_STRING_SERIAL];
 

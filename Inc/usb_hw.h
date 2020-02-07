@@ -42,6 +42,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x.h"
+#include "common_types.h"
 #include "usb_type.h"
 
 /* Exported types ------------------------------------------------------------*/
@@ -51,7 +52,7 @@
 /* Exported functions ------------------------------------------------------- */
 void Get_SerialNum(void);
 void Get_ProductStr(void);
-void USB_HW_Init(void);
+void USB_HW_Init(app_config_t * p_config);
 
 #endif  /*__USB_HW_H*/
 

@@ -252,7 +252,7 @@ static void AsciiToUnicode (uint8_t * pbuf_in , uint8_t *pbuf_out , uint8_t len)
   }
 }
 
-void USB_HW_Init(void)
+void USB_HW_Init(app_config_t * p_config)
 {
 	Set_System();
 
