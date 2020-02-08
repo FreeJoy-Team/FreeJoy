@@ -9,9 +9,9 @@
 #ifndef __COMMON_DEFINES_H__
 #define __COMMON_DEFINES_H__
 
-#define DEBUG
+//#define DEBUG
 
-#define FIRMWARE_VERSION					0x1332			// v1.3.3b2
+#define FIRMWARE_VERSION					0x1333			// v1.3.3b3
 #define USED_PINS_NUM							30					// constant for BluePill and BlackPill boards
 #define MAX_AXIS_NUM							8						// max 8
 #define MAX_BUTTONS_NUM						128					// power of 2, max 128

@@ -81,7 +81,6 @@ void ShiftRegisterRead(shift_reg_config_t * shift_register, uint8_t * data)
 		pin_config[shift_register->pin_cs].port->ODR |= pin_config[shift_register->pin_cs].pin;			
 	}
 	
-	
 	reg_cnt = (uint8_t) ((float)shift_register->button_cnt/8.0);		// number of data bytes to read
 	for (uint8_t i=0; i<reg_cnt; i++)
 	{
@@ -93,12 +92,15 @@ void ShiftRegisterRead(shift_reg_config_t * shift_register, uint8_t * data)
 		{
 			do
 			{
-				GPIOB->ODR &= ~GPIO_Pin_3;			
+				GPIOB->ODR &= ~GPIO_Pin_3;
+				for (int i=0; i<SHIFTREG_TICK_DELAY; i++) __NOP();				
 				if(pin_config[shift_register->pin_data].port->IDR & pin_config[shift_register->pin_data].pin)
 				{
 					data[i] |= mask; 
 				}
-				GPIOB->ODR |= GPIO_Pin_3;
+				GPIOB->ODR |= GPIO_Pin_3;			
+				
+				
 				
 				mask = mask >> 1;
 			} while (mask);
@@ -107,12 +109,15 @@ void ShiftRegisterRead(shift_reg_config_t * shift_register, uint8_t * data)
 		{
 			do
 			{
-				GPIOB->ODR &= ~GPIO_Pin_3;			
+				GPIOB->ODR &= ~GPIO_Pin_3;
+				for (int i=0; i<SHIFTREG_TICK_DELAY; i++) __NOP();
 				if(!(pin_config[shift_register->pin_data].port->IDR & pin_config[shift_register->pin_data].pin))
 				{
 					data[i] |= mask; 
-				}
-				GPIOB->ODR |= GPIO_Pin_3;
+				}				
+				GPIOB->ODR |= GPIO_Pin_3;			
+					
+				
 				
 				mask = mask >> 1;
 			} while (mask);
