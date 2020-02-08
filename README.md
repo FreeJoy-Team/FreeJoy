@@ -2,7 +2,7 @@
 
 <img src="https://d.radikal.ru/d10/2002/9e/660f8758e3d8.png">
 
-FreeJoy is widely configurable game device controller based on cheap STM32F103C8 microcontroller board. It allows you to create your own HOTAS, pedals, steering wheel device and customize a purchased one.
+FreeJoy is widely configurable game device controller based on cheap STM32F103C8 microcontroller board. It allows you to create your own HOTAS, pedals, steering wheel device or customize a purchased one.
 
 ## Features
 FreeJoy supports the following external periphery:

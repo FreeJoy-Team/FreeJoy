@@ -62,6 +62,8 @@ int main(void)
 		if (bootloader > 0)
 		{
 			Delay_ms(50);	// time to let HID end last transmission
+			// Disable USB
+			PowerOff();
 			EnterBootloader();
 		}
   }

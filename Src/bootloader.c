@@ -12,7 +12,7 @@ int main(void)
 	FLASH_Unlock();
 	for (uint8_t i=0; i<28; i++)
 	{
-		FLASH_ErasePage(0x8000000);
+		FLASH_ErasePage(0x8000000 + i*0x400);
 	}
 	
 	// erase config
@@ -20,7 +20,7 @@ int main(void)
 	
 	for (uint16_t i=0; i<program_size; i+=sizeof(uint32_t))
 	{
-		FLASH_ProgramHalfWord(0x8000000 + i, *(uint32_t*) (FIRMWARE_COPY_ADDR + 0x3C + i));
+		FLASH_ProgramWord(0x8000000 + i, *(uint32_t*) (FIRMWARE_COPY_ADDR + 0x3C + i));
 	}
 	FLASH_Lock();
 	
