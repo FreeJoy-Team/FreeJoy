@@ -252,6 +252,25 @@ static void AsciiToUnicode (uint8_t * pbuf_in , uint8_t *pbuf_out , uint8_t len)
   }
 }
 
+/*******************************************************************************
+* Function Name  : Get_VidPid.
+* Description    : Change VID and PID.
+* Input          : None.
+* Output         : None.
+* Return         : None.
+*******************************************************************************/
+void Get_VidPid(void)
+{
+	app_config_t tmp;
+	
+	ConfigGet(&tmp);
+	
+  CustomHID_DeviceDescriptor[8] = LOBYTE(tmp.vid);
+	CustomHID_DeviceDescriptor[9] = HIBYTE(tmp.vid);
+	CustomHID_DeviceDescriptor[10] = LOBYTE(tmp.pid);
+	CustomHID_DeviceDescriptor[11] = HIBYTE(tmp.pid);
+}
+
 void USB_HW_Init(app_config_t * p_config)
 {
 	Set_System();

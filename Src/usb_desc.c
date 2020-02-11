@@ -63,10 +63,10 @@ uint8_t CustomHID_DeviceDescriptor[CUSTOMHID_SIZ_DEVICE_DESC] =
     0x00,                       /*bDeviceSubClass*/
     0x00,                       /*bDeviceProtocol*/
     0x40,                       /*bMaxPacketSize40*/
-    0x04,            						/*idVendor = 0x0483 */
-    0x83,
-    0x57,						            /*idProduct = 0x5750*/
-    0x50,            
+    0x83,            						/*idVendor = 0x0483 */
+    0x04,
+    0x50,						            /*idProduct = 0x5750*/
+    0x57,            
     0x00,                       /*bcdDevice rel. 2.00*/
     0x02,
     1,                          /*Index of string descriptor describing

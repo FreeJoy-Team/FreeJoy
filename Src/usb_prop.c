@@ -146,6 +146,7 @@ void CustomHID_init(void)
   ID*/
   Get_SerialNum();
 	Get_ProductStr();
+	Get_VidPid();
     
   pInformation->Current_Configuration = 0;
   /* Connect the device */

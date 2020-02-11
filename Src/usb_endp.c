@@ -213,6 +213,11 @@ void EP1_OUT_Callback(void)
 						pos += sizeof(shift_modificator_t);
 						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.shift_config[4]), sizeof(shift_modificator_t));
 						pos += sizeof(shift_modificator_t);
+						
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.vid), sizeof(tmp_config.vid));
+						pos += sizeof(tmp_config.vid);
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_config.pid), sizeof(tmp_config.pid));
+						pos += sizeof(tmp_config.pid);
 						break;
 						
 					default:
@@ -359,6 +364,12 @@ void EP1_OUT_Callback(void)
 					pos += sizeof(shift_modificator_t);
 					memcpy((uint8_t *) &(tmp_config.shift_config[4]), &hid_buf[pos], sizeof(shift_modificator_t));
 					pos += sizeof(shift_modificator_t);
+					
+					memcpy((uint8_t *) &(tmp_config.vid), &hid_buf[pos], sizeof(tmp_config.vid));
+					pos += sizeof(tmp_config.vid);
+					memcpy((uint8_t *) &(tmp_config.pid), &hid_buf[pos], sizeof(tmp_config.pid));
+					pos += sizeof(tmp_config.pid);
+					
 				}					
 					break;
 				

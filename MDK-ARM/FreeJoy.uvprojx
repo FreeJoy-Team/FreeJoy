@@ -543,6 +543,11 @@
               <FileType>5</FileType>
               <FilePath>..\Inc\common_types.h</FilePath>
             </File>
+            <File>
+              <FileName>main.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Inc\main.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1331,6 +1336,11 @@
               <FileName>common_types.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\Inc\common_types.h</FilePath>
+            </File>
+            <File>
+              <FileName>main.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Inc\main.h</FilePath>
             </File>
           </Files>
         </Group>
