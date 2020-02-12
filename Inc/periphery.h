@@ -42,7 +42,7 @@ uint64_t GetTick(void);
 void Delay_ms(__IO uint32_t nTime);
 void Delay_us(__IO uint32_t nTime);
 
-void IO_Init (app_config_t * p_config);
+void IO_Init (dev_config_t * p_dev_config);
 
 
 

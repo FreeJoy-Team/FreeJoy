@@ -260,10 +260,10 @@ analog_data_t ShapeFunc (axis_config_t * p_axis_cfg,  analog_data_t value, uint8
 
 /**
   * @brief  Axes initialization after startup
-	*	@param	p_config: Pointer to device configuration structure
+	*	@param	p_dev_config: Pointer to device configuration structure
   * @retval None
   */
-void AxesInit (app_config_t * p_config)
+void AxesInit (dev_config_t * p_dev_config)
 {
 	uint8_t adc_cnt = 0;
 	uint8_t sensors_cnt = 0;
@@ -285,11 +285,11 @@ void AxesInit (app_config_t * p_config)
 	// Count ADC channels
 	for (int i=0; i<USED_PINS_NUM; i++)
 	{
-		if (p_config->pins[i] == AXIS_ANALOG)
+		if (p_dev_config->pins[i] == AXIS_ANALOG)
 		{
 			adc_cnt++;
 		}
-		else if (p_config->pins[i] == TLE5011_CS)
+		else if (p_dev_config->pins[i] == TLE5011_CS)
 		{
 						
 			sensors[sensors_cnt].cs_pin = i;
@@ -328,14 +328,14 @@ void AxesInit (app_config_t * p_config)
 	for (int i=0; i<USED_PINS_NUM; i++)
 	{
 		// Configure Sensors channels		
-		if (p_config->pins[i] == TLE5011_CS)
+		if (p_dev_config->pins[i] == TLE5011_CS)
 		{
 			axis_num++;
 		}
 	}
 	for (int i=0; i<MAX_AXIS_NUM; i++)
 	{ 
-		if (p_config->pins[i] == AXIS_ANALOG)		// Configure ADC channels
+		if (p_dev_config->pins[i] == AXIS_ANALOG)		// Configure ADC channels
 		{
 			/* ADC1 regular channel configuration */ 
 			ADC_RegularChannelConfig(ADC1, channel_config[i].channel, i+1, ADC_SampleTime_239Cycles5);
@@ -383,10 +383,10 @@ void AxesInit (app_config_t * p_config)
 
 /**
   * @brief  Axes data processing routine
-	*	@param	p_config: Pointer to device configuration structure
+	*	@param	p_dev_config: Pointer to device configuration structure
   * @retval None
   */
-void AxesProcess (app_config_t * p_config)
+void AxesProcess (dev_config_t * p_dev_config)
 {
 	int32_t tmp[MAX_AXIS_NUM];
 	float tmpf;
@@ -394,12 +394,12 @@ void AxesProcess (app_config_t * p_config)
 	for (uint8_t i=0; i<MAX_AXIS_NUM; i++)
 	{
 		
-		int8_t source = p_config->axis_config[i].source_main;
+		int8_t source = p_dev_config->axis_config[i].source_main;
 		
 		if (source >= 0)
 		{
 			// source TLE501x
-			if (p_config->pins[source] == TLE5011_CS)
+			if (p_dev_config->pins[source] == TLE5011_CS)
 			{
 				tmpf = 0;
 				uint8_t k=0;
@@ -412,7 +412,7 @@ void AxesProcess (app_config_t * p_config)
 				if (TLE501x_GetAngle(&sensors[k], &tmpf) == 0)
 				{
 					sensors[k].ok_cnt++;
-					if (p_config->axis_config[i].magnet_offset)
+					if (p_dev_config->axis_config[i].magnet_offset)
 					{
 						tmpf -= 180;
 						if (tmpf < -180) tmpf += 360;
@@ -428,9 +428,9 @@ void AxesProcess (app_config_t * p_config)
 				}
 			}
 			// source analog
-			else if (p_config->pins[source] == AXIS_ANALOG)
+			else if (p_dev_config->pins[source] == AXIS_ANALOG)
 			{
-				if (p_config->axis_config[i].magnet_offset)
+				if (p_dev_config->axis_config[i].magnet_offset)
 				{
 						tmp[i] = input_data[source] - 2047;
 						if (tmp < 0) tmp[i] += 4095;
@@ -454,30 +454,30 @@ void AxesProcess (app_config_t * p_config)
 			axes_buttons[i][1].prev_state = axes_buttons[i][1].current_state;
 			axes_buttons[i][2].prev_state = axes_buttons[i][2].current_state;
 			
-			axes_buttons[i][0].current_state = buttons_state[p_config->axis_config[i].decrement_button].current_state;
-			axes_buttons[i][1].current_state = buttons_state[p_config->axis_config[i].increment_button].current_state;
-			axes_buttons[i][2].current_state = buttons_state[p_config->axis_config[i].center_button].current_state;
+			axes_buttons[i][0].current_state = buttons_state[p_dev_config->axis_config[i].decrement_button].current_state;
+			axes_buttons[i][1].current_state = buttons_state[p_dev_config->axis_config[i].increment_button].current_state;
+			axes_buttons[i][2].current_state = buttons_state[p_dev_config->axis_config[i].center_button].current_state;
 			
       			// decrement
       if (axes_buttons[i][0].current_state && !axes_buttons[i][0].prev_state)
       {
-        tmp32 -= AXIS_FULLSCALE * p_config->axis_config[i].step / 255;
+        tmp32 -= AXIS_FULLSCALE * p_dev_config->axis_config[i].step / 255;
       }
 			else if (axes_buttons[i][0].prev_state && millis - axes_buttons[i][0].time_last > 200)
 			{
 				axes_buttons[i][0].time_last = millis;
-        tmp32 -= AXIS_FULLSCALE * p_config->axis_config[i].step / 255;
+        tmp32 -= AXIS_FULLSCALE * p_dev_config->axis_config[i].step / 255;
 			}
 			
 			// increment
       if (axes_buttons[i][1].current_state && !axes_buttons[i][1].prev_state)
       {
-        tmp32 += AXIS_FULLSCALE * p_config->axis_config[i].step / 255;
+        tmp32 += AXIS_FULLSCALE * p_dev_config->axis_config[i].step / 255;
       }
 			else if (axes_buttons[i][1].prev_state && millis - axes_buttons[i][1].time_last > 200)
 			{
 				axes_buttons[i][1].time_last = millis;
-        tmp32 += AXIS_FULLSCALE * p_config->axis_config[i].step / 255;
+        tmp32 += AXIS_FULLSCALE * p_dev_config->axis_config[i].step / 255;
 			}
 			
 			// center
@@ -493,24 +493,24 @@ void AxesProcess (app_config_t * p_config)
     }
 		
 		// Filtering
-		tmp[i] = Filter(raw_axis_data[i], filter_buffer[i], p_config->axis_config[i].filter);
+		tmp[i] = Filter(raw_axis_data[i], filter_buffer[i], p_dev_config->axis_config[i].filter);
 			
     // Scale output data
     tmp[i] = map3( tmp[i], 
-                 p_config->axis_config[i].calib_min,
-                 p_config->axis_config[i].calib_center,    
-                 p_config->axis_config[i].calib_max, 
+                 p_dev_config->axis_config[i].calib_min,
+                 p_dev_config->axis_config[i].calib_center,    
+                 p_dev_config->axis_config[i].calib_max, 
                  AXIS_MIN_VALUE,
                  AXIS_CENTER_VALUE,
                  AXIS_MAX_VALUE,
-                 p_config->axis_config[i].dead_zone);    
+                 p_dev_config->axis_config[i].dead_zone);    
     // Shaping
-    tmp[i] = ShapeFunc(&p_config->axis_config[i], tmp[i], 11);
+    tmp[i] = ShapeFunc(&p_dev_config->axis_config[i], tmp[i], 11);
     // Lowing resolution if needed
-    tmp[i] = SetResolutioin(tmp[i], p_config->axis_config[i].resolution);
+    tmp[i] = SetResolutioin(tmp[i], p_dev_config->axis_config[i].resolution);
     
     // Invertion
-    if (p_config->axis_config[i].inverted > 0)
+    if (p_dev_config->axis_config[i].inverted > 0)
     {
       tmp[i] = 0 - tmp[i];
     }
@@ -519,22 +519,22 @@ void AxesProcess (app_config_t * p_config)
 	for (uint8_t i=0; i<MAX_AXIS_NUM; i++)
 	{
 		// Multi-axis process
-		if (p_config->axis_config[i].function != NO_FUNCTION)
+		if (p_dev_config->axis_config[i].function != NO_FUNCTION)
 		{
 			{
-				switch (p_config->axis_config[i].function)
+				switch (p_dev_config->axis_config[i].function)
 				{
 					case FUNCTION_PLUS_ABS:
-						tmp[i] = tmp[i]/2 + tmp[p_config->axis_config[i].source_secondary]/2;
+						tmp[i] = tmp[i]/2 + tmp[p_dev_config->axis_config[i].source_secondary]/2;
 						break;
 					case FUNCTION_PLUS_REL:
-						tmp[i] = tmp[i] + tmp[p_config->axis_config[i].source_secondary] - AXIS_MIN_VALUE;
+						tmp[i] = tmp[i] + tmp[p_dev_config->axis_config[i].source_secondary] - AXIS_MIN_VALUE;
 						break;
 					case FUNCTION_MINUS_ABS:
-						tmp[i] = tmp[i]/2 - tmp[p_config->axis_config[i].source_secondary]/2;
+						tmp[i] = tmp[i]/2 - tmp[p_dev_config->axis_config[i].source_secondary]/2;
 						break;
 					case FUNCTION_MINUS_REL:
-						tmp[i] = tmp[i] - tmp[p_config->axis_config[i].source_secondary] + AXIS_MIN_VALUE;
+						tmp[i] = tmp[i] - tmp[p_dev_config->axis_config[i].source_secondary] + AXIS_MIN_VALUE;
 						break;
 					default:
 						break;
@@ -548,7 +548,7 @@ void AxesProcess (app_config_t * p_config)
     // setting technical axis data
     scaled_axis_data[i] = tmp[i];
     // setting output axis data
-    if (p_config->axis_config[i].out_enabled)  out_axis_data[i] = tmp[i];
+    if (p_dev_config->axis_config[i].out_enabled)  out_axis_data[i] = tmp[i];
     else  out_axis_data[i] = 0;
 		
 	}
@@ -557,15 +557,15 @@ void AxesProcess (app_config_t * p_config)
 
 /**
   * @brief  Resetting axis calibration values to the default
-	*	@param	p_config: Pointer to device configuration structure
+	*	@param	p_dev_config: Pointer to device configuration structure
 	*	@param	axis_num: Number of axis 
   * @retval None
   */
-void AxisResetCalibration (app_config_t * p_config, uint8_t axis_num)
+void AxisResetCalibration (dev_config_t * p_dev_config, uint8_t axis_num)
 {
-	p_config->axis_config[axis_num].calib_max = AXIS_MIN_VALUE;
-	p_config->axis_config[axis_num].calib_center = AXIS_CENTER_VALUE;
-	p_config->axis_config[axis_num].calib_min = AXIS_MAX_VALUE;
+	p_dev_config->axis_config[axis_num].calib_max = AXIS_MIN_VALUE;
+	p_dev_config->axis_config[axis_num].calib_center = AXIS_CENTER_VALUE;
+	p_dev_config->axis_config[axis_num].calib_min = AXIS_MAX_VALUE;
 }
 
 /**

@@ -39,7 +39,7 @@
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 volatile int32_t millis =0, joy_millis=0;
-extern app_config_t config;
+extern dev_config_t dev_config;
 joy_report_t joy_report;
 uint8_t btn_num = 0;
 uint8_t	physical_buttons_data[MAX_BUTTONS_NUM];
@@ -184,7 +184,7 @@ void TIM3_IRQHandler(void)
 	{
 		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
 
-		AxesProcess(&config);
+		AxesProcess(&dev_config);
 
 		
 		for (uint8_t i=0; i<MAX_AXIS_NUM; i++)
@@ -208,7 +208,7 @@ void TIM1_UP_IRQHandler(void)
 
 		millis = GetTick();
 		// check if it is time to send joystick data
-		if (millis - joy_millis > config.exchange_period_ms )
+		if (millis - joy_millis > dev_config.exchange_period_ms )
 		{
 			joy_millis = millis;
 				
@@ -226,7 +226,7 @@ void TIM1_UP_IRQHandler(void)
 			USB_CUSTOM_HID_SendReport((uint8_t *)&(joy_report.id), sizeof(joy_report)-sizeof(joy_report.dummy));
 		}
 	
-		EncoderProcess(buttons_state, &config);
+		EncoderProcess(buttons_state, &dev_config);
 	}
 	
 }

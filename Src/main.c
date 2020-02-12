@@ -9,7 +9,7 @@
 #include "main.h"
 
 #include "periphery.h"
-#include "flash.h"
+#include "config.h"
 #include "analog.h"
 #include "buttons.h"
 #include "encoders.h"
@@ -20,7 +20,7 @@
 
 
 /* Private variables ---------------------------------------------------------*/
-app_config_t config;
+dev_config_t dev_config;
 volatile uint8_t bootloader = 0;
 
 
@@ -35,29 +35,30 @@ int main(void)
 {
 	SysTick_Init();
 	// getting configuration from flash memory
-	ConfigGet(&config);
+	DevConfigGet(&dev_config);
 	
 	// set default config at first startup
-	if ((config.firmware_version & 0xFFF0) != (FIRMWARE_VERSION &0xFFF0))
+	if ((dev_config.firmware_version & 0xFFF0) != (FIRMWARE_VERSION &0xFFF0))
 	{
-		ConfigSet((app_config_t *) &init_config);
-		ConfigGet(&config);
+		DevConfigSet((dev_config_t *) &init_config);
+		DevConfigGet(&dev_config);
 	}
+	AppConfigInit(&dev_config);
 	
 	Delay_ms(50);
 	
-	USB_HW_Init(&config);
-	IO_Init(&config);
-	AxesInit(&config); 
-	EncodersInit(&config);	
-	ShiftRegistersInit(&config);
-	RadioButtons_Init(&config);
+	USB_HW_Init(&dev_config);
+	IO_Init(&dev_config);
+	AxesInit(&dev_config); 
+	EncodersInit(&dev_config);	
+	ShiftRegistersInit(&dev_config);
+	RadioButtons_Init(&dev_config);
 	
 	Timers_Init();
 
   while (1)
   {
-		ButtonsReadLogical(&config);
+		ButtonsReadLogical(&dev_config);
 		// jump to bootloader if new firmware received
 		if (bootloader > 0)
 		{

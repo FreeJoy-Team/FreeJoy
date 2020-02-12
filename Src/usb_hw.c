@@ -3,7 +3,7 @@
 #include "usb_desc.h"
 #include "usb_pwr.h"
 
-#include "flash.h"
+#include "config.h"
 #include "string.h"
 
 /* Private typedef -----------------------------------------------------------*/
@@ -199,9 +199,9 @@ void Get_SerialNum(void)
 *******************************************************************************/
 void Get_ProductStr(void)
 {
-	app_config_t tmp;
+	dev_config_t tmp;
 	
-	ConfigGet(&tmp);
+	DevConfigGet(&tmp);
 	
   AsciiToUnicode((uint8_t *) &tmp.device_name[0], &CustomHID_StringProduct[2], sizeof(tmp.device_name));
 }
@@ -261,9 +261,9 @@ static void AsciiToUnicode (uint8_t * pbuf_in , uint8_t *pbuf_out , uint8_t len)
 *******************************************************************************/
 void Get_VidPid(void)
 {
-	app_config_t tmp;
+	dev_config_t tmp;
 	
-	ConfigGet(&tmp);
+	DevConfigGet(&tmp);
 	
   CustomHID_DeviceDescriptor[8] = LOBYTE(tmp.vid);
 	CustomHID_DeviceDescriptor[9] = HIBYTE(tmp.vid);
@@ -271,7 +271,39 @@ void Get_VidPid(void)
 	CustomHID_DeviceDescriptor[11] = HIBYTE(tmp.pid);
 }
 
-void USB_HW_Init(app_config_t * p_config)
+/*******************************************************************************
+* Function Name  : Get_ReportDesc.
+* Description    : Change VID and PID.
+* Input          : None.
+* Output         : None.
+* Return         : None.
+*******************************************************************************/
+void Get_ReportDesc(void)
+{
+	app_config_t tmp_app_config;
+	dev_config_t tmp_dev_config;
+	
+	AppConfigGet(&tmp_app_config);
+	DevConfigGet(&tmp_dev_config);
+
+	CustomHID_ReportDescriptor[13] = tmp_app_config.buttons_cnt;
+	
+	CustomHID_ReportDescriptor[27] = tmp_dev_config.axis_config[0].out_enabled ? 0x30 : 0x00;
+	CustomHID_ReportDescriptor[29] = tmp_dev_config.axis_config[1].out_enabled ? 0x31 : 0x00;
+	CustomHID_ReportDescriptor[31] = tmp_dev_config.axis_config[2].out_enabled ? 0x32 : 0x00;
+	CustomHID_ReportDescriptor[33] = tmp_dev_config.axis_config[3].out_enabled ? 0x33 : 0x00;
+	CustomHID_ReportDescriptor[35] = tmp_dev_config.axis_config[4].out_enabled ? 0x34 : 0x00;
+	CustomHID_ReportDescriptor[37] = tmp_dev_config.axis_config[5].out_enabled ? 0x35 : 0x00;
+	CustomHID_ReportDescriptor[39] = tmp_dev_config.axis_config[6].out_enabled ? 0x36 : 0x00;
+	CustomHID_ReportDescriptor[41] = tmp_dev_config.axis_config[7].out_enabled ? 0x36 : 0x00;
+	
+	CustomHID_ReportDescriptor[55] = (tmp_app_config.povs & 0x01) ? 0x39 : 0x00;
+	CustomHID_ReportDescriptor[74] = (tmp_app_config.povs & 0x02) ? 0x39 : 0x00;
+	CustomHID_ReportDescriptor[78] = (tmp_app_config.povs & 0x04) ? 0x39 : 0x00;
+	CustomHID_ReportDescriptor[82] = (tmp_app_config.povs & 0x08) ? 0x39 : 0x00;
+}
+
+void USB_HW_Init(dev_config_t * p_dev_config)
 {
 	Set_System();
 

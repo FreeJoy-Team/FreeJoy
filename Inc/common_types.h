@@ -231,7 +231,15 @@ typedef struct
 	uint16_t						vid;
 	uint16_t						pid;
 	uint8_t							reserved_10[27];
-}app_config_t;
+}dev_config_t;
+
+typedef struct
+{
+	uint8_t							axes_cnt;
+	uint8_t							buttons_cnt;
+	uint8_t							povs;
+	
+} app_config_t;
 
 typedef struct
 {

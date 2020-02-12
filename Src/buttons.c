@@ -19,17 +19,17 @@ uint8_t						shifts_state;
   * @brief  Getting logical button state accoring to its configuration
   * @param  p_button_state:	Pointer to button state structure
 	* @param  pov_buf: Pointer to POV states buffer
-	* @param  p_config: Pointer to device configuration
+	* @param  p_dev_config: Pointer to device configuration
 	* @param  num: Button number
   * @retval None
   */
-void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_buf, app_config_t * p_config, uint8_t num)
+void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_buf, dev_config_t * p_dev_config, uint8_t num)
 {
 	uint32_t 	millis;
 	
 	millis = GetTick();
 	// choose config for current button
-	switch (p_config->buttons[num].type)
+	switch (p_dev_config->buttons[num].type)
 	{		
 		case BUTTON_INVERTED:
 			// invert state for inverted button
@@ -44,7 +44,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 			}
 			// set state after debounce if state have not changed
 			else if (	p_button_state->changed && p_button_state->pin_state != p_button_state->prev_state &&
-								millis - p_button_state->time_last > p_config->button_debounce_ms)
+								millis - p_button_state->time_last > p_dev_config->button_debounce_ms)
 			{
 				p_button_state->changed = 0;
 				p_button_state->current_state = p_button_state->pin_state;
@@ -53,7 +53,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 			}
 			// reset if state changed during debounce period
 			else if (	p_button_state->changed && 
-								millis - p_button_state->time_last > p_config->button_debounce_ms)
+								millis - p_button_state->time_last > p_dev_config->button_debounce_ms)
 			{
 				p_button_state->changed = 0;
 			}
@@ -69,7 +69,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 			}
 			// set state after debounce if state have not changed
 			else if (	p_button_state->changed && p_button_state->pin_state &&
-								millis - p_button_state->time_last > p_config->button_debounce_ms)
+								millis - p_button_state->time_last > p_dev_config->button_debounce_ms)
 			{
 				p_button_state->changed = 0;
 				p_button_state->prev_state = 1;
@@ -77,7 +77,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 				p_button_state->cnt++;
 			}
 			// reset if state changed during debounce period
-			else if (!p_button_state->pin_state && millis - p_button_state->time_last > p_config->button_debounce_ms)
+			else if (!p_button_state->pin_state && millis - p_button_state->time_last > p_dev_config->button_debounce_ms)
 			{
 				p_button_state->changed = 0;
 				p_button_state->prev_state = 0;
@@ -93,7 +93,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 			}
 			// set state after debounce if state have not changed
 			else if (	p_button_state->changed && p_button_state->pin_state != p_button_state->prev_state &&
-								millis - p_button_state->time_last > p_config->button_debounce_ms)
+								millis - p_button_state->time_last > p_dev_config->button_debounce_ms)
 			{
 				p_button_state->changed = 0;
 				p_button_state->current_state = 1;
@@ -101,7 +101,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 				p_button_state->cnt++;
 			}
 			// release button after push time
-			else if (	millis - p_button_state->time_last > p_config->toggle_press_time_ms)
+			else if (	millis - p_button_state->time_last > p_dev_config->toggle_press_time_ms)
 			{
 				p_button_state->current_state = 0;
 				p_button_state->changed = 0;
@@ -117,7 +117,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 			}
 			// set state after debounce if state have not changed
 			else if (	p_button_state->changed && p_button_state->pin_state > p_button_state->prev_state &&
-								millis - p_button_state->time_last > p_config->button_debounce_ms)
+								millis - p_button_state->time_last > p_dev_config->button_debounce_ms)
 			{
 				p_button_state->changed = 0;
 				p_button_state->current_state = 1;
@@ -125,7 +125,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 				p_button_state->cnt++;
 			}
 			// release button after push time
-			else if (	millis - p_button_state->time_last > p_config->toggle_press_time_ms)
+			else if (	millis - p_button_state->time_last > p_dev_config->toggle_press_time_ms)
 			{
 				p_button_state->prev_state = p_button_state->pin_state;
 				p_button_state->current_state = 0;
@@ -142,7 +142,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 			}
 			// set state after debounce if state have not changed
 			else if (	p_button_state->changed && p_button_state->pin_state < p_button_state->prev_state &&
-								millis - p_button_state->time_last > p_config->button_debounce_ms)
+								millis - p_button_state->time_last > p_dev_config->button_debounce_ms)
 			{
 				p_button_state->changed = 0;
 				p_button_state->current_state = 1;
@@ -150,7 +150,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 				p_button_state->cnt++;
 			}
 			// release button after push time
-			else if (	millis - p_button_state->time_last > p_config->toggle_press_time_ms)
+			else if (	millis - p_button_state->time_last > p_dev_config->toggle_press_time_ms)
 			{
 				p_button_state->prev_state = p_button_state->pin_state;
 				p_button_state->current_state = 0;
@@ -170,7 +170,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 			}
 			// set state after debounce if state have not changed
 			else if (	p_button_state->changed && p_button_state->pin_state != p_button_state->prev_state &&
-								millis - p_button_state->time_last > p_config->button_debounce_ms)
+								millis - p_button_state->time_last > p_dev_config->button_debounce_ms)
 			{
 				p_button_state->changed = 0;
 				//p_button_state->current_state = p_button_state->pin_state;
@@ -178,17 +178,17 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 				p_button_state->cnt += p_button_state->pin_state;
 				
 				// set bit in povs data
-				if ((p_config->buttons[num].type) == POV1_UP)
+				if ((p_dev_config->buttons[num].type) == POV1_UP)
 				{
 					pov_buf[0] &= !(1 << 3);
 					pov_buf[0] |= (p_button_state->pin_state << 3);
 				}
-				else if ((p_config->buttons[num].type) == POV1_RIGHT)
+				else if ((p_dev_config->buttons[num].type) == POV1_RIGHT)
 				{
 					pov_buf[0] &= !(1 << 2);
 					pov_buf[0] |= (p_button_state->pin_state << 2);
 				}
-				else if ((p_config->buttons[num].type) == POV1_DOWN)
+				else if ((p_dev_config->buttons[num].type) == POV1_DOWN)
 				{
 					pov_buf[0] &= !(1 << 1);
 					pov_buf[0] |= (p_button_state->pin_state << 1);
@@ -201,7 +201,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 			}
 			// reset if state changed during debounce period
 			else if (	p_button_state->changed && 
-								millis - p_button_state->time_last > p_config->button_debounce_ms )
+								millis - p_button_state->time_last > p_dev_config->button_debounce_ms )
 			{
 				p_button_state->changed = 0;
 			}
@@ -219,7 +219,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 			}
 			// set state after debounce if state have not changed
 			else if (	p_button_state->changed && p_button_state->pin_state != p_button_state->prev_state &&
-								millis - p_button_state->time_last > p_config->button_debounce_ms)
+								millis - p_button_state->time_last > p_dev_config->button_debounce_ms)
 			{
 				p_button_state->changed = 0;
 				//p_button_state->current_state = p_button_state->pin_state;
@@ -227,17 +227,17 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 				p_button_state->cnt += p_button_state->pin_state;
 				
 				// set bit in povs data
-				if ((p_config->buttons[num].type) == POV2_UP)
+				if ((p_dev_config->buttons[num].type) == POV2_UP)
 				{
 					pov_buf[1] &= !(1 << 3);
 					pov_buf[1] |= (p_button_state->pin_state << 3);
 				}
-				else if ((p_config->buttons[num].type) == POV2_RIGHT)
+				else if ((p_dev_config->buttons[num].type) == POV2_RIGHT)
 				{
 					pov_buf[1] &= !(1 << 2);
 					pov_buf[1] |= (p_button_state->pin_state << 2);
 				}
-				else if ((p_config->buttons[num].type) == POV2_DOWN)
+				else if ((p_dev_config->buttons[num].type) == POV2_DOWN)
 				{
 					pov_buf[1] &= !(1 << 1);
 					pov_buf[1] |= (p_button_state->pin_state << 1);
@@ -250,7 +250,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 			}
 			// reset if state changed during debounce period
 			else if (	p_button_state->changed && 
-								millis - p_button_state->time_last > p_config->button_debounce_ms )
+								millis - p_button_state->time_last > p_dev_config->button_debounce_ms )
 			{
 				p_button_state->changed = 0;
 			}
@@ -268,7 +268,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 			}
 			// set state after debounce if state have not changed
 			else if (	p_button_state->changed && p_button_state->pin_state != p_button_state->prev_state &&
-								millis - p_button_state->time_last > p_config->button_debounce_ms)
+								millis - p_button_state->time_last > p_dev_config->button_debounce_ms)
 			{
 				p_button_state->changed = 0;
 				//p_button_state->current_state = p_button_state->pin_state;
@@ -276,17 +276,17 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 				p_button_state->cnt += p_button_state->pin_state;
 				
 				// set bit in povs data
-				if ((p_config->buttons[num].type) == POV3_UP)
+				if ((p_dev_config->buttons[num].type) == POV3_UP)
 				{
 					pov_buf[2] &= !(1 << 3);
 					pov_buf[2] |= (p_button_state->pin_state << 3);
 				}
-				else if ((p_config->buttons[num].type) == POV3_RIGHT)
+				else if ((p_dev_config->buttons[num].type) == POV3_RIGHT)
 				{
 					pov_buf[2] &= !(1 << 2);
 					pov_buf[2] |= (p_button_state->pin_state << 2);
 				}
-				else if ((p_config->buttons[num].type) == POV3_DOWN)
+				else if ((p_dev_config->buttons[num].type) == POV3_DOWN)
 				{
 					pov_buf[2] &= !(1 << 1);
 					pov_buf[2] |= (p_button_state->pin_state << 1);
@@ -299,7 +299,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 			}
 			// reset if state changed during debounce period
 			else if (	p_button_state->changed && 
-								millis - p_button_state->time_last > p_config->button_debounce_ms )
+								millis - p_button_state->time_last > p_dev_config->button_debounce_ms )
 			{
 				p_button_state->changed = 0;
 			}
@@ -317,7 +317,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 			}
 			// set state after debounce if state have not changed
 			else if (	p_button_state->changed && p_button_state->pin_state != p_button_state->prev_state &&
-								millis - p_button_state->time_last > p_config->button_debounce_ms)
+								millis - p_button_state->time_last > p_dev_config->button_debounce_ms)
 			{
 				p_button_state->changed = 0;
 				//p_button_state->current_state = p_button_state->pin_state;
@@ -325,17 +325,17 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 				p_button_state->cnt += p_button_state->pin_state;
 				
 				// set bit in povs data
-				if ((p_config->buttons[num].type) == POV4_UP)
+				if ((p_dev_config->buttons[num].type) == POV4_UP)
 				{
 					pov_buf[3] &= !(1 << 3);
 					pov_buf[3] |= (p_button_state->pin_state << 3);
 				}
-				else if ((p_config->buttons[num].type) == POV4_RIGHT)
+				else if ((p_dev_config->buttons[num].type) == POV4_RIGHT)
 				{
 					pov_buf[3] &= !(1 << 2);
 					pov_buf[3] |= (p_button_state->pin_state << 2);
 				}
-				else if ((p_config->buttons[num].type) == POV4_DOWN)
+				else if ((p_dev_config->buttons[num].type) == POV4_DOWN)
 				{
 					pov_buf[3] &= !(1 << 1);
 					pov_buf[3] |= (p_button_state->pin_state << 1);
@@ -348,7 +348,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 			}
 			// reset if state changed during debounce period
 			else if (	p_button_state->changed && 
-								millis - p_button_state->time_last > p_config->button_debounce_ms )
+								millis - p_button_state->time_last > p_dev_config->button_debounce_ms )
 			{
 				p_button_state->changed = 0;
 			}
@@ -367,7 +367,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 			}
 			// set state after debounce if state have not changed
 			else if (	p_button_state->changed && p_button_state->pin_state &&
-								millis - p_button_state->time_last > p_config->button_debounce_ms)
+								millis - p_button_state->time_last > p_dev_config->button_debounce_ms)
 			{
 				p_button_state->changed = 0;
 				p_button_state->prev_state = 1;
@@ -376,14 +376,14 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 				
 				for (uint8_t i=0; i<MAX_BUTTONS_NUM; i++)
 				{
-					if (p_config->buttons[i].type == p_config->buttons[num].type && i != num)
+					if (p_dev_config->buttons[i].type == p_dev_config->buttons[num].type && i != num)
 					{
 						buttons_state[i].current_state = 0;
 					}
 				}
 			}
 			// reset if state changed during debounce period
-			else if (!p_button_state->pin_state && millis - p_button_state->time_last > p_config->button_debounce_ms)
+			else if (!p_button_state->pin_state && millis - p_button_state->time_last > p_dev_config->button_debounce_ms)
 			{
 				p_button_state->changed = 0;
 				p_button_state->prev_state = 0;
@@ -398,16 +398,16 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 
 /**
   * @brief  Set initial states for radio buttons
-	* @param  p_config: Pointer to device configuration
+	* @param  p_dev_config: Pointer to device configuration
   * @retval None
   */
-void RadioButtons_Init (app_config_t * p_config)
+void RadioButtons_Init (dev_config_t * p_dev_config)
 {
 	for (uint8_t i=0; i<4; i++)
 	{
 		for (uint8_t j=0; j<MAX_BUTTONS_NUM; j++)
 		{
-			if (p_config->buttons[j].type == (RADIO_BUTTON1 + i))
+			if (p_dev_config->buttons[j].type == (RADIO_BUTTON1 + i))
 			{
 				buttons_state[j].current_state = 1;
 				break;
@@ -419,12 +419,12 @@ void RadioButtons_Init (app_config_t * p_config)
 /**
   * @brief  Checking single button state
   * @param  pin_num:	Number of pin where button is connected
-	* @param  p_config: Pointer to device configuration
+	* @param  p_dev_config: Pointer to device configuration
   * @retval Buttons state
   */
-uint8_t DirectButtonGet (uint8_t pin_num,  app_config_t * p_config)
+uint8_t DirectButtonGet (uint8_t pin_num,  dev_config_t * p_dev_config)
 {	
-	if (p_config->pins[pin_num] == BUTTON_VCC)
+	if (p_dev_config->pins[pin_num] == BUTTON_VCC)
 	{
 		return GPIO_ReadInputDataBit(pin_config[pin_num].port, pin_config[pin_num].pin);
 	}
@@ -437,16 +437,16 @@ uint8_t DirectButtonGet (uint8_t pin_num,  app_config_t * p_config)
 /**
   * @brief  Getting buttons states of matrix buttons
 	* @param  raw_button_data_buf: Pointer to raw buttons data buffer
-	* @param  p_config: Pointer to device configuration
+	* @param  p_dev_config: Pointer to device configuration
 	* @param  pos: Pointer to button position counter
   * @retval None
   */
-void MaxtrixButtonsGet (uint8_t * raw_button_data_buf, app_config_t * p_config, uint8_t * pos)
+void MaxtrixButtonsGet (uint8_t * raw_button_data_buf, dev_config_t * p_dev_config, uint8_t * pos)
 {
 	// get matrix buttons
 	for (int i=0; i<USED_PINS_NUM; i++)
 	{
-		if ((p_config->pins[i] == BUTTON_COLUMN) && ((*pos) < MAX_BUTTONS_NUM))
+		if ((p_dev_config->pins[i] == BUTTON_COLUMN) && ((*pos) < MAX_BUTTONS_NUM))
 		{
 			// tie Column pin to ground
 			GPIO_WriteBit(pin_config[i].port, pin_config[i].pin, Bit_RESET);
@@ -454,9 +454,9 @@ void MaxtrixButtonsGet (uint8_t * raw_button_data_buf, app_config_t * p_config, 
 			// get states at Rows
 			for (int k=0; k<USED_PINS_NUM; k++)
 			{
-				if (p_config->pins[k] == BUTTON_ROW && (*pos) < MAX_BUTTONS_NUM)
+				if (p_dev_config->pins[k] == BUTTON_ROW && (*pos) < MAX_BUTTONS_NUM)
 				{ 
-					raw_button_data_buf[*pos] = DirectButtonGet(k, p_config);
+					raw_button_data_buf[*pos] = DirectButtonGet(k, p_dev_config);
 					(*pos)++;
 				}
 			}
@@ -469,20 +469,20 @@ void MaxtrixButtonsGet (uint8_t * raw_button_data_buf, app_config_t * p_config, 
 /**
   * @brief  Getting buttons states of single buttons
 	* @param  raw_button_data_buf: Pointer to raw buttons data buffer
-	* @param  p_config: Pointer to device configuration
+	* @param  p_dev_config: Pointer to device configuration
 	* @param  pos: Pointer to button position counter
   * @retval None
   */
-void SingleButtonsGet (uint8_t * raw_button_data_buf, app_config_t * p_config, uint8_t * pos)
+void SingleButtonsGet (uint8_t * raw_button_data_buf, dev_config_t * p_dev_config, uint8_t * pos)
 {
 	for (int i=0; i<USED_PINS_NUM; i++)
 	{
-		if (p_config->pins[i] == BUTTON_GND || 
-				p_config->pins[i] == BUTTON_VCC)
+		if (p_dev_config->pins[i] == BUTTON_GND || 
+				p_dev_config->pins[i] == BUTTON_VCC)
 		{
 			if ((*pos) < MAX_BUTTONS_NUM)
 			{
-				raw_button_data_buf[*pos] = DirectButtonGet(i, p_config);
+				raw_button_data_buf[*pos] = DirectButtonGet(i, p_dev_config);
 				(*pos)++;
 			}
 			else break;
@@ -491,28 +491,28 @@ void SingleButtonsGet (uint8_t * raw_button_data_buf, app_config_t * p_config, u
 }
 
 
-uint8_t ButtonsReadPhysical(app_config_t * p_config, uint8_t * p_buf)
+uint8_t ButtonsReadPhysical(dev_config_t * p_dev_config, uint8_t * p_buf)
 {
 	uint8_t pos = 0;
 	// Getting physical buttons states
-	MaxtrixButtonsGet(p_buf, p_config, &pos);
-	ShiftRegistersGet(p_buf, p_config, &pos);
-	AxesToButtonsGet(p_buf, p_config, &pos);
-	SingleButtonsGet(p_buf, p_config, &pos);
+	MaxtrixButtonsGet(p_buf, p_dev_config, &pos);
+	ShiftRegistersGet(p_buf, p_dev_config, &pos);
+	AxesToButtonsGet(p_buf, p_dev_config, &pos);
+	SingleButtonsGet(p_buf, p_dev_config, &pos);
 	
 	return pos;
 }
 
 /**
   * @brief  Checking all buttons routine
-	* @param  p_config: Pointer to device configuration
+	* @param  p_dev_config: Pointer to device configuration
   * @retval None
   */
-void ButtonsReadLogical (app_config_t * p_config)
+void ButtonsReadLogical (dev_config_t * p_dev_config)
 {
 	uint8_t pos = 0;
 	
-	pos = ButtonsReadPhysical(p_config, raw_buttons_data);
+	pos = ButtonsReadPhysical(p_dev_config, raw_buttons_data);
 	
 	// Process regular buttons
 	for (uint8_t i=0; i<pos; i++)
@@ -522,15 +522,15 @@ void ButtonsReadLogical (app_config_t * p_config)
 		// check logical buttons to have shift modificators
 		for (uint8_t j=0; j<MAX_BUTTONS_NUM; j++)
 		{
-			int8_t btn = p_config->buttons[j].physical_num;
+			int8_t btn = p_dev_config->buttons[j].physical_num;
 			
-			if (btn == i && (p_config->buttons[j].shift_modificator))				// we found button this shift modificator 
+			if (btn == i && (p_dev_config->buttons[j].shift_modificator))				// we found button this shift modificator 
 			{
-				shift_num = p_config->buttons[j].shift_modificator;
+				shift_num = p_dev_config->buttons[j].shift_modificator;
 				if (shifts_state & 1<<(shift_num-1))											// shift pressed for this button
 				{
-					buttons_state[j].pin_state = raw_buttons_data[p_config->buttons[j].physical_num];					
-					LogicalButtonProcessState(&buttons_state[j], pov_pos, p_config, j);
+					buttons_state[j].pin_state = raw_buttons_data[p_dev_config->buttons[j].physical_num];					
+					LogicalButtonProcessState(&buttons_state[j], pov_pos, p_dev_config, j);
 				}
 				else if (buttons_state[j].current_state)	// shift released for this button
 				{
@@ -539,7 +539,7 @@ void ButtonsReadLogical (app_config_t * p_config)
 					buttons_state[j].pin_state = !buttons_state[j].prev_state;			
 					buttons_state[j].changed = 1;
 					buttons_state[j].time_last = 0;			
-					LogicalButtonProcessState(&buttons_state[j], pov_pos, p_config, j);
+					LogicalButtonProcessState(&buttons_state[j], pov_pos, p_dev_config, j);
 				}
 			}				
 		}
@@ -549,10 +549,10 @@ void ButtonsReadLogical (app_config_t * p_config)
 			for (uint8_t j=0; j<MAX_BUTTONS_NUM; j++)
 			{
 				
-				if (p_config->buttons[j].physical_num == i)		// we found corresponding logical button
+				if (p_dev_config->buttons[j].physical_num == i)		// we found corresponding logical button
 				{
 					buttons_state[j].pin_state = raw_buttons_data[i];				
-					LogicalButtonProcessState(&buttons_state[j], pov_pos, p_config, j);
+					LogicalButtonProcessState(&buttons_state[j], pov_pos, p_dev_config, j);
 				}
 			}
 		}		
@@ -560,15 +560,15 @@ void ButtonsReadLogical (app_config_t * p_config)
 		{
 			for (uint8_t j=0; j<MAX_BUTTONS_NUM; j++)
 			{
-				if (p_config->buttons[j].physical_num == i && (shifts_state) == 0 &&
-					(p_config->buttons[j].shift_modificator) == 0)
+				if (p_dev_config->buttons[j].physical_num == i && (shifts_state) == 0 &&
+					(p_dev_config->buttons[j].shift_modificator) == 0)
 				{
 					buttons_state[j].pin_state = raw_buttons_data[i];				
-					LogicalButtonProcessState(&buttons_state[j], pov_pos, p_config, j);
+					LogicalButtonProcessState(&buttons_state[j], pov_pos, p_dev_config, j);
 				}
 				// shift pressed
-				else if (p_config->buttons[j].physical_num == i && shifts_state & (1<<0) &&
-					(p_config->buttons[j].shift_modificator) == 0)
+				else if (p_dev_config->buttons[j].physical_num == i && shifts_state & (1<<0) &&
+					(p_dev_config->buttons[j].shift_modificator) == 0)
 				{
 					// disable button
 					if (buttons_state[j].current_state)	
@@ -577,11 +577,11 @@ void ButtonsReadLogical (app_config_t * p_config)
 						buttons_state[j].pin_state = !buttons_state[j].prev_state;	
 						buttons_state[j].changed = 1;	
 						buttons_state[j].time_last = 0;
-						LogicalButtonProcessState(&buttons_state[j], pov_pos, p_config, j);
+						LogicalButtonProcessState(&buttons_state[j], pov_pos, p_dev_config, j);
 					}	
 				}
-				else if (p_config->buttons[j].physical_num == i && shifts_state & (1<<1)	&&
-					(p_config->buttons[j].shift_modificator) == 0)
+				else if (p_dev_config->buttons[j].physical_num == i && shifts_state & (1<<1)	&&
+					(p_dev_config->buttons[j].shift_modificator) == 0)
 				{
 					// disable button
 					if (buttons_state[j].current_state)	
@@ -590,11 +590,11 @@ void ButtonsReadLogical (app_config_t * p_config)
 						buttons_state[j].pin_state = !buttons_state[j].prev_state;	
 						buttons_state[j].changed = 1;	
 						buttons_state[j].time_last = 0;						
-						LogicalButtonProcessState(&buttons_state[j], pov_pos, p_config, j);
+						LogicalButtonProcessState(&buttons_state[j], pov_pos, p_dev_config, j);
 					}		
 				}
-				else if (p_config->buttons[j].physical_num == i && shifts_state & (1<<2) &&
-					(p_config->buttons[j].shift_modificator) == 0)
+				else if (p_dev_config->buttons[j].physical_num == i && shifts_state & (1<<2) &&
+					(p_dev_config->buttons[j].shift_modificator) == 0)
 				{
 					// disable button
 					if (buttons_state[j].current_state)	
@@ -603,11 +603,11 @@ void ButtonsReadLogical (app_config_t * p_config)
 						buttons_state[j].pin_state = !buttons_state[j].prev_state;	
 						buttons_state[j].changed = 1;		
 						buttons_state[j].time_last = 0;						
-						LogicalButtonProcessState(&buttons_state[j], pov_pos, p_config, j);
+						LogicalButtonProcessState(&buttons_state[j], pov_pos, p_dev_config, j);
 					}	
 				}
-				else if (p_config->buttons[j].physical_num == i && shifts_state & (1<<3) &&
-					(p_config->buttons[j].shift_modificator) == 0)
+				else if (p_dev_config->buttons[j].physical_num == i && shifts_state & (1<<3) &&
+					(p_dev_config->buttons[j].shift_modificator) == 0)
 				{
 					// disable button
 					if (buttons_state[j].current_state)	
@@ -616,11 +616,11 @@ void ButtonsReadLogical (app_config_t * p_config)
 						buttons_state[j].pin_state = !buttons_state[j].prev_state;	
 						buttons_state[j].changed = 1;	
 						buttons_state[j].time_last = 0;									
-						LogicalButtonProcessState(&buttons_state[j], pov_pos, p_config, j);
+						LogicalButtonProcessState(&buttons_state[j], pov_pos, p_dev_config, j);
 					}		
 				}
-				else if (p_config->buttons[j].physical_num == i && shifts_state & (1<<4) &&
-					(p_config->buttons[j].shift_modificator) == 0)
+				else if (p_dev_config->buttons[j].physical_num == i && shifts_state & (1<<4) &&
+					(p_dev_config->buttons[j].shift_modificator) == 0)
 				{
 					// disable button
 					if (buttons_state[j].current_state)	
@@ -629,7 +629,7 @@ void ButtonsReadLogical (app_config_t * p_config)
 						buttons_state[j].pin_state = !buttons_state[j].prev_state;	
 						buttons_state[j].changed = 1;	
 						buttons_state[j].time_last = 0;									
-						LogicalButtonProcessState(&buttons_state[j], pov_pos, p_config, j);
+						LogicalButtonProcessState(&buttons_state[j], pov_pos, p_dev_config, j);
 					}	
 				}
 			}
@@ -637,16 +637,16 @@ void ButtonsReadLogical (app_config_t * p_config)
 	}	
 	
 	// convert encoders input
-	//EncoderProcess(buttons_state, p_config);
+	//EncoderProcess(buttons_state, p_dev_config);
 	
 	shifts_state = 0;
 	for (uint8_t i=0; i<5; i++)
 	{
-		if (p_config->shift_config[i].button >= 0)
+		if (p_dev_config->shift_config[i].button >= 0)
 		{
 			for (uint8_t j=0; j<MAX_BUTTONS_NUM; j++)
 			{		
-				if (j == p_config->shift_config[i].button)
+				if (j == p_dev_config->shift_config[i].button)
 				{									
 					shifts_state |= (buttons_state[j].current_state << i);
 				}
@@ -661,17 +661,17 @@ void ButtonsReadLogical (app_config_t * p_config)
 			buttons_data[(i & 0xF8)>>3] &= ~(1 << (i & 0x07));
 			
 			// buttons is mapped to shift
-			if (i == p_config->shift_config[0].button ||
-					i == p_config->shift_config[1].button ||
-					i == p_config->shift_config[2].button ||
-					i == p_config->shift_config[3].button ||
-					i == p_config->shift_config[4].button)	continue;
+			if (i == p_dev_config->shift_config[0].button ||
+					i == p_dev_config->shift_config[1].button ||
+					i == p_dev_config->shift_config[2].button ||
+					i == p_dev_config->shift_config[3].button ||
+					i == p_dev_config->shift_config[4].button)	continue;
 			
 			for (uint8_t j=0; j<MAX_AXIS_NUM; j++)
 			{
 				// button is mapped to axis
-				if (i == p_config->axis_config[j].decrement_button ||
-						i == p_config->axis_config[j].increment_button)
+				if (i == p_dev_config->axis_config[j].decrement_button ||
+						i == p_dev_config->axis_config[j].increment_button)
 				{
 					is_button_to_axis = 1;
 					break;

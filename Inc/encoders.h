@@ -16,8 +16,8 @@
 #define   ENC_COUNT      1
 
 
-void EncoderProcess (buttons_state_t * button_state_buf, app_config_t * p_config);
-void EncodersInit (app_config_t * p_config);
+void EncoderProcess (buttons_state_t * button_state_buf, dev_config_t * p_dev_config);
+void EncodersInit (dev_config_t * p_dev_config);
 
 #endif 	/* __BUTTONS_H__ */
 

@@ -16,7 +16,7 @@
 #include "common_types.h"
 
 
-static const app_config_t init_config =
+static const dev_config_t init_config =
 {
 	.firmware_version = 0x1340,		// do not change
 	
