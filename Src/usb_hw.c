@@ -286,7 +286,8 @@ void Get_ReportDesc(void)
 	AppConfigGet(&tmp_app_config);
 	DevConfigGet(&tmp_dev_config);
 
-	CustomHID_ReportDescriptor[13] = tmp_app_config.buttons_cnt;
+	CustomHID_ReportDescriptor[13] = tmp_app_config.buttons_cnt ? tmp_app_config.buttons_cnt : 1;
+	//CustomHID_ReportDescriptor[21] = tmp_app_config.buttons_cnt ? ((tmp_app_config.buttons_cnt - 1)/8 + 1) * 8 : 0;
 	
 	CustomHID_ReportDescriptor[27] = tmp_dev_config.axis_config[0].out_enabled ? 0x30 : 0x00;
 	CustomHID_ReportDescriptor[29] = tmp_dev_config.axis_config[1].out_enabled ? 0x31 : 0x00;

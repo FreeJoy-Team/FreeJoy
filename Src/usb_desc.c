@@ -149,7 +149,7 @@ uint8_t CustomHID_ReportDescriptor[CUSTOMHID_SIZ_REPORT_DESC] =
     0xa1, 0x01,                    // COLLECTION (Application)
 
 		0x85, REPORT_ID_JOY,				 	 //		REPORT_ID	(JOY_REPORT_ID)	
-	  0x05, 0x09,                    //   USAGE_PAGE (Button)
+	  0x05, 0x09,                    //   USAGE_PAGE (Button)		
     0x19, 0x01,                    //   USAGE_MINIMUM (Button 1)
     0x29, MAX_BUTTONS_NUM,         //   USAGE_MAXIMUM (Button MAX_BUTTONS_NUM)
     0x15, 0x00,                    //   LOGICAL_MINIMUM (0)
@@ -203,7 +203,7 @@ uint8_t CustomHID_ReportDescriptor[CUSTOMHID_SIZ_REPORT_DESC] =
     0x15, 0x00,                    //   LOGICAL_MINIMUM (0)
     0x26, 0xff, 0x00,              //   LOGICAL_MAXIMUM (255)
     0x75, 0x08,                    //   REPORT_SIZE (8)
-    0x95, 0x09,                    //   REPORT_COUNT (9)
+    0x95, 0x0A,                    //   REPORT_COUNT (10)
     0x81, 0x00,                    //   INPUT (Data,Ary,Abs)
 		
 		// config data

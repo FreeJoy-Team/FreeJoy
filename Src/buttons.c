@@ -655,9 +655,11 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 	}
 	
 	// convert data to report format
+	
+	uint8_t k = 0;
 	for (int i=0;i<MAX_BUTTONS_NUM;i++)
 	{
-			uint8_t is_button_to_axis = 0;
+			uint8_t is_hidden = 0;
 			buttons_data[(i & 0xF8)>>3] &= ~(1 << (i & 0x07));
 			
 			// buttons is mapped to shift
@@ -667,20 +669,37 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 					i == p_dev_config->shift_config[3].button ||
 					i == p_dev_config->shift_config[4].button)	continue;
 			
+			if (p_dev_config->buttons[i].type == POV1_DOWN ||
+					p_dev_config->buttons[i].type == POV1_UP ||
+					p_dev_config->buttons[i].type == POV1_LEFT ||
+					p_dev_config->buttons[i].type == POV1_RIGHT ||
+					p_dev_config->buttons[i].type == POV2_DOWN ||
+					p_dev_config->buttons[i].type == POV2_UP ||
+					p_dev_config->buttons[i].type == POV2_LEFT ||
+					p_dev_config->buttons[i].type == POV2_RIGHT ||
+					p_dev_config->buttons[i].type == POV3_DOWN ||
+					p_dev_config->buttons[i].type == POV3_UP ||
+					p_dev_config->buttons[i].type == POV3_LEFT ||
+					p_dev_config->buttons[i].type == POV3_RIGHT ||
+					p_dev_config->buttons[i].type == POV4_DOWN ||
+					p_dev_config->buttons[i].type == POV4_UP ||
+					p_dev_config->buttons[i].type == POV4_LEFT ||
+					p_dev_config->buttons[i].type == POV4_RIGHT) continue;	
+			
 			for (uint8_t j=0; j<MAX_AXIS_NUM; j++)
 			{
 				// button is mapped to axis
 				if (i == p_dev_config->axis_config[j].decrement_button ||
 						i == p_dev_config->axis_config[j].increment_button)
 				{
-					is_button_to_axis = 1;
+					is_hidden = 1;
 					break;
 				}
 			}
 
-			if (!is_button_to_axis)
+			if (!is_hidden)
 			{
-				buttons_data[(i & 0xF8)>>3] |= (buttons_state[i].current_state << (i & 0x07));
+				buttons_data[(k++ & 0xF8)>>3] |= (buttons_state[i].current_state << (i & 0x07));
 			}
 	}
 	
@@ -727,7 +746,7 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 	* @param  data: Pointer to target buffer of logical buttons
   * @retval None
   */
-void ButtonsGet (uint8_t * raw_data, button_data_t * data)
+void ButtonsGet (uint8_t * raw_data, button_data_t * data, uint8_t * shift_data)
 {
 	if (raw_data != NULL)
 	{
@@ -736,6 +755,10 @@ void ButtonsGet (uint8_t * raw_data, button_data_t * data)
 	if (data != NULL)
 	{
 		memcpy(data, buttons_data, sizeof(buttons_data));
+	}
+	if (data != NULL)
+	{
+		memcpy(shift_data, &shifts_state, sizeof(shifts_state));
 	}
 }
 /**
