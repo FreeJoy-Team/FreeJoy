@@ -654,6 +654,8 @@ void ButtonsReadLogical (app_config_t * p_config)
 		}
 	}
 	
+	// disable data updating from IRQ
+	NVIC_DisableIRQ(TIM1_UP_IRQn);
 	// convert data to report format
 	for (int i=0;i<MAX_BUTTONS_NUM;i++)
 	{
@@ -718,7 +720,8 @@ void ButtonsReadLogical (app_config_t * p_config)
 				break;
 		}
 	}
-	
+	// restore IRQ
+	NVIC_EnableIRQ(TIM1_UP_IRQn);
 }
 
 /**

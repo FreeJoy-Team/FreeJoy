@@ -96,8 +96,9 @@ void Timers_Init(void)
 	TIM_Cmd(TIM3, ENABLE);	
 }
 
+
 /**
-  * @brief Timers Configuration
+  * @brief Timers pause
 	* @param ms: Milliseconds to pause
   * @retval None
   */
