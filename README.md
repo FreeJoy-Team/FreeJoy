@@ -23,7 +23,7 @@ FreeJoy supports up to 8 analog inputs at pins A0-A7 and TLE5010/5011 sensors as
 * Resolution
 * Calibration (manual or automatical)
 * Smothing (4 levels of filtration)
-* Invertion
+* Inversion
 * Dead zone
 * Magnet offset option
 * Curve shaping

@@ -515,7 +515,9 @@ void AxesProcess (app_config_t * p_config)
       tmp[i] = 0 - tmp[i];
     }
 	}
-      
+   
+	// disable data updating from IRQ
+	NVIC_DisableIRQ(TIM1_UP_IRQn);
 	for (uint8_t i=0; i<MAX_AXIS_NUM; i++)
 	{
 		// Multi-axis process
@@ -552,6 +554,8 @@ void AxesProcess (app_config_t * p_config)
     else  out_axis_data[i] = 0;
 		
 	}
+	// restore IRQ
+	NVIC_EnableIRQ(TIM1_UP_IRQn);
 	
 }
 
