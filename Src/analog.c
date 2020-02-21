@@ -516,6 +516,8 @@ void AxesProcess (dev_config_t * p_dev_config)
     }
 	}
       
+	// prevent not atomic read
+	NVIC_DisableIRQ(TIM1_UP_IRQn);
 	for (uint8_t i=0; i<MAX_AXIS_NUM; i++)
 	{
 		// Multi-axis process
@@ -552,7 +554,8 @@ void AxesProcess (dev_config_t * p_dev_config)
     else  out_axis_data[i] = 0;
 		
 	}
-	
+	// resume IRQ
+	NVIC_EnableIRQ(TIM1_UP_IRQn);
 }
 
 /**

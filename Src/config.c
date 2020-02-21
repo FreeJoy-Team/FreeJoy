@@ -71,19 +71,35 @@ void AppConfigInit (dev_config_t * p_dev_config)
 		if (p_dev_config->buttons[i].type == POV1_DOWN ||
 					p_dev_config->buttons[i].type == POV1_UP ||
 					p_dev_config->buttons[i].type == POV1_LEFT ||
-					p_dev_config->buttons[i].type == POV1_RIGHT ||
-					p_dev_config->buttons[i].type == POV2_DOWN ||
+					p_dev_config->buttons[i].type == POV1_RIGHT)
+		{
+			app_config.povs |= 0x01;
+			continue;
+		}
+		if (p_dev_config->buttons[i].type == POV2_DOWN ||
 					p_dev_config->buttons[i].type == POV2_UP ||
 					p_dev_config->buttons[i].type == POV2_LEFT ||
-					p_dev_config->buttons[i].type == POV2_RIGHT ||
-					p_dev_config->buttons[i].type == POV3_DOWN ||
+					p_dev_config->buttons[i].type == POV2_RIGHT)
+		{
+			app_config.povs |= 0x02;
+			continue;
+		}
+		if (p_dev_config->buttons[i].type == POV3_DOWN ||
 					p_dev_config->buttons[i].type == POV3_UP ||
 					p_dev_config->buttons[i].type == POV3_LEFT ||
-					p_dev_config->buttons[i].type == POV3_RIGHT ||
-					p_dev_config->buttons[i].type == POV4_DOWN ||
+					p_dev_config->buttons[i].type == POV3_RIGHT)
+		{
+			app_config.povs |= 0x04;
+			continue;
+		}
+		if (p_dev_config->buttons[i].type == POV4_DOWN ||
 					p_dev_config->buttons[i].type == POV4_UP ||
 					p_dev_config->buttons[i].type == POV4_LEFT ||
-					p_dev_config->buttons[i].type == POV4_RIGHT) continue;	
+					p_dev_config->buttons[i].type == POV4_RIGHT)
+		{
+			app_config.povs |= 0x08;
+			continue;
+		}
 
 		for (uint8_t j=0; j<MAX_AXIS_NUM; j++)
 		{

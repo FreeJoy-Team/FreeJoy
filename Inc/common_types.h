@@ -245,12 +245,12 @@ typedef struct
 {
 	uint8_t 				dummy;
 	uint8_t 				id;
-	uint8_t 				button_data[MAX_BUTTONS_NUM/8];
-	int16_t			 		axis_data[MAX_AXIS_NUM];
-	uint8_t 				pov_data[MAX_POVS_NUM];
 	int16_t					raw_axis_data[MAX_AXIS_NUM];
 	uint8_t					raw_button_data[9];
-	uint8_t					shift_button_data;
+	uint8_t					shift_button_data;	
+	int16_t			 		axis_data[MAX_AXIS_NUM];
+	uint8_t 				pov_data[MAX_POVS_NUM];
+	uint8_t 				button_data[MAX_BUTTONS_NUM/8];
 	
 } joy_report_t;
 

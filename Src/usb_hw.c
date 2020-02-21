@@ -286,22 +286,22 @@ void Get_ReportDesc(void)
 	AppConfigGet(&tmp_app_config);
 	DevConfigGet(&tmp_dev_config);
 
-	CustomHID_ReportDescriptor[13] = tmp_app_config.buttons_cnt ? tmp_app_config.buttons_cnt : 1;
-	//CustomHID_ReportDescriptor[21] = tmp_app_config.buttons_cnt ? ((tmp_app_config.buttons_cnt - 1)/8 + 1) * 8 : 0;
+	CustomHID_ReportDescriptor[104] = tmp_app_config.buttons_cnt ? tmp_app_config.buttons_cnt : 1;
+	CustomHID_ReportDescriptor[112] = tmp_app_config.buttons_cnt ? ((tmp_app_config.buttons_cnt - 1)/8 + 1) * 8 : 0;
 	
-	CustomHID_ReportDescriptor[27] = tmp_dev_config.axis_config[0].out_enabled ? 0x30 : 0x00;
-	CustomHID_ReportDescriptor[29] = tmp_dev_config.axis_config[1].out_enabled ? 0x31 : 0x00;
-	CustomHID_ReportDescriptor[31] = tmp_dev_config.axis_config[2].out_enabled ? 0x32 : 0x00;
-	CustomHID_ReportDescriptor[33] = tmp_dev_config.axis_config[3].out_enabled ? 0x33 : 0x00;
-	CustomHID_ReportDescriptor[35] = tmp_dev_config.axis_config[4].out_enabled ? 0x34 : 0x00;
-	CustomHID_ReportDescriptor[37] = tmp_dev_config.axis_config[5].out_enabled ? 0x35 : 0x00;
-	CustomHID_ReportDescriptor[39] = tmp_dev_config.axis_config[6].out_enabled ? 0x36 : 0x00;
-	CustomHID_ReportDescriptor[41] = tmp_dev_config.axis_config[7].out_enabled ? 0x36 : 0x00;
+	CustomHID_ReportDescriptor[41] = tmp_dev_config.axis_config[0].out_enabled ? 0x30 : 0x00;
+	CustomHID_ReportDescriptor[43] = tmp_dev_config.axis_config[1].out_enabled ? 0x31 : 0x00;
+	CustomHID_ReportDescriptor[45] = tmp_dev_config.axis_config[2].out_enabled ? 0x32 : 0x00;
+	CustomHID_ReportDescriptor[47] = tmp_dev_config.axis_config[3].out_enabled ? 0x33 : 0x00;
+	CustomHID_ReportDescriptor[49] = tmp_dev_config.axis_config[4].out_enabled ? 0x34 : 0x00;
+	CustomHID_ReportDescriptor[51] = tmp_dev_config.axis_config[5].out_enabled ? 0x35 : 0x00;
+	CustomHID_ReportDescriptor[53] = tmp_dev_config.axis_config[6].out_enabled ? 0x36 : 0x00;
+	CustomHID_ReportDescriptor[55] = tmp_dev_config.axis_config[7].out_enabled ? 0x36 : 0x00;
 	
-	CustomHID_ReportDescriptor[55] = (tmp_app_config.povs & 0x01) ? 0x39 : 0x00;
-	CustomHID_ReportDescriptor[74] = (tmp_app_config.povs & 0x02) ? 0x39 : 0x00;
-	CustomHID_ReportDescriptor[78] = (tmp_app_config.povs & 0x04) ? 0x39 : 0x00;
-	CustomHID_ReportDescriptor[82] = (tmp_app_config.povs & 0x08) ? 0x39 : 0x00;
+	CustomHID_ReportDescriptor[69] = (tmp_app_config.povs & 0x01) ? 0x39 : 0x00;
+	CustomHID_ReportDescriptor[88] = (tmp_app_config.povs & 0x02) ? 0x39 : 0x00;
+	CustomHID_ReportDescriptor[92] = (tmp_app_config.povs & 0x04) ? 0x39 : 0x00;
+	CustomHID_ReportDescriptor[96] = (tmp_app_config.povs & 0x08) ? 0x39 : 0x00;
 }
 
 void USB_HW_Init(dev_config_t * p_dev_config)

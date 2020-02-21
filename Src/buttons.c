@@ -654,8 +654,10 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 		}
 	}
 	
-	// convert data to report format
 	
+	// prevent not atomic read
+	NVIC_DisableIRQ(TIM1_UP_IRQn);
+	// convert data to report format	
 	uint8_t k = 0;
 	for (int i=0;i<MAX_BUTTONS_NUM;i++)
 	{
@@ -699,7 +701,8 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 
 			if (!is_hidden)
 			{
-				buttons_data[(k++ & 0xF8)>>3] |= (buttons_state[i].current_state << (i & 0x07));
+				buttons_data[(k & 0xF8)>>3] |= (buttons_state[i].current_state << (k & 0x07));
+				k++;
 			}
 	}
 	
@@ -737,7 +740,8 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 				break;
 		}
 	}
-	
+	// resume IRQ
+	NVIC_EnableIRQ(TIM1_UP_IRQn);
 }
 
 /**

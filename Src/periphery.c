@@ -97,7 +97,7 @@ void Timers_Init(void)
 }
 
 /**
-  * @brief Timers Configuration
+  * @brief Timers pause
 	* @param ms: Milliseconds to pause
   * @retval None
   */
