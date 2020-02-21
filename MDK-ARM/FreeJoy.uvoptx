@@ -154,8 +154,8 @@
           <Type>2</Type>
           <LineNumber>0</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>536875064</Address>
-          <ByteObject>1</ByteObject>
+          <Address>536874876</Address>
+          <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>1</ManyObjects>
           <SizeOfObject>1</SizeOfObject>
@@ -163,7 +163,7 @@
           <BreakIfRCount>1</BreakIfRCount>
           <Filename></Filename>
           <ExecCommand></ExecCommand>
-          <Expression>&amp;buttons_data[0]</Expression>
+          <Expression>buttons_data[4]==0</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>

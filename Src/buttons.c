@@ -654,14 +654,11 @@ void ButtonsReadLogical (app_config_t * p_config)
 		}
 	}
 	
-	// disable data updating from IRQ
-	NVIC_DisableIRQ(TIM1_UP_IRQn);
 	// convert data to report format
 	for (int i=0;i<MAX_BUTTONS_NUM;i++)
 	{
 			uint8_t is_button_to_axis = 0;
-			buttons_data[(i & 0xF8)>>3] &= ~(1 << (i & 0x07));
-			
+						
 			// buttons is mapped to shift
 			if (i == p_config->shift_config[0].button ||
 					i == p_config->shift_config[1].button ||
@@ -682,7 +679,14 @@ void ButtonsReadLogical (app_config_t * p_config)
 
 			if (!is_button_to_axis)
 			{
+				// disable data updating from IRQ
+				NVIC_DisableIRQ(TIM1_UP_IRQn);
+				
+				buttons_data[(i & 0xF8)>>3] &= ~(1 << (i & 0x07));
 				buttons_data[(i & 0xF8)>>3] |= (buttons_state[i].current_state << (i & 0x07));
+				
+				// restore IRQ
+				NVIC_EnableIRQ(TIM1_UP_IRQn);
 			}
 	}
 	
@@ -720,8 +724,6 @@ void ButtonsReadLogical (app_config_t * p_config)
 				break;
 		}
 	}
-	// restore IRQ
-	NVIC_EnableIRQ(TIM1_UP_IRQn);
 }
 
 /**
