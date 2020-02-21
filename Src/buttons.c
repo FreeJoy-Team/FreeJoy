@@ -446,21 +446,21 @@ void MaxtrixButtonsGet (uint8_t * raw_button_data_buf, dev_config_t * p_dev_conf
 	// get matrix buttons
 	for (int i=0; i<USED_PINS_NUM; i++)
 	{
-		if ((p_dev_config->pins[i] == BUTTON_COLUMN) && ((*pos) < MAX_BUTTONS_NUM))
+		if ((p_dev_config->pins[i] == BUTTON_ROW) && ((*pos) < MAX_BUTTONS_NUM))
 		{
-			// tie Column pin to ground
+			// tie Row pin to ground
 			GPIO_WriteBit(pin_config[i].port, pin_config[i].pin, Bit_RESET);
 			
-			// get states at Rows
+			// get states at Columns
 			for (int k=0; k<USED_PINS_NUM; k++)
 			{
-				if (p_dev_config->pins[k] == BUTTON_ROW && (*pos) < MAX_BUTTONS_NUM)
+				if (p_dev_config->pins[k] == BUTTON_COLUMN && (*pos) < MAX_BUTTONS_NUM)
 				{ 
 					raw_button_data_buf[*pos] = DirectButtonGet(k, p_dev_config);
 					(*pos)++;
 				}
 			}
-			// return Column pin to Hi-Z state
+			// return Row pin to Hi-Z state
 			GPIO_WriteBit(pin_config[i].port, pin_config[i].pin, Bit_SET);
 		}
 	}
@@ -654,15 +654,11 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 		}
 	}
 	
-	
-	// prevent not atomic read
-	NVIC_DisableIRQ(TIM1_UP_IRQn);
 	// convert data to report format	
 	uint8_t k = 0;
 	for (int i=0;i<MAX_BUTTONS_NUM;i++)
 	{
 			uint8_t is_hidden = 0;
-			buttons_data[(i & 0xF8)>>3] &= ~(1 << (i & 0x07));
 			
 			// buttons is mapped to shift
 			if (i == p_dev_config->shift_config[0].button ||
@@ -701,8 +697,15 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 
 			if (!is_hidden)
 			{
+				// prevent not atomic read
+				NVIC_DisableIRQ(TIM1_UP_IRQn);
+				
+				buttons_data[(i & 0xF8)>>3] &= ~(1 << (i & 0x07));
 				buttons_data[(k & 0xF8)>>3] |= (buttons_state[i].current_state << (k & 0x07));
 				k++;
+				
+				// resume IRQ
+				NVIC_EnableIRQ(TIM1_UP_IRQn);
 			}
 	}
 	
@@ -740,8 +743,6 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 				break;
 		}
 	}
-	// resume IRQ
-	NVIC_EnableIRQ(TIM1_UP_IRQn);
 }
 
 /**

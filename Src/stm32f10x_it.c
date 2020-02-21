@@ -202,7 +202,6 @@ void TIM3_IRQHandler(void)
 
 void TIM1_UP_IRQHandler(void)
 {
-	uint8_t report_buf[64];
 	app_config_t tmp_app_config;
 	
 	if (TIM_GetITStatus(TIM1, TIM_IT_Update))
@@ -233,7 +232,7 @@ void TIM1_UP_IRQHandler(void)
 			
 			joy_report.id = REPORT_ID_JOY;	
 							
-			USB_CUSTOM_HID_SendReport((uint8_t *)&(joy_report.id), sizeof(joy_report)-sizeof(joy_report.dummy));
+			USB_CUSTOM_HID_SendReport((uint8_t *)&joy_report.id, sizeof(joy_report) - sizeof(joy_report.dummy));
 		}
 	
 		EncoderProcess(buttons_state, &dev_config);

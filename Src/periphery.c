@@ -246,14 +246,14 @@ void IO_Init (dev_config_t * p_dev_config)
 			GPIO_InitStructure.GPIO_Pin = pin_config[i].pin;
 			GPIO_Init(pin_config[i].port, &GPIO_InitStructure);
 		}
-		else if (p_dev_config->pins[i] == BUTTON_ROW)
+		else if (p_dev_config->pins[i] == BUTTON_COLUMN)
 		{
 			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
 			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
 			GPIO_InitStructure.GPIO_Pin = pin_config[i].pin;
 			GPIO_Init(pin_config[i].port, &GPIO_InitStructure);
 		}
-		else if (p_dev_config->pins[i] == BUTTON_COLUMN)
+		else if (p_dev_config->pins[i] == BUTTON_ROW)
 		{
 			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
 			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;

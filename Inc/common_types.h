@@ -243,7 +243,7 @@ typedef struct
 
 typedef struct
 {
-	uint8_t 				dummy;
+	uint8_t					dummy;		// alighning
 	uint8_t 				id;
 	int16_t					raw_axis_data[MAX_AXIS_NUM];
 	uint8_t					raw_button_data[9];
