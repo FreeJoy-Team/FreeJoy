@@ -40,9 +40,6 @@
 /* Private variables ---------------------------------------------------------*/
 volatile int32_t millis =0, joy_millis=0;
 extern app_config_t config;
-joy_report_t joy_report;
-uint8_t btn_num = 0;
-uint8_t	physical_buttons_data[MAX_BUTTONS_NUM];
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
@@ -201,6 +198,9 @@ void TIM3_IRQHandler(void)
 
 void TIM1_UP_IRQHandler(void)
 {
+	uint8_t btn_num = 0;
+	uint8_t	physical_buttons_data[MAX_BUTTONS_NUM];
+	joy_report_t joy_report;
 	
 	if (TIM_GetITStatus(TIM1, TIM_IT_Update))
 	{

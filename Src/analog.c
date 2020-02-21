@@ -516,8 +516,7 @@ void AxesProcess (app_config_t * p_config)
     }
 	}
    
-	// disable data updating from IRQ
-	NVIC_DisableIRQ(TIM1_UP_IRQn);
+	
 	for (uint8_t i=0; i<MAX_AXIS_NUM; i++)
 	{
 		// Multi-axis process
@@ -546,6 +545,8 @@ void AxesProcess (app_config_t * p_config)
 			else if (tmp[i] < AXIS_MIN_VALUE) tmp[i] = AXIS_MIN_VALUE;
 		}
 		
+		// disable data updating from IRQ
+		NVIC_DisableIRQ(TIM1_UP_IRQn);
 		
     // setting technical axis data
     scaled_axis_data[i] = tmp[i];
@@ -553,9 +554,10 @@ void AxesProcess (app_config_t * p_config)
     if (p_config->axis_config[i].out_enabled)  out_axis_data[i] = tmp[i];
     else  out_axis_data[i] = 0;
 		
+		// restore IRQ
+		NVIC_EnableIRQ(TIM1_UP_IRQn);
 	}
-	// restore IRQ
-	NVIC_EnableIRQ(TIM1_UP_IRQn);
+	
 	
 }
 
