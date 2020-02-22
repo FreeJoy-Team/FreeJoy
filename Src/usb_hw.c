@@ -281,22 +281,20 @@ void Get_VidPid(void)
 void Get_ReportDesc(void)
 {
 	app_config_t tmp_app_config;
-	dev_config_t tmp_dev_config;
 	
 	AppConfigGet(&tmp_app_config);
-	DevConfigGet(&tmp_dev_config);
 
 	CustomHID_ReportDescriptor[104] = tmp_app_config.buttons_cnt ? tmp_app_config.buttons_cnt : 1;
 	CustomHID_ReportDescriptor[112] = tmp_app_config.buttons_cnt ? ((tmp_app_config.buttons_cnt - 1)/8 + 1) * 8 : 0;
 	
-	CustomHID_ReportDescriptor[41] = tmp_dev_config.axis_config[0].out_enabled ? 0x30 : 0x00;
-	CustomHID_ReportDescriptor[43] = tmp_dev_config.axis_config[1].out_enabled ? 0x31 : 0x00;
-	CustomHID_ReportDescriptor[45] = tmp_dev_config.axis_config[2].out_enabled ? 0x32 : 0x00;
-	CustomHID_ReportDescriptor[47] = tmp_dev_config.axis_config[3].out_enabled ? 0x33 : 0x00;
-	CustomHID_ReportDescriptor[49] = tmp_dev_config.axis_config[4].out_enabled ? 0x34 : 0x00;
-	CustomHID_ReportDescriptor[51] = tmp_dev_config.axis_config[5].out_enabled ? 0x35 : 0x00;
-	CustomHID_ReportDescriptor[53] = tmp_dev_config.axis_config[6].out_enabled ? 0x36 : 0x00;
-	CustomHID_ReportDescriptor[55] = tmp_dev_config.axis_config[7].out_enabled ? 0x36 : 0x00;
+	CustomHID_ReportDescriptor[41] = (tmp_app_config.axes & 0x01) ? 0x30 : 0x04;
+	CustomHID_ReportDescriptor[43] = (tmp_app_config.axes & 0x02) ? 0x31 : 0x04;
+	CustomHID_ReportDescriptor[45] = (tmp_app_config.axes & 0x04) ? 0x32 : 0x04;
+	CustomHID_ReportDescriptor[47] = (tmp_app_config.axes & 0x08) ? 0x33 : 0x04;
+	CustomHID_ReportDescriptor[49] = (tmp_app_config.axes & 0x10) ? 0x34 : 0x04;
+	CustomHID_ReportDescriptor[51] = (tmp_app_config.axes & 0x20) ? 0x35 : 0x04;
+	CustomHID_ReportDescriptor[53] = (tmp_app_config.axes & 0x40) ? 0x36 : 0x04;
+	CustomHID_ReportDescriptor[55] = (tmp_app_config.axes & 0x80) ? 0x36 : 0x04;
 	
 	CustomHID_ReportDescriptor[69] = (tmp_app_config.povs & 0x01) ? 0x39 : 0x00;
 	CustomHID_ReportDescriptor[88] = (tmp_app_config.povs & 0x02) ? 0x39 : 0x00;

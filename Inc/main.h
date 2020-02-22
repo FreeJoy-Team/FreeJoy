@@ -18,7 +18,7 @@
 
 static const dev_config_t init_config =
 {
-	.firmware_version = 0x1340,		// do not change
+	.firmware_version = 0x1341,		// do not change
 	
 	/* 
 		Name of device in devices dispatcher
@@ -667,6 +667,7 @@ static const dev_config_t init_config =
 	
 	.vid = 0x0483,
 	.pid = 0x5750,
+	.is_dynamic_config = 0,
 		
 };
 

@@ -2,6 +2,23 @@
   ******************************************************************************
   * @file           : analog.c
   * @brief          : Analog axis driver implementation
+		
+		FreeJoy software for game device controllers
+    Copyright (C) 2020  Yury Vostrenkov (yuvostrenkov@gmail.com)
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+		
   ******************************************************************************
   */
 
@@ -20,9 +37,10 @@ analog_data_t out_axis_data[MAX_AXIS_NUM];
 
 analog_data_t FILTER_LOW_COEFF[FILTER_LOW_SIZE] = {40, 30, 15, 10, 5};
 analog_data_t FILTER_MED_COEFF[FILTER_MED_SIZE] = {30, 20, 10, 10, 10, 6, 6, 4, 2, 2};
-analog_data_t FILTER_HIGH_COEFF[FILTER_HIGH_SIZE] = {20, 20, 10, 10, 5, 5, 5, 5, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1};
+analog_data_t FILTER_HIGH_COEFF[FILTER_HIGH_SIZE] = {25, 20, 10, 5, 5, 5, 5, 5, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1};
+analog_data_t FILTER_VERY_HIGH_COEFF[FILTER_VERY_HIGH_SIZE] = {15, 15, 10, 10, 10, 10, 5, 4, 3, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1};
 
-analog_data_t filter_buffer[MAX_AXIS_NUM][FILTER_HIGH_SIZE];
+analog_data_t filter_buffer[MAX_AXIS_NUM][FILTER_VERY_HIGH_SIZE];
 	
 buttons_state_t axes_buttons[MAX_AXIS_NUM][3];
 
@@ -33,16 +51,6 @@ adc_channel_config_t channel_config[MAX_AXIS_NUM] =
 	{ADC_Channel_4, 4}, {ADC_Channel_5, 5}, 
 	{ADC_Channel_6, 6}, {ADC_Channel_7, 7}, 
 };
-
-///**
-//  * @brief 	Returns absolute value of input parameter
-//	*	@param	x: Input value
-//  * @retval Absolute value
-//  */
-//static int32_t abs (int32_t x)
-//{
-//	return (x > 0) ? x : -x;
-//}
 
 /**
   * @brief  Transform value from input range to value in output range
@@ -214,6 +222,17 @@ analog_data_t Filter (analog_data_t value, analog_data_t * filter_buf, filter_t 
 				filter_buf[i] = filter_buf[i-1];
 				
 				tmp32 += filter_buf[i] * FILTER_HIGH_COEFF[i];
+			}
+		break;
+			
+		case FILTER_VERY_HIGH:
+			
+			tmp32 = value * FILTER_VERY_HIGH_COEFF[0];
+			for (uint8_t i=FILTER_VERY_HIGH_SIZE-1; i>0; i--)
+			{
+				filter_buf[i] = filter_buf[i-1];
+				
+				tmp32 += filter_buf[i] * FILTER_VERY_HIGH_COEFF[i];
 			}
 			
 		break;

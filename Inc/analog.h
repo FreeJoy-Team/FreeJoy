@@ -13,9 +13,10 @@
 #include "common_types.h"
 #include "periphery.h"
 
-#define FILTER_LOW_SIZE				5
-#define FILTER_MED_SIZE				10
-#define FILTER_HIGH_SIZE			20
+#define FILTER_LOW_SIZE						5
+#define FILTER_MED_SIZE						10
+#define FILTER_HIGH_SIZE					20
+#define FILTER_VERY_HIGH_SIZE			20
 
 extern tle_t sensors[MAX_AXIS_NUM];
 

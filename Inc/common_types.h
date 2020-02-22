@@ -18,7 +18,7 @@ enum
 	FILTER_LOW,
 	FILTER_MEDIUM,
 	FILTER_HIGH,
-	
+	FILTER_VERY_HIGH,
 }; 
 typedef uint8_t filter_t;
 
@@ -230,12 +230,13 @@ typedef struct
 	shift_modificator_t	shift_config[5];
 	uint16_t						vid;
 	uint16_t						pid;
-	uint8_t							reserved_10[27];
+	uint8_t							is_dynamic_config; 
+	uint8_t							reserved_10[26];
 }dev_config_t;
 
 typedef struct
 {
-	uint8_t							axes_cnt;
+	uint8_t							axes;
 	uint8_t							buttons_cnt;
 	uint8_t							povs;
 	

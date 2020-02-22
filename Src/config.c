@@ -2,6 +2,23 @@
   ******************************************************************************
   * @file           : config.c
   * @brief          : Config management implementation
+		
+		FreeJoy software for game device controllers
+    Copyright (C) 2020  Yury Vostrenkov (yuvostrenkov@gmail.com)
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+		
   ******************************************************************************
   */
 
@@ -49,75 +66,83 @@ void DevConfigGet (dev_config_t * p_dev_config)
 
 void AppConfigInit (dev_config_t * p_dev_config)
 {
-	app_config.axes_cnt = 0;
+	app_config.axes = 0;
 	app_config.buttons_cnt = 0;
 	app_config.povs = 0;
 	
-	for (uint8_t i=0; i<MAX_AXIS_NUM; i++)
+	if (p_dev_config->is_dynamic_config)
 	{
-		if (p_dev_config->axis_config[i].out_enabled)	app_config.axes_cnt++;
+		for (uint8_t i=0; i<MAX_AXIS_NUM; i++)
+		{
+			if (p_dev_config->axis_config[i].out_enabled)	app_config.axes |= (1<<i);
+		}
+
+		for (uint8_t i=0; i<MAX_BUTTONS_NUM; i++)
+		{
+			uint8_t is_hidden = 0;
+			
+			if (i == p_dev_config->shift_config[0].button ||
+						i == p_dev_config->shift_config[1].button ||
+						i == p_dev_config->shift_config[2].button ||
+						i == p_dev_config->shift_config[3].button ||
+						i == p_dev_config->shift_config[4].button)	continue;
+			
+			if (p_dev_config->buttons[i].type == POV1_DOWN ||
+						p_dev_config->buttons[i].type == POV1_UP ||
+						p_dev_config->buttons[i].type == POV1_LEFT ||
+						p_dev_config->buttons[i].type == POV1_RIGHT)
+			{
+				app_config.povs |= 0x01;
+				continue;
+			}
+			if (p_dev_config->buttons[i].type == POV2_DOWN ||
+						p_dev_config->buttons[i].type == POV2_UP ||
+						p_dev_config->buttons[i].type == POV2_LEFT ||
+						p_dev_config->buttons[i].type == POV2_RIGHT)
+			{
+				app_config.povs |= 0x02;
+				continue;
+			}
+			if (p_dev_config->buttons[i].type == POV3_DOWN ||
+						p_dev_config->buttons[i].type == POV3_UP ||
+						p_dev_config->buttons[i].type == POV3_LEFT ||
+						p_dev_config->buttons[i].type == POV3_RIGHT)
+			{
+				app_config.povs |= 0x04;
+				continue;
+			}
+			if (p_dev_config->buttons[i].type == POV4_DOWN ||
+						p_dev_config->buttons[i].type == POV4_UP ||
+						p_dev_config->buttons[i].type == POV4_LEFT ||
+						p_dev_config->buttons[i].type == POV4_RIGHT)
+			{
+				app_config.povs |= 0x08;
+				continue;
+			}
+
+			for (uint8_t j=0; j<MAX_AXIS_NUM; j++)
+			{
+					// button is mapped to axis
+					if (i == p_dev_config->axis_config[j].decrement_button ||
+							i == p_dev_config->axis_config[j].increment_button)
+					{
+						is_hidden = 1;
+						break;
+					}
+			}
+			
+			if (!is_hidden && p_dev_config->buttons[i].physical_num >=0)
+			{
+				app_config.buttons_cnt++;
+			}
+		}		
 	}
-
-	for (uint8_t i=0; i<MAX_BUTTONS_NUM; i++)
+	else
 	{
-		uint8_t is_hidden = 0;
-		
-		if (i == p_dev_config->shift_config[0].button ||
-					i == p_dev_config->shift_config[1].button ||
-					i == p_dev_config->shift_config[2].button ||
-					i == p_dev_config->shift_config[3].button ||
-					i == p_dev_config->shift_config[4].button)	continue;
-		
-		if (p_dev_config->buttons[i].type == POV1_DOWN ||
-					p_dev_config->buttons[i].type == POV1_UP ||
-					p_dev_config->buttons[i].type == POV1_LEFT ||
-					p_dev_config->buttons[i].type == POV1_RIGHT)
-		{
-			app_config.povs |= 0x01;
-			continue;
-		}
-		if (p_dev_config->buttons[i].type == POV2_DOWN ||
-					p_dev_config->buttons[i].type == POV2_UP ||
-					p_dev_config->buttons[i].type == POV2_LEFT ||
-					p_dev_config->buttons[i].type == POV2_RIGHT)
-		{
-			app_config.povs |= 0x02;
-			continue;
-		}
-		if (p_dev_config->buttons[i].type == POV3_DOWN ||
-					p_dev_config->buttons[i].type == POV3_UP ||
-					p_dev_config->buttons[i].type == POV3_LEFT ||
-					p_dev_config->buttons[i].type == POV3_RIGHT)
-		{
-			app_config.povs |= 0x04;
-			continue;
-		}
-		if (p_dev_config->buttons[i].type == POV4_DOWN ||
-					p_dev_config->buttons[i].type == POV4_UP ||
-					p_dev_config->buttons[i].type == POV4_LEFT ||
-					p_dev_config->buttons[i].type == POV4_RIGHT)
-		{
-			app_config.povs |= 0x08;
-			continue;
-		}
-
-		for (uint8_t j=0; j<MAX_AXIS_NUM; j++)
-		{
-				// button is mapped to axis
-				if (i == p_dev_config->axis_config[j].decrement_button ||
-						i == p_dev_config->axis_config[j].increment_button)
-				{
-					is_hidden = 1;
-					break;
-				}
-		}
-		
-		if (!is_hidden && p_dev_config->buttons[i].physical_num >=0)
-		{
-			app_config.buttons_cnt++;
-		}
-	}		
-	
+		app_config.axes = 0xFF;
+		app_config.buttons_cnt = MAX_BUTTONS_NUM;
+		app_config.povs = 0x0F;
+	}
 	
 }
 
