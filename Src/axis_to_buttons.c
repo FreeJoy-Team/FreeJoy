@@ -2,6 +2,23 @@
   ******************************************************************************
   * @file           : axis_to_buttons.c
   * @brief          : Axis to buttons driver implementation
+		
+		FreeJoy software for game device controllers
+    Copyright (C) 2020  Yury Vostrenkov (yuvostrenkov@gmail.com)
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+		
   ******************************************************************************
   */
 
@@ -100,11 +117,11 @@ uint8_t GetPressedFromAxis (analog_data_t axis_data, uint8_t btn_num, axis_to_bu
 /**
   * @brief  Getting buttons states from axes to buttons
 	* @param  raw_button_data_buf: Pointer to raw buttons data buffer
-	* @param  p_config: Pointer to device configuration
+	* @param  p_dev_config: Pointer to device configuration
 	* @param  pos: Pointer to button position counter
   * @retval None
   */
-void AxesToButtonsGet (uint8_t * raw_button_data_buf, app_config_t * p_config, uint8_t * pos)
+void AxesToButtonsGet (uint8_t * raw_button_data_buf, dev_config_t * p_dev_config, uint8_t * pos)
 {
 	analog_data_t 		scaled_axes_data[MAX_AXIS_NUM];
 	
@@ -113,14 +130,14 @@ void AxesToButtonsGet (uint8_t * raw_button_data_buf, app_config_t * p_config, u
 	
 	for (uint8_t i=0; i<MAX_AXIS_NUM; i++)
 	{
-		if (p_config->axes_to_buttons[i].is_enabled)
+		if (p_dev_config->axes_to_buttons[i].is_enabled)
 		{
-			for (uint8_t j=0; j<p_config->axes_to_buttons[i].buttons_cnt; j++)
+			for (uint8_t j=0; j<p_dev_config->axes_to_buttons[i].buttons_cnt; j++)
 			{
 				if ((*pos) < MAX_BUTTONS_NUM)
 				{
 					// get raw button state from axis
-					raw_button_data_buf[*pos] = GetPressedFromAxis(scaled_axes_data[i], j, &p_config->axes_to_buttons[i]);
+					raw_button_data_buf[*pos] = GetPressedFromAxis(scaled_axes_data[i], j, &p_dev_config->axes_to_buttons[i]);
 
 					(*pos)++;
 				}

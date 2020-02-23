@@ -2,6 +2,23 @@
   ******************************************************************************
   * @file           : encoders.c
   * @brief          : Encoders driver implementation
+		
+		FreeJoy software for game device controllers
+    Copyright (C) 2020  Yury Vostrenkov (yuvostrenkov@gmail.com)
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+		
   ******************************************************************************
   */
 
@@ -37,7 +54,7 @@ int8_t enc_array [16] =
 
 encoder_t encoders_state[MAX_ENCODERS_NUM];
 
-void EncoderProcess (buttons_state_t * button_state_buf, app_config_t * p_config)
+void EncoderProcess (buttons_state_t * button_state_buf, dev_config_t * p_dev_config)
 {	
 	uint8_t encoders_present = 0;
 	
@@ -52,7 +69,7 @@ void EncoderProcess (buttons_state_t * button_state_buf, app_config_t * p_config
 	}
 	if (!encoders_present) return;		// dont waste time if no encoders connected
 	
-	ButtonsReadPhysical(p_config, physical_buttons_state);		// read raw buttons state
+	ButtonsReadPhysical(p_dev_config, physical_buttons_state);		// read raw buttons state
 	
 	
 	for (int i=0; i<MAX_ENCODERS_NUM; i++)
@@ -63,8 +80,8 @@ void EncoderProcess (buttons_state_t * button_state_buf, app_config_t * p_config
 			int8_t stt;
 			encoders_state[i].state <<= 2;			// shift prev state to clear space for new data
 			
-			if (physical_buttons_state[p_config->buttons[encoders_state[i].pin_a].physical_num])	encoders_state[i].state |= 0x01;		// Pin A high
-			if (physical_buttons_state[p_config->buttons[encoders_state[i].pin_b].physical_num])	encoders_state[i].state |= 0x02;		// Pin B high
+			if (physical_buttons_state[p_dev_config->buttons[encoders_state[i].pin_a].physical_num])	encoders_state[i].state |= 0x01;		// Pin A high
+			if (physical_buttons_state[p_dev_config->buttons[encoders_state[i].pin_b].physical_num])	encoders_state[i].state |= 0x02;		// Pin B high
 			
 			if ((encoders_state[i].state & 0x03) != ((encoders_state[i].state >> 2) & 0x03))							// Current state != Prev state
 			{
@@ -106,7 +123,7 @@ void EncoderProcess (buttons_state_t * button_state_buf, app_config_t * p_config
 			}
 		}
 		
-		if (millis - encoders_state[i].time_last > p_config->encoder_press_time_ms)
+		if (millis - encoders_state[i].time_last > p_dev_config->encoder_press_time_ms)
 		{	
 			button_state_buf[encoders_state[i].pin_a].current_state = 0;
 			button_state_buf[encoders_state[i].pin_b].current_state = 0;
@@ -114,7 +131,7 @@ void EncoderProcess (buttons_state_t * button_state_buf, app_config_t * p_config
 	}
 }
 
-void EncodersInit(app_config_t * p_config)
+void EncodersInit(dev_config_t * p_dev_config)
 {
 	uint8_t pos = 0;
 	int8_t prev_a = -1;
@@ -128,11 +145,11 @@ void EncodersInit(app_config_t * p_config)
 	
 	for (int i=0; i<MAX_BUTTONS_NUM; i++)
 	{
-		if ((p_config->buttons[i].type) == ENCODER_INPUT_A &&  i > prev_a)
+		if ((p_dev_config->buttons[i].type) == ENCODER_INPUT_A &&  i > prev_a)
 		{
 			for (int j=0; j<MAX_BUTTONS_NUM; j++)
 			{
-				if ((p_config->buttons[j].type) == ENCODER_INPUT_B && j > prev_b && pos < MAX_ENCODERS_NUM)
+				if ((p_dev_config->buttons[j].type) == ENCODER_INPUT_B && j > prev_b && pos < MAX_ENCODERS_NUM)
 				{
 					encoders_state[pos].pin_a = i;
 					encoders_state[pos].pin_b = j;

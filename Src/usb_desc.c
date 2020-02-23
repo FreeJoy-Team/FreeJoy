@@ -46,12 +46,14 @@
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
+uint16_t usb_vid = 0x0483;
+uint16_t usb_pid = 0x5750;
 /* Extern variables ----------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
 /* USB Standard Device Descriptor */
-const uint8_t CustomHID_DeviceDescriptor[CUSTOMHID_SIZ_DEVICE_DESC] =
+uint8_t CustomHID_DeviceDescriptor[CUSTOMHID_SIZ_DEVICE_DESC] =
   {
     0x12,                       /*bLength */
     USB_DEVICE_DESCRIPTOR_TYPE, /*bDescriptorType*/
@@ -61,10 +63,10 @@ const uint8_t CustomHID_DeviceDescriptor[CUSTOMHID_SIZ_DEVICE_DESC] =
     0x00,                       /*bDeviceSubClass*/
     0x00,                       /*bDeviceProtocol*/
     0x40,                       /*bMaxPacketSize40*/
-    0x83,                       /*idVendor (0x0483)*/
+    0x83,            						/*idVendor = 0x0483 */
     0x04,
-    0x50,                       /*idProduct = 0x5750*/
-    0x57,
+    0x50,						            /*idProduct = 0x5750*/
+    0x57,            
     0x00,                       /*bcdDevice rel. 2.00*/
     0x02,
     1,                          /*Index of string descriptor describing
@@ -80,7 +82,7 @@ const uint8_t CustomHID_DeviceDescriptor[CUSTOMHID_SIZ_DEVICE_DESC] =
 
 /* USB Configuration Descriptor */
 /*   All Descriptors (Configuration, Interface, Endpoint, Class, Vendor */
-const uint8_t CustomHID_ConfigDescriptor[CUSTOMHID_SIZ_CONFIG_DESC] =
+uint8_t CustomHID_ConfigDescriptor[CUSTOMHID_SIZ_CONFIG_DESC] =
   {
     0x09, /* bLength: Configuration Descriptor size */
     USB_CONFIGURATION_DESCRIPTOR_TYPE, /* bDescriptorType: Configuration */
@@ -140,22 +142,32 @@ const uint8_t CustomHID_ConfigDescriptor[CUSTOMHID_SIZ_CONFIG_DESC] =
     /* 41 */
   }
   ; /* CustomHID_ConfigDescriptor */
-const uint8_t CustomHID_ReportDescriptor[CUSTOMHID_SIZ_REPORT_DESC] =
+uint8_t CustomHID_ReportDescriptor[CUSTOMHID_SIZ_REPORT_DESC] =
   {                    
     0x05, 0x01,                    // USAGE_PAGE (Generic Desktop)
     0x09, 0x04,                    // USAGE (Joystick)
     0xa1, 0x01,                    // COLLECTION (Application)
 
 		0x85, REPORT_ID_JOY,				 	 //		REPORT_ID	(JOY_REPORT_ID)	
-	  0x05, 0x09,                    //   USAGE_PAGE (Button)
-    0x19, 0x01,                    //   USAGE_MINIMUM (Button 1)
-    0x29, MAX_BUTTONS_NUM,         //   USAGE_MAXIMUM (Button MAX_BUTTONS_NUM)
+	  
+		// raw axis data
+		0x06, 0x00, 0xff,              // 	USAGE_PAGE (Vendor Defined Page 1)
+    0x09, 0x01,                    //   USAGE (Vendor Usage 1)
+    0x16, 0x01, 0x80,              //  	LOGICAL_MINIMUM (-32767)
+    0x26, 0xFF, 0x7F,						   //   LOGICAL_MAXIMUM (32767)
+    0x75, 0x10,                    //   REPORT_SIZE (16)
+    0x95, MAX_AXIS_NUM,            //   REPORT_COUNT (MAX_AXIS_NUM)
+    0x81, 0x00,                    //   INPUT (Data,Ary,Abs)
+		
+		// raw button serial data
+    0x09, 0x02,                    //   USAGE (Vendor Usage 2)
     0x15, 0x00,                    //   LOGICAL_MINIMUM (0)
-    0x25, 0x01,                    //   LOGICAL_MAXIMUM (1)
-    0x75, 0x01,                    //   REPORT_SIZE (1)
-    0x95, MAX_BUTTONS_NUM,         //   REPORT_COUNT (MAX_BUTTONS_NUM)
-    0x81, 0x02,                    //   INPUT (Data,Var,Abs)
-
+    0x26, 0xff, 0x00,              //   LOGICAL_MAXIMUM (255)
+    0x75, 0x08,                    //   REPORT_SIZE (8)
+    0x95, 0x0A,                    //   REPORT_COUNT (10)
+    0x81, 0x00,                    //   INPUT (Data,Ary,Abs)
+		
+		// axes data
 		0x05, 0x01,                    // 	USAGE_PAGE (Generic Desktop)
 		0x09, 0x30,                    //   USAGE (X)
     0x09, 0x31,                    //   USAGE (Y)
@@ -171,6 +183,7 @@ const uint8_t CustomHID_ReportDescriptor[CUSTOMHID_SIZ_REPORT_DESC] =
     0x95, MAX_AXIS_NUM,       		 //   REPORT_COUNT (MAX_AXIS_NUM)
     0x81, 0x02,                    //   INPUT (Data,Var,Abs)
 		
+		// POV data
 		0x09, 0x39, 									 //   USAGE (Hat switch)
 		0x15, 0x00, 									 //   LOGICAL_MINIMUM (0)
 		0x25, 0x07, 									 //   LOGICAL_MAXIMUM (7)
@@ -187,25 +200,21 @@ const uint8_t CustomHID_ReportDescriptor[CUSTOMHID_SIZ_REPORT_DESC] =
 		0x09, 0x39, 									 //   USAGE (Hat switch)
 		0x81, 0x02, 									 //   INPUT (Data,Var,Abs)
 		
-		// raw axis data
-		0x06, 0x00, 0xff,              // 	USAGE_PAGE (Vendor Defined Page 1)
-    0x09, 0x01,                    //   USAGE (Vendor Usage 1)
-    0x16, 0x01, 0x80,              //  	LOGICAL_MINIMUM (-32767)
-    0x26, 0xFF, 0x7F,						   //   LOGICAL_MAXIMUM (32767)
-    0x75, 0x10,                    //   REPORT_SIZE (16)
-    0x95, MAX_AXIS_NUM,            //   REPORT_COUNT (MAX_AXIS_NUM)
-    0x81, 0x00,                    //   INPUT (Data,Ary,Abs)
-		
-		// raw button serial data
-    0x09, 0x02,                    //   USAGE (Vendor Usage 2)
+		// buttons data
+		0x05, 0x09,                    //   USAGE_PAGE (Button)		
+    0x19, 0x01,                    //   USAGE_MINIMUM (Button 1)
+    0x29, MAX_BUTTONS_NUM,         //   USAGE_MAXIMUM (Button MAX_BUTTONS_NUM)
     0x15, 0x00,                    //   LOGICAL_MINIMUM (0)
-    0x26, 0xff, 0x00,              //   LOGICAL_MAXIMUM (255)
-    0x75, 0x08,                    //   REPORT_SIZE (8)
-    0x95, 0x09,                    //   REPORT_COUNT (9)
-    0x81, 0x00,                    //   INPUT (Data,Ary,Abs)
+    0x25, 0x01,                    //   LOGICAL_MAXIMUM (1)
+    0x75, 0x01,                    //   REPORT_SIZE (1)
+    0x95, MAX_BUTTONS_NUM,         //   REPORT_COUNT (MAX_BUTTONS_NUM)
+    0x81, 0x02,                    //   INPUT (Data,Var,Abs)
+		
+		
 		
 		// config data
 		0x85, REPORT_ID_CONFIG_IN,     //   REPORT_ID (2)
+		0x06, 0x00, 0xff,              // 	USAGE_PAGE (Vendor Defined Page 1)
     0x09, 0x03,                    //   USAGE (Vendor Usage 3)
     0x15, 0x00,                    //   LOGICAL_MINIMUM (0)
     0x26, 0xff, 0x00,              //   LOGICAL_MAXIMUM (255)
@@ -245,7 +254,7 @@ const uint8_t CustomHID_ReportDescriptor[CUSTOMHID_SIZ_REPORT_DESC] =
   }; /* CustomHID_ReportDescriptor */
 
 /* USB String Descriptors (optional) */
-const uint8_t CustomHID_StringLangID[CUSTOMHID_SIZ_STRING_LANGID] =
+uint8_t CustomHID_StringLangID[CUSTOMHID_SIZ_STRING_LANGID] =
   {
     CUSTOMHID_SIZ_STRING_LANGID,
     USB_STRING_DESCRIPTOR_TYPE,
@@ -254,7 +263,7 @@ const uint8_t CustomHID_StringLangID[CUSTOMHID_SIZ_STRING_LANGID] =
   }
   ; /* LangID = 0x0409: U.S. English */
 
-const uint8_t CustomHID_StringVendor[CUSTOMHID_SIZ_STRING_VENDOR] =
+uint8_t CustomHID_StringVendor[CUSTOMHID_SIZ_STRING_VENDOR] =
   {
     CUSTOMHID_SIZ_STRING_VENDOR, /* Size of Vendor string */
     USB_STRING_DESCRIPTOR_TYPE,  /* bDescriptorType*/

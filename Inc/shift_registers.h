@@ -14,8 +14,8 @@
 
 #define SHIFTREG_TICK_DELAY			10
 
-void ShiftRegistersInit(app_config_t * p_config);
-void ShiftRegistersGet (uint8_t * raw_button_data_buf, app_config_t * p_config, uint8_t * pos);
+void ShiftRegistersInit(dev_config_t * p_dev_config);
+void ShiftRegistersGet (uint8_t * raw_button_data_buf, dev_config_t * p_dev_config, uint8_t * pos);
 
 #endif 	/* __SHIFT_REGISTERS_H__ */
 

@@ -2,6 +2,23 @@
   ******************************************************************************
   * @file           : shift_registers.c
   * @brief          : Encoders driver implementation
+		
+		FreeJoy software for game device controllers
+    Copyright (C) 2020  Yury Vostrenkov (yuvostrenkov@gmail.com)
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+		
   ******************************************************************************
   */
 
@@ -10,10 +27,10 @@
 
 /**
   * @brief  Initializate shift registers states at startup
-	* @param  p_config: Pointer to device configuration
+	* @param  p_dev_config: Pointer to device configuration
   * @retval None
   */
-void ShiftRegistersInit(app_config_t * p_config)
+void ShiftRegistersInit(dev_config_t * p_dev_config)
 {
 	uint8_t pos = 0;
 	int8_t prev_cs = -1;
@@ -21,20 +38,20 @@ void ShiftRegistersInit(app_config_t * p_config)
 	
 	for (int i=0; i<MAX_SHIFT_REG_NUM; i++)
 	{
-		p_config->shift_registers[i].pin_cs = -1;
-		p_config->shift_registers[i].pin_data = -1;
+		p_dev_config->shift_registers[i].pin_cs = -1;
+		p_dev_config->shift_registers[i].pin_data = -1;
 	}
 	
 	for (int i=0; i<USED_PINS_NUM; i++)
 	{
-		if (p_config->pins[i] == SHIFT_REG_CS && i > prev_cs)
+		if (p_dev_config->pins[i] == SHIFT_REG_CS && i > prev_cs)
 		{
 			for (int j=0; j<USED_PINS_NUM; j++)
 			{
-				if (p_config->pins[j] == SHIFT_REG_DATA && j > prev_data)
+				if (p_dev_config->pins[j] == SHIFT_REG_DATA && j > prev_data)
 				{
-					p_config->shift_registers[pos].pin_cs = i;
-					p_config->shift_registers[pos].pin_data = j;
+					p_dev_config->shift_registers[pos].pin_cs = i;
+					p_dev_config->shift_registers[pos].pin_data = j;
 					
 					prev_cs = i;
 					prev_data = j;
@@ -128,19 +145,19 @@ void ShiftRegisterRead(shift_reg_config_t * shift_register, uint8_t * data)
 /**
   * @brief  Getting buttons states from shift registers
 	* @param  raw_button_data_buf: Pointer to raw buttons data buffer
-	* @param  p_config: Pointer to device configuration
+	* @param  p_dev_config: Pointer to device configuration
 	* @param  pos: Pointer to button position counter
   * @retval None
   */
-void ShiftRegistersGet (uint8_t * raw_button_data_buf, app_config_t * p_config, uint8_t * pos)
+void ShiftRegistersGet (uint8_t * raw_button_data_buf, dev_config_t * p_dev_config, uint8_t * pos)
 {	
 	uint8_t input_data[16];
 	for (uint8_t i=0; i<MAX_SHIFT_REG_NUM; i++)
 	{
-		if (p_config->shift_registers[i].pin_cs >=0 && p_config->shift_registers[i].pin_data >=0)
+		if (p_dev_config->shift_registers[i].pin_cs >=0 && p_dev_config->shift_registers[i].pin_data >=0)
 		{
-			ShiftRegisterRead(&p_config->shift_registers[i], input_data);
-			for (uint8_t j=0; j<p_config->shift_registers[i].button_cnt; j++)
+			ShiftRegisterRead(&p_dev_config->shift_registers[i], input_data);
+			for (uint8_t j=0; j<p_dev_config->shift_registers[i].button_cnt; j++)
 			{
 				if ((*pos) <128)
 				{

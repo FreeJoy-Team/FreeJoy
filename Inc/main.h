@@ -16,9 +16,9 @@
 #include "common_types.h"
 
 
-static const app_config_t init_config =
+static const dev_config_t init_config =
 {
-	.firmware_version = 0x1335,		// do not change
+	.firmware_version = 0x1341,		// do not change
 	
 	/* 
 		Name of device in devices dispatcher
@@ -664,6 +664,10 @@ static const app_config_t init_config =
 	.shift_config[2].button = -1,
 	.shift_config[3].button = -1,
 	.shift_config[4].button = -1,
+	
+	.vid = 0x0483,
+	.pid = 0x5750,
+	.is_dynamic_config = 0,
 		
 };
 

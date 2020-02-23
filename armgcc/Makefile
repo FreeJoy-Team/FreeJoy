@@ -30,7 +30,7 @@ C_SOURCES =  \
 ../Src/buttons.c \
 ../Src/crc16.c \
 ../Src/encoders.c \
-../Src/flash.c \
+../Src/config.c \
 ../Src/main.c \
 ../Src/periphery.c \
 ../Src/sensors.c \

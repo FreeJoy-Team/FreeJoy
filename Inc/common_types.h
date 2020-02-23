@@ -18,7 +18,7 @@ enum
 	FILTER_LOW,
 	FILTER_MEDIUM,
 	FILTER_HIGH,
-	
+	FILTER_VERY_HIGH,
 }; 
 typedef uint8_t filter_t;
 
@@ -228,18 +228,30 @@ typedef struct
 	// config 12	
 	shift_reg_config_t	shift_registers[4];
 	shift_modificator_t	shift_config[5];
-	uint8_t							reserved_10[31];
-}app_config_t;
+	uint16_t						vid;
+	uint16_t						pid;
+	uint8_t							is_dynamic_config; 
+	uint8_t							reserved_10[26];
+}dev_config_t;
 
 typedef struct
 {
-	uint8_t 				dummy;
+	uint8_t							axes;
+	uint8_t							buttons_cnt;
+	uint8_t							povs;
+	
+} app_config_t;
+
+typedef struct
+{
+	uint8_t					dummy;		// alighning
 	uint8_t 				id;
-	uint8_t 				button_data[MAX_BUTTONS_NUM/8];
-	int16_t			 		axis_data[MAX_AXIS_NUM];
-	uint8_t 				pov_data[MAX_POVS_NUM];
 	int16_t					raw_axis_data[MAX_AXIS_NUM];
 	uint8_t					raw_button_data[9];
+	uint8_t					shift_button_data;	
+	int16_t			 		axis_data[MAX_AXIS_NUM];
+	uint8_t 				pov_data[MAX_POVS_NUM];
+	uint8_t 				button_data[MAX_BUTTONS_NUM/8];
 	
 } joy_report_t;
 

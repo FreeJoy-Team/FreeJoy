@@ -2,6 +2,24 @@
   ******************************************************************************
   * @file           : periphery.c
   * @brief          : Periphery driver implementation
+	
+		
+		FreeJoy software for game device controllers
+    Copyright (C) 2020  Yury Vostrenkov (yuvostrenkov@gmail.com)
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+		
   ******************************************************************************
   */
 
@@ -201,7 +219,7 @@ void Generator_Init(void)
 }
 
 /* IO init function */
-void IO_Init (app_config_t * p_config)
+void IO_Init (dev_config_t * p_dev_config)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
 
@@ -220,7 +238,7 @@ void IO_Init (app_config_t * p_config)
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13;
   GPIO_Init(GPIOC, &GPIO_InitStructure);
 	
-	while ((p_config->firmware_version & 0xFFF0) != (FIRMWARE_VERSION & 0xFFF0))
+	while ((p_dev_config->firmware_version & 0xFFF0) != (FIRMWARE_VERSION & 0xFFF0))
 	{
 		// blink LED if firmware version doesnt match
 		GPIOB->ODR ^= GPIO_Pin_12;
@@ -233,42 +251,42 @@ void IO_Init (app_config_t * p_config)
 	for (int i=0; i<USED_PINS_NUM; i++)
 	{
 		// buttons
-		if (p_config->pins[i] == BUTTON_GND)
+		if (p_dev_config->pins[i] == BUTTON_GND)
 		{
 			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
 			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
 			GPIO_InitStructure.GPIO_Pin = pin_config[i].pin;
 			GPIO_Init(pin_config[i].port, &GPIO_InitStructure);
 		}
-		else if (p_config->pins[i] == BUTTON_VCC)
+		else if (p_dev_config->pins[i] == BUTTON_VCC)
 		{
 			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
 			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
 			GPIO_InitStructure.GPIO_Pin = pin_config[i].pin;
 			GPIO_Init(pin_config[i].port, &GPIO_InitStructure);
 		}
-		else if (p_config->pins[i] == BUTTON_ROW)
+		else if (p_dev_config->pins[i] == BUTTON_COLUMN)
 		{
 			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
 			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
 			GPIO_InitStructure.GPIO_Pin = pin_config[i].pin;
 			GPIO_Init(pin_config[i].port, &GPIO_InitStructure);
 		}
-		else if (p_config->pins[i] == BUTTON_COLUMN)
+		else if (p_dev_config->pins[i] == BUTTON_ROW)
 		{
 			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
 			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
 			GPIO_InitStructure.GPIO_Pin = pin_config[i].pin;
 			GPIO_Init(pin_config[i].port, &GPIO_InitStructure);
 		}		
-		else if (p_config->pins[i] == AXIS_ANALOG)
+		else if (p_dev_config->pins[i] == AXIS_ANALOG)
 		{
 			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
 			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
 			GPIO_InitStructure.GPIO_Pin = pin_config[i].pin;
 			GPIO_Init(pin_config[i].port, &GPIO_InitStructure);
 		}
-		else if (p_config->pins[i] == SPI_SCK)//  && i == 14)
+		else if (p_dev_config->pins[i] == SPI_SCK)//  && i == 14)
 		{
 #if USE_SOFT_SPI			
 			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
@@ -282,7 +300,7 @@ void IO_Init (app_config_t * p_config)
 			GPIO_Init (GPIOB,&GPIO_InitStructure);
 #endif			
 		}
-		else if (p_config->pins[i] == SPI_DATA)// && i == 16)
+		else if (p_dev_config->pins[i] == SPI_DATA)// && i == 16)
 		{
 #if USE_SOFT_SPI	
 			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
@@ -297,7 +315,7 @@ void IO_Init (app_config_t * p_config)
 #endif
 			UserSPI_Init();
 		}
-		else if (p_config->pins[i] == TLE5011_CS)
+		else if (p_dev_config->pins[i] == TLE5011_CS)
 		{
 			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
@@ -305,11 +323,11 @@ void IO_Init (app_config_t * p_config)
 			GPIO_Init(pin_config[i].port, &GPIO_InitStructure);
 			GPIO_WriteBit(pin_config[i].port, pin_config[i].pin, Bit_SET);
 		}
-		else if (p_config->pins[i] == TLE5011_GEN  && i == 17)
+		else if (p_dev_config->pins[i] == TLE5011_GEN  && i == 17)
 		{
 			Generator_Init();	// 4MHz output at PB6 pin
 		}
-		else if (p_config->pins[i] == SHIFT_REG_CS)
+		else if (p_dev_config->pins[i] == SHIFT_REG_CS)
 		{
 			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
@@ -317,7 +335,7 @@ void IO_Init (app_config_t * p_config)
 			GPIO_Init(pin_config[i].port, &GPIO_InitStructure);
 			GPIO_WriteBit(pin_config[i].port, pin_config[i].pin, Bit_SET);
 		}
-		else if (p_config->pins[i] == SHIFT_REG_DATA)
+		else if (p_dev_config->pins[i] == SHIFT_REG_DATA)
 		{
 			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
 			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;

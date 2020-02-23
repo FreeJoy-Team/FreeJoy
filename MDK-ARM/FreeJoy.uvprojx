@@ -403,6 +403,11 @@
               <FilePath>../Src/stm32f10x_it.c</FilePath>
             </File>
             <File>
+              <FileName>config.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\config.c</FilePath>
+            </File>
+            <File>
               <FileName>periphery.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\periphery.c</FilePath>
@@ -441,11 +446,6 @@
               <FileName>axis_to_buttons.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\axis_to_buttons.c</FilePath>
-            </File>
-            <File>
-              <FileName>flash.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Src\flash.c</FilePath>
             </File>
             <File>
               <FileName>crc16.c</FileName>
@@ -1248,6 +1248,11 @@
               <FilePath>../Src/stm32f10x_it.c</FilePath>
             </File>
             <File>
+              <FileName>config.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\config.c</FilePath>
+            </File>
+            <File>
               <FileName>periphery.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\periphery.c</FilePath>
@@ -1286,11 +1291,6 @@
               <FileName>axis_to_buttons.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\axis_to_buttons.c</FilePath>
-            </File>
-            <File>
-              <FileName>flash.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Src\flash.c</FilePath>
             </File>
             <File>
               <FileName>crc16.c</FileName>

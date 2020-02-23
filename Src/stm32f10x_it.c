@@ -29,6 +29,7 @@
 #include "analog.h"
 #include "encoders.h"
 #include "sensors.h"
+#include "config.h"
 
 /** @addtogroup STM32F10x_StdPeriph_Template
   * @{
@@ -39,7 +40,7 @@
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 volatile int32_t millis =0, joy_millis=0;
-extern app_config_t config;
+extern dev_config_t dev_config;
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
@@ -181,7 +182,7 @@ void TIM3_IRQHandler(void)
 	{
 		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
 
-		AxesProcess(&config);
+		AxesProcess(&dev_config);
 
 		
 		for (uint8_t i=0; i<MAX_AXIS_NUM; i++)
@@ -208,25 +209,30 @@ void TIM1_UP_IRQHandler(void)
 
 		millis = GetTick();
 		// check if it is time to send joystick data
-		if (millis - joy_millis > config.exchange_period_ms )
+		if (millis - joy_millis > dev_config.exchange_period_ms )
 		{
 			joy_millis = millis;
 				
 			// getting fresh data to joystick report buffer
-			ButtonsGet(physical_buttons_data, joy_report.button_data);
+			ButtonsGet(physical_buttons_data, joy_report.button_data, &joy_report.shift_button_data);
 			AnalogGet(joy_report.axis_data, NULL, joy_report.raw_axis_data);	
 			POVsGet(joy_report.pov_data);
 			
-			joy_report.id = REPORT_ID_JOY;		
 			joy_report.raw_button_data[0] = btn_num;
-			for (uint8_t i=0; i<8; i++)	joy_report.raw_button_data[1+i] = physical_buttons_data[btn_num+i];
-			btn_num += 8;
+			for (uint8_t i=0; i<64; i++)	
+			{
+				joy_report.raw_button_data[1 + ((i & 0xF8)>>3)] &= ~(1 << (i & 0x07));
+				joy_report.raw_button_data[1 + ((i & 0xF8)>>3)] |= physical_buttons_data[btn_num+i] << (i & 0x07);
+			}
+			btn_num += 64;
 			btn_num = btn_num & 0x7F;
+			
+			joy_report.id = REPORT_ID_JOY;	
 							
-			USB_CUSTOM_HID_SendReport((uint8_t *)&(joy_report.id), sizeof(joy_report)-sizeof(joy_report.dummy));
+			USB_CUSTOM_HID_SendReport((uint8_t *)&joy_report.id, sizeof(joy_report) - sizeof(joy_report.dummy));
 		}
 	
-		EncoderProcess(buttons_state, &config);
+		EncoderProcess(buttons_state, &dev_config);
 	}
 	
 }
