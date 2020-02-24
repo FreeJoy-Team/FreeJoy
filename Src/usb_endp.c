@@ -408,7 +408,7 @@ void EP1_OUT_Callback(void)
 						// blink LED if firmware version doesnt match
 						GPIOB->ODR ^= GPIO_Pin_12;
 						GPIOC->ODR ^=	GPIO_Pin_13;
-						Delay_ms(200);
+						Delay_us(200000);
 					}
 				}
 				else

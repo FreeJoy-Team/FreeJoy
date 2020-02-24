@@ -15,10 +15,13 @@
 enum
 {
 	FILTER_NO = 0,
-	FILTER_LOW,
-	FILTER_MEDIUM,
-	FILTER_HIGH,
-	FILTER_VERY_HIGH,
+	FILTER_LEVEL_1,
+	FILTER_LEVEL_2,
+	FILTER_LEVEL_3,
+	FILTER_LEVEL_4,
+	FILTER_LEVEL_5,
+	FILTER_LEVEL_6,
+	FILTER_LEVEL_7,
 }; 
 typedef uint8_t filter_t;
 
@@ -45,7 +48,8 @@ typedef struct
 	uint8_t					:0;
 	int8_t				 	curve_shape[11];
 	uint8_t					resolution;
-	uint8_t					dead_zone;
+	uint8_t					deadband_size: 7;
+	uint8_t					is_dynamic_deadband: 1;
 	
 	int8_t					source_main;
 	uint8_t					function:	3;
@@ -55,7 +59,8 @@ typedef struct
 	int8_t					center_button;
 	int8_t					increment_button;
 	uint8_t					step;
-	uint8_t					reserved[4];
+	uint8_t					adc_channel;
+	uint8_t					reserved[3];
 	
 } axis_config_t;
 

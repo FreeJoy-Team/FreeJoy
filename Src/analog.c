@@ -35,12 +35,16 @@ analog_data_t scaled_axis_data[MAX_AXIS_NUM];
 analog_data_t raw_axis_data[MAX_AXIS_NUM];
 analog_data_t out_axis_data[MAX_AXIS_NUM];
 
-analog_data_t FILTER_LOW_COEFF[FILTER_LOW_SIZE] = {40, 30, 15, 10, 5};
-analog_data_t FILTER_MED_COEFF[FILTER_MED_SIZE] = {30, 20, 10, 10, 10, 6, 6, 4, 2, 2};
-analog_data_t FILTER_HIGH_COEFF[FILTER_HIGH_SIZE] = {25, 20, 10, 5, 5, 5, 5, 5, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1};
-analog_data_t FILTER_VERY_HIGH_COEFF[FILTER_VERY_HIGH_SIZE] = {15, 15, 10, 10, 10, 10, 5, 4, 3, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1};
+analog_data_t FILTER_LEVEL_1_COEF[FILTER_BUF_SIZE] = {40, 30, 15, 10, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+analog_data_t FILTER_LEVEL_2_COEF[FILTER_BUF_SIZE] = {30, 20, 10, 10, 10, 6, 6, 4, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+analog_data_t FILTER_LEVEL_3_COEF[FILTER_BUF_SIZE] = {25, 20, 10, 5, 5, 5, 5, 5, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1};
+analog_data_t FILTER_LEVEL_4_COEF[FILTER_BUF_SIZE] = {15, 15, 10, 10, 10, 10, 5, 4, 3, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1};
+analog_data_t FILTER_LEVEL_5_COEF[FILTER_BUF_SIZE] = {15, 10, 10, 10, 10, 10, 10, 4, 3, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1};
+analog_data_t FILTER_LEVEL_6_COEF[FILTER_BUF_SIZE] = {10, 10, 10, 10, 10, 10, 10, 7, 4, 3, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1};
+analog_data_t FILTER_LEVEL_7_COEF[FILTER_BUF_SIZE] = {10, 10, 10, 10, 10, 10, 8, 6, 4, 4, 3, 3, 2, 2, 2, 2, 1, 1, 1, 1};
 
-analog_data_t filter_buffer[MAX_AXIS_NUM][FILTER_VERY_HIGH_SIZE];
+analog_data_t filter_buffer[MAX_AXIS_NUM][FILTER_BUF_SIZE];
+analog_data_t deadband_buffer[MAX_AXIS_NUM][DEADBAND_BUF_SIZE];
 	
 buttons_state_t axes_buttons[MAX_AXIS_NUM][3];
 
@@ -51,6 +55,13 @@ adc_channel_config_t channel_config[MAX_AXIS_NUM] =
 	{ADC_Channel_4, 4}, {ADC_Channel_5, 5}, 
 	{ADC_Channel_6, 6}, {ADC_Channel_7, 7}, 
 };
+
+
+unsigned int iabs (int x)
+{
+	if (x >= 0) return x;
+	else return -x;
+}
 
 /**
   * @brief  Transform value from input range to value in output range
@@ -107,7 +118,7 @@ static int32_t map_tle (int32_t x)
 	*	@param	out_min: Minimum value of output range
 	*	@param	out_center:	Center value of input range
 	*	@param	out_max: Maximum value of output range
-	*	@param	dead_zone: Width of center dead zone
+	*	@param	deadband_size: Width of center dead zone
   * @retval Transformed value
   */
 static int32_t map3(	int32_t x, 
@@ -117,7 +128,7 @@ static int32_t map3(	int32_t x,
 											int32_t out_min,
 											int32_t out_center,
 											int32_t out_max,
-											uint8_t dead_zone)
+											uint8_t deadband_size)
 {
 	int32_t tmp;
 	int32_t ret;
@@ -125,8 +136,8 @@ static int32_t map3(	int32_t x,
 	int32_t dead_zone_left;
 	
 	tmp = x;
-	dead_zone_right = ((in_max - in_center)*dead_zone)>>10;
-	dead_zone_left = ((in_center - in_min)*dead_zone)>>10;
+	dead_zone_right = ((in_max - in_center)*deadband_size)>>10;
+	dead_zone_left = ((in_center - in_min)*deadband_size)>>10;
 	
 	if (tmp < in_min)	return out_min;
 	if (tmp > in_max)	return out_max; 
@@ -195,46 +206,78 @@ analog_data_t Filter (analog_data_t value, analog_data_t * filter_buf, filter_t 
 		case FILTER_NO:
 			return value;
 		
-		case FILTER_LOW:
-			tmp32 = value * FILTER_LOW_COEFF[0];
-			for (uint8_t i=FILTER_LOW_SIZE-1; i>0; i--)
+		case FILTER_LEVEL_1:
+			tmp32 = value * FILTER_LEVEL_1_COEF[0];
+			for (uint8_t i=FILTER_BUF_SIZE-1; i>0; i--)
 			{
 				filter_buf[i] = filter_buf[i-1];
 				
-				tmp32 += filter_buf[i] * FILTER_LOW_COEFF[i];
+				tmp32 += filter_buf[i] * FILTER_LEVEL_1_COEF[i];
 			}
 		break;
 		
-		case FILTER_MEDIUM:
-			tmp32 = value * FILTER_MED_COEFF[0];
-			for (uint8_t i=FILTER_MED_SIZE-1; i>0; i--)
+		case FILTER_LEVEL_2:
+			tmp32 = value * FILTER_LEVEL_2_COEF[0];
+			for (uint8_t i=FILTER_BUF_SIZE-1; i>0; i--)
 			{
 				filter_buf[i] = filter_buf[i-1];
 				
-				tmp32 += filter_buf[i] * FILTER_MED_COEFF[i];
+				tmp32 += filter_buf[i] * FILTER_LEVEL_2_COEF[i];
 			}
 		break;
 		
-		case FILTER_HIGH:
-			tmp32 = value * FILTER_HIGH_COEFF[0];
-			for (uint8_t i=FILTER_HIGH_SIZE-1; i>0; i--)
+		case FILTER_LEVEL_3:
+			tmp32 = value * FILTER_LEVEL_3_COEF[0];
+			for (uint8_t i=FILTER_BUF_SIZE-1; i>0; i--)
 			{
 				filter_buf[i] = filter_buf[i-1];
 				
-				tmp32 += filter_buf[i] * FILTER_HIGH_COEFF[i];
+				tmp32 += filter_buf[i] * FILTER_LEVEL_3_COEF[i];
 			}
 		break;
 			
-		case FILTER_VERY_HIGH:
+		case FILTER_LEVEL_4:
 			
-			tmp32 = value * FILTER_VERY_HIGH_COEFF[0];
-			for (uint8_t i=FILTER_VERY_HIGH_SIZE-1; i>0; i--)
+			tmp32 = value * FILTER_LEVEL_4_COEF[0];
+			for (uint8_t i=FILTER_BUF_SIZE-1; i>0; i--)
 			{
 				filter_buf[i] = filter_buf[i-1];
 				
-				tmp32 += filter_buf[i] * FILTER_VERY_HIGH_COEFF[i];
-			}
+				tmp32 += filter_buf[i] * FILTER_LEVEL_4_COEF[i];
+			}			
+		break;
 			
+		case FILTER_LEVEL_5:
+			
+			tmp32 = value * FILTER_LEVEL_5_COEF[0];
+			for (uint8_t i=FILTER_BUF_SIZE-1; i>0; i--)
+			{
+				filter_buf[i] = filter_buf[i-1];
+				
+				tmp32 += filter_buf[i] * FILTER_LEVEL_5_COEF[i];
+			}			
+		break;
+
+		case FILTER_LEVEL_6:
+			
+			tmp32 = value * FILTER_LEVEL_6_COEF[0];
+			for (uint8_t i=FILTER_BUF_SIZE-1; i>0; i--)
+			{
+				filter_buf[i] = filter_buf[i-1];
+				
+				tmp32 += filter_buf[i] * FILTER_LEVEL_6_COEF[i];
+			}			
+		break;
+			
+		case FILTER_LEVEL_7:
+			
+			tmp32 = value * FILTER_LEVEL_7_COEF[0];
+			for (uint8_t i=FILTER_BUF_SIZE-1; i>0; i--)
+			{
+				filter_buf[i] = filter_buf[i-1];
+				
+				tmp32 += filter_buf[i] * FILTER_LEVEL_7_COEF[i];
+			}			
 		break;
 	}
 	
@@ -242,6 +285,37 @@ analog_data_t Filter (analog_data_t value, analog_data_t * filter_buf, filter_t 
 	
 	
 	return filter_buf[0];
+}
+
+/**
+  * @brief  Dynamic deadband implementation
+	*	@param	value: Value to process
+	*	@param	deadband_buf:	Pointer to deadband data buffer
+	* @param	deadband_size: Deadband width
+  * @retval Is holding?
+  */
+uint8_t IsDynamicDeadbandHolding (analog_data_t value, analog_data_t * deadband_buf, uint8_t deadband_size)
+{
+	uint8_t is_holding = 1;
+	int32_t	tmp32 = 0;
+	
+	// searching for pseudo dispercy
+	for (uint8_t i=0; i<DEADBAND_BUF_SIZE; i++)
+	{
+		tmp32 += (deadband_buf[i] - value);
+	}
+	tmp32 = iabs(tmp32)/DEADBAND_BUF_SIZE;
+	
+	if (tmp32 > (deadband_size * AXIS_FULLSCALE)>>13)	is_holding = 0;
+	
+	// shift buffer data and add a new value
+	for (uint8_t i=DEADBAND_BUF_SIZE-1; i>0; i--)
+	{
+		deadband_buf[i] = deadband_buf[i-1];
+	}
+	deadband_buf[0] = value;
+	
+	return is_holding;
 }
 
 /**
@@ -514,25 +588,58 @@ void AxesProcess (dev_config_t * p_dev_config)
 		// Filtering
 		tmp[i] = Filter(raw_axis_data[i], filter_buffer[i], p_dev_config->axis_config[i].filter);
 			
-    // Scale output data
-    tmp[i] = map3( tmp[i], 
-                 p_dev_config->axis_config[i].calib_min,
-                 p_dev_config->axis_config[i].calib_center,    
-                 p_dev_config->axis_config[i].calib_max, 
-                 AXIS_MIN_VALUE,
-                 AXIS_CENTER_VALUE,
-                 AXIS_MAX_VALUE,
-                 p_dev_config->axis_config[i].dead_zone);    
-    // Shaping
-    tmp[i] = ShapeFunc(&p_dev_config->axis_config[i], tmp[i], 11);
-    // Lowing resolution if needed
-    tmp[i] = SetResolutioin(tmp[i], p_dev_config->axis_config[i].resolution);
-    
-    // Invertion
-    if (p_dev_config->axis_config[i].inverted > 0)
-    {
-      tmp[i] = 0 - tmp[i];
-    }
+		// Deadband processing and scaling		
+		if (!p_dev_config->axis_config[i].is_dynamic_deadband)
+		{
+			// Scale output data
+			tmp[i] = map3( tmp[i], 
+									 p_dev_config->axis_config[i].calib_min,
+									 p_dev_config->axis_config[i].calib_center,    
+									 p_dev_config->axis_config[i].calib_max, 
+									 AXIS_MIN_VALUE,
+									 AXIS_CENTER_VALUE,
+									 AXIS_MAX_VALUE,
+									 p_dev_config->axis_config[i].deadband_size); 
+
+			// Shaping
+			tmp[i] = ShapeFunc(&p_dev_config->axis_config[i], tmp[i], 11);
+			// Lowing resolution if needed
+			tmp[i] = SetResolutioin(tmp[i], p_dev_config->axis_config[i].resolution);
+			
+			// Invertion
+			if (p_dev_config->axis_config[i].inverted > 0)
+			{
+				tmp[i] = 0 - tmp[i];
+			}			
+		}
+		else if (p_dev_config->axis_config[i].is_dynamic_deadband && 
+						IsDynamicDeadbandHolding(tmp[i], deadband_buffer[i], p_dev_config->axis_config[i].deadband_size))
+		{
+			tmp[i] = scaled_axis_data[i];
+		}	
+		else
+		{
+			// Scale output data
+			tmp[i] = map3( tmp[i], 
+									 p_dev_config->axis_config[i].calib_min,
+									 p_dev_config->axis_config[i].calib_center,    
+									 p_dev_config->axis_config[i].calib_max, 
+									 AXIS_MIN_VALUE,
+									 AXIS_CENTER_VALUE,
+									 AXIS_MAX_VALUE,
+									 0); 
+			// Shaping
+			tmp[i] = ShapeFunc(&p_dev_config->axis_config[i], tmp[i], 11);
+			// Lowing resolution if needed
+			tmp[i] = SetResolutioin(tmp[i], p_dev_config->axis_config[i].resolution);
+			
+			// Invertion
+			if (p_dev_config->axis_config[i].inverted > 0)
+			{
+				tmp[i] = 0 - tmp[i];
+			}
+		}
+			
 	}
    
 	
@@ -570,7 +677,7 @@ void AxesProcess (dev_config_t * p_dev_config)
     // setting technical axis data
     scaled_axis_data[i] = tmp[i];
     // setting output axis data
-    if (p_dev_config->axis_config[i].out_enabled)  out_axis_data[i] = tmp[i];
+    if (p_dev_config->axis_config[i].out_enabled)  out_axis_data[i] = scaled_axis_data[i];
     else  out_axis_data[i] = 0;
 		
 		// restore IRQ

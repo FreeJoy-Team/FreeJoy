@@ -180,6 +180,11 @@
           <WinNumber>1</WinNumber>
           <ItemText>buttons_data</ItemText>
         </Ww>
+        <Ww>
+          <count>6</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>deadband_buffer</ItemText>
+        </Ww>
       </WatchWindow1>
       <Tracepoint>
         <THDelay>0</THDelay>
