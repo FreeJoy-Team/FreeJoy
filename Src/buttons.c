@@ -197,22 +197,22 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 				// set bit in povs data
 				if ((p_dev_config->buttons[num].type) == POV1_UP)
 				{
-					pov_buf[0] &= !(1 << 3);
+					pov_buf[0] &= ~(1 << 3);
 					pov_buf[0] |= (p_button_state->pin_state << 3);
 				}
 				else if ((p_dev_config->buttons[num].type) == POV1_RIGHT)
 				{
-					pov_buf[0] &= !(1 << 2);
+					pov_buf[0] &= ~(1 << 2);
 					pov_buf[0] |= (p_button_state->pin_state << 2);
 				}
 				else if ((p_dev_config->buttons[num].type) == POV1_DOWN)
 				{
-					pov_buf[0] &= !(1 << 1);
+					pov_buf[0] &= ~(1 << 1);
 					pov_buf[0] |= (p_button_state->pin_state << 1);
 				}
 				else
 				{
-					pov_buf[0] &= !(1 << 0);
+					pov_buf[0] &= ~(1 << 0);
 					pov_buf[0] |= (p_button_state->pin_state << 0);
 				}
 			}
@@ -246,22 +246,22 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 				// set bit in povs data
 				if ((p_dev_config->buttons[num].type) == POV2_UP)
 				{
-					pov_buf[1] &= !(1 << 3);
+					pov_buf[1] &= ~(1 << 3);
 					pov_buf[1] |= (p_button_state->pin_state << 3);
 				}
 				else if ((p_dev_config->buttons[num].type) == POV2_RIGHT)
 				{
-					pov_buf[1] &= !(1 << 2);
+					pov_buf[1] &= ~(1 << 2);
 					pov_buf[1] |= (p_button_state->pin_state << 2);
 				}
 				else if ((p_dev_config->buttons[num].type) == POV2_DOWN)
 				{
-					pov_buf[1] &= !(1 << 1);
+					pov_buf[1] &= ~(1 << 1);
 					pov_buf[1] |= (p_button_state->pin_state << 1);
 				}
 				else
 				{
-					pov_buf[1] &= !(1 << 0);
+					pov_buf[1] &= ~(1 << 0);
 					pov_buf[1] |= (p_button_state->pin_state << 0);
 				}
 			}
@@ -295,22 +295,22 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 				// set bit in povs data
 				if ((p_dev_config->buttons[num].type) == POV3_UP)
 				{
-					pov_buf[2] &= !(1 << 3);
+					pov_buf[2] &= ~(1 << 3);
 					pov_buf[2] |= (p_button_state->pin_state << 3);
 				}
 				else if ((p_dev_config->buttons[num].type) == POV3_RIGHT)
 				{
-					pov_buf[2] &= !(1 << 2);
+					pov_buf[2] &= ~(1 << 2);
 					pov_buf[2] |= (p_button_state->pin_state << 2);
 				}
 				else if ((p_dev_config->buttons[num].type) == POV3_DOWN)
 				{
-					pov_buf[2] &= !(1 << 1);
+					pov_buf[2] &= ~(1 << 1);
 					pov_buf[2] |= (p_button_state->pin_state << 1);
 				}
 				else
 				{
-					pov_buf[2] &= !(1 << 0);
+					pov_buf[2] &= ~(1 << 0);
 					pov_buf[2] |= (p_button_state->pin_state << 0);
 				}
 			}
@@ -344,22 +344,22 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 				// set bit in povs data
 				if ((p_dev_config->buttons[num].type) == POV4_UP)
 				{
-					pov_buf[3] &= !(1 << 3);
+					pov_buf[3] &= ~(1 << 3);
 					pov_buf[3] |= (p_button_state->pin_state << 3);
 				}
 				else if ((p_dev_config->buttons[num].type) == POV4_RIGHT)
 				{
-					pov_buf[3] &= !(1 << 2);
+					pov_buf[3] &= ~(1 << 2);
 					pov_buf[3] |= (p_button_state->pin_state << 2);
 				}
 				else if ((p_dev_config->buttons[num].type) == POV4_DOWN)
 				{
-					pov_buf[3] &= !(1 << 1);
+					pov_buf[3] &= ~(1 << 1);
 					pov_buf[3] |= (p_button_state->pin_state << 1);
 				}
 				else
 				{
-					pov_buf[3] &= !(1 << 0);
+					pov_buf[3] &= ~(1 << 0);
 					pov_buf[3] |= (p_button_state->pin_state << 0);
 				}
 			}
