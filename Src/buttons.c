@@ -717,7 +717,7 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 				// prevent not atomic read
 				NVIC_DisableIRQ(TIM1_UP_IRQn);
 				
-				buttons_data[(i & 0xF8)>>3] &= ~(1 << (i & 0x07));
+				buttons_data[(k & 0xF8)>>3] &= ~(1 << (k & 0x07));
 				buttons_data[(k & 0xF8)>>3] |= (buttons_state[i].current_state << (k & 0x07));
 				k++;
 				

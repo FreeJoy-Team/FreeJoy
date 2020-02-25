@@ -153,7 +153,7 @@
         <Ww>
           <count>0</count>
           <WinNumber>1</WinNumber>
-          <ItemText>dev_config</ItemText>
+          <ItemText>dev_config,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>1</count>
@@ -183,7 +183,12 @@
         <Ww>
           <count>6</count>
           <WinNumber>1</WinNumber>
-          <ItemText>deadband_buffer</ItemText>
+          <ItemText>deadband_buffer,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>7</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>buttons_state</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>

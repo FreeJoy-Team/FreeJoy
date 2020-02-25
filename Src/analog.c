@@ -297,16 +297,24 @@ analog_data_t Filter (analog_data_t value, analog_data_t * filter_buf, filter_t 
 uint8_t IsDynamicDeadbandHolding (analog_data_t value, analog_data_t * deadband_buf, uint8_t deadband_size)
 {
 	uint8_t is_holding = 1;
-	int32_t	tmp32 = 0;
+	int32_t	disp = 0;
+	int32_t mean = 0;
 	
-	// searching for pseudo dispercy
+	// calculating mean value
 	for (uint8_t i=0; i<DEADBAND_BUF_SIZE; i++)
 	{
-		tmp32 += (deadband_buf[i] - value);
+		mean += deadband_buf[i];
 	}
-	tmp32 = iabs(tmp32)/DEADBAND_BUF_SIZE;
+	mean = mean/DEADBAND_BUF_SIZE;
 	
-	if (tmp32 > (deadband_size * AXIS_FULLSCALE)>>13)	is_holding = 0;
+	// calculating dispercy
+	for (uint8_t i=0; i<DEADBAND_BUF_SIZE; i++)
+	{
+		disp += (deadband_buf[i] - mean)*(deadband_buf[i] - mean);
+	}
+	disp = disp/DEADBAND_BUF_SIZE;
+	
+	if (disp > deadband_size*deadband_size)	is_holding = 0;
 	
 	// shift buffer data and add a new value
 	for (uint8_t i=DEADBAND_BUF_SIZE-1; i>0; i--)
@@ -604,7 +612,7 @@ void AxesProcess (dev_config_t * p_dev_config)
 			// Shaping
 			tmp[i] = ShapeFunc(&p_dev_config->axis_config[i], tmp[i], 11);
 			// Lowing resolution if needed
-			tmp[i] = SetResolutioin(tmp[i], p_dev_config->axis_config[i].resolution);
+			tmp[i] = SetResolutioin(tmp[i], p_dev_config->axis_config[i].resolution + 1);
 			
 			// Invertion
 			if (p_dev_config->axis_config[i].inverted > 0)
@@ -613,7 +621,8 @@ void AxesProcess (dev_config_t * p_dev_config)
 			}			
 		}
 		else if (p_dev_config->axis_config[i].is_dynamic_deadband && 
-						IsDynamicDeadbandHolding(tmp[i], deadband_buffer[i], p_dev_config->axis_config[i].deadband_size))
+						 iabs(tmp[i] - scaled_axis_data[i]) < 3*p_dev_config->axis_config[i].deadband_size &&
+						  IsDynamicDeadbandHolding(tmp[i], deadband_buffer[i], p_dev_config->axis_config[i].deadband_size))
 		{
 			tmp[i] = scaled_axis_data[i];
 		}	
@@ -631,17 +640,15 @@ void AxesProcess (dev_config_t * p_dev_config)
 			// Shaping
 			tmp[i] = ShapeFunc(&p_dev_config->axis_config[i], tmp[i], 11);
 			// Lowing resolution if needed
-			tmp[i] = SetResolutioin(tmp[i], p_dev_config->axis_config[i].resolution);
+			tmp[i] = SetResolutioin(tmp[i], p_dev_config->axis_config[i].resolution + 1);
 			
 			// Invertion
 			if (p_dev_config->axis_config[i].inverted > 0)
 			{
 				tmp[i] = 0 - tmp[i];
 			}
-		}
-			
-	}
-   
+		}		
+	}  
 	
 	for (uint8_t i=0; i<MAX_AXIS_NUM; i++)
 	{

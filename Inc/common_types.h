@@ -47,20 +47,21 @@ typedef struct
 	uint8_t 				filter: 3;
 	uint8_t					:0;
 	int8_t				 	curve_shape[11];
-	uint8_t					resolution;
+	uint8_t					resolution : 4;
+	uint8_t					adc_channel : 4;
 	uint8_t					deadband_size: 7;
 	uint8_t					is_dynamic_deadband: 1;
 	
 	int8_t					source_main;
 	uint8_t					function:	3;
-	uint8_t					source_secondary: 5;
+	uint8_t					source_secondary: 3;
+	uint8_t					:0;
 	
 	int8_t					decrement_button;
 	int8_t					center_button;
 	int8_t					increment_button;
 	uint8_t					step;
-	uint8_t					adc_channel;
-	uint8_t					reserved[3];
+	uint8_t					reserved[4];
 	
 } axis_config_t;
 

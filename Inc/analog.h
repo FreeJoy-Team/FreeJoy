@@ -14,7 +14,8 @@
 #include "periphery.h"
 
 #define FILTER_BUF_SIZE									20
-#define DEADBAND_BUF_SIZE								4
+#define DEADBAND_BUF_SIZE								8
+#define DEADBAND_HOLD_VALUE							2000
 
 extern tle_t sensors[MAX_AXIS_NUM];
 
