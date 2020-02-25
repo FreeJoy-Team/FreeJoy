@@ -475,9 +475,9 @@ void AxesProcess (dev_config_t * p_dev_config)
 			
 			axes_buttons[i][0].current_state = buttons_state[p_dev_config->axis_config[i].decrement_button].current_state;
 			axes_buttons[i][1].current_state = buttons_state[p_dev_config->axis_config[i].increment_button].current_state;
-			axes_buttons[i][2].current_state = buttons_state[p_dev_config->axis_config[i].center_button].current_state;
+			axes_buttons[i][2].current_state = buttons_state[p_dev_config->axis_config[i].center_button].current_state;			
 			
-      			// decrement
+      // decrement
       if (axes_buttons[i][0].current_state && !axes_buttons[i][0].prev_state)
       {
         tmp32 -= AXIS_FULLSCALE * p_dev_config->axis_config[i].step / 255;
@@ -500,7 +500,7 @@ void AxesProcess (dev_config_t * p_dev_config)
 			}
 			
 			// center
-      if (axes_buttons[i][2].current_state && !axes_buttons[i][2].prev_state)
+      if (axes_buttons[i][2].current_state)
       {
         tmp32 = AXIS_CENTER_VALUE;
       }
