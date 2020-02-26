@@ -134,6 +134,8 @@ enum
 	RADIO_BUTTON3,
 	RADIO_BUTTON4,
 	
+	SEQUENTIAL_BUTTON,
+	
 };
 typedef uint8_t button_type_t;
 

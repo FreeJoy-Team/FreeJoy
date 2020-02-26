@@ -70,6 +70,7 @@ int main(void)
 	EncodersInit(&dev_config);	
 	ShiftRegistersInit(&dev_config);
 	RadioButtons_Init(&dev_config);
+	SequentialButtons_Init(&dev_config);
 	
 	Timers_Init();
 
