@@ -17,6 +17,9 @@
 #define DEADBAND_BUF_SIZE								8
 #define DEADBAND_HOLD_VALUE							2000
 
+
+#define ADC_BLOCKING_MODE								0
+
 extern tle_t sensors[MAX_AXIS_NUM];
 
 typedef struct
@@ -29,6 +32,7 @@ typedef struct
 
 
 void AxesInit (dev_config_t * p_dev_config);
+void ADC_Conversion (void);
 void AxesProcess (dev_config_t * p_dev_config);
 void AxisResetCalibration (dev_config_t * p_dev_config, uint8_t axis_num);
 void AnalogGet (analog_data_t * out_data, analog_data_t * scaled_data, analog_data_t * raw_data);

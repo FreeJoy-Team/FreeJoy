@@ -96,6 +96,8 @@ enum
 
   SHIFT_REG_CS,
   SHIFT_REG_DATA,
+	
+	LED_PWM,
 
 };
 typedef uint8_t pin_t;

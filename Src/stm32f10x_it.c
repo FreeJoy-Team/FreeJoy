@@ -183,7 +183,6 @@ void TIM3_IRQHandler(void)
 		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
 
 		AxesProcess(&dev_config);
-
 		
 		for (uint8_t i=0; i<MAX_AXIS_NUM; i++)
 		{
@@ -233,8 +232,24 @@ void TIM1_UP_IRQHandler(void)
 		}
 	
 		EncoderProcess(buttons_state, &dev_config);
+		
+		ADC_Conversion();
 	}
 	
+}
+
+// ADC conversion Complete
+void DMA1_Channel1_IRQHandler(void)
+{
+	if (DMA_GetITStatus(DMA1_IT_TC1))
+	{
+		DMA_ClearITPendingBit(DMA1_IT_TC1);
+		
+		ADC_Cmd(ADC1, DISABLE);
+		DMA_Cmd(DMA1_Channel1, DISABLE);
+		
+		NVIC_EnableIRQ(TIM3_IRQn);
+	}
 }
 
 // SPI Rx Complete
