@@ -37,11 +37,11 @@ analog_data_t out_axis_data[MAX_AXIS_NUM];
 
 analog_data_t FILTER_LEVEL_1_COEF[FILTER_BUF_SIZE] = {40, 30, 15, 10, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 analog_data_t FILTER_LEVEL_2_COEF[FILTER_BUF_SIZE] = {30, 20, 10, 10, 10, 6, 6, 4, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-analog_data_t FILTER_LEVEL_3_COEF[FILTER_BUF_SIZE] = {25, 20, 10, 5, 5, 5, 5, 5, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1};
-analog_data_t FILTER_LEVEL_4_COEF[FILTER_BUF_SIZE] = {15, 15, 10, 10, 10, 10, 5, 4, 3, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1};
-analog_data_t FILTER_LEVEL_5_COEF[FILTER_BUF_SIZE] = {15, 10, 10, 10, 10, 10, 10, 4, 3, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1};
-analog_data_t FILTER_LEVEL_6_COEF[FILTER_BUF_SIZE] = {10, 10, 10, 10, 10, 10, 10, 7, 4, 3, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1};
-analog_data_t FILTER_LEVEL_7_COEF[FILTER_BUF_SIZE] = {10, 10, 10, 10, 10, 10, 8, 6, 4, 4, 3, 3, 2, 2, 2, 2, 1, 1, 1, 1};
+analog_data_t FILTER_LEVEL_3_COEF[FILTER_BUF_SIZE] = {25, 20, 10, 10, 8, 6, 6, 4, 2, 2, 2, 2, 2, 1, 0, 0, 0, 0, 0, 0};
+analog_data_t FILTER_LEVEL_4_COEF[FILTER_BUF_SIZE] = {20, 15, 10, 8, 8, 6, 6, 6, 4, 2, 2, 2, 2, 2, 2, 2, 2, 1, 0, 0};
+analog_data_t FILTER_LEVEL_5_COEF[FILTER_BUF_SIZE] = {15, 13, 11, 10, 10, 9, 7, 4, 3, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1};
+analog_data_t FILTER_LEVEL_6_COEF[FILTER_BUF_SIZE] = {12, 10, 8, 8, 8, 7, 7, 6, 6, 5, 4, 4, 3, 3, 2, 2, 2, 1, 1, 1};
+analog_data_t FILTER_LEVEL_7_COEF[FILTER_BUF_SIZE] = {8, 8, 7, 7, 7, 6, 6, 6, 6, 6, 5, 5, 5, 5, 5, 3, 2, 1, 1, 1};
 
 analog_data_t filter_buffer[MAX_AXIS_NUM][FILTER_BUF_SIZE];
 analog_data_t deadband_buffer[MAX_AXIS_NUM][DEADBAND_BUF_SIZE];
