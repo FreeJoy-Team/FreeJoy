@@ -561,9 +561,9 @@ void AxesProcess (dev_config_t * p_dev_config)
 				if (TLE501x_GetAngle(&sensors[k], &tmpf) == 0)
 				{
 					sensors[k].ok_cnt++;
-					if (p_dev_config->axis_config[i].magnet_offset)
+					if (p_dev_config->axis_config[i].offset_angle > 0)
 					{
-						tmpf -= 180;
+						tmpf -= p_dev_config->axis_config[i].offset_angle * 15;
 						if (tmpf < -180) tmpf += 360;
 						else if (tmpf > 180) tmpf -= 360;
 					}
@@ -579,9 +579,9 @@ void AxesProcess (dev_config_t * p_dev_config)
 			// source analog
 			else if (p_dev_config->pins[source] == AXIS_ANALOG)
 			{
-				if (p_dev_config->axis_config[i].magnet_offset)
+				if (p_dev_config->axis_config[i].offset_angle > 0)
 				{
-						tmp[i] = input_data[source] - 2047;
+						tmp[i] = input_data[source] - p_dev_config->axis_config[i].offset_angle * 170;
 						if (tmp[i] < 0) tmp[i] += 4095;
 						else if (tmp[i] > 4095) tmp[i] -= 4095;
 				}

@@ -42,10 +42,10 @@ typedef struct
 	analog_data_t		calib_center;
 	analog_data_t 	calib_max;
 	uint8_t					out_enabled: 1;
-	uint8_t					magnet_offset: 1;
 	uint8_t					inverted: 1;
+	uint8_t					function: 3;
 	uint8_t 				filter: 3;
-	uint8_t					:0;
+	
 	int8_t				 	curve_shape[11];
 	uint8_t					resolution : 4;
 	uint8_t					adc_channel : 4;
@@ -53,9 +53,8 @@ typedef struct
 	uint8_t					is_dynamic_deadband: 1;
 	
 	int8_t					source_main;
-	uint8_t					function:	3;
 	uint8_t					source_secondary: 3;
-	uint8_t					:0;
+	uint8_t					offset_angle: 5;
 	
 	int8_t					decrement_button;
 	int8_t					center_button;
