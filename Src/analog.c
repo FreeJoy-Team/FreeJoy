@@ -299,6 +299,9 @@ uint8_t IsDynamicDeadbandHolding (analog_data_t value, analog_data_t * deadband_
 	uint8_t is_holding = 1;
 	int32_t	disp = 0;
 	int32_t mean = 0;
+	int32_t treshold;
+	
+	treshold = 3 * deadband_size;
 	
 	// calculating mean value
 	for (uint8_t i=0; i<DEADBAND_BUF_SIZE; i++)
@@ -314,8 +317,10 @@ uint8_t IsDynamicDeadbandHolding (analog_data_t value, analog_data_t * deadband_
 	}
 	disp = disp/DEADBAND_BUF_SIZE;
 	
-	if (disp > deadband_size*deadband_size)	is_holding = 0;
-	
+	if (disp > treshold*treshold)	
+	{
+		is_holding = 0;
+	}
 	// shift buffer data and add a new value
 	for (uint8_t i=DEADBAND_BUF_SIZE-1; i>0; i--)
 	{
@@ -340,21 +345,39 @@ analog_data_t ShapeFunc (axis_config_t * p_axis_cfg,  analog_data_t value, uint8
 	uint8_t min_index;
 	analog_data_t ret;
 	
-	int32_t tmp = value - AXIS_MIN_VALUE;
-	int32_t fullscale = AXIS_MAX_VALUE - AXIS_MIN_VALUE;
-	
-	step = (float)fullscale/((float)point_cnt-1.0f);
-	min_index = tmp/step;
-	
-	if (min_index == point_cnt-1) min_index = point_cnt-2;
-	
-	in_min = AXIS_MIN_VALUE + min_index*step;
-	in_max = AXIS_MIN_VALUE + (min_index+1)*step;
-	
-	out_min = ((int32_t)p_axis_cfg->curve_shape[min_index] * (int32_t)fullscale/200 + (int32_t)AXIS_CENTER_VALUE);
-	out_max = ((int32_t)p_axis_cfg->curve_shape[min_index+1] * (int32_t)fullscale/200 + (int32_t)AXIS_CENTER_VALUE);
-	
-	ret = map2(value, in_min, in_max, out_min, out_max);
+	// check if is not linear
+	if (p_axis_cfg->curve_shape[0] != -100 ||  
+			p_axis_cfg->curve_shape[1] != -80 ||
+			p_axis_cfg->curve_shape[2] != -60 ||
+			p_axis_cfg->curve_shape[3] != -40 ||
+			p_axis_cfg->curve_shape[4] != - 20 ||
+			p_axis_cfg->curve_shape[5] != 0 || 
+			p_axis_cfg->curve_shape[6] != 20 ||
+			p_axis_cfg->curve_shape[7] != 40 ||
+			p_axis_cfg->curve_shape[8] != 60 ||
+			p_axis_cfg->curve_shape[9] != 80 ||
+			p_axis_cfg->curve_shape[10] != 100)
+	{	
+		int32_t tmp = value - AXIS_MIN_VALUE;
+		int32_t fullscale = AXIS_MAX_VALUE - AXIS_MIN_VALUE;
+		
+		step = (float)fullscale/((float)point_cnt-1.0f);
+		min_index = tmp/step;
+		
+		if (min_index == point_cnt-1) min_index = point_cnt-2;
+		
+		in_min = AXIS_MIN_VALUE + min_index*step;
+		in_max = AXIS_MIN_VALUE + (min_index+1)*step;
+		
+		out_min = ((int32_t)p_axis_cfg->curve_shape[min_index] * (int32_t)fullscale/200 + (int32_t)AXIS_CENTER_VALUE);
+		out_max = ((int32_t)p_axis_cfg->curve_shape[min_index+1] * (int32_t)fullscale/200 + (int32_t)AXIS_CENTER_VALUE);
+		
+		ret = map2(value, in_min, in_max, out_min, out_max);
+	}
+	else
+	{
+		ret = value;
+	}
 	
 	return(ret);
 }
@@ -559,7 +582,7 @@ void AxesProcess (dev_config_t * p_dev_config)
 				if (p_dev_config->axis_config[i].magnet_offset)
 				{
 						tmp[i] = input_data[source] - 2047;
-						if (tmp < 0) tmp[i] += 4095;
+						if (tmp[i] < 0) tmp[i] += 4095;
 						else if (tmp[i] > 4095) tmp[i] -= 4095;
 				}
 				else
@@ -646,7 +669,7 @@ void AxesProcess (dev_config_t * p_dev_config)
 			}			
 		}
 		else if (p_dev_config->axis_config[i].is_dynamic_deadband && 
-						 iabs(tmp[i] - scaled_axis_data[i]) < 3*p_dev_config->axis_config[i].deadband_size &&
+						 iabs(tmp[i] - scaled_axis_data[i]) < 3*3*p_dev_config->axis_config[i].deadband_size &&			// 3*3*deadband_size = 3 sigma
 						  IsDynamicDeadbandHolding(tmp[i], deadband_buffer[i], p_dev_config->axis_config[i].deadband_size))
 		{
 			tmp[i] = scaled_axis_data[i];
