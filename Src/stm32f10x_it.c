@@ -183,7 +183,6 @@ void TIM3_IRQHandler(void)
 		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
 
 		AxesProcess(&dev_config);
-		
 		for (uint8_t i=0; i<MAX_AXIS_NUM; i++)
 		{
 			if (sensors[i].cs_pin >= 0 && sensors[i].rx_complete && sensors[i].rx_complete)
@@ -206,6 +205,8 @@ void TIM1_UP_IRQHandler(void)
 	{
 		TIM_ClearITPendingBit(TIM1, TIM_IT_Update);
 
+		
+		
 		millis = GetTick();
 		// check if it is time to send joystick data
 		if (millis - joy_millis > dev_config.exchange_period_ms )
@@ -233,9 +234,7 @@ void TIM1_UP_IRQHandler(void)
 	
 		EncoderProcess(buttons_state, &dev_config);
 		
-		ADC_Conversion();
 	}
-	
 }
 
 // ADC conversion Complete

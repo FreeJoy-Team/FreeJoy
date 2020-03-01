@@ -212,6 +212,13 @@ typedef struct
 	
 } shift_modificator_t;
 
+typedef struct
+{
+	uint8_t				duty_cycle[3];	
+	uint8_t				reserved[7];
+	
+} led_pwm_config_t;
+
 typedef struct 
 {
 	// config 1
@@ -239,8 +246,9 @@ typedef struct
 	shift_modificator_t	shift_config[5];
 	uint16_t						vid;
 	uint16_t						pid;
-	uint8_t							is_dynamic_config; 
-	uint8_t							reserved_10[26];
+	uint8_t							is_dynamic_config;
+	led_pwm_config_t		led_pwm_config;
+	uint8_t							reserved_10[16];
 }dev_config_t;
 
 typedef struct

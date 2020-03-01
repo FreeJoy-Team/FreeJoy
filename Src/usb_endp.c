@@ -220,6 +220,8 @@ void EP1_OUT_Callback(void)
 						pos += sizeof(tmp_dev_config.pid);
 						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.is_dynamic_config), sizeof(tmp_dev_config.is_dynamic_config));
 						pos += sizeof(tmp_dev_config.is_dynamic_config);
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.led_pwm_config), sizeof(tmp_dev_config.led_pwm_config));
+						pos += sizeof(tmp_dev_config.led_pwm_config);
 						break;
 						
 					default:
@@ -373,6 +375,8 @@ void EP1_OUT_Callback(void)
 					pos += sizeof(tmp_dev_config.pid);
 					memcpy((uint8_t *) &(tmp_dev_config.is_dynamic_config), &hid_buf[pos], sizeof(tmp_dev_config.is_dynamic_config));
 					pos += sizeof(tmp_dev_config.is_dynamic_config);
+					memcpy((uint8_t *) &(tmp_dev_config.led_pwm_config), &hid_buf[pos], sizeof(tmp_dev_config.led_pwm_config));
+					pos += sizeof(tmp_dev_config.led_pwm_config);
 					
 				}					
 					break;

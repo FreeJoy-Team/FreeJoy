@@ -40,7 +40,6 @@
 dev_config_t dev_config;
 volatile uint8_t bootloader = 0;
 
-
 /* Private function prototypes -----------------------------------------------*/
 
 /**
@@ -72,11 +71,12 @@ int main(void)
 	RadioButtons_Init(&dev_config);
 	SequentialButtons_Init(&dev_config);
 	
-	Timers_Init();
+	Timers_Init(&dev_config);
 
   while (1)
   {
 		ButtonsReadLogical(&dev_config);
+		
 		// jump to bootloader if new firmware received
 		if (bootloader > 0)
 		{

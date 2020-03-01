@@ -18,7 +18,7 @@
 
 static const dev_config_t init_config =
 {
-	.firmware_version = 0x1350,		// do not change
+	.firmware_version = 0x1400,		// do not change
 	
 	/* 
 		Name of device in devices dispatcher
@@ -85,10 +85,10 @@ static const dev_config_t init_config =
 	.pins[20] = NOT_USED,							// PB9
 	.pins[21] = NOT_USED,							// PB10
 	.pins[22] = NOT_USED,							// PB11
-	.pins[23] = BUTTON_GND,						// PB12
-	.pins[24] = BUTTON_GND,						// PB13
-	.pins[25] = BUTTON_GND,						// PB14
-	.pins[26] = BUTTON_GND,						// PB15
+	.pins[23] = NOT_USED,							// PB12
+	.pins[24] = NOT_USED,							// PB13
+	.pins[25] = NOT_USED,							// PB14
+	.pins[26] = NOT_USED,							// PB15
 	.pins[27] = NOT_USED,							// PC13
 	.pins[28] = NOT_USED,							// PC14
 	.pins[29] = NOT_USED,							// PC15
@@ -116,7 +116,7 @@ static const dev_config_t init_config =
 	.axis_config[0].curve_shape[10] = 100,	
 	.axis_config[0].resolution = 15,
 	.axis_config[0].deadband_size = 0,
-	.axis_config[0].source_main = -1,
+	.axis_config[0].source_main = 0,
 	.axis_config[0].function = 0,
 	.axis_config[0].source_secondary = 0,
 	.axis_config[0].decrement_button = -1,
@@ -144,7 +144,7 @@ static const dev_config_t init_config =
 	.axis_config[1].curve_shape[10] = 100,	
 	.axis_config[1].resolution = 15,
 	.axis_config[1].deadband_size = 0,
-	.axis_config[1].source_main = -1,
+	.axis_config[1].source_main = 1,
 	.axis_config[1].function = 0,
 	.axis_config[1].source_secondary = 0,
 	.axis_config[1].decrement_button = -1,
@@ -172,7 +172,7 @@ static const dev_config_t init_config =
 	.axis_config[2].curve_shape[10] = 100,	
 	.axis_config[2].resolution = 15,
 	.axis_config[2].deadband_size = 0,
-	.axis_config[2].source_main = -1,
+	.axis_config[2].source_main = 2,
 	.axis_config[2].function = 0,
 	.axis_config[2].source_secondary = 0,
 	.axis_config[2].decrement_button = -1,
@@ -200,7 +200,7 @@ static const dev_config_t init_config =
 	.axis_config[3].curve_shape[10] = 100,	
 	.axis_config[3].resolution = 15,
 	.axis_config[3].deadband_size = 0,
-	.axis_config[3].source_main = -1,
+	.axis_config[3].source_main = 3,
 	.axis_config[3].function = 0,
 	.axis_config[3].source_secondary = 0,
 	.axis_config[3].decrement_button = -1,
