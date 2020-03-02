@@ -128,10 +128,6 @@ void Timers_Init(dev_config_t * p_dev_config)
   TIM_OC4Init(TIM3, &TIM_OCInitStructure);
   TIM_OC4PreloadConfig(TIM3, TIM_OCPreload_Enable);
 	
-//	TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
-//	NVIC_SetPriority(TIM3_IRQn, 4);
-//	NVIC_EnableIRQ(TIM3_IRQn);
-	
 	TIM_Cmd(TIM3, ENABLE);	
 }
 

@@ -183,7 +183,17 @@
         <Ww>
           <count>6</count>
           <WinNumber>1</WinNumber>
-          <ItemText>tmp_buf,0x0A</ItemText>
+          <ItemText>tmp,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>7</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>raw_axis_data,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>8</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>scaled_axis_data,0x0A</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>

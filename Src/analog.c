@@ -658,7 +658,7 @@ void AxesProcess (dev_config_t * p_dev_config)
 			}			
 		}
 		else if (p_dev_config->axis_config[i].is_dynamic_deadband && 
-						 iabs(tmp[i] - scaled_axis_data[i]) < 3*3*p_dev_config->axis_config[i].deadband_size &&			// 3*3*deadband_size = 3 sigma
+						 iabs(tmp[i] - raw_axis_data[i]) < 3*3*p_dev_config->axis_config[i].deadband_size &&			// 3*3*deadband_size = 3 sigma
 						  IsDynamicDeadbandHolding(tmp[i], deadband_buffer[i], p_dev_config->axis_config[i].deadband_size))
 		{
 			tmp[i] = scaled_axis_data[i];
