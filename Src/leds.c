@@ -64,12 +64,12 @@ void LED_SetMatrix(uint8_t * state_buf, dev_config_t * p_dev_config, uint8_t * p
 {
 	for (uint8_t i=0; i<USED_PINS_NUM; i++)
 	{
-		if (p_dev_config->pins[i] == LED_COLUMN)
+		if (p_dev_config->pins[i] == LED_ROW)
 		{
 			pin_config[i].port->ODR |= pin_config[i].pin;
 			for (uint8_t j=0; j<USED_PINS_NUM; j++)
 			{
-				if (p_dev_config->pins[i] == LED_ROW)
+				if (p_dev_config->pins[i] == LED_COLUMN)
 				{
 					leds_state[(*pos)] ? (pin_config[j].port->ODR &= ~pin_config[j].pin) : (pin_config[j].port->ODR |= pin_config[j].pin); 
 					(*pos)++;				
@@ -89,7 +89,6 @@ void LEDs_PhysicalProcess (dev_config_t * p_dev_config)
 	LED_SetMatrix(leds_state, p_dev_config, &pos);
 	LED_SetSingle(leds_state, p_dev_config, &pos);
 		
-	
 }
 
 

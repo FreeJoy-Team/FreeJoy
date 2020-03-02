@@ -116,9 +116,7 @@ void ShiftRegisterRead(shift_reg_config_t * shift_register, uint8_t * data)
 					data[i] |= mask; 
 				}
 				GPIOB->ODR |= GPIO_Pin_3;			
-				
-				
-				
+
 				mask = mask >> 1;
 			} while (mask);
 		}
@@ -133,9 +131,7 @@ void ShiftRegisterRead(shift_reg_config_t * shift_register, uint8_t * data)
 					data[i] |= mask; 
 				}				
 				GPIOB->ODR |= GPIO_Pin_3;			
-					
-				
-				
+
 				mask = mask >> 1;
 			} while (mask);
 		}

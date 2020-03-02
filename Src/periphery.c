@@ -406,7 +406,7 @@ void IO_Init (dev_config_t * p_dev_config)
 			GPIO_InitStructure.GPIO_Pin = pin_config[i].pin;
 			GPIO_Init(pin_config[i].port, &GPIO_InitStructure);
 		}
-		else if (p_dev_config->pins[i] == LED_ROW)
+		else if (p_dev_config->pins[i] == LED_COLUMN)
 		{
 			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
 			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
@@ -414,7 +414,7 @@ void IO_Init (dev_config_t * p_dev_config)
 			GPIO_Init(pin_config[i].port, &GPIO_InitStructure);
 			pin_config[i].port->ODR &=  ~pin_config[i].pin;
 		}
-		else if (p_dev_config->pins[i] == LED_COLUMN)
+		else if (p_dev_config->pins[i] == LED_ROW)
 		{
 			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
 			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
