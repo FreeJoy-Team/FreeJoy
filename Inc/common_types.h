@@ -97,6 +97,9 @@ enum
   SHIFT_REG_DATA,
 	
 	LED_PWM,
+	LED_SINGLE,
+	LED_ROW,
+	LED_COLUMN,
 
 };
 typedef uint8_t pin_t;
@@ -136,6 +139,7 @@ enum
 	RADIO_BUTTON4,
 	
 	SEQUENTIAL_BUTTON,
+	
 	
 };
 typedef uint8_t button_type_t;
@@ -212,12 +216,29 @@ typedef struct
 	
 } shift_modificator_t;
 
+
+enum 
+{
+	LED_NORMAL = 0,
+	LED_INVERTED,
+};
+
 typedef struct
 {
 	uint8_t				duty_cycle[3];	
 	uint8_t				reserved[7];
 	
 } led_pwm_config_t;
+
+
+
+typedef struct
+{
+	int8_t				input_num;
+	uint8_t				type: 3;
+	uint8_t				:0;
+	
+} led_config_t;
 
 typedef struct 
 {
@@ -249,6 +270,11 @@ typedef struct
 	uint8_t							is_dynamic_config;
 	led_pwm_config_t		led_pwm_config;
 	uint8_t							reserved_10[16];
+	
+	// config 13;
+	led_config_t				leds[MAX_LEDS_NUM];
+	
+	
 }dev_config_t;
 
 typedef struct

@@ -31,6 +31,7 @@ C_SOURCES =  \
 ../Src/crc16.c \
 ../Src/encoders.c \
 ../Src/config.c \
+../Src/leds.c \
 ../Src/main.c \
 ../Src/periphery.c \
 ../Src/sensors.c \

@@ -275,7 +275,7 @@
               <OCR_RVCT4>
                 <Type>1</Type>
                 <StartAddress>0x8000000</StartAddress>
-                <Size>0x8000</Size>
+                <Size>0x10000</Size>
               </OCR_RVCT4>
               <OCR_RVCT5>
                 <Type>1</Type>
@@ -436,6 +436,11 @@
               <FileName>buttons.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\buttons.c</FilePath>
+            </File>
+            <File>
+              <FileName>leds.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\leds.c</FilePath>
             </File>
             <File>
               <FileName>analog.c</FileName>
@@ -1281,6 +1286,11 @@
               <FileName>buttons.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\buttons.c</FilePath>
+            </File>
+            <File>
+              <FileName>leds.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\leds.c</FilePath>
             </File>
             <File>
               <FileName>analog.c</FileName>
