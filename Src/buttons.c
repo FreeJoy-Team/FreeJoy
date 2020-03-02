@@ -504,16 +504,17 @@ void RadioButtons_Init (dev_config_t * p_dev_config)
   */
 void SequentialButtons_Init (dev_config_t * p_dev_config)
 {
-	uint8_t physical_num = 0;
-	
-	for (uint8_t i=0; i<MAX_BUTTONS_NUM; i++)
+	for (uint8_t physical_num=0; physical_num<MAX_BUTTONS_NUM; physical_num++)
 	{
+		for (uint8_t i=0; i<MAX_BUTTONS_NUM; i++)
+		{
 			if (p_dev_config->buttons[i].type == SEQUENTIAL_BUTTON &&
 					p_dev_config->buttons[i].physical_num == physical_num)
 			{
 				buttons_state[i].current_state = 1;
-				physical_num++;
+				break;
 			}
+		}
 	}
 }
 

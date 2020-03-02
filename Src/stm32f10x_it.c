@@ -39,7 +39,7 @@
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-volatile int32_t millis =0, joy_millis=0;
+volatile int32_t millis =0, joy_millis=0, adc_millis=100, sensors_millis=101;
 extern dev_config_t dev_config;
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
@@ -169,31 +169,11 @@ void TIM2_IRQHandler(void)
 		
 		TIM_Cmd(TIM2, DISABLE);
 		NVIC_DisableIRQ(TIM2_IRQn);		
-		
-		NVIC_EnableIRQ(TIM3_IRQn);
+	
 		NVIC_EnableIRQ(TIM1_UP_IRQn);
 	}
 }
 
-
-void TIM3_IRQHandler(void)
-{
-	if (TIM_GetITStatus(TIM3, TIM_IT_Update))
-	{
-		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
-
-		AxesProcess(&dev_config);
-		for (uint8_t i=0; i<MAX_AXIS_NUM; i++)
-		{
-			if (sensors[i].cs_pin >= 0 && sensors[i].rx_complete && sensors[i].rx_complete)
-			{
-				TLE501x_StartDMA(&sensors[i]);
-				return;
-			}
-		}
-		
-	}	
-}
 
 void TIM1_UP_IRQHandler(void)
 {
@@ -209,7 +189,7 @@ void TIM1_UP_IRQHandler(void)
 		
 		millis = GetTick();
 		// check if it is time to send joystick data
-		if (millis - joy_millis > dev_config.exchange_period_ms )
+		if (millis - joy_millis >= dev_config.exchange_period_ms )
 		{
 			joy_millis = millis;
 				
@@ -231,23 +211,36 @@ void TIM1_UP_IRQHandler(void)
 							
 			USB_CUSTOM_HID_SendReport((uint8_t *)&joy_report.id, sizeof(joy_report) - sizeof(joy_report.dummy));
 		}
+		// Internal ADC conversion
+		if (millis - adc_millis >= ADC_PERIOD_MS)
+		{
+			adc_millis = millis;
+			
+			
+			AxesProcess(&dev_config);
+
+			ADC_Conversion();
+			// Enable TLE clock after ADC conversion
+			Generator_Start();
+			
+		}
+		// External sensors data receiption
+		if (millis - sensors_millis >= ADC_PERIOD_MS)
+		{
+			sensors_millis = millis;
+			
+			for (uint8_t i=0; i<MAX_AXIS_NUM; i++)
+			{
+				if (sensors[i].cs_pin >= 0 && sensors[i].rx_complete && sensors[i].rx_complete)
+				{
+					TLE501x_StartDMA(&sensors[i]);
+					return;
+				}
+			}
+		}
 	
 		EncoderProcess(buttons_state, &dev_config);
 		
-	}
-}
-
-// ADC conversion Complete
-void DMA1_Channel1_IRQHandler(void)
-{
-	if (DMA_GetITStatus(DMA1_IT_TC1))
-	{
-		DMA_ClearITPendingBit(DMA1_IT_TC1);
-		
-		ADC_Cmd(ADC1, DISABLE);
-		DMA_Cmd(DMA1_Channel1, DISABLE);
-		
-		NVIC_EnableIRQ(TIM3_IRQn);
 	}
 }
 
@@ -287,6 +280,8 @@ void DMA1_Channel2_IRQHandler(void)
 				return;
 			}
 		}
+		// Disable TLE clock after communication frame
+		Generator_Stop();
 	}
 }
 

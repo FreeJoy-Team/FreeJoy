@@ -183,7 +183,7 @@
         <Ww>
           <count>6</count>
           <WinNumber>1</WinNumber>
-          <ItemText>tmp</ItemText>
+          <ItemText>tmp_buf,0x0A</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>

@@ -128,9 +128,9 @@ void Timers_Init(dev_config_t * p_dev_config)
   TIM_OC4Init(TIM3, &TIM_OCInitStructure);
   TIM_OC4PreloadConfig(TIM3, TIM_OCPreload_Enable);
 	
-	TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
-	NVIC_SetPriority(TIM3_IRQn, 4);
-	NVIC_EnableIRQ(TIM3_IRQn);
+//	TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
+//	NVIC_SetPriority(TIM3_IRQn, 4);
+//	NVIC_EnableIRQ(TIM3_IRQn);
 	
 	TIM_Cmd(TIM3, ENABLE);	
 }
@@ -162,7 +162,7 @@ void Timers_Pause(uint16_t ms)
 	TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
 	NVIC_EnableIRQ(TIM2_IRQn);
 	
-	NVIC_DisableIRQ(TIM3_IRQn);
+//	NVIC_DisableIRQ(TIM3_IRQn);
 	NVIC_DisableIRQ(TIM1_UP_IRQn);
 
 	TIM_Cmd(TIM2, ENABLE);
@@ -235,8 +235,26 @@ void Generator_Init(void)
   GPIO_InitStructureure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_Init(GPIOB, &GPIO_InitStructureure);
 
-  /* TIM4 enable counter */
+  
+}
+/**
+  * @brief Generator Start Function
+  * @param None
+  * @retval None
+  */
+void Generator_Start(void)
+{
+	/* TIM4 enable counter */
   TIM_Cmd(TIM4, ENABLE);
+}
+/**
+  * @brief Generator Stop Function
+  * @param None
+  * @retval None
+  */
+void Generator_Stop (void)
+{
+	TIM_Cmd(TIM4, DISABLE);
 }
 
 /* IO init function */
@@ -361,6 +379,7 @@ void IO_Init (dev_config_t * p_dev_config)
 		else if (p_dev_config->pins[i] == TLE5011_GEN  && i == 17)
 		{
 			Generator_Init();	// 4MHz output at PB6 pin
+			Generator_Start();
 		}
 		else if (p_dev_config->pins[i] == SHIFT_REG_CS)
 		{

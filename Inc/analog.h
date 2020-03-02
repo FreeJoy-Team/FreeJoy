@@ -17,6 +17,10 @@
 #define DEADBAND_BUF_SIZE								8
 #define DEADBAND_HOLD_VALUE							2000
 
+#define ADC_PERIOD_MS										2
+#define SENSORS_PERIOD_MS								2
+
+
 extern tle_t sensors[MAX_AXIS_NUM];
 
 typedef struct

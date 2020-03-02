@@ -480,11 +480,11 @@ void AxesInit (dev_config_t * p_dev_config)
 		DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
 		DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
 		DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;
-		DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
+		DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
 		DMA_InitStructure.DMA_Priority = DMA_Priority_High;
 		DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
 		DMA_Init(DMA1_Channel1, &DMA_InitStructure);
-
+	
 			/* Enable ADC1 */
 		ADC_Cmd(ADC1, ENABLE);
 			
@@ -497,11 +497,26 @@ void AxesInit (dev_config_t * p_dev_config)
 		ADC_StartCalibration(ADC1);
 		/* Check the end of ADC1 calibration */
 		while(ADC_GetCalibrationStatus(ADC1));
-		
-		ADC_SoftwareStartConvCmd(ADC1, ENABLE);
-		
-		DMA_Cmd(DMA1_Channel1, ENABLE);
 	}
+}
+
+/**
+  * @brief  ADC conversion processing routine
+  * @retval None
+  */
+void ADC_Conversion (void)
+{
+		DMA_SetCurrDataCounter(DMA1_Channel1, MAX_AXIS_NUM);	
+		DMA_Cmd(DMA1_Channel1, ENABLE);
+		ADC_Cmd(ADC1, ENABLE);
+		/* Start ADC1 Software Conversion */ 
+		ADC_SoftwareStartConvCmd(ADC1, ENABLE);
+
+		while (!DMA_GetFlagStatus(DMA1_FLAG_TC1));
+		DMA_ClearFlag(DMA1_FLAG_TC1);
+			
+		ADC_Cmd(ADC1, DISABLE);
+		DMA_Cmd(DMA1_Channel1, DISABLE);
 }
 
 /**
