@@ -116,7 +116,8 @@ void ShiftRegisterRead(shift_reg_config_t * shift_register, uint8_t * data)
 					data[i] |= mask; 
 				}
 				GPIOB->ODR |= GPIO_Pin_3;			
-
+				for (int i=0; i<SHIFTREG_TICK_DELAY; i++) __NOP();
+				
 				mask = mask >> 1;
 			} while (mask);
 		}
@@ -130,7 +131,8 @@ void ShiftRegisterRead(shift_reg_config_t * shift_register, uint8_t * data)
 				{
 					data[i] |= mask; 
 				}				
-				GPIOB->ODR |= GPIO_Pin_3;			
+				GPIOB->ODR |= GPIO_Pin_3;
+				for (int i=0; i<SHIFTREG_TICK_DELAY; i++) __NOP();
 
 				mask = mask >> 1;
 			} while (mask);

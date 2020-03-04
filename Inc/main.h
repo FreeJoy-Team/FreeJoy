@@ -18,7 +18,7 @@
 
 static const dev_config_t init_config =
 {
-	.firmware_version = 0x1410,		// do not change
+	.firmware_version = 0x1411,		// do not change
 	
 	/* 
 		Name of device in devices dispatcher
@@ -668,6 +668,55 @@ static const dev_config_t init_config =
 	.vid = 0x0483,
 	.pid = 0x5750,
 	.is_dynamic_config = 0,
+	
+	.leds[0].input_num = -1,
+	.leds[0].type = LED_NORMAL,
+	.leds[1].input_num = -1,
+	.leds[1].type = LED_NORMAL,
+	.leds[2].input_num = -1,
+	.leds[2].type = LED_NORMAL,
+	.leds[3].input_num = -1,
+	.leds[3].type = LED_NORMAL,
+	.leds[4].input_num = -1,
+	.leds[4].type = LED_NORMAL,
+	.leds[5].input_num = -1,
+	.leds[5].type = LED_NORMAL,
+	.leds[6].input_num = -1,
+	.leds[6].type = LED_NORMAL,
+	.leds[7].input_num = -1,
+	.leds[7].type = LED_NORMAL,
+	.leds[8].input_num = -1,
+	.leds[8].type = LED_NORMAL,
+	.leds[9].input_num = -1,
+	.leds[9].type = LED_NORMAL,
+	.leds[10].input_num = -1,
+	.leds[10].type = LED_NORMAL,
+	.leds[11].input_num = -1,
+	.leds[11].type = LED_NORMAL,
+	.leds[12].input_num = -1,
+	.leds[12].type = LED_NORMAL,
+	.leds[13].input_num = -1,
+	.leds[13].type = LED_NORMAL,
+	.leds[14].input_num = -1,
+	.leds[14].type = LED_NORMAL,
+	.leds[15].input_num = -1,
+	.leds[15].type = LED_NORMAL,
+	.leds[16].input_num = -1,
+	.leds[16].type = LED_NORMAL,
+	.leds[17].input_num = -1,
+	.leds[17].type = LED_NORMAL,
+	.leds[18].input_num = -1,
+	.leds[18].type = LED_NORMAL,
+	.leds[19].input_num = -1,
+	.leds[19].type = LED_NORMAL,
+	.leds[20].input_num = -1,
+	.leds[20].type = LED_NORMAL,
+	.leds[21].input_num = -1,
+	.leds[21].type = LED_NORMAL,
+	.leds[22].input_num = -1,
+	.leds[22].type = LED_NORMAL,
+	.leds[23].input_num = -1,
+	.leds[23].type = LED_NORMAL,	
 		
 };
 

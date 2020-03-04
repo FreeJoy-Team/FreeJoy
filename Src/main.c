@@ -29,6 +29,7 @@
 #include "config.h"
 #include "analog.h"
 #include "buttons.h"
+#include "leds.h"
 #include "encoders.h"
 
 #include "usb_hw.h"
@@ -76,6 +77,7 @@ int main(void)
   while (1)
   {
 		ButtonsReadLogical(&dev_config);
+		LEDs_PhysicalProcess(&dev_config);
 		
 		// jump to bootloader if new firmware received
 		if (bootloader > 0)
