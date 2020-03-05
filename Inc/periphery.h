@@ -35,8 +35,11 @@ typedef struct
 extern pin_config_t pin_config[USED_PINS_NUM];
 
 void SysTick_Init(void);
-void Timers_Init(void);
+void Timers_Init(dev_config_t * p_dev_config);
 void Timers_Pause(uint16_t ms);
+
+void Generator_Start(void);
+void Generator_Stop(void);
 uint64_t GetTick(void);
 
 void Delay_ms(__IO uint32_t nTime);

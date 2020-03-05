@@ -78,9 +78,10 @@ void SysTick_Init(void)
   * @brief Timers Configuration
   * @retval None
   */
-void Timers_Init(void)
+void Timers_Init(dev_config_t * p_dev_config)
 {
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure;	
+	TIM_OCInitTypeDef  				TIM_OCInitStructure;
 	RCC_ClocksTypeDef RCC_Clocks;
 	
 	RCC_GetClocksFreq(&RCC_Clocks);	
@@ -103,14 +104,30 @@ void Timers_Init(void)
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
 		
 	TIM_TimeBaseStructInit(&TIM_TimeBaseInitStructure);	
-	TIM_TimeBaseInitStructure.TIM_Prescaler = RCC_Clocks.PCLK1_Frequency/10000 - 1;
-	TIM_TimeBaseInitStructure.TIM_Period = 40 - 1;			// 2ms
+	TIM_TimeBaseInitStructure.TIM_Prescaler = RCC_Clocks.PCLK1_Frequency/100000 - 1;
+	TIM_TimeBaseInitStructure.TIM_Period = 400 - 1;			// 2ms
+	TIM_TimeBaseInitStructure.TIM_ClockDivision = 0;
+	TIM_TimeBaseInitStructure.TIM_CounterMode = TIM_CounterMode_Up;
 	TIM_TimeBaseInit(TIM3, &TIM_TimeBaseInitStructure);
+	TIM_ARRPreloadConfig(TIM3, ENABLE);
 	
-	TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
-	NVIC_SetPriority(TIM3_IRQn, 4);
-	NVIC_EnableIRQ(TIM3_IRQn);
-
+	/* PWM1 Mode configuration: Channel1 */
+  TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
+  TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
+  TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
+	// Channel 1
+	TIM_OCInitStructure.TIM_Pulse = p_dev_config->led_pwm_config.duty_cycle[2] * (TIM_TimeBaseInitStructure.TIM_Period + 1) / 100;
+  TIM_OC1Init(TIM3, &TIM_OCInitStructure);
+  TIM_OC1PreloadConfig(TIM3, TIM_OCPreload_Enable);
+	// Channel 3
+	TIM_OCInitStructure.TIM_Pulse = p_dev_config->led_pwm_config.duty_cycle[0] * (TIM_TimeBaseInitStructure.TIM_Period + 1) / 100;
+  TIM_OC3Init(TIM3, &TIM_OCInitStructure);
+  TIM_OC3PreloadConfig(TIM3, TIM_OCPreload_Enable);
+	// Channel 4
+	TIM_OCInitStructure.TIM_Pulse = p_dev_config->led_pwm_config.duty_cycle[1] * (TIM_TimeBaseInitStructure.TIM_Period + 1) / 100;
+  TIM_OC4Init(TIM3, &TIM_OCInitStructure);
+  TIM_OC4PreloadConfig(TIM3, TIM_OCPreload_Enable);
+	
 	TIM_Cmd(TIM3, ENABLE);	
 }
 
@@ -141,7 +158,7 @@ void Timers_Pause(uint16_t ms)
 	TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
 	NVIC_EnableIRQ(TIM2_IRQn);
 	
-	NVIC_DisableIRQ(TIM3_IRQn);
+//	NVIC_DisableIRQ(TIM3_IRQn);
 	NVIC_DisableIRQ(TIM1_UP_IRQn);
 
 	TIM_Cmd(TIM2, ENABLE);
@@ -214,8 +231,26 @@ void Generator_Init(void)
   GPIO_InitStructureure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_Init(GPIOB, &GPIO_InitStructureure);
 
-  /* TIM4 enable counter */
+  
+}
+/**
+  * @brief Generator Start Function
+  * @param None
+  * @retval None
+  */
+void Generator_Start(void)
+{
+	/* TIM4 enable counter */
   TIM_Cmd(TIM4, ENABLE);
+}
+/**
+  * @brief Generator Stop Function
+  * @param None
+  * @retval None
+  */
+void Generator_Stop (void)
+{
+	TIM_Cmd(TIM4, DISABLE);
 }
 
 /* IO init function */
@@ -228,7 +263,10 @@ void IO_Init (dev_config_t * p_dev_config)
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB,ENABLE);
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC,ENABLE);
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
+	GPIO_PinRemapConfig(GPIO_Remap_SWJ_NoJTRST, ENABLE);
 	GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE);
+	GPIO_PinRemapConfig(GPIO_PartialRemap_TIM3, ENABLE);
+	
 	
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
@@ -245,6 +283,17 @@ void IO_Init (dev_config_t * p_dev_config)
 		GPIOC->ODR ^=	GPIO_Pin_13;
 		Delay_ms(300);
 	}
+	
+	// Reset GPIO
+	GPIOA->CRL=0x44444444;
+	GPIOA->CRH=0x44444444;
+	GPIOA->ODR=0x0;
+	GPIOB->CRL=0x44444444;
+	GPIOB->CRH=0x44444444;
+	GPIOB->ODR=0x0;
+	GPIOC->CRL=0x44444444;
+	GPIOC->CRH=0x44444444;
+	GPIOC->ODR=0x0;
 	
 
 	// setting up GPIO according confgiguration
@@ -326,6 +375,7 @@ void IO_Init (dev_config_t * p_dev_config)
 		else if (p_dev_config->pins[i] == TLE5011_GEN  && i == 17)
 		{
 			Generator_Init();	// 4MHz output at PB6 pin
+			Generator_Start();
 		}
 		else if (p_dev_config->pins[i] == SHIFT_REG_CS)
 		{
@@ -339,6 +389,43 @@ void IO_Init (dev_config_t * p_dev_config)
 		{
 			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
 			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+			GPIO_InitStructure.GPIO_Pin = pin_config[i].pin;
+			GPIO_Init(pin_config[i].port, &GPIO_InitStructure);
+		}
+		else if (p_dev_config->pins[i] == LED_PWM)
+		{
+			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+			GPIO_InitStructure.GPIO_Pin = pin_config[i].pin;
+			GPIO_Init(pin_config[i].port, &GPIO_InitStructure);
+		}
+		else if (p_dev_config->pins[i] == LED_SINGLE)
+		{
+			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+			GPIO_InitStructure.GPIO_Pin = pin_config[i].pin;
+			GPIO_Init(pin_config[i].port, &GPIO_InitStructure);
+		}
+		else if (p_dev_config->pins[i] == LED_COLUMN)
+		{
+			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+			GPIO_InitStructure.GPIO_Pin = pin_config[i].pin;
+			GPIO_Init(pin_config[i].port, &GPIO_InitStructure);
+			pin_config[i].port->ODR &=  ~pin_config[i].pin;
+		}
+		else if (p_dev_config->pins[i] == LED_ROW)
+		{
+			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
+			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+			GPIO_InitStructure.GPIO_Pin = pin_config[i].pin;
+			GPIO_Init(pin_config[i].port, &GPIO_InitStructure);
+			pin_config[i].port->ODR |=  pin_config[i].pin;
+		}
+		else if (p_dev_config->pins[i] == NOT_USED)
+		{
+			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
+			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
 			GPIO_InitStructure.GPIO_Pin = pin_config[i].pin;
 			GPIO_Init(pin_config[i].port, &GPIO_InitStructure);
 		}

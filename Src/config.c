@@ -26,12 +26,21 @@
 
 app_config_t app_config;
 
+uint8_t DevConfigCheck (dev_config_t * p_dev_config)
+{
+	uint8_t ret = 0;
+	
+	if (p_dev_config == NULL)	ret = 1;
+	
+	return ret;
+}
+
 void DevConfigSet (dev_config_t * p_dev_config)
 {
 	uint32_t data_addr = (uint32_t) p_dev_config;
 	uint32_t prog_addr;
 	
-	if (p_dev_config == NULL)
+	if (DevConfigCheck(p_dev_config) != 0)
 		return;
 
 	prog_addr = CONFIG_ADDR;

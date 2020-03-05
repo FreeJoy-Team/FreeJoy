@@ -92,7 +92,7 @@ void EP1_OUT_Callback(void)
 		{
 			config_in_cnt = hid_buf[1];			// requested config packet number
 			
-			if ((config_in_cnt > 0) & (config_in_cnt <= 12))
+			if ((config_in_cnt > 0) & (config_in_cnt <= 13))
 			{		
 				
 				uint8_t pos = 2;
@@ -220,6 +220,14 @@ void EP1_OUT_Callback(void)
 						pos += sizeof(tmp_dev_config.pid);
 						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.is_dynamic_config), sizeof(tmp_dev_config.is_dynamic_config));
 						pos += sizeof(tmp_dev_config.is_dynamic_config);
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.led_pwm_config), sizeof(tmp_dev_config.led_pwm_config));
+						pos += sizeof(tmp_dev_config.led_pwm_config);
+						break;
+						
+						case 13:
+							memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.leds[0]), MAX_LEDS_NUM*sizeof(led_config_t));
+							pos += MAX_LEDS_NUM*sizeof(led_config_t);
+						
 						break;
 						
 					default:
@@ -373,14 +381,23 @@ void EP1_OUT_Callback(void)
 					pos += sizeof(tmp_dev_config.pid);
 					memcpy((uint8_t *) &(tmp_dev_config.is_dynamic_config), &hid_buf[pos], sizeof(tmp_dev_config.is_dynamic_config));
 					pos += sizeof(tmp_dev_config.is_dynamic_config);
+					memcpy((uint8_t *) &(tmp_dev_config.led_pwm_config), &hid_buf[pos], sizeof(tmp_dev_config.led_pwm_config));
+					pos += sizeof(tmp_dev_config.led_pwm_config);
 					
 				}					
 					break;
 				
+				case 13:
+				{
+					memcpy((uint8_t *) &(tmp_dev_config.leds[0]), &hid_buf[pos], MAX_LEDS_NUM*sizeof(led_config_t));
+					pos += MAX_LEDS_NUM*sizeof(led_config_t);
+				}
+				break;
+				
 				default:
 					break;
 			}
-			if (hid_buf[1] < 12)		// request new packet
+			if (hid_buf[1] < 13)		// request new packet
 			{
 				config_out_cnt = hid_buf[1] + 1;
 				
@@ -408,7 +425,7 @@ void EP1_OUT_Callback(void)
 						// blink LED if firmware version doesnt match
 						GPIOB->ODR ^= GPIO_Pin_12;
 						GPIOC->ODR ^=	GPIO_Pin_13;
-						Delay_ms(200);
+						Delay_us(200000);
 					}
 				}
 				else

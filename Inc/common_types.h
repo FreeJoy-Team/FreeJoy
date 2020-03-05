@@ -15,10 +15,13 @@
 enum
 {
 	FILTER_NO = 0,
-	FILTER_LOW,
-	FILTER_MEDIUM,
-	FILTER_HIGH,
-	FILTER_VERY_HIGH,
+	FILTER_LEVEL_1,
+	FILTER_LEVEL_2,
+	FILTER_LEVEL_3,
+	FILTER_LEVEL_4,
+	FILTER_LEVEL_5,
+	FILTER_LEVEL_6,
+	FILTER_LEVEL_7,
 }; 
 typedef uint8_t filter_t;
 
@@ -39,17 +42,19 @@ typedef struct
 	analog_data_t		calib_center;
 	analog_data_t 	calib_max;
 	uint8_t					out_enabled: 1;
-	uint8_t					magnet_offset: 1;
 	uint8_t					inverted: 1;
+	uint8_t					function: 3;
 	uint8_t 				filter: 3;
-	uint8_t					:0;
+	
 	int8_t				 	curve_shape[11];
-	uint8_t					resolution;
-	uint8_t					dead_zone;
+	uint8_t					resolution : 4;
+	uint8_t					adc_channel : 4;
+	uint8_t					deadband_size: 7;
+	uint8_t					is_dynamic_deadband: 1;
 	
 	int8_t					source_main;
-	uint8_t					function:	3;
-	uint8_t					source_secondary: 5;
+	uint8_t					source_secondary: 3;
+	uint8_t					offset_angle: 5;
 	
 	int8_t					decrement_button;
 	int8_t					center_button;
@@ -90,6 +95,11 @@ enum
 
   SHIFT_REG_CS,
   SHIFT_REG_DATA,
+	
+	LED_PWM,
+	LED_SINGLE,
+	LED_ROW,
+	LED_COLUMN,
 
 };
 typedef uint8_t pin_t;
@@ -127,6 +137,9 @@ enum
 	RADIO_BUTTON2,
 	RADIO_BUTTON3,
 	RADIO_BUTTON4,
+	
+	SEQUENTIAL_BUTTON,
+	
 	
 };
 typedef uint8_t button_type_t;
@@ -203,6 +216,30 @@ typedef struct
 	
 } shift_modificator_t;
 
+
+enum 
+{
+	LED_NORMAL = 0,
+	LED_INVERTED,
+};
+
+typedef struct
+{
+	uint8_t				duty_cycle[3];	
+	uint8_t				reserved[7];
+	
+} led_pwm_config_t;
+
+
+
+typedef struct
+{
+	int8_t				input_num;
+	uint8_t				type: 3;
+	uint8_t				:0;
+	
+} led_config_t;
+
 typedef struct 
 {
 	// config 1
@@ -230,8 +267,14 @@ typedef struct
 	shift_modificator_t	shift_config[5];
 	uint16_t						vid;
 	uint16_t						pid;
-	uint8_t							is_dynamic_config; 
-	uint8_t							reserved_10[26];
+	uint8_t							is_dynamic_config;
+	led_pwm_config_t		led_pwm_config;
+	uint8_t							reserved_10[16];
+	
+	// config 13;
+	led_config_t				leds[MAX_LEDS_NUM];
+	
+	
 }dev_config_t;
 
 typedef struct

@@ -30,7 +30,7 @@ button_data_t 		buttons_data[MAX_BUTTONS_NUM/8];
 pov_data_t 				pov_data[MAX_POVS_NUM];
 uint8_t						pov_pos[MAX_POVS_NUM];
 uint8_t						raw_buttons_data[MAX_BUTTONS_NUM];
-uint8_t						shifts_state;
+uint8_t						shifts_state;					
 
 /**
   * @brief  Getting logical button state accoring to its configuration
@@ -406,6 +406,70 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 				p_button_state->prev_state = 0;
 			}
 			break;
+			
+		case SEQUENTIAL_BUTTON:
+			// set timestamp if state changed to HIGH
+			if (!p_button_state->changed && 
+					p_button_state->pin_state > p_button_state->prev_state)		
+			{
+				p_button_state->time_last = millis;
+				p_button_state->changed = 1;
+			}
+			// set state after debounce if state have not changed
+			else if (	p_button_state->changed && p_button_state->pin_state &&
+								millis - p_button_state->time_last > p_dev_config->button_debounce_ms)
+			{
+				uint8_t is_first = 1;
+				p_button_state->changed = 0;
+				//p_button_state->cnt++;
+				
+				for (int16_t i=num-1; i>=0; i--)
+				{
+					if (p_dev_config->buttons[i].physical_num == p_dev_config->buttons[num].physical_num &&
+							p_dev_config->buttons[i].type == SEQUENTIAL_BUTTON)														
+					{
+						is_first = 0;
+						if (buttons_state[i].current_state && !buttons_state[i].prev_state)
+						{
+							buttons_state[i].current_state = 0;
+							p_button_state->current_state = 1;
+							p_button_state->prev_state = p_button_state->pin_state;
+							p_button_state->time_last = millis;
+							break;
+						}
+					}
+				}
+				
+				if (is_first && !p_button_state->current_state) // first in list and not pressed
+				{
+					// search for last in list
+					for (int16_t i=MAX_BUTTONS_NUM; i>num; i--)
+					{
+						// check last
+						if (p_dev_config->buttons[i].physical_num == p_dev_config->buttons[num].physical_num &&
+								p_dev_config->buttons[i].type == SEQUENTIAL_BUTTON)
+						{
+							if (!buttons_state[i].current_state) break;
+							else if (!buttons_state[i].prev_state)
+							{
+								buttons_state[i].current_state = 0;
+								p_button_state->current_state = 1;
+								p_button_state->prev_state = p_button_state->pin_state;
+								p_button_state->time_last = millis;
+								break;
+							}
+						}	
+					}				
+				}
+				
+			}
+			// reset if state changed during debounce period
+			else if (!p_button_state->pin_state && millis - p_button_state->time_last > p_dev_config->button_debounce_ms)
+			{
+				p_button_state->changed = 0;
+				p_button_state->prev_state = 0;
+			}	
+			break;
 		
 		default:
 			break;
@@ -427,6 +491,27 @@ void RadioButtons_Init (dev_config_t * p_dev_config)
 			if (p_dev_config->buttons[j].type == (RADIO_BUTTON1 + i))
 			{
 				buttons_state[j].current_state = 1;
+				break;
+			}
+		}
+	}
+}
+
+/**
+  * @brief  Set initial states for sequential buttons
+	* @param  p_dev_config: Pointer to device configuration
+  * @retval None
+  */
+void SequentialButtons_Init (dev_config_t * p_dev_config)
+{
+	for (uint8_t physical_num=0; physical_num<MAX_BUTTONS_NUM; physical_num++)
+	{
+		for (uint8_t i=0; i<MAX_BUTTONS_NUM; i++)
+		{
+			if (p_dev_config->buttons[i].type == SEQUENTIAL_BUTTON &&
+					p_dev_config->buttons[i].physical_num == physical_num)
+			{
+				buttons_state[i].current_state = 1;
 				break;
 			}
 		}
@@ -530,7 +615,7 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 	uint8_t pos = 0;
 	
 	pos = ButtonsReadPhysical(p_dev_config, raw_buttons_data);
-	
+
 	// Process regular buttons
 	for (uint8_t i=0; i<pos; i++)
 	{
@@ -652,9 +737,6 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 			}
 		}
 	}	
-	
-	// convert encoders input
-	//EncoderProcess(buttons_state, p_dev_config);
 	
 	shifts_state = 0;
 	for (uint8_t i=0; i<5; i++)

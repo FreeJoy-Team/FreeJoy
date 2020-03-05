@@ -438,6 +438,11 @@
               <FilePath>..\Src\buttons.c</FilePath>
             </File>
             <File>
+              <FileName>leds.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\leds.c</FilePath>
+            </File>
+            <File>
               <FileName>analog.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\analog.c</FilePath>
@@ -1281,6 +1286,11 @@
               <FileName>buttons.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\buttons.c</FilePath>
+            </File>
+            <File>
+              <FileName>leds.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\leds.c</FilePath>
             </File>
             <File>
               <FileName>analog.c</FileName>
