@@ -158,7 +158,6 @@ void Timers_Pause(uint16_t ms)
 	TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
 	NVIC_EnableIRQ(TIM2_IRQn);
 	
-//	NVIC_DisableIRQ(TIM3_IRQn);
 	NVIC_DisableIRQ(TIM1_UP_IRQn);
 
 	TIM_Cmd(TIM2, ENABLE);

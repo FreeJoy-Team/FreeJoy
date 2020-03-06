@@ -79,7 +79,7 @@ void EP1_OUT_Callback(void)
 
 	// 2 second delay for joy report
 	joy_millis = GetTick() + 2000;
-	Timers_Pause(2000);
+	//Timers_Pause(2000);
 	
 	/* Read received data (2 bytes) */  
   USB_SIL_Read(EP1_OUT, hid_buf);

@@ -223,12 +223,12 @@
           <ItemText>leds_state</ItemText>
         </Ww>
         <Ww>
-          <count>6</count>
+          <count>11</count>
           <WinNumber>1</WinNumber>
           <ItemText>pov_data</ItemText>
         </Ww>
         <Ww>
-          <count>7</count>
+          <count>12</count>
           <WinNumber>1</WinNumber>
           <ItemText>pov_pos</ItemText>
         </Ww>
