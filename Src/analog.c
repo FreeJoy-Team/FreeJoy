@@ -34,6 +34,7 @@ analog_data_t input_data[MAX_AXIS_NUM];
 analog_data_t scaled_axis_data[MAX_AXIS_NUM];
 analog_data_t raw_axis_data[MAX_AXIS_NUM];
 analog_data_t out_axis_data[MAX_AXIS_NUM];
+analog_data_t tmp_axis_data[PREBUF_SIZE][MAX_AXIS_NUM];
 
 analog_data_t FILTER_LEVEL_1_COEF[FILTER_BUF_SIZE] = {40, 30, 15, 10, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 analog_data_t FILTER_LEVEL_2_COEF[FILTER_BUF_SIZE] = {30, 20, 10, 10, 10, 6, 6, 4, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -462,7 +463,7 @@ void AxesInit (dev_config_t * p_dev_config)
 		if (p_dev_config->pins[i] == AXIS_ANALOG)		// Configure ADC channels
 		{
 			/* ADC1 regular channel configuration */ 
-			ADC_RegularChannelConfig(ADC1, channel_config[i].channel, i+1, ADC_SampleTime_239Cycles5);
+			ADC_RegularChannelConfig(ADC1, channel_config[i].channel, i+1, ADC_SampleTime_71Cycles5);
 			axis_num++;
 		}
 		
@@ -506,8 +507,12 @@ void AxesInit (dev_config_t * p_dev_config)
   */
 void ADC_Conversion (void)
 {
+	static uint8_t num_of_conv = 0;
+	analog_data_t tmp = 0;
+	
 	if (adc_cnt > 0)
 	{
+		DMA1_Channel1->CMAR = (uint32_t) &tmp_axis_data[num_of_conv++];
 		DMA_SetCurrDataCounter(DMA1_Channel1, MAX_AXIS_NUM);	
 		DMA_Cmd(DMA1_Channel1, ENABLE);
 		ADC_Cmd(ADC1, ENABLE);
@@ -519,6 +524,20 @@ void ADC_Conversion (void)
 			
 		ADC_Cmd(ADC1, DISABLE);
 		DMA_Cmd(DMA1_Channel1, DISABLE);
+		
+		if (num_of_conv > PREBUF_SIZE - 1) 
+		{
+			num_of_conv = 0;
+			for (uint8_t i=0; i<MAX_AXIS_NUM; i++)
+			{
+				tmp = 0;
+				for (uint8_t k=0; k<PREBUF_SIZE; k++)
+				{
+					tmp += tmp_axis_data[k][i];					
+				}
+				input_data[i] = tmp/PREBUF_SIZE;
+			}
+		}
 	}
 }
 

@@ -38,9 +38,16 @@
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
+
+#define ADC_PERIOD_MS										2
+#define SENSORS_PERIOD_MS								2
+#define ENCODER_PERIOD_MS								1
+
 /* Private variables ---------------------------------------------------------*/
-volatile int32_t millis =0, joy_millis=0, adc_millis=100, sensors_millis=101;
+
+volatile int32_t millis =0, joy_millis=0, encoder_millis = 0, adc_millis=100, sensors_millis=101;
 extern dev_config_t dev_config;
+
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
@@ -215,16 +222,15 @@ void TIM1_UP_IRQHandler(void)
 		if (millis - adc_millis >= ADC_PERIOD_MS)
 		{
 			adc_millis = millis;
-			
-			
+						
 			AxesProcess(&dev_config);
-
+			
 			// Disable periphery before ADC conversion
 			RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1,DISABLE);	
 			RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2|RCC_APB1Periph_TIM3|RCC_APB1Periph_TIM4, DISABLE);
 			RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB|RCC_APB2Periph_GPIOC,DISABLE);			
-			
-			ADC_Conversion();
+				
+			for (uint8_t i=0; i<PREBUF_SIZE; i++)	ADC_Conversion();		
 			
 			// Enable periphery after ADC conversion
 			RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1,ENABLE);	
@@ -247,8 +253,12 @@ void TIM1_UP_IRQHandler(void)
 				}
 			}
 		}
-	
-		EncoderProcess(buttons_state, &dev_config);
+		// encoders polling
+		if (millis - encoder_millis >= ENCODER_PERIOD_MS)
+		{
+			encoder_millis = millis;
+			EncoderProcess(buttons_state, &dev_config);
+		}
 		
 	}
 }

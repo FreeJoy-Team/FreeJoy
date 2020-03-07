@@ -104,7 +104,7 @@ void Timers_Init(dev_config_t * p_dev_config)
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);		
 	TIM_TimeBaseStructInit(&TIM_TimeBaseInitStructure);	
 	TIM_TimeBaseInitStructure.TIM_Prescaler = RCC_Clocks.PCLK1_Frequency/100000 - 1;
-	TIM_TimeBaseInitStructure.TIM_Period = 400 - 1;			// 2ms, 500Hz
+	TIM_TimeBaseInitStructure.TIM_Period = 200 - 1;			// 1ms, 1000Hz
 	TIM_TimeBaseInitStructure.TIM_ClockDivision = 0;
 	TIM_TimeBaseInitStructure.TIM_CounterMode = TIM_CounterMode_Up;
 	TIM_TimeBaseInit(TIM3, &TIM_TimeBaseInitStructure);
