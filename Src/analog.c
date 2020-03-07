@@ -48,6 +48,9 @@ analog_data_t deadband_buffer[MAX_AXIS_NUM][DEADBAND_BUF_SIZE];
 	
 buttons_state_t axes_buttons[MAX_AXIS_NUM][3];
 
+uint8_t adc_cnt = 0;
+uint8_t sensors_cnt = 0;	
+	
 adc_channel_config_t channel_config[MAX_AXIS_NUM] =
 {
 	{ADC_Channel_0, 0}, {ADC_Channel_1, 1}, 
@@ -389,9 +392,6 @@ analog_data_t ShapeFunc (axis_config_t * p_axis_cfg,  analog_data_t value, uint8
   */
 void AxesInit (dev_config_t * p_dev_config)
 {
-	uint8_t adc_cnt = 0;
-	uint8_t sensors_cnt = 0;
-	
   ADC_InitTypeDef ADC_InitStructure;
 	DMA_InitTypeDef DMA_InitStructure;
 
@@ -506,6 +506,8 @@ void AxesInit (dev_config_t * p_dev_config)
   */
 void ADC_Conversion (void)
 {
+	if (adc_cnt > 0)
+	{
 		DMA_SetCurrDataCounter(DMA1_Channel1, MAX_AXIS_NUM);	
 		DMA_Cmd(DMA1_Channel1, ENABLE);
 		ADC_Cmd(ADC1, ENABLE);
@@ -517,6 +519,7 @@ void ADC_Conversion (void)
 			
 		ADC_Cmd(ADC1, DISABLE);
 		DMA_Cmd(DMA1_Channel1, DISABLE);
+	}
 }
 
 /**
