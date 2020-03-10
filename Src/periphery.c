@@ -375,7 +375,7 @@ void IO_Init (dev_config_t * p_dev_config)
 			Generator_Init();	// 4MHz output at PB6 pin
 			Generator_Start();
 		}
-		else if (p_dev_config->pins[i] == SHIFT_REG_CS)
+		else if (p_dev_config->pins[i] == SHIFT_REG_LATCH)
 		{
 			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;

@@ -25,6 +25,8 @@
 #include "shift_registers.h"
 #include "buttons.h"
 
+shift_reg_t shift_registers[4];
+
 /**
   * @brief  Initializate shift registers states at startup
 	* @param  p_dev_config: Pointer to device configuration
@@ -33,34 +35,45 @@
 void ShiftRegistersInit(dev_config_t * p_dev_config)
 {
 	uint8_t pos = 0;
-	int8_t prev_cs = -1;
 	int8_t prev_data = -1;
-	
+	int8_t prev_latch = -1;
+
 	for (int i=0; i<MAX_SHIFT_REG_NUM; i++)
 	{
-		p_dev_config->shift_registers[i].pin_cs = -1;
-		p_dev_config->shift_registers[i].pin_data = -1;
+		shift_registers[i].pin_data = -1;
+		shift_registers[i].pin_latch = -1;
+		shift_registers[i].button_cnt = p_dev_config->shift_registers[i].button_cnt;
+		shift_registers[i].type = p_dev_config->shift_registers[i].type;
 	}
 	
+	// set data pins
 	for (int i=0; i<USED_PINS_NUM; i++)
 	{
-		if (p_dev_config->pins[i] == SHIFT_REG_CS && i > prev_cs)
+		if (p_dev_config->pins[i] == SHIFT_REG_DATA && i > prev_data)
 		{
-			for (int j=0; j<USED_PINS_NUM; j++)
-			{
-				if (p_dev_config->pins[j] == SHIFT_REG_DATA && j > prev_data)
-				{
-					p_dev_config->shift_registers[pos].pin_cs = i;
-					p_dev_config->shift_registers[pos].pin_data = j;
-					
-					prev_cs = i;
-					prev_data = j;
-					pos++;
-					break;
-				}
-			}
+			shift_registers[pos].pin_data = i;				
+			prev_data = i;
+			pos++;			
 		}
-		
+	}
+	// set latch pins
+	pos = 0;
+	for (int i=0; i<USED_PINS_NUM; i++)
+	{
+		if (p_dev_config->pins[i] == SHIFT_REG_LATCH && i > prev_latch)
+		{
+			shift_registers[pos].pin_latch = i;					
+			prev_latch = i;
+			pos++;			
+		}
+	}
+	// if latch pin not set and data pin is set than set last defined latch pin
+	for (int i=0; i<MAX_SHIFT_REG_NUM; i++)
+	{
+		if (shift_registers[i].pin_data >= 0 && shift_registers[i].pin_latch == -1)
+		{
+			shift_registers[i].pin_latch = prev_latch;
+		}
 	}
 }
 
@@ -70,7 +83,7 @@ void ShiftRegistersInit(dev_config_t * p_dev_config)
 	* @param  data: Pointer to data buffer
   * @retval None
   */
-void ShiftRegisterRead(shift_reg_config_t * shift_register, uint8_t * data)
+void ShiftRegisterRead(shift_reg_t * shift_register, uint8_t * data)
 {
 	uint8_t reg_cnt;
 	
@@ -79,23 +92,24 @@ void ShiftRegisterRead(shift_reg_config_t * shift_register, uint8_t * data)
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;	
 	GPIO_Init (GPIOB,&GPIO_InitStructure);
+	
 	// set SCK low
 	GPIOB->ODR &= ~GPIO_Pin_3;
 	
 	if (shift_register->type == CD4021_PULL_DOWN || shift_register->type == CD4021_PULL_UP)		// positive polarity
 	{
 		// Latch impulse
-		pin_config[shift_register->pin_cs].port->ODR |= pin_config[shift_register->pin_cs].pin;
+		pin_config[shift_register->pin_latch].port->ODR |= pin_config[shift_register->pin_latch].pin;
 		for (int i=0; i<SHIFTREG_TICK_DELAY; i++) __NOP();
-		pin_config[shift_register->pin_cs].port->ODR &= ~pin_config[shift_register->pin_cs].pin;
+		pin_config[shift_register->pin_latch].port->ODR &= ~pin_config[shift_register->pin_latch].pin;
 			
 	}
 	else	// HC165 negative polarity
 	{
 		// Latch impulse
-		pin_config[shift_register->pin_cs].port->ODR &= ~pin_config[shift_register->pin_cs].pin;
+		pin_config[shift_register->pin_latch].port->ODR &= ~pin_config[shift_register->pin_latch].pin;
 		for (int i=0; i<SHIFTREG_TICK_DELAY; i++) __NOP();
-		pin_config[shift_register->pin_cs].port->ODR |= pin_config[shift_register->pin_cs].pin;			
+		pin_config[shift_register->pin_latch].port->ODR |= pin_config[shift_register->pin_latch].pin;			
 	}
 	
 	reg_cnt = (uint8_t) ((float)shift_register->button_cnt/8.0);		// number of data bytes to read
@@ -152,10 +166,10 @@ void ShiftRegistersGet (uint8_t * raw_button_data_buf, dev_config_t * p_dev_conf
 	uint8_t input_data[16];
 	for (uint8_t i=0; i<MAX_SHIFT_REG_NUM; i++)
 	{
-		if (p_dev_config->shift_registers[i].pin_cs >=0 && p_dev_config->shift_registers[i].pin_data >=0)
+		if (shift_registers[i].pin_latch >=0 && shift_registers[i].pin_data >=0)
 		{
-			ShiftRegisterRead(&p_dev_config->shift_registers[i], input_data);
-			for (uint8_t j=0; j<p_dev_config->shift_registers[i].button_cnt; j++)
+			ShiftRegisterRead(&shift_registers[i], input_data);
+			for (uint8_t j=0; j<shift_registers[i].button_cnt; j++)
 			{
 				if ((*pos) <128)
 				{

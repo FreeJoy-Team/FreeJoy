@@ -93,7 +93,7 @@ enum
   SPI_DATA,
   TLE5011_GEN,
 
-  SHIFT_REG_CS,
+  SHIFT_REG_LATCH,
   SHIFT_REG_DATA,
 	
 	LED_PWM,
@@ -198,8 +198,16 @@ typedef struct
 {	
 	uint8_t 			type;
 	uint8_t 			button_cnt;	
-	int8_t 				pin_cs;
+	int8_t 				pin_latch;
 	int8_t 				pin_data;
+	
+} shift_reg_t;
+
+typedef struct
+{	
+	uint8_t 			type;
+	uint8_t 			button_cnt;	
+	int8_t 				reserved[2];
 	
 } shift_reg_config_t;
 
