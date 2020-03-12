@@ -333,34 +333,30 @@ void IO_Init (dev_config_t * p_dev_config)
 			GPIO_InitStructure.GPIO_Pin = pin_config[i].pin;
 			GPIO_Init(pin_config[i].port, &GPIO_InitStructure);
 		}
-		else if (p_dev_config->pins[i] == SPI_SCK)//  && i == 14)
+		else if (p_dev_config->pins[i] == SPI_SCK)//  && i == 14)		// PB3
 		{
-#if USE_SOFT_SPI			
-			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-			GPIO_InitStructure.GPIO_Pin = pin_config[i].pin;
-			GPIO_Init(pin_config[i].port, &GPIO_InitStructure);
-#else 
 			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 			GPIO_InitStructure.GPIO_Pin = pin_config[i].pin;
 			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;	
-			GPIO_Init (GPIOB,&GPIO_InitStructure);
-#endif			
+			GPIO_Init (GPIOB,&GPIO_InitStructure);			
 		}
-		else if (p_dev_config->pins[i] == SPI_DATA)// && i == 16)
-		{
-#if USE_SOFT_SPI	
-			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
+		else if (p_dev_config->pins[i] == SPI_MISO && i == 15)			// PB4
+		{		
 			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 			GPIO_InitStructure.GPIO_Pin = pin_config[i].pin;
-			GPIO_Init(pin_config[i].port, &GPIO_InitStructure);
-#else			
-			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-			GPIO_InitStructure.GPIO_Pin = pin_config[i].pin;
-			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;	
+			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
 			GPIO_Init (GPIOB,&GPIO_InitStructure);
-#endif
-			UserSPI_Init();
+			
+			HardSPI_Init();
+		}
+		else if (p_dev_config->pins[i] == SPI_MOSI && i == 16)			// PB5
+		{		
+			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+			GPIO_InitStructure.GPIO_Pin = pin_config[i].pin;
+			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;						// PP or OD?
+			GPIO_Init (GPIOB,&GPIO_InitStructure);
+
+			HardSPI_Init();
 		}
 		else if (p_dev_config->pins[i] == TLE5011_CS)
 		{

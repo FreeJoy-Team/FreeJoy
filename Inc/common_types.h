@@ -48,7 +48,7 @@ typedef struct
 	
 	int8_t				 	curve_shape[11];
 	uint8_t					resolution : 4;
-	uint8_t					adc_channel : 4;
+	uint8_t					channel : 4;
 	uint8_t					deadband_size: 7;
 	uint8_t					is_dynamic_deadband: 1;
 	
@@ -88,10 +88,18 @@ enum
 //	RESERVED,
 	
 	SPI_SCK = 7,
+  SPI_MOSI,
+  SPI_MISO,
 
   TLE5011_CS,
-  SPI_DATA,
   TLE5011_GEN,
+
+  MCP3201_CS,
+  MCP3202_CS,
+  MCP3204_CS,
+  MCP3208_CS,
+
+  MLX90393_CS,
 
   SHIFT_REG_LATCH,
   SHIFT_REG_DATA,
@@ -138,6 +146,7 @@ enum
 	RADIO_BUTTON3,
 	RADIO_BUTTON4,
 	
+	SEQUENTIAL_TOGGLE,
 	SEQUENTIAL_BUTTON,
 	
 	

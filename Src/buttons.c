@@ -407,7 +407,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 			}
 			break;
 			
-		case SEQUENTIAL_BUTTON:
+		case SEQUENTIAL_TOGGLE:
 			// set timestamp if state changed to HIGH
 			if (!p_button_state->changed && 
 					p_button_state->pin_state > p_button_state->prev_state)		
@@ -426,7 +426,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 				for (int16_t i=num-1; i>=0; i--)
 				{
 					if (p_dev_config->buttons[i].physical_num == p_dev_config->buttons[num].physical_num &&
-							p_dev_config->buttons[i].type == SEQUENTIAL_BUTTON)														
+							p_dev_config->buttons[i].type == SEQUENTIAL_TOGGLE)														
 					{
 						is_first = 0;
 						if (buttons_state[i].current_state && !buttons_state[i].prev_state)
@@ -447,7 +447,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 					{
 						// check last
 						if (p_dev_config->buttons[i].physical_num == p_dev_config->buttons[num].physical_num &&
-								p_dev_config->buttons[i].type == SEQUENTIAL_BUTTON)
+								p_dev_config->buttons[i].type == SEQUENTIAL_TOGGLE)
 						{
 							if (!buttons_state[i].current_state) break;
 							else if (!buttons_state[i].prev_state)
@@ -508,7 +508,7 @@ void SequentialButtons_Init (dev_config_t * p_dev_config)
 	{
 		for (uint8_t i=0; i<MAX_BUTTONS_NUM; i++)
 		{
-			if (p_dev_config->buttons[i].type == SEQUENTIAL_BUTTON &&
+			if (p_dev_config->buttons[i].type == SEQUENTIAL_TOGGLE &&
 					p_dev_config->buttons[i].physical_num == physical_num)
 			{
 				buttons_state[i].current_state = 1;

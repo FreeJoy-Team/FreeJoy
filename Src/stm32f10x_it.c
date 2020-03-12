@@ -324,7 +324,7 @@ void DMA1_Channel3_IRQHandler(void)
 			{
 				sensors[i].tx_complete = 1;
 				sensors[i].rx_complete = 0;
-				UserSPI_HalfDuplex_Receive(&sensors[i].data[1], 5);
+				HardSPI_HalfDuplex_Receive(&sensors[i].data[1], 5);
 				return;
 			}
 		}

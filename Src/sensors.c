@@ -60,10 +60,10 @@ void TLE501x_Read(uint8_t * data, uint8_t addr, uint8_t length)
 {
 	uint8_t cmd = 0x80 | (addr & 0x0F)<<3 | (length & 0x07);
 	
-	UserSPI_HalfDuplex_Transmit(&cmd, 1);
+	HardSPI_HalfDuplex_Transmit(&cmd, 1);
 	if (length > 0)
 	{
-		UserSPI_HalfDuplex_Receive(data, length+1);
+		HardSPI_HalfDuplex_Receive(data, length+1);
 	}
 
 }
@@ -71,10 +71,10 @@ void TLE501x_Read(uint8_t * data, uint8_t addr, uint8_t length)
 void TLE501x_Write(uint8_t * data, uint8_t addr, uint8_t length)
 {
 	uint8_t cmd = addr<<3 | (addr & 0x0F)<<3 | (length & 0x07);
-	UserSPI_HalfDuplex_Transmit(&cmd, 1);
+	HardSPI_HalfDuplex_Transmit(&cmd, 1);
 	if (length > 0)
 	{
-		UserSPI_HalfDuplex_Transmit(data, length);
+		HardSPI_HalfDuplex_Transmit(data, length);
 	}
 }
 
@@ -130,7 +130,7 @@ void TLE501x_StartDMA(tle_t * sensor)
 	NVIC_DisableIRQ(TIM1_UP_IRQn);
 	NVIC_DisableIRQ(TIM3_IRQn);
 	
-	UserSPI_HalfDuplex_Transmit(&sensor->data[0], 2);
+	HardSPI_HalfDuplex_Transmit(&sensor->data[0], 2);
 }
 
 void TLE501x_StopDMA(tle_t * sensor)

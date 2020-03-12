@@ -12,12 +12,12 @@
 #include "stm32f10x.h"
 #include "stm32f10x_conf.h"
 
-#define USE_SOFT_SPI		0
+
 #define SPI_USE_DMA			1
 
-void UserSPI_Init(void);
-void UserSPI_HalfDuplex_Transmit(uint8_t * data, uint16_t length);
-void UserSPI_HalfDuplex_Receive(uint8_t * data, uint16_t length);
+void HardSPI_Init(void);
+void HardSPI_HalfDuplex_Transmit(uint8_t * data, uint16_t length);
+void HardSPI_HalfDuplex_Receive(uint8_t * data, uint16_t length);
 
 #endif 	/* __SPI_H__ */
 
