@@ -418,9 +418,14 @@
               <FilePath>..\Src\spi.c</FilePath>
             </File>
             <File>
-              <FileName>sensors.c</FileName>
+              <FileName>tle5011.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Src\sensors.c</FilePath>
+              <FilePath>..\Src\tle5011.c</FilePath>
+            </File>
+            <File>
+              <FileName>mcp320x.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\mcp320x.c</FilePath>
             </File>
             <File>
               <FileName>encoders.c</FileName>
@@ -1268,9 +1273,14 @@
               <FilePath>..\Src\spi.c</FilePath>
             </File>
             <File>
-              <FileName>sensors.c</FileName>
+              <FileName>tle5011.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Src\sensors.c</FilePath>
+              <FilePath>..\Src\tle5011.c</FilePath>
+            </File>
+            <File>
+              <FileName>mcp320x.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\mcp320x.c</FilePath>
             </File>
             <File>
               <FileName>encoders.c</FileName>

@@ -28,7 +28,8 @@
 #include "periphery.h"
 #include "analog.h"
 #include "encoders.h"
-#include "sensors.h"
+#include "tle5011.h"
+#include "mcp320x.h"
 #include "config.h"
 
 /** @addtogroup STM32F10x_StdPeriph_Template
@@ -243,13 +244,29 @@ void TIM1_UP_IRQHandler(void)
 		if (millis - sensors_millis >= ADC_PERIOD_MS)
 		{
 			sensors_millis = millis;
-			
+			// TODO: check if we can just start sensors[0]
 			for (uint8_t i=0; i<MAX_AXIS_NUM; i++)
 			{
 				if (sensors[i].cs_pin >= 0 && sensors[i].rx_complete && sensors[i].rx_complete)
 				{
-					TLE501x_StartDMA(&sensors[i]);
-					return;
+					if (sensors[i].type == TLE5011)
+					{
+						TLE501x_StartDMA(&sensors[i]);
+						return;
+					}
+					else if (sensors[i].type == MCP3201 ||
+									 sensors[i].type == MCP3202 ||
+									 sensors[i].type == MCP3204 ||
+									 sensors[i].type == MCP3208)
+					{
+						MCP320x_StartDMA(&sensors[i]);
+						return;
+					}
+					else if (sensors[i].type == MLX90393)
+					{
+	//					MLX90393_StartDMA(&sensors[i++]);
+	//					return;
+					}
 				}
 			}
 		}
@@ -284,7 +301,21 @@ void DMA1_Channel2_IRQHandler(void)
 		// Close connection to the sensor
 		if (i < MAX_AXIS_NUM)
 		{
-			TLE501x_StopDMA(&sensors[i++]);
+			if (sensors[i].type == TLE5011)
+			{
+				TLE501x_StopDMA(&sensors[i++]);
+			}
+			else if (sensors[i].type == MCP3201 ||
+							 sensors[i].type == MCP3202 ||
+							 sensors[i].type == MCP3204 ||
+							 sensors[i].type == MCP3208)
+			{
+				MCP320x_StopDMA(&sensors[i++]);
+			}
+			else if (sensors[i].type == MLX90393)
+			{
+//				MLX90393_StopDMA(&sensors[i++]);
+			}
 		}
 		// Enable other peripery IRQs
 		NVIC_EnableIRQ(TIM1_UP_IRQn);
@@ -295,8 +326,24 @@ void DMA1_Channel2_IRQHandler(void)
 		{
 			if (sensors[i].cs_pin >= 0 && sensors[i].rx_complete && sensors[i].rx_complete)
 			{
-				TLE501x_StartDMA(&sensors[i]);
-				return;
+				if (sensors[i].type == TLE5011)
+				{
+					TLE501x_StartDMA(&sensors[i]);
+					return;
+				}
+				else if (sensors[i].type == MCP3201 ||
+								 sensors[i].type == MCP3202 ||
+								 sensors[i].type == MCP3204 ||
+								 sensors[i].type == MCP3208)
+				{
+					MCP320x_StartDMA(&sensors[i]);
+					return;
+				}
+				else if (sensors[i].type == MLX90393)
+				{
+//					MLX90393_StartDMA(&sensors[i++]);
+//					return;
+				}
 			}
 		}
 		// Disable TLE clock after communication frame
@@ -324,7 +371,14 @@ void DMA1_Channel3_IRQHandler(void)
 			{
 				sensors[i].tx_complete = 1;
 				sensors[i].rx_complete = 0;
-				HardSPI_HalfDuplex_Receive(&sensors[i].data[1], 5);
+				if (sensors[i].type == TLE5011)
+				{
+					HardSPI_HalfDuplex_Receive(&sensors[i].data[1], 5);					
+				}
+//				else if (sensors[i].type == MLX90393)
+//				{
+//					HardSPI_FullDuplex_Receive(&sensors[i].data[1], 5);
+//				}
 				return;
 			}
 		}

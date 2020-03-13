@@ -1,7 +1,7 @@
 /**
   ******************************************************************************
-  * @file           : sensors.c
-  * @brief          : Sensors driver implementation
+  * @file           : tle5011.c
+  * @brief          : TLE5011 sensors driver implementation
 			
 		FreeJoy software for game device controllers
     Copyright (C) 2020  Yury Vostrenkov (yuvostrenkov@gmail.com)
@@ -22,7 +22,7 @@
   ******************************************************************************
   */
 
-#include "sensors.h"
+#include "tle5011.h"
 #include <math.h>
 
 uint8_t MathCRC8(uint8_t crc, uint8_t data)
@@ -78,24 +78,11 @@ void TLE501x_Write(uint8_t * data, uint8_t addr, uint8_t length)
 	}
 }
 
-int TLE501x_GetAngle(tle_t * sensor, float * angle)
+int TLE501x_GetAngle(sensor_t * sensor, float * angle)
 {
 	int16_t x_value, y_value;
 	float out = 0;
 	int ret = 0;
-
-	
-#if (!SPI_USE_DMA)
-	// Update command
-	sensor->data[0] = 0x00;
-	pin_config[sensor->cs_pin].port->ODR &= ~pin_config[sensor->cs_pin].pin;	
-	TLE501x_Write(&sensor->data[0], 0x00, 0);	
-	
-	// Get sensor data	
-	TLE501x_Read(&sensor->data[1], 0x01, 4);	
-	pin_config[sensor->cs_pin].port->ODR |= pin_config[sensor->cs_pin].pin;
-
-#endif
 	
 	if (CheckCrc(&sensor->data[1], sensor->data[5], 0xFB, 4))
 	{
@@ -116,8 +103,7 @@ int TLE501x_GetAngle(tle_t * sensor, float * angle)
 	return ret;
 }
 
-#if (SPI_USE_DMA)	
-void TLE501x_StartDMA(tle_t * sensor)
+void TLE501x_StartDMA(sensor_t * sensor)
 {	
 	sensor->rx_complete = 1;
 	sensor->tx_complete = 0;
@@ -133,7 +119,7 @@ void TLE501x_StartDMA(tle_t * sensor)
 	HardSPI_HalfDuplex_Transmit(&sensor->data[0], 2);
 }
 
-void TLE501x_StopDMA(tle_t * sensor)
+void TLE501x_StopDMA(sensor_t * sensor)
 {	
 	DMA_Cmd(DMA1_Channel2, DISABLE);
 	SPI_BiDirectionalLineConfig(SPI1, SPI_Direction_Tx);
@@ -142,6 +128,6 @@ void TLE501x_StopDMA(tle_t * sensor)
 	sensor->rx_complete = 1;
 	sensor->tx_complete = 1;
 }
-#endif
+
 
 

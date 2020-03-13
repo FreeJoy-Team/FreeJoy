@@ -64,15 +64,27 @@ typedef struct
 	
 } axis_config_t;
 
+enum
+{
+	TLE5011 = 1,
+	MCP3201,
+	MCP3202,
+	MCP3204,
+	MCP3208,
+	MLX90393,
+};
+
 typedef struct
 {
-	uint8_t 	data[6];
+	uint8_t		type;
+	uint8_t		channel;
+	uint8_t 	data[16];
 	uint8_t 	rx_complete;
 	uint8_t 	tx_complete;
 	int8_t 		cs_pin;
 	uint32_t	ok_cnt;
 	uint32_t 	err_cnt;
-} tle_t;
+} sensor_t;
 
 enum
 {

@@ -1,13 +1,13 @@
 /**
   ******************************************************************************
-  * @file           : sensors.h
-  * @brief          : Header for sensors.c file.
+  * @file           : tle5011.h
+  * @brief          : Header for tle5011.c file.
   ******************************************************************************
   */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __SENSORS_H__
-#define __SENSORS_H__
+#ifndef __TLE5011_H__
+#define __TLE5011_H__
 
 #include "common_types.h"
 #include "periphery.h"
@@ -18,9 +18,9 @@
 
 #define TLE501x_TIMEOUT		100
 
-void TLE501x_StartDMA(tle_t * sensor);
-void TLE501x_StopDMA(tle_t * sensor);
-int TLE501x_GetAngle(tle_t * sensor, float * angle);
+void TLE501x_StartDMA(sensor_t * sensor);
+void TLE501x_StopDMA(sensor_t * sensor);
+int TLE501x_GetAngle(sensor_t * sensor, float * angle);
 
-#endif 	/* __SENSORS_H__ */
+#endif 	/* __TLE5011_H__ */
 

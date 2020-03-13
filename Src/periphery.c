@@ -24,7 +24,6 @@
   */
 
 #include "periphery.h"
-#include "sensors.h"
 
 volatile uint64_t Ticks;
 volatile uint32_t TimingDelay;
@@ -358,7 +357,12 @@ void IO_Init (dev_config_t * p_dev_config)
 
 			HardSPI_Init();
 		}
-		else if (p_dev_config->pins[i] == TLE5011_CS)
+		else if (p_dev_config->pins[i] == TLE5011_CS || 
+						 p_dev_config->pins[i] == MCP3201_CS ||
+						 p_dev_config->pins[i] == MCP3202_CS ||
+						 p_dev_config->pins[i] == MCP3204_CS ||
+						 p_dev_config->pins[i] == MCP3208_CS ||
+						 p_dev_config->pins[i] == MLX90393_CS)
 		{
 			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
