@@ -423,6 +423,11 @@
               <FilePath>..\Src\tle5011.c</FilePath>
             </File>
             <File>
+              <FileName>mlx90393.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\mlx90393.c</FilePath>
+            </File>
+            <File>
               <FileName>mcp320x.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\mcp320x.c</FilePath>
@@ -1276,6 +1281,11 @@
               <FileName>tle5011.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\tle5011.c</FilePath>
+            </File>
+            <File>
+              <FileName>mlx90393.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\mlx90393.c</FilePath>
             </File>
             <File>
               <FileName>mcp320x.c</FileName>

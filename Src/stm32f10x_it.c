@@ -30,6 +30,7 @@
 #include "encoders.h"
 #include "tle5011.h"
 #include "mcp320x.h"
+#include "mlx90393.h"
 #include "config.h"
 
 /** @addtogroup STM32F10x_StdPeriph_Template
@@ -264,8 +265,8 @@ void TIM1_UP_IRQHandler(void)
 					}
 					else if (sensors[i].type == MLX90393)
 					{
-	//					MLX90393_StartDMA(&sensors[i++]);
-	//					return;
+						MLX90393_StartDMA(&sensors[i++]);
+						return;
 					}
 				}
 			}
@@ -314,7 +315,7 @@ void DMA1_Channel2_IRQHandler(void)
 			}
 			else if (sensors[i].type == MLX90393)
 			{
-//				MLX90393_StopDMA(&sensors[i++]);
+				MLX90393_StopDMA(&sensors[i++]);
 			}
 		}
 		// Enable other peripery IRQs
@@ -341,8 +342,8 @@ void DMA1_Channel2_IRQHandler(void)
 				}
 				else if (sensors[i].type == MLX90393)
 				{
-//					MLX90393_StartDMA(&sensors[i++]);
-//					return;
+					MLX90393_StartDMA(&sensors[i++]);
+					return;
 				}
 			}
 		}
@@ -375,10 +376,6 @@ void DMA1_Channel3_IRQHandler(void)
 				{
 					HardSPI_HalfDuplex_Receive(&sensors[i].data[1], 5);					
 				}
-//				else if (sensors[i].type == MLX90393)
-//				{
-//					HardSPI_FullDuplex_Receive(&sensors[i].data[1], 5);
-//				}
 				return;
 			}
 		}

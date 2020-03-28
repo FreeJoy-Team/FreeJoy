@@ -27,6 +27,7 @@
 #include <math.h>
 #include "tle5011.h"
 #include "mcp320x.h"
+#include "mlx90393.h"
 #include "buttons.h"
 
 sensor_t sensors[MAX_AXIS_NUM];
@@ -489,6 +490,9 @@ void AxesInit (dev_config_t * p_dev_config)
 					sensors[sensors_cnt].type = MLX90393;
 					sensors[sensors_cnt].channel = p_dev_config->axis_config[k].channel;
 					sensors[sensors_cnt].cs_pin = i;
+					
+					MLX90393_StartBurst(&sensors[sensors_cnt]);
+					
 					sensors_cnt++;
 				}
 			}
@@ -511,7 +515,7 @@ void AxesInit (dev_config_t * p_dev_config)
 		}
 		else if (sensors[0].type == MLX90393)
 		{
-			// TODO: sensors start
+			MLX90393_StartDMA(&sensors[0]);
 		}
 	}
 
