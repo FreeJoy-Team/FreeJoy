@@ -352,7 +352,7 @@ void IO_Init (dev_config_t * p_dev_config)
 		{		
 			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 			GPIO_InitStructure.GPIO_Pin = pin_config[i].pin;
-			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;						// PP or OD?
+			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;						// PP or OD?
 			GPIO_Init (GPIOB,&GPIO_InitStructure);
 
 			HardSPI_Init();

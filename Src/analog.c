@@ -827,7 +827,7 @@ void AxesProcess (dev_config_t * p_dev_config)
 		else
 		{
 			// Scale output data
-			tmp[i] = map3( tmp[i], 
+			tmp[i] = map3( tmp[i],
 									 p_dev_config->axis_config[i].calib_min,
 									 p_dev_config->axis_config[i].calib_center,    
 									 p_dev_config->axis_config[i].calib_max, 
