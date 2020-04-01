@@ -491,8 +491,7 @@ void AxesInit (dev_config_t * p_dev_config)
 					sensors[sensors_cnt].channel = p_dev_config->axis_config[k].channel;
 					sensors[sensors_cnt].cs_pin = i;
 					
-					MLX90393_StartBurst(&sensors[sensors_cnt]);
-					
+					MLX90393_Start(&sensors[sensors_cnt]);
 					sensors_cnt++;
 				}
 			}
@@ -711,7 +710,7 @@ void AxesProcess (dev_config_t * p_dev_config)
 				// search for needed sensor
 				for (k=0; k<MAX_AXIS_NUM; k++)
 				{
-					if (sensors[k].cs_pin == source || sensors[k].channel == channel) break;
+					if (sensors[k].cs_pin == source && sensors[k].channel == channel) break;
 				}
 				// get data
 				if (p_dev_config->axis_config[i].offset_angle > 0)	// offset enabled
@@ -729,7 +728,32 @@ void AxesProcess (dev_config_t * p_dev_config)
 			}	
 			else if (p_dev_config->pins[source] == MLX90393_CS)				// source MLX90393
 			{
-				// TODO: getting sensors data
+				uint8_t k = 0;
+				uint16_t tmp16 = 0;
+				// search for needed sensor
+				for (k=0; k<MAX_AXIS_NUM; k++)
+				{
+					if (sensors[k].cs_pin == source && sensors[k].channel == channel) break;
+				}
+				if (MLX90393_GetData(&tmp16, &sensors[k]) == 0)
+				{
+					sensors[k].ok_cnt++;
+					
+					if (p_dev_config->axis_config[i].offset_angle > 0)	// offset enabled
+					{
+						raw_axis_data[i] = tmp16 - p_dev_config->axis_config[i].offset_angle * 2730;
+						if (raw_axis_data[i] < AXIS_MIN_VALUE) raw_axis_data[i] += AXIS_FULLSCALE;
+						else if (raw_axis_data[i] > AXIS_MAX_VALUE) raw_axis_data[i] -= AXIS_FULLSCALE;
+					}
+					else
+					{
+						raw_axis_data[i] = tmp16;
+					}
+				}
+				else
+				{
+					sensors[k].err_cnt++;
+				}
 			}				
 			else if (p_dev_config->pins[source] == AXIS_ANALOG)				// source analog
 			{

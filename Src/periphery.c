@@ -176,7 +176,7 @@ uint64_t GetTick(void)
   * @brief Delay implementation
   * @retval None
   */
-void Delay_ms(__IO uint32_t nTime)
+void Delay_ms(uint32_t nTime)
 {
   TimingDelay = nTime;
   while(TimingDelay != 0);
@@ -186,9 +186,14 @@ void Delay_ms(__IO uint32_t nTime)
   * @brief Delay implementation
   * @retval None
   */
-void Delay_us(__IO uint32_t nTime)
+void Delay_us(uint32_t nTime)
 {
-  for (int i=0; i<5;i++) __NOP();
+	int32_t us = nTime * 5;
+	
+	while(us > 0)
+	{
+		us--;
+	}
 }
 
 /**
@@ -343,10 +348,8 @@ void IO_Init (dev_config_t * p_dev_config)
 		{		
 			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 			GPIO_InitStructure.GPIO_Pin = pin_config[i].pin;
-			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
 			GPIO_Init (GPIOB,&GPIO_InitStructure);
-			
-			HardSPI_Init();
 		}
 		else if (p_dev_config->pins[i] == SPI_MOSI && i == 16)			// PB5
 		{		

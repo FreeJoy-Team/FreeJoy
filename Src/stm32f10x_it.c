@@ -245,10 +245,10 @@ void TIM1_UP_IRQHandler(void)
 		if (millis - sensors_millis >= ADC_PERIOD_MS)
 		{
 			sensors_millis = millis;
-			// TODO: check if we can just start sensors[0]
+
 			for (uint8_t i=0; i<MAX_AXIS_NUM; i++)
 			{
-				if (sensors[i].cs_pin >= 0 && sensors[i].rx_complete && sensors[i].rx_complete)
+				if (sensors[i].cs_pin >= 0 && sensors[i].tx_complete && sensors[i].rx_complete)
 				{
 					if (sensors[i].type == TLE5011)
 					{
@@ -315,7 +315,18 @@ void DMA1_Channel2_IRQHandler(void)
 			}
 			else if (sensors[i].type == MLX90393)
 			{
-				MLX90393_StopDMA(&sensors[i++]);
+				MLX90393_StopDMA(&sensors[i]);
+				
+				// search for last logical sensor for this physical sensor (in case of multiple channels)
+				for (uint8_t k=0;k<MAX_AXIS_NUM;k++)
+				{
+					if (sensors[k].cs_pin == sensors[i].cs_pin)
+					{
+						memcpy(sensors[k].data, sensors[i].data, sizeof(sensors[k].data));
+						i=k;
+					}
+				}
+				i++;
 			}
 		}
 		// Enable other peripery IRQs
@@ -342,7 +353,12 @@ void DMA1_Channel2_IRQHandler(void)
 				}
 				else if (sensors[i].type == MLX90393)
 				{
-					MLX90393_StartDMA(&sensors[i++]);
+					// search for last logical sensor for this physical sensor (in case of multiple channels)
+					for (uint8_t k=i;k<MAX_AXIS_NUM;k++)
+					{
+						if (sensors[k].cs_pin == sensors[i].cs_pin) i=k;
+					}
+					MLX90393_StartDMA(&sensors[i]);
 					return;
 				}
 			}

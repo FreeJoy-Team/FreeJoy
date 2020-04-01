@@ -25,77 +25,159 @@
 #include "mlx90393.h"
 #include <math.h>
 
-void MLX90393_ReadRegister(uint8_t * data, uint8_t addr)
+/**
+  * @brief MLX90393 NOP
+  * @param in_data: Buffer for incoming data
+  * @retval None
+  */
+void MLX90393_NOP(uint8_t * in_data)
 {
-	uint8_t tmp_buf[5];
+	uint8_t tmp_buf[1];
 	
-	tmp_buf[0] = 0x50;				// Read Register command
-	tmp_buf[1] = addr<<2;			// Register address	
-	tmp_buf[2] = 0;						// Status
-	tmp_buf[3] = 0;						// MSB
-	tmp_buf[4] = 0;						// LSB
+	tmp_buf[0] = 0x00;
 	
-	HardSPI_FullDuplex_TransmitReceive(tmp_buf, tmp_buf, 5);
+	HardSPI_FullDuplex_TransmitReceive(tmp_buf, in_data, 1);
 }
 
-void MLX90393_WriteRegister(uint8_t * data, uint8_t addr)
+/**
+  * @brief MLX90393 warm reset function
+  * @param in_data: Buffer for incoming data
+  * @retval None
+  */
+void MLX90393_Reset(uint8_t * in_data)
 {
-	uint8_t tmp_buf[5];
+	uint8_t tmp_buf[1];
 	
-	tmp_buf[0] = 0x60;				// Write Register command	
-	tmp_buf[1] = 0;						// MSB
-	tmp_buf[2] = 0;						// LSB
-	tmp_buf[3] = addr<<2;			// Register address	
-	tmp_buf[4] = 0;						// Status
+	tmp_buf[0] = 0xF0;
 	
-	HardSPI_FullDuplex_TransmitReceive(tmp_buf, tmp_buf, 5);
+	HardSPI_FullDuplex_TransmitReceive(tmp_buf, in_data, 1);
 }
 
-void MLX90393_StartBurst(sensor_t * sensor)
+/**
+  * @brief MLX90393 SPI Write command Function
+  * @param command: Command to write
+  * @retval None
+  */
+void MLX90393_WriteCommand(uint8_t command, uint8_t * in_data)
 {
 	uint8_t tmp_buf[2];
 	
-	tmp_buf[0] = 0xE8;				// MSB	
-	tmp_buf[1] = 0x07;				// LSB
+	tmp_buf[0] = command;
+	tmp_buf[1] = 0;
 	
-	pin_config[sensor->cs_pin].port->ODR &= ~pin_config[sensor->cs_pin].pin;
-	MLX90393_WriteRegister(tmp_buf, 0x02);
-	Delay_ms(1);
-	pin_config[sensor->cs_pin].port->ODR |= pin_config[sensor->cs_pin].pin;
-	Delay_ms(15);
-	
-	tmp_buf[0] = 0x1E;				// Burst mode	
-	tmp_buf[1] = 0;						// Status
-	
-	pin_config[sensor->cs_pin].port->ODR &= ~pin_config[sensor->cs_pin].pin;
-	HardSPI_FullDuplex_TransmitReceive(tmp_buf, tmp_buf, 2);
-	Delay_ms(1);
-	pin_config[sensor->cs_pin].port->ODR |= pin_config[sensor->cs_pin].pin;
-	Delay_ms(15);
+	HardSPI_FullDuplex_TransmitReceive(tmp_buf, in_data, 2);
 }
 
+/**
+  * @brief MLX90393 SPI Write register Function
+  * @param data: Content of register
+  * @param addr: Register address
+  * @retval None
+  */
+void MLX90393_WriteRegister(uint16_t data,  uint8_t addr , uint8_t * in_data)
+{
+	uint8_t tmp_buf[5];
+	
+	tmp_buf[0] = 0x60;								// Write Register command	
+	tmp_buf[1] = data >> 8;						// MSB
+	tmp_buf[2] = data & 0xFF;					// LSB
+	tmp_buf[3] = addr<<2;							// Register address	
+	tmp_buf[4] = 0;										// Status
+	
+	HardSPI_FullDuplex_TransmitReceive(tmp_buf, in_data, 5);
+}
+
+/**
+  * @brief MLX90393 start burst operation command
+  * @param sensor: Sensor struct
+  * @retval None
+  */
+void MLX90393_Start(sensor_t * sensor)
+{
+	uint8_t rx_buf[5];
+	
+	// Reset
+	pin_config[sensor->cs_pin].port->ODR &= ~pin_config[sensor->cs_pin].pin;
+	MLX90393_Reset(rx_buf);							
+	Delay_us(30);
+	pin_config[sensor->cs_pin].port->ODR |= pin_config[sensor->cs_pin].pin;
+	Delay_us(10);
+	
+	// Reg 0
+	pin_config[sensor->cs_pin].port->ODR &= ~pin_config[sensor->cs_pin].pin;
+	MLX90393_WriteRegister(GAIN_SEL(0)|HAL_CONF(0x0C), 0x00, rx_buf);					
+	Delay_us(60);
+	pin_config[sensor->cs_pin].port->ODR |= pin_config[sensor->cs_pin].pin;
+	Delay_us(10);	
+
+	// Reg 1	
+	pin_config[sensor->cs_pin].port->ODR &= ~pin_config[sensor->cs_pin].pin;
+	MLX90393_WriteRegister(SPI_MODE|TCMP_EN|BURST_SEL_X|BURST_SEL_Y|BURST_SEL_Z, 0x01, rx_buf);					
+	Delay_us(60);
+	pin_config[sensor->cs_pin].port->ODR |= pin_config[sensor->cs_pin].pin;
+	Delay_us(10);
+
+	// Reg 2
+	pin_config[sensor->cs_pin].port->ODR &= ~pin_config[sensor->cs_pin].pin;
+	MLX90393_WriteRegister(RES(0,0,0)|OSR(2)|DIG_FILT(2), 0x02, rx_buf);					
+	Delay_us(60);
+	pin_config[sensor->cs_pin].port->ODR |= pin_config[sensor->cs_pin].pin;
+	Delay_us(10);	
+	
+	// Burst mode XYZ	
+	pin_config[sensor->cs_pin].port->ODR &= ~pin_config[sensor->cs_pin].pin;
+	MLX90393_WriteCommand(MLX_START_BURST|MLX_X|MLX_Y|MLX_Z, rx_buf);							
+	Delay_us(30);
+	pin_config[sensor->cs_pin].port->ODR |= pin_config[sensor->cs_pin].pin;
+	Delay_us(10);
+}
+
+/**
+  * @brief MLX90393 get measured data
+  * @param data: variable for storing data
+  * @param sensor: Sensor struct
+  * @retval status
+  */
+int MLX90393_GetData(uint16_t * data, sensor_t * sensor)
+{
+	int ret = 0;
+	
+	if (sensor->data[1] & 0x10)	ret = -1;
+	else
+	{
+		*data = sensor->data[2 + sensor->channel*2]<<8|sensor->data[3 + sensor->channel*2];
+	}
+	return ret;
+}
+
+/**
+  * @brief MLX90393 start processing with DMA
+  * @param sensor: Sensor struct
+  * @retval None
+  */
 void MLX90393_StartDMA(sensor_t * sensor)
 {	
+	uint8_t tmp_buf[8];
+	
 	sensor->rx_complete = 0;
 	sensor->tx_complete = 1;
-	
-	// CS low
-	pin_config[sensor->cs_pin].port->ODR &= ~pin_config[sensor->cs_pin].pin;
-	
-	sensor->data[0] = 0x4E;		// Read Meas. command
-	sensor->data[1] = 0x00;		// Status
-	sensor->data[2] = 0x00;		// X MSB
-	sensor->data[3] = 0x00;		// X LSB
-	sensor->data[4] = 0x00;		// Y MSB
-	sensor->data[5] = 0x00;		// Y LSB
-	sensor->data[6] = 0x00;		// Z MSB
-	sensor->data[7] = 0x00;		// Z LSB
+
+	tmp_buf[0] = 0x4E;		// Read Meas. command
+	tmp_buf[1] = 0x00;		// Status
+	tmp_buf[2] = 0x00;		// X MSB
+	tmp_buf[3] = 0x00;		// X LSB
+	tmp_buf[4] = 0x00;		// Y MSB
+	tmp_buf[5] = 0x00;		// Y LSB
+	tmp_buf[6] = 0x00;		// Z MSB
+	tmp_buf[7] = 0x00;		// Z LSB
 	
 	// Disable other interrupts
 	NVIC_DisableIRQ(TIM1_UP_IRQn);
 	NVIC_DisableIRQ(TIM3_IRQn);
 	
-	HardSPI_FullDuplex_TransmitReceive(&sensor->data[0],&sensor->data[0], 3);
+	// CS low
+	pin_config[sensor->cs_pin].port->ODR &= ~pin_config[sensor->cs_pin].pin;
+	HardSPI_FullDuplex_TransmitReceive(tmp_buf, sensor->data, 8);
 }
 
 void MLX90393_StopDMA(sensor_t * sensor)
