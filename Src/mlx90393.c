@@ -141,7 +141,7 @@ void MLX90393_Start(sensor_t * sensor)
 	// Modify register value
 	tmp_data = rx_buf[3]<<8|rx_buf[4];
 	tmp_data &= ~0x01FF;
-	tmp_data |= GAIN_SEL(7)|HAL_CONF(0x00);
+	tmp_data |= GAIN_SEL(3)|HAL_CONF(0x00);
 	// Write register value
 	pin_config[sensor->cs_pin].port->ODR &= ~pin_config[sensor->cs_pin].pin;
 	MLX90393_WriteRegister(tmp_data, 0x00, rx_buf);					
@@ -158,7 +158,7 @@ void MLX90393_Start(sensor_t * sensor)
 	pin_config[sensor->cs_pin].port->ODR |= pin_config[sensor->cs_pin].pin;
 	Delay_us(10);
 	// Set register value
-	tmp_data = SPI_MODE|TCMP_EN|BURST_SEL_X|BURST_SEL_Y|BURST_SEL_Z;
+	tmp_data = SPI_MODE|BURST_SEL_X|BURST_SEL_Y|BURST_SEL_Z;
 	// Write register value
 	pin_config[sensor->cs_pin].port->ODR &= ~pin_config[sensor->cs_pin].pin;
 	MLX90393_WriteRegister(tmp_data, 0x01, rx_buf);					
@@ -177,7 +177,7 @@ void MLX90393_Start(sensor_t * sensor)
 	// Modify register value
 	tmp_data = rx_buf[3]<<8|rx_buf[4];
 	tmp_data &= ~0x1FFF;
-	tmp_data |= RES(0,0,0)|OSR(0)|DIG_FILT(1);
+	tmp_data |= RES(1,1,1)|OSR(0)|DIG_FILT(0);
 	// Write register value
 	pin_config[sensor->cs_pin].port->ODR &= ~pin_config[sensor->cs_pin].pin;
 	MLX90393_WriteRegister(tmp_data, 0x02, rx_buf);					

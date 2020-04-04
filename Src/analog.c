@@ -600,35 +600,38 @@ void AxesInit (dev_config_t * p_dev_config)
   */
 void ADC_Conversion (void)
 {
-	static uint8_t num_of_conv = 0;
+	uint8_t num_of_conv = 0;
 	analog_data_t tmp = 0;
 	
 	if (adc_cnt > 0)
 	{
-		DMA1_Channel1->CMAR = (uint32_t) &tmp_axis_data[num_of_conv++];
-		DMA_SetCurrDataCounter(DMA1_Channel1, MAX_AXIS_NUM);	
-		DMA_Cmd(DMA1_Channel1, ENABLE);
-		ADC_Cmd(ADC1, ENABLE);
-		/* Start ADC1 Software Conversion */ 
-		ADC_SoftwareStartConvCmd(ADC1, ENABLE);
-
-		while (!DMA_GetFlagStatus(DMA1_FLAG_TC1));
-		DMA_ClearFlag(DMA1_FLAG_TC1);
-			
-		ADC_Cmd(ADC1, DISABLE);
-		DMA_Cmd(DMA1_Channel1, DISABLE);
-		
-		if (num_of_conv > PREBUF_SIZE - 1) 
+		for (uint8_t i=0; i<PREBUF_SIZE; i++)	
 		{
-			num_of_conv = 0;
-			for (uint8_t i=0; i<MAX_AXIS_NUM; i++)
+			DMA1_Channel1->CMAR = (uint32_t) &tmp_axis_data[num_of_conv++];
+			DMA_SetCurrDataCounter(DMA1_Channel1, MAX_AXIS_NUM);	
+			DMA_Cmd(DMA1_Channel1, ENABLE);
+			ADC_Cmd(ADC1, ENABLE);
+			/* Start ADC1 Software Conversion */ 
+			ADC_SoftwareStartConvCmd(ADC1, ENABLE);
+
+			while (!DMA_GetFlagStatus(DMA1_FLAG_TC1));
+			DMA_ClearFlag(DMA1_FLAG_TC1);
+				
+			ADC_Cmd(ADC1, DISABLE);
+			DMA_Cmd(DMA1_Channel1, DISABLE);
+			
+			if (num_of_conv > PREBUF_SIZE - 1) 
 			{
-				tmp = 0;
-				for (uint8_t k=0; k<PREBUF_SIZE; k++)
+				num_of_conv = 0;
+				for (uint8_t i=0; i<MAX_AXIS_NUM; i++)
 				{
-					tmp += tmp_axis_data[k][i];					
+					tmp = 0;
+					for (uint8_t k=0; k<PREBUF_SIZE; k++)
+					{
+						tmp += tmp_axis_data[k][i];					
+					}
+					input_data[i] = tmp/PREBUF_SIZE;
 				}
-				input_data[i] = tmp/PREBUF_SIZE;
 			}
 		}
 	}

@@ -217,7 +217,7 @@ void TIM1_UP_IRQHandler(void)
 			RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB|RCC_APB2Periph_GPIOC,DISABLE);			
 				
 			// ADC measurement
-			for (uint8_t i=0; i<PREBUF_SIZE; i++)	ADC_Conversion();				// TODO: hide cycle in conversion function
+			ADC_Conversion();
 			
 			// Enable periphery after ADC conversion
 			RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1,ENABLE);	
