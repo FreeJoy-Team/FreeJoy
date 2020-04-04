@@ -169,20 +169,6 @@ void SysTick_Handler(void)
 /*  file (startup_stm32f10x_xx.s).                                            */
 /******************************************************************************/
 
-void TIM2_IRQHandler(void)
-{	
-	
-	if (TIM_GetITStatus(TIM2, TIM_IT_Update))
-	{
-		TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
-		
-		TIM_Cmd(TIM2, DISABLE);
-		NVIC_DisableIRQ(TIM2_IRQn);		
-	
-		NVIC_EnableIRQ(TIM1_UP_IRQn);
-	}
-}
-
 
 void TIM1_UP_IRQHandler(void)
 {
@@ -194,8 +180,6 @@ void TIM1_UP_IRQHandler(void)
 	{
 		TIM_ClearITPendingBit(TIM1, TIM_IT_Update);
 
-		
-		
 		millis = GetTick();
 		// check if it is time to send joystick data
 		if (millis - joy_millis >= dev_config.exchange_period_ms )
@@ -232,7 +216,8 @@ void TIM1_UP_IRQHandler(void)
 			RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2|RCC_APB1Periph_TIM3|RCC_APB1Periph_TIM4, DISABLE);
 			RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB|RCC_APB2Periph_GPIOC,DISABLE);			
 				
-			for (uint8_t i=0; i<PREBUF_SIZE; i++)	ADC_Conversion();		
+			// ADC measurement
+			for (uint8_t i=0; i<PREBUF_SIZE; i++)	ADC_Conversion();				// TODO: hide cycle in conversion function
 			
 			// Enable periphery after ADC conversion
 			RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1,ENABLE);	

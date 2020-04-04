@@ -99,7 +99,7 @@ void Timers_Init(dev_config_t * p_dev_config)
 
 	TIM_Cmd(TIM1, ENABLE);	
 	
-	// PWM timer
+	// LED PWM timer
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);		
 	TIM_TimeBaseStructInit(&TIM_TimeBaseInitStructure);	
 	TIM_TimeBaseInitStructure.TIM_Prescaler = RCC_Clocks.PCLK1_Frequency/100000 - 1;
@@ -127,38 +127,6 @@ void Timers_Init(dev_config_t * p_dev_config)
   TIM_OC4PreloadConfig(TIM3, TIM_OCPreload_Enable);
 	
 	TIM_Cmd(TIM3, ENABLE);	
-}
-
-
-/**
-  * @brief Timers pause
-	* @param ms: Milliseconds to pause
-  * @retval None
-  */
-void Timers_Pause(uint16_t ms)
-{
-	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure;	
-	RCC_ClocksTypeDef RCC_Clocks;
-	
-	RCC_GetClocksFreq(&RCC_Clocks);	
-	
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
-		
-	TIM_TimeBaseStructInit(&TIM_TimeBaseInitStructure);	
-	TIM_TimeBaseInitStructure.TIM_Prescaler = RCC_Clocks.PCLK1_Frequency/1000 - 1;
-	TIM_TimeBaseInitStructure.TIM_Period = 2*ms;
-	TIM_TimeBaseInitStructure.TIM_CounterMode = TIM_CounterMode_Down;
-	TIM_TimeBaseInitStructure.TIM_RepetitionCounter = 2*ms -1;
-	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseInitStructure);
-	
-	TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);	
-	NVIC_SetPriority(TIM2_IRQn, 5);
-	TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
-	NVIC_EnableIRQ(TIM2_IRQn);
-	
-	NVIC_DisableIRQ(TIM1_UP_IRQn);
-
-	TIM_Cmd(TIM2, ENABLE);
 }
 
 

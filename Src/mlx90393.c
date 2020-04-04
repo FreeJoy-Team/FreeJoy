@@ -88,6 +88,25 @@ void MLX90393_WriteRegister(uint16_t data,  uint8_t addr , uint8_t * in_data)
 }
 
 /**
+  * @brief MLX90393 SPI Read register Function
+  * @param data: Content of register
+  * @param addr: Register address
+  * @retval None
+  */
+void MLX90393_ReadRegister(uint8_t addr , uint8_t * in_data)
+{
+	uint8_t tmp_buf[5];
+	
+	tmp_buf[0] = 0x50;								// Write Register command	
+	tmp_buf[1] = addr<<2;							// Register address	
+	tmp_buf[2] = 0;										// Status
+	tmp_buf[3] = 0;										// MSB
+	tmp_buf[4] = 0;										// LSB
+	
+	HardSPI_FullDuplex_TransmitReceive(tmp_buf, in_data, 5);
+}
+
+/**
   * @brief MLX90393 start burst operation command
   * @param sensor: Sensor struct
   * @retval None
@@ -95,41 +114,83 @@ void MLX90393_WriteRegister(uint16_t data,  uint8_t addr , uint8_t * in_data)
 void MLX90393_Start(sensor_t * sensor)
 {
 	uint8_t rx_buf[5];
+	uint16_t tmp_data;
+	
+	// Exit
+	pin_config[sensor->cs_pin].port->ODR &= ~pin_config[sensor->cs_pin].pin;
+	MLX90393_WriteCommand(MLX_EXIT, rx_buf);							
+	Delay_us(30);
+	pin_config[sensor->cs_pin].port->ODR |= pin_config[sensor->cs_pin].pin;
+	Delay_ms(15);
 	
 	// Reset
 	pin_config[sensor->cs_pin].port->ODR &= ~pin_config[sensor->cs_pin].pin;
 	MLX90393_Reset(rx_buf);							
 	Delay_us(30);
 	pin_config[sensor->cs_pin].port->ODR |= pin_config[sensor->cs_pin].pin;
-	Delay_us(10);
+	Delay_ms(50);
+
+	// -------------- Register 0 ----------------- //
 	
-	// Reg 0
+	// Read register value
 	pin_config[sensor->cs_pin].port->ODR &= ~pin_config[sensor->cs_pin].pin;
-	MLX90393_WriteRegister(GAIN_SEL(0)|HAL_CONF(0x0C), 0x00, rx_buf);					
+	MLX90393_ReadRegister(0x00, rx_buf);					
 	Delay_us(60);
 	pin_config[sensor->cs_pin].port->ODR |= pin_config[sensor->cs_pin].pin;
 	Delay_us(10);	
-
-	// Reg 1	
+	// Modify register value
+	tmp_data = rx_buf[3]<<8|rx_buf[4];
+	tmp_data &= ~0x01FF;
+	tmp_data |= GAIN_SEL(7)|HAL_CONF(0x00);
+	// Write register value
 	pin_config[sensor->cs_pin].port->ODR &= ~pin_config[sensor->cs_pin].pin;
-	MLX90393_WriteRegister(SPI_MODE|TCMP_EN|BURST_SEL_X|BURST_SEL_Y|BURST_SEL_Z, 0x01, rx_buf);					
+	MLX90393_WriteRegister(tmp_data, 0x00, rx_buf);					
+	Delay_us(60);
+	pin_config[sensor->cs_pin].port->ODR |= pin_config[sensor->cs_pin].pin;
+	Delay_ms(15);	
+
+	// -------------- Register 1 ----------------- //
+	
+	// Read register value
+	pin_config[sensor->cs_pin].port->ODR &= ~pin_config[sensor->cs_pin].pin;
+	MLX90393_ReadRegister(0x01, rx_buf);					
 	Delay_us(60);
 	pin_config[sensor->cs_pin].port->ODR |= pin_config[sensor->cs_pin].pin;
 	Delay_us(10);
-
-	// Reg 2
+	// Set register value
+	tmp_data = SPI_MODE|TCMP_EN|BURST_SEL_X|BURST_SEL_Y|BURST_SEL_Z;
+	// Write register value
 	pin_config[sensor->cs_pin].port->ODR &= ~pin_config[sensor->cs_pin].pin;
-	MLX90393_WriteRegister(RES(0,0,0)|OSR(2)|DIG_FILT(2), 0x02, rx_buf);					
+	MLX90393_WriteRegister(tmp_data, 0x01, rx_buf);					
 	Delay_us(60);
 	pin_config[sensor->cs_pin].port->ODR |= pin_config[sensor->cs_pin].pin;
-	Delay_us(10);	
+	Delay_ms(15);
+
+	// -------------- Register 2 ----------------- //
+	
+	// Read register value
+	pin_config[sensor->cs_pin].port->ODR &= ~pin_config[sensor->cs_pin].pin;
+	MLX90393_ReadRegister(0x02, rx_buf);					
+	Delay_us(60);
+	pin_config[sensor->cs_pin].port->ODR |= pin_config[sensor->cs_pin].pin;
+	Delay_us(10);
+	// Modify register value
+	tmp_data = rx_buf[3]<<8|rx_buf[4];
+	tmp_data &= ~0x1FFF;
+	tmp_data |= RES(0,0,0)|OSR(0)|DIG_FILT(1);
+	// Write register value
+	pin_config[sensor->cs_pin].port->ODR &= ~pin_config[sensor->cs_pin].pin;
+	MLX90393_WriteRegister(tmp_data, 0x02, rx_buf);					
+	Delay_us(60);
+	pin_config[sensor->cs_pin].port->ODR |= pin_config[sensor->cs_pin].pin;
+	Delay_ms(15);	
 	
 	// Burst mode XYZ	
 	pin_config[sensor->cs_pin].port->ODR &= ~pin_config[sensor->cs_pin].pin;
 	MLX90393_WriteCommand(MLX_START_BURST|MLX_X|MLX_Y|MLX_Z, rx_buf);							
 	Delay_us(30);
 	pin_config[sensor->cs_pin].port->ODR |= pin_config[sensor->cs_pin].pin;
-	Delay_us(10);
+	Delay_ms(15);
 }
 
 /**
