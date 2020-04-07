@@ -200,7 +200,7 @@ typedef struct
 
 typedef struct
 {
-	int8_t points[13];
+	uint8_t points[13];
 	uint8_t buttons_cnt;
 	uint8_t is_enabled;
 	
