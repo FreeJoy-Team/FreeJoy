@@ -383,6 +383,18 @@ void DMA1_Channel3_IRQHandler(void)
 	}
 }
 
+// I2C Tx Complete
+void DMA1_Channel6_IRQHandler(void)  
+{
+	
+}
+
+// I2C Rx Complete
+void DMA1_Channel7_IRQHandler(void)  
+{
+	
+}
+
 /**
 * @brief This function handles USB low priority or CAN RX0 interrupts.
 */

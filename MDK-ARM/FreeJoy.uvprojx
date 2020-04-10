@@ -413,9 +413,19 @@
               <FilePath>..\Src\periphery.c</FilePath>
             </File>
             <File>
+              <FileName>i2c.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\i2c.c</FilePath>
+            </File>
+            <File>
               <FileName>spi.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\spi.c</FilePath>
+            </File>
+            <File>
+              <FileName>ads1115.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ads1115.c</FilePath>
             </File>
             <File>
               <FileName>tle5011.c</FileName>
@@ -1273,9 +1283,19 @@
               <FilePath>..\Src\periphery.c</FilePath>
             </File>
             <File>
+              <FileName>i2c.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\i2c.c</FilePath>
+            </File>
+            <File>
               <FileName>spi.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\spi.c</FilePath>
+            </File>
+            <File>
+              <FileName>ads1115.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ads1115.c</FilePath>
             </File>
             <File>
               <FileName>tle5011.c</FileName>

@@ -328,6 +328,22 @@ void IO_Init (dev_config_t * p_dev_config)
 
 			HardSPI_Init();
 		}
+		else if (p_dev_config->pins[i] == I2C_SCL && i == 19)			// PB8
+		{		
+			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+			GPIO_InitStructure.GPIO_Pin = pin_config[i].pin;
+			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;
+			GPIO_Init (GPIOB,&GPIO_InitStructure);
+		}
+		else if (p_dev_config->pins[i] == I2C_SDA && i == 20)			// PB9
+		{		
+			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+			GPIO_InitStructure.GPIO_Pin = pin_config[i].pin;
+			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;						
+			GPIO_Init (GPIOB,&GPIO_InitStructure);
+			
+			HardI2C_Init();
+		}
 		else if (p_dev_config->pins[i] == TLE5011_CS || 
 						 p_dev_config->pins[i] == MCP3201_CS ||
 						 p_dev_config->pins[i] == MCP3202_CS ||

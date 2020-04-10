@@ -15,6 +15,7 @@
 #include "common_types.h"
 
 #include "spi.h"
+#include "i2c.h"
 
 #include "string.h"
 

@@ -56,6 +56,7 @@ void MLX90393_Reset(uint8_t * in_data)
 /**
   * @brief MLX90393 SPI Write command Function
   * @param command: Command to write
+  * @param in_data: Buffer for incoming data
   * @retval None
   */
 void MLX90393_WriteCommand(uint8_t command, uint8_t * in_data)
@@ -72,6 +73,7 @@ void MLX90393_WriteCommand(uint8_t command, uint8_t * in_data)
   * @brief MLX90393 SPI Write register Function
   * @param data: Content of register
   * @param addr: Register address
+  * @param in_data: Buffer for incoming data
   * @retval None
   */
 void MLX90393_WriteRegister(uint16_t data,  uint8_t addr , uint8_t * in_data)
@@ -91,6 +93,7 @@ void MLX90393_WriteRegister(uint16_t data,  uint8_t addr , uint8_t * in_data)
   * @brief MLX90393 SPI Read register Function
   * @param data: Content of register
   * @param addr: Register address
+  * @param in_data: Buffer for incoming data
   * @retval None
   */
 void MLX90393_ReadRegister(uint8_t addr , uint8_t * in_data)
@@ -141,7 +144,7 @@ void MLX90393_Start(sensor_t * sensor)
 	// Modify register value
 	tmp_data = rx_buf[3]<<8|rx_buf[4];
 	tmp_data &= ~0x01FF;
-	tmp_data |= GAIN_SEL(3)|HAL_CONF(0x00);
+	tmp_data |= GAIN_SEL(0)|HAL_CONF(0x00);
 	// Write register value
 	pin_config[sensor->cs_pin].port->ODR &= ~pin_config[sensor->cs_pin].pin;
 	MLX90393_WriteRegister(tmp_data, 0x00, rx_buf);					
@@ -158,7 +161,7 @@ void MLX90393_Start(sensor_t * sensor)
 	pin_config[sensor->cs_pin].port->ODR |= pin_config[sensor->cs_pin].pin;
 	Delay_us(10);
 	// Set register value
-	tmp_data = SPI_MODE|BURST_SEL_X|BURST_SEL_Y|BURST_SEL_Z;
+	tmp_data = SPI_MODE|I2C_MODE|BURST_SEL_X|BURST_SEL_Y|BURST_SEL_Z;
 	// Write register value
 	pin_config[sensor->cs_pin].port->ODR &= ~pin_config[sensor->cs_pin].pin;
 	MLX90393_WriteRegister(tmp_data, 0x01, rx_buf);					
@@ -206,7 +209,7 @@ int MLX90393_GetData(uint16_t * data, sensor_t * sensor)
 	if (sensor->data[1] & 0x10)	ret = -1;
 	else
 	{
-		*data = sensor->data[2 + sensor->channel*2]<<8|sensor->data[3 + sensor->channel*2];
+		*data = (sensor->data[2 + sensor->channel*2]<<8|sensor->data[3 + sensor->channel*2]);
 	}
 	return ret;
 }

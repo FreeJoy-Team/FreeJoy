@@ -60,7 +60,8 @@ typedef struct
 	int8_t					center_button;
 	int8_t					increment_button;
 	uint8_t					step;
-	uint8_t					reserved[4];
+	uint8_t					i2c_address;
+	uint8_t					reserved[3];
 	
 } axis_config_t;
 
@@ -120,6 +121,9 @@ enum
 	LED_SINGLE,
 	LED_ROW,
 	LED_COLUMN,
+	
+	I2C_SCL,
+	I2C_SDA,
 
 };
 typedef uint8_t pin_t;

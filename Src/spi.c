@@ -58,7 +58,8 @@ void HardSPI_Init(void)
 
 /**
   * @brief Hardware SPI Send Half-Duplex Function
-  * @param None
+	* @param data: data to transmit
+	* @param length: length of data to transmit
   * @retval None
   */
 void HardSPI_HalfDuplex_Transmit(uint8_t * data, uint16_t length)
@@ -97,7 +98,8 @@ void HardSPI_HalfDuplex_Transmit(uint8_t * data, uint16_t length)
 
 /**
   * @brief Hardware SPI Receive Half-Duplex Function
-  * @param None
+	* @param data: buffer for storing received data
+	* @param length: length of data to receive
   * @retval None
   */
 void HardSPI_HalfDuplex_Receive(uint8_t * data, uint16_t length)
@@ -130,7 +132,8 @@ void HardSPI_HalfDuplex_Receive(uint8_t * data, uint16_t length)
 
 /**
   * @brief Hardware SPI Transmit-Receive Full-Duplex Function
-  * @param None
+	* @param data: buffer for storing rx/tx data
+	* @param length: length of data to receive/transmit
   * @retval None
   */
 void HardSPI_FullDuplex_TransmitReceive(uint8_t * tx_data, uint8_t * rx_data, uint16_t length)
