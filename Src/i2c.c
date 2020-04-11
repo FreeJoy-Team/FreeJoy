@@ -69,30 +69,30 @@ int I2C_WriteBlocking(uint8_t dev_addr, uint8_t reg_addr, uint8_t * data, uint16
 	uint32_t ticks = I2C_TIMEOUT;			// number of flag checks before stop i2c transmition 
 	
 	I2C_GenerateSTART(I2C1, ENABLE);
-	while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT)&&ticks) {ticks--;}
+	while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT) && --ticks);
 	ticks = I2C_TIMEOUT;
 	if (ticks == 0) return -1;
 	
 	I2C_Send7bitAddress(I2C1, dev_addr, I2C_Direction_Transmitter);
-	while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)&&ticks) {ticks--;}
+	while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED) && --ticks);
 	if (ticks == 0) return -1;
 	ticks = I2C_TIMEOUT;
 	
 	I2C_SendData(I2C1, reg_addr);
-	while((!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED))&&ticks) {ticks--;}
+	while((!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED)) && --ticks);
 	if (ticks == 0) return -1;
 	ticks = I2C_TIMEOUT;
 		
 	for (uint16_t i=0; i<length; i++)
 	{
 		I2C_SendData(I2C1, data[i]);
-		while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED)&&ticks) ticks--;
+		while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED) && --ticks);
 		if (ticks == 0) return -1;
 		ticks = I2C_TIMEOUT;
 	}
 	
 	I2C_GenerateSTOP(I2C1, ENABLE);
-	while(I2C_GetFlagStatus(I2C1, I2C_FLAG_BUSY)&&ticks) {ticks--;}
+	while(I2C_GetFlagStatus(I2C1, I2C_FLAG_BUSY) && --ticks);
 
 	return 0;
 }
@@ -110,37 +110,37 @@ int I2C_ReadBlocking(uint8_t dev_addr, uint8_t reg_addr, uint8_t * data, uint16_
 	uint32_t ticks = I2C_TIMEOUT;
 	
 	I2C_GenerateSTART(I2C1, ENABLE);
-	while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT)&&ticks) ticks--;
+	while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT) && --ticks);
 	if (ticks == 0) return -1;
 	ticks = I2C_TIMEOUT;
 		
 	I2C_Send7bitAddress(I2C1, dev_addr, I2C_Direction_Transmitter);
-	while((!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED))&&ticks) ticks--;
+	while((!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)) && --ticks);
 	if (ticks == 0) return -1;
 	ticks = I2C_TIMEOUT;
 
 	I2C_SendData(I2C1, reg_addr);
-	while((!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED))&&ticks) ticks--;
+	while((!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED)) && --ticks);
 	if (ticks == 0) return -1;
 	ticks = I2C_TIMEOUT;
 	
 	I2C_GenerateSTOP(I2C1, ENABLE);
-	while(I2C_GetFlagStatus(I2C1, I2C_FLAG_BUSY)&&ticks) {ticks--;}	
+	while(I2C_GetFlagStatus(I2C1, I2C_FLAG_BUSY) && --ticks);
 	if (ticks == 0) return -1;
 	
 	I2C_GenerateSTART(I2C1, ENABLE);
-	while((!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT))&&ticks) ticks--;
+	while((!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT)) && --ticks);
 	if (ticks == 0) return -1;
 	ticks = I2C_TIMEOUT;
 	
 	I2C_Send7bitAddress(I2C1, dev_addr, I2C_Direction_Receiver);
-	while((!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED))&&ticks) ticks--;
+	while((!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED)) && --ticks);
 	if (ticks == 0) return -1;
 	ticks = I2C_TIMEOUT;
 	
 	for (uint8_t i=0; i<length; i++)
 	{
-		while((!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_RECEIVED))&&ticks) ticks--;
+		while((!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_RECEIVED)) && --ticks);
 		if (ticks == 0) return -1;
 		ticks = I2C_TIMEOUT;
 		
@@ -148,7 +148,7 @@ int I2C_ReadBlocking(uint8_t dev_addr, uint8_t reg_addr, uint8_t * data, uint16_
 	}
 	
 	I2C_GenerateSTOP(I2C1, ENABLE);
-	while(I2C_GetFlagStatus(I2C1, I2C_FLAG_BUSY)&&ticks) {ticks--;}	
+	while(I2C_GetFlagStatus(I2C1, I2C_FLAG_BUSY) && --ticks);
 	if (ticks == 0) return -1;
 	
 	return 0;

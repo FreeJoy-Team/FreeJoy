@@ -234,9 +234,9 @@ void TIM1_UP_IRQHandler(void)
 			sensors_millis = millis;
 
 			// start I2C sensors 
-			for (uint8_t i=0; i<MAX_AXIS_NUM; i++)
+ 			for (uint8_t i=0; i<MAX_AXIS_NUM; i++)
 			{
-				if (sensors[i].source == (pin_t)SOURCE_I2C && sensors[i].rx_complete && sensors[i].rx_complete)
+				if (sensors[i].source == (pin_t)SOURCE_I2C && sensors[i].rx_complete && sensors[i].tx_complete)
 				{
 					status = ADS1115_StartDMA(&sensors[i]);
 					break;
@@ -405,35 +405,48 @@ void DMA1_Channel6_IRQHandler(void)
 	{
 		// Clear transmission complete flag 
 		DMA_ClearFlag(DMA1_FLAG_TC6);
-		// wait for last byte transfer	
-		while(!I2C_GetFlagStatus(I2C1,I2C_FLAG_TXE)&&ticks) ticks--;
-		if (ticks == 0) return;
-		ticks = I2C_TIMEOUT;
 		
-		// generate STOP for I2C and Disable DMA 
-		I2C_GenerateSTOP(I2C1, ENABLE);
-		while(I2C_GetFlagStatus(I2C1, I2C_FLAG_BUSY)&&ticks) ticks--;
-		if (ticks == 0) return;
 		I2C_DMACmd(I2C1,DISABLE);	
 		DMA_Cmd(DMA1_Channel6,DISABLE);
+		
+		/* EV8_2: Wait until BTF is set before programming the STOP */
+    while ((I2C1->SR1 & 0x00004) != 0x000004 && --ticks);
+		if (ticks == 0)	
+		{
+			sensors[i].tx_complete = 1;
+			sensors[i].rx_complete = 1;
+			return;
+		}
+		ticks = I2C_TIMEOUT;
+		
+    /* Program the STOP */
+    I2C_GenerateSTOP(I2C1, ENABLE);
+    /* Make sure that the STOP bit is cleared by Hardware */
+		while ((I2C1->CR1&0x200) == 0x200 && --ticks);
+		if (ticks == 0)	
+		{
+			sensors[i].tx_complete = 1;
+			sensors[i].rx_complete = 1;
+			return;
+		}
 		
 		for (i = 0; i < MAX_AXIS_NUM; i++)
 		{
 			// searching for active sensor
-			if (sensors[i].source == (pin_t)SOURCE_I2C && 
-								sensors[i].rx_complete && !sensors[i].tx_complete) // mux is set
+			if (sensors[i].source == (pin_t)SOURCE_I2C && !sensors[i].tx_complete) // mux is set
 			{			
 				sensors[i].tx_complete = 1;
-				sensors[i].rx_complete = 1;
-				i++;
+//				sensors[i].rx_complete = 0;
+//				i++;
 				break;							
 			}
 		}
 		
 		// start processing for next I2C sensor 
-		for ( ;i<MAX_AXIS_NUM;i++)
+		for (uint8_t k = i+1; k < MAX_AXIS_NUM; k++)
 		{
-			if (sensors[i].source == (pin_t)SOURCE_I2C && sensors[i].rx_complete && sensors[i].rx_complete)
+			if (sensors[k].source == (pin_t)SOURCE_I2C && 
+					!sensors[k].rx_complete && sensors[k].address != sensors[i].address)
 			{
 				status = ADS1115_StartDMA(&sensors[i]);
 				return;
@@ -452,23 +465,25 @@ void DMA1_Channel7_IRQHandler(void)
 	{
 		// Clear transmission complete flag 
 		DMA_ClearFlag(DMA1_FLAG_TC7);
-		// wait for last byte transfer	
-		while(!I2C_GetFlagStatus(I2C1,I2C_FLAG_RXNE)&&ticks) ticks--;
-		if (ticks == 0) return;
-		ticks = I2C_TIMEOUT;
-		// generate STOP for I2C and Disable DMA 
-		I2C_GenerateSTOP(I2C1, ENABLE);
-		while(I2C_GetFlagStatus(I2C1, I2C_FLAG_BUSY)&&ticks) ticks--;
-		if (ticks == 0) return;
+		
 		I2C_DMACmd(I2C1,DISABLE);	
-		DMA_Cmd(DMA1_Channel7,DISABLE);
+		DMA_Cmd(DMA1_Channel7,DISABLE);		
+		
+		I2C_GenerateSTOP(I2C1, ENABLE);
+		while ((I2C1->CR1&0x200) == 0x200 && --ticks);
+		if (ticks == 0)	
+		{
+			sensors[i].tx_complete = 1;
+			sensors[i].rx_complete = 1;
+			return;
+		}
 		
 		for (i = 0; i < MAX_AXIS_NUM; i++)
 		{
 			// searching for active sensor
 			if (sensors[i].source == (pin_t)SOURCE_I2C && !sensors[i].rx_complete)		// data is read
 			{
-				sensors[i].tx_complete = 0;
+				//sensors[i].tx_complete = 1;
 				sensors[i].rx_complete = 1;
 				
 				// search for next logical sensor for this physical sensor (in case of multiple channels)
@@ -476,7 +491,7 @@ void DMA1_Channel7_IRQHandler(void)
 				{
 					if (sensors[k].address == sensors[i].address)
 					{
-						status = ADS1115_SetMuxDMA(&sensors[i], sensors[k].channel);
+						status = ADS1115_SetMuxDMA(&sensors[k]);
 						return;
 					}
 					// that was the last one
@@ -484,7 +499,7 @@ void DMA1_Channel7_IRQHandler(void)
 					{
 						if (sensors[k].address == sensors[i].address)
 						{
-							status = ADS1115_SetMuxDMA(&sensors[i], sensors[k].channel);		// setting mux for first used channel
+							status = ADS1115_SetMuxDMA(&sensors[k]);		// setting mux for first used channel
 							return;
 						}
 					}
@@ -496,28 +511,43 @@ void DMA1_Channel7_IRQHandler(void)
 
 // I2C error
 void I2C1_ER_IRQHandler(void)
-{	
-	// Reset I2C
-	I2C1->CR1 |= I2C_CR1_SWRST;
-	I2C1->CR1 &= ~I2C_CR1_SWRST;
-	I2C_Start();
-}
-
-// I2C events
-void I2C1_EV_IRQHandler(void)
 {
-	uint32_t event = I2C_GetLastEvent(I2C1);
-	
-	switch (event)
-	{
+
+    __IO uint32_t SR1Register =0;
+
+    /* Read the I2C1 status register */
+    SR1Register = I2C1->SR1;
+    /* If AF = 1 */
+    if ((SR1Register & 0x0400) == 0x0400)
+    {
+        I2C1->SR1 &= 0xFBFF;
+        SR1Register = 0;
+    }
+    /* If ARLO = 1 */
+    if ((SR1Register & 0x0200) == 0x0200)
+    {
+        I2C1->SR1 &= 0xFBFF;
+        SR1Register = 0;
+    }
+    /* If BERR = 1 */
+    if ((SR1Register & 0x0100) == 0x0100)
+    {
+        I2C1->SR1 &= 0xFEFF;
+        SR1Register = 0;
+    }
+
+    /* If OVR = 1 */
+
+    if ((SR1Register & 0x0800) == 0x0800)
+    {
+        I2C1->SR1 &= 0xF7FF;
+        SR1Register = 0;
+    }
 		
-		
-		default:		// clear flags
-			I2C_ClearFlag(I2C1,event);
-			I2C_GetFlagStatus(I2C1, I2C_FLAG_STOPF);
-			I2C_Cmd(I2C1, ENABLE);
-			break;
-	}
+//	// Reset I2C
+//	I2C1->CR1 |= I2C_CR1_SWRST;
+//	I2C1->CR1 &= ~I2C_CR1_SWRST;
+//	I2C_Start();
 }
 
 /**

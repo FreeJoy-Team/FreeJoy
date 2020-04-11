@@ -69,15 +69,14 @@ int ADS1115_StartDMA(sensor_t * sensor)
 	uint32_t ticks = I2C_TIMEOUT;
 	
 	// disable DMA
-	I2C_DMACmd(I2C1,DISABLE);
-	DMA_Cmd(DMA1_Channel7,DISABLE);
+	I2C_DMACmd(I2C1, DISABLE);
+	DMA_Cmd(DMA1_Channel7, DISABLE);
 	while (DMA1_Channel7->CCR & (1<<0));
 	// clear flags
 	DMA_ClearFlag(DMA1_FLAG_GL7|DMA1_FLAG_HT7|DMA1_FLAG_TC7|DMA1_FLAG_TE7);	
 	
 	// DMA initialization
 	DMA_InitTypeDef DMA_InitStructure;
-	//DMA_DeInit(DMA1_Channel4);
 	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t) &I2C1->DR;
 	DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t) sensor->data;
 	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
@@ -88,19 +87,20 @@ int ADS1115_StartDMA(sensor_t * sensor)
 	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
 	DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
 	DMA_InitStructure.DMA_Priority = DMA_Priority_Medium;
-	DMA_InitStructure.DMA_BufferSize = 1;	
+	DMA_InitStructure.DMA_BufferSize = 2;	
 	DMA_Init(DMA1_Channel7,&DMA_InitStructure);
 	
 	DMA_ITConfig(DMA1_Channel7,DMA_IT_TC,ENABLE);
+	NVIC_EnableIRQ(DMA1_Channel7_IRQn);
 	// set transmittion flags
 	sensor->rx_complete = 0;
-	sensor->tx_complete = 0;
+	sensor->tx_complete = 1;
 	
 	
 	
 	// Writting pointer register in blocking mode 
 	I2C_GenerateSTART(I2C1, ENABLE);
-	while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT)&&ticks) ticks--;
+	while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT) && --ticks);			// EV5
 	if (ticks == 0) 
 	{
 		sensor->rx_complete = 1;
@@ -110,17 +110,16 @@ int ADS1115_StartDMA(sensor_t * sensor)
 	ticks = I2C_TIMEOUT;
 	
 	I2C_Send7bitAddress(I2C1, sensor->address << 1, I2C_Direction_Transmitter);
-	while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)&&ticks) ticks--;
+	while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED) && --ticks);			// EV6
 	if (ticks == 0) 
 	{
 		sensor->rx_complete = 1;
 		sensor->tx_complete = 1;
 		return -1;
 	}
-
 	
 	I2C_SendData(I2C1, 0x00);		// Pointer register data is 0x00 (address of conversion register)
-	while((!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED))&&ticks) ticks--;
+	while((!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED)) && --ticks);
 	if (ticks == 0) 
 	{
 		sensor->rx_complete = 1;
@@ -130,7 +129,7 @@ int ADS1115_StartDMA(sensor_t * sensor)
 	ticks = I2C_TIMEOUT;
 	
 	I2C_GenerateSTOP(I2C1, ENABLE);
-	while(I2C_GetFlagStatus(I2C1, I2C_FLAG_BUSY)&&ticks) {ticks--;}	
+	while(I2C_GetFlagStatus(I2C1, I2C_FLAG_BUSY) && --ticks);
 	if (ticks == 0) 
 	{
 		sensor->rx_complete = 1;
@@ -138,12 +137,13 @@ int ADS1115_StartDMA(sensor_t * sensor)
 		return -1;
 	}
 	
-	// Start reading conversion register in non-blocking mode
+	// Start reading conversion register in non-blocking mode	
+	I2C_DMALastTransferCmd(I2C1, ENABLE);
 	I2C_DMACmd(I2C1,ENABLE);
 	DMA_Cmd(DMA1_Channel7,ENABLE);
 	
 	I2C_GenerateSTART(I2C1, ENABLE);
-	while((!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT))&&ticks) ticks--;
+	while((!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT)) && --ticks);
 	if (ticks == 0) 
 	{
 		sensor->rx_complete = 1;
@@ -153,7 +153,7 @@ int ADS1115_StartDMA(sensor_t * sensor)
 	ticks = I2C_TIMEOUT;
 	
 	I2C_Send7bitAddress(I2C1, sensor->address << 1, I2C_Direction_Receiver);
-	while((!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED))&&ticks) ticks--;
+	while((!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED)) && --ticks);
 	if (ticks == 0) 
 	{
 		sensor->rx_complete = 1;
@@ -170,14 +170,17 @@ int ADS1115_StartDMA(sensor_t * sensor)
   * @param sensor: Sensor struct
   * @retval status
   */
-int ADS1115_SetMuxDMA(sensor_t * sensor, uint8_t channel)
+int ADS1115_SetMuxDMA(sensor_t * sensor)
 {
 	uint8_t tmp_buf[3];
 	uint32_t ticks = I2C_TIMEOUT;
 	
-	tmp_buf[0] = 0x01;											// config register address
-	tmp_buf[1] = 0x44 | (channel << 4);			// config reg MSB
-	tmp_buf[2] = 0xE3;											// config reg LSB
+	tmp_buf[0] = 0x01;															// config register address
+	tmp_buf[1] = 0x44 | (sensor->channel << 4);			// config reg MSB
+	tmp_buf[2] = 0xE3;															// config reg LSB
+	
+	sensor->rx_complete = 1;
+	sensor->tx_complete = 0;
 	
 	// disable DMA
 	I2C_DMACmd(I2C1,DISABLE);
@@ -203,14 +206,15 @@ int ADS1115_SetMuxDMA(sensor_t * sensor, uint8_t channel)
 	DMA_Init(DMA1_Channel6,&DMA_InitStructure);
 	
 	DMA_ITConfig(DMA1_Channel6,DMA_IT_TC,ENABLE);
+	NVIC_EnableIRQ(DMA1_Channel6_IRQn);
 	
 	// Start reading conversion register in non-blocking mode
 	I2C_DMACmd(I2C1,ENABLE);
-	DMA_Cmd(DMA1_Channel6,ENABLE);
+	DMA_Cmd(DMA1_Channel6, ENABLE);
 	
 	// Start writtin config register in non-blocking mode
 	I2C_GenerateSTART(I2C1, ENABLE);
-	while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT)&&ticks) {ticks--;}
+	while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT) && --ticks);
 	ticks = I2C_TIMEOUT;
 	if (ticks == 0) 
 	{
@@ -220,7 +224,7 @@ int ADS1115_SetMuxDMA(sensor_t * sensor, uint8_t channel)
 	}
 	
 	I2C_Send7bitAddress(I2C1, sensor->address << 1, I2C_Direction_Transmitter);
-	while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)&&ticks) {ticks--;}
+	while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED) && --ticks);
 	if (ticks == 0) 
 	{
 		sensor->rx_complete = 1;
