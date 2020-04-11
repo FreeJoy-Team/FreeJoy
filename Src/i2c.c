@@ -29,84 +29,129 @@
   * @param None
   * @retval None
   */
-void HardI2C_Init(void)
+void I2C_Start(void)
 {
-	I2C_InitTypeDef I2C_InitStructure;
-	
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE);
-	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);	
+
+	I2C_InitTypeDef I2C_InitStructure;
 	
 	I2C_InitStructure.I2C_Ack = I2C_Ack_Enable;
 	I2C_InitStructure.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
 	I2C_InitStructure.I2C_ClockSpeed = 400000;
-	I2C_InitStructure.I2C_DutyCycle = I2C_DutyCycle_2;
+	I2C_InitStructure.I2C_DutyCycle = I2C_DutyCycle_16_9;
 	I2C_InitStructure.I2C_Mode = I2C_Mode_I2C;
 	I2C_InitStructure.I2C_OwnAddress1 = 0x07;
-	I2C_Init(I2C1, &I2C_InitStructure);
 	
-	I2C_DMACmd(I2C1, ENABLE);
-	I2C_Cmd(I2C1, ENABLE);
+	
+	I2C_Init(I2C1,&I2C_InitStructure);
+	I2C_Cmd(I2C1,ENABLE);
+	
+	//I2C_ITConfig(I2C1, I2C_IT_EVT/*|I2C_IT_BUF*/, ENABLE);
+	I2C_ITConfig(I2C1,I2C_IT_ERR,ENABLE);
+	
+	NVIC_EnableIRQ (I2C1_EV_IRQn);
+	NVIC_SetPriority(I2C1_EV_IRQn,3);
+	NVIC_EnableIRQ (I2C1_ER_IRQn);
+	NVIC_SetPriority(I2C1_ER_IRQn,3);
 }
 
 /**
   * @brief Hardware I2C Send Function
+	* @param dev_addr: slave device 7-bit I2C address
+	* @param reg_addr: address of internal register
 	* @param data: data to transmit
 	* @param length: length of data to transmit
-  * @retval None
+  * @retval status
   */
-void HardI2C_Transmit(uint8_t * data, uint16_t length)
+int I2C_WriteBlocking(uint8_t dev_addr, uint8_t reg_addr, uint8_t * data, uint16_t length)
 {	
-	DMA_InitTypeDef DMA_InitStructure;
+	uint32_t ticks = I2C_TIMEOUT;			// number of flag checks before stop i2c transmition 
+	
+	I2C_GenerateSTART(I2C1, ENABLE);
+	while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT)&&ticks) {ticks--;}
+	ticks = I2C_TIMEOUT;
+	if (ticks == 0) return -1;
+	
+	I2C_Send7bitAddress(I2C1, dev_addr, I2C_Direction_Transmitter);
+	while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)&&ticks) {ticks--;}
+	if (ticks == 0) return -1;
+	ticks = I2C_TIMEOUT;
+	
+	I2C_SendData(I2C1, reg_addr);
+	while((!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED))&&ticks) {ticks--;}
+	if (ticks == 0) return -1;
+	ticks = I2C_TIMEOUT;
 		
-	DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t) data;
-	DMA_InitStructure.DMA_BufferSize = length;
-	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t) &I2C1->DR;
-	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
-	DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
-	DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
-	DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
-	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
-	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
-	DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
-	DMA_InitStructure.DMA_Priority = DMA_Priority_Medium;
-	DMA_Init(DMA1_Channel3, &DMA_InitStructure);
+	for (uint16_t i=0; i<length; i++)
+	{
+		I2C_SendData(I2C1, data[i]);
+		while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED)&&ticks) ticks--;
+		if (ticks == 0) return -1;
+		ticks = I2C_TIMEOUT;
+	}
 	
-	DMA_ITConfig(DMA1_Channel6, DMA_IT_TC, ENABLE);
-	NVIC_SetPriority(DMA1_Channel6_IRQn, 4);
-	NVIC_EnableIRQ(DMA1_Channel6_IRQn);
-	
-	DMA_Cmd(DMA1_Channel6, ENABLE);
+	I2C_GenerateSTOP(I2C1, ENABLE);
+	while(I2C_GetFlagStatus(I2C1, I2C_FLAG_BUSY)&&ticks) {ticks--;}
+
+	return 0;
 }
 
 /**
   * @brief Hardware I2C Receive Function
+	* @param dev_addr: slave device 7-bit I2C address
+	* @param reg_addr: address of internal register
 	* @param data: buffer for storing received data
 	* @param length: length of data to receive
   * @retval None
   */
-void HardI2C_Receive(uint8_t * data, uint16_t length)
+int I2C_ReadBlocking(uint8_t dev_addr, uint8_t reg_addr, uint8_t * data, uint16_t length)
 {
-	DMA_InitTypeDef DMA_InitStructure;
+	uint32_t ticks = I2C_TIMEOUT;
+	
+	I2C_GenerateSTART(I2C1, ENABLE);
+	while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT)&&ticks) ticks--;
+	if (ticks == 0) return -1;
+	ticks = I2C_TIMEOUT;
 		
-	DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t) data;
-	DMA_InitStructure.DMA_BufferSize = length;
-	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t) &I2C1->DR;
-	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
-	DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
-	DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
-	DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
-	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
-	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
-	DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
-	DMA_InitStructure.DMA_Priority = DMA_Priority_Medium;
-	DMA_Init(DMA1_Channel2, &DMA_InitStructure);
-	
-	DMA_ITConfig(DMA1_Channel7, DMA_IT_TC, ENABLE);
-	NVIC_SetPriority(DMA1_Channel7_IRQn, 4);
-	NVIC_EnableIRQ(DMA1_Channel7_IRQn);
-	
-	DMA_Cmd(DMA1_Channel7, ENABLE);
-}
+	I2C_Send7bitAddress(I2C1, dev_addr, I2C_Direction_Transmitter);
+	while((!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED))&&ticks) ticks--;
+	if (ticks == 0) return -1;
+	ticks = I2C_TIMEOUT;
 
+	I2C_SendData(I2C1, reg_addr);
+	while((!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED))&&ticks) ticks--;
+	if (ticks == 0) return -1;
+	ticks = I2C_TIMEOUT;
+	
+	I2C_GenerateSTOP(I2C1, ENABLE);
+	while(I2C_GetFlagStatus(I2C1, I2C_FLAG_BUSY)&&ticks) {ticks--;}	
+	if (ticks == 0) return -1;
+	
+	I2C_GenerateSTART(I2C1, ENABLE);
+	while((!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT))&&ticks) ticks--;
+	if (ticks == 0) return -1;
+	ticks = I2C_TIMEOUT;
+	
+	I2C_Send7bitAddress(I2C1, dev_addr, I2C_Direction_Receiver);
+	while((!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED))&&ticks) ticks--;
+	if (ticks == 0) return -1;
+	ticks = I2C_TIMEOUT;
+	
+	for (uint8_t i=0; i<length; i++)
+	{
+		while((!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_RECEIVED))&&ticks) ticks--;
+		if (ticks == 0) return -1;
+		ticks = I2C_TIMEOUT;
+		
+		data[i] = I2C1->DR;
+	}
+	
+	I2C_GenerateSTOP(I2C1, ENABLE);
+	while(I2C_GetFlagStatus(I2C1, I2C_FLAG_BUSY)&&ticks) {ticks--;}	
+	if (ticks == 0) return -1;
+	
+	return 0;
+}
 
 

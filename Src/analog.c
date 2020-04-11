@@ -28,6 +28,7 @@
 #include "tle5011.h"
 #include "mcp320x.h"
 #include "mlx90393.h"
+#include "ads1115.h"
 #include "buttons.h"
 
 sensor_t sensors[MAX_AXIS_NUM];
@@ -404,7 +405,7 @@ void AxesInit (dev_config_t * p_dev_config)
 	
 	for (int i = 0; i<MAX_AXIS_NUM; i++)
 	{
-		sensors[i].cs_pin = -1;
+		sensors[i].source = -1;
 		sensors[i].rx_complete = 1;
 		sensors[i].tx_complete = 1;
 	}
@@ -423,7 +424,7 @@ void AxesInit (dev_config_t * p_dev_config)
 				if (p_dev_config->axis_config[k].source_main == i)
 				{
 					sensors[sensors_cnt].type = TLE5011;			
-					sensors[sensors_cnt].cs_pin = i;
+					sensors[sensors_cnt].source = i;
 					sensors_cnt++;
 					break;
 				}
@@ -436,7 +437,7 @@ void AxesInit (dev_config_t * p_dev_config)
 				if (p_dev_config->axis_config[k].source_main == i)
 				{
 					sensors[sensors_cnt].type = MCP3201;			
-					sensors[sensors_cnt].cs_pin = i;
+					sensors[sensors_cnt].source = i;
 					sensors_cnt++;
 					break;
 				}
@@ -450,7 +451,7 @@ void AxesInit (dev_config_t * p_dev_config)
 				{
 					sensors[sensors_cnt].type = MCP3202;
 					sensors[sensors_cnt].channel = p_dev_config->axis_config[k].channel;		
-					sensors[sensors_cnt].cs_pin = i;
+					sensors[sensors_cnt].source = i;
 					sensors_cnt++;
 				}
 			}
@@ -463,7 +464,7 @@ void AxesInit (dev_config_t * p_dev_config)
 				{
 					sensors[sensors_cnt].type = MCP3204;
 					sensors[sensors_cnt].channel = p_dev_config->axis_config[k].channel;					
-					sensors[sensors_cnt].cs_pin = i;
+					sensors[sensors_cnt].source = i;
 					sensors_cnt++;
 				}
 			}
@@ -476,7 +477,7 @@ void AxesInit (dev_config_t * p_dev_config)
 				{
 					sensors[sensors_cnt].type = MCP3208;	
 					sensors[sensors_cnt].channel = p_dev_config->axis_config[k].channel;
-					sensors[sensors_cnt].cs_pin = i;
+					sensors[sensors_cnt].source = i;
 					sensors_cnt++;
 				}
 			}
@@ -487,36 +488,55 @@ void AxesInit (dev_config_t * p_dev_config)
 			{
 				if (p_dev_config->axis_config[k].source_main == i)
 				{
-					sensors[sensors_cnt].type = MLX90393;
+					sensors[sensors_cnt].type = MLX90393_SPI;
 					sensors[sensors_cnt].channel = p_dev_config->axis_config[k].channel;
-					sensors[sensors_cnt].cs_pin = i;
+					sensors[sensors_cnt].source = i;
 					
 					MLX90393_Start(&sensors[sensors_cnt]);
 					sensors_cnt++;
 				}
 			}
 		}
+		else if (p_dev_config->pins[i] == I2C_SCL)
+		{
+			for (uint8_t k=0; k<MAX_AXIS_NUM; k++)
+			{
+				if (p_dev_config->axis_config[k].source_main == (pin_t) SOURCE_I2C)
+				{
+					if ((p_dev_config->axis_config[k].i2c_address & 0xFC) == 0x48)
+					{
+						sensors[sensors_cnt].address = p_dev_config->axis_config[k].i2c_address;
+						sensors[sensors_cnt].type = ADS1115;
+						sensors[sensors_cnt].channel = p_dev_config->axis_config[k].channel;
+						sensors[sensors_cnt].source = (pin_t) SOURCE_I2C;
+						
+						ADS1115_Init(&sensors[sensors_cnt]);
+						sensors_cnt++;
+					}
+				}
+			}
+		}
 	}
 	
 
-	if (sensors > 0) 
-	{
-		if (sensors[0].type == TLE5011)
-		{
-			TLE501x_StartDMA(&sensors[0]);
-		}
-		else if (sensors[0].type == MCP3201 ||
-						 sensors[0].type == MCP3202 ||
-						 sensors[0].type == MCP3204 ||
-						 sensors[0].type == MCP3208)
-		{
-			MCP320x_StartDMA(&sensors[0]);
-		}
-		else if (sensors[0].type == MLX90393)
-		{
-			MLX90393_StartDMA(&sensors[0]);
-		}
-	}
+//	if (sensors > 0) 
+//	{
+//		if (sensors[0].type == TLE5011)
+//		{
+//			TLE501x_StartDMA(&sensors[0]);
+//		}
+//		else if (sensors[0].type == MCP3201 ||
+//						 sensors[0].type == MCP3202 ||
+//						 sensors[0].type == MCP3204 ||
+//						 sensors[0].type == MCP3208)
+//		{
+//			MCP320x_StartDMA(&sensors[0]);
+//		}
+//		else if (sensors[0].type == MLX90393_SPI)
+//		{
+//			MLX90393_StartDMA(&sensors[0]);
+//		}
+//	}
 
 	
 	if ((adc_cnt + sensors_cnt) > MAX_AXIS_NUM)
@@ -663,7 +683,7 @@ void AxesProcess (dev_config_t * p_dev_config)
 				// search for needed sensor
 				for (k=0; k<MAX_AXIS_NUM; k++)
 				{
-					if (sensors[k].cs_pin == source) break;
+					if (sensors[k].source == source) break;
 				}
 				// get angle data
 				if (TLE501x_GetAngle(&sensors[k], &tmpf) == 0)
@@ -689,7 +709,7 @@ void AxesProcess (dev_config_t * p_dev_config)
 				// search for needed sensor
 				for (k=0; k<MAX_AXIS_NUM; k++)
 				{
-					if (sensors[k].cs_pin == source) break;
+					if (sensors[k].source == source) break;
 				}
 				// get data
 				if (p_dev_config->axis_config[i].offset_angle > 0)	// offset enabled
@@ -713,7 +733,7 @@ void AxesProcess (dev_config_t * p_dev_config)
 				// search for needed sensor
 				for (k=0; k<MAX_AXIS_NUM; k++)
 				{
-					if (sensors[k].cs_pin == source && sensors[k].channel == channel) break;
+					if (sensors[k].source == source && sensors[k].channel == channel) break;
 				}
 				// get data
 				if (p_dev_config->axis_config[i].offset_angle > 0)	// offset enabled
@@ -736,7 +756,7 @@ void AxesProcess (dev_config_t * p_dev_config)
 				// search for needed sensor
 				for (k=0; k<MAX_AXIS_NUM; k++)
 				{
-					if (sensors[k].cs_pin == source && sensors[k].channel == channel) break;
+					if (sensors[k].source == source && sensors[k].channel == channel) break;
 				}
 				if (MLX90393_GetData(&tmp16, &sensors[k]) == 0)
 				{

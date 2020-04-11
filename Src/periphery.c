@@ -235,6 +235,7 @@ void IO_Init (dev_config_t * p_dev_config)
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
 	GPIO_PinRemapConfig(GPIO_Remap_SWJ_NoJTRST, ENABLE);
 	GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE);
+	GPIO_PinRemapConfig(GPIO_Remap_I2C1, ENABLE);
 	GPIO_PinRemapConfig(GPIO_PartialRemap_TIM3, ENABLE);
 	
 	
@@ -326,7 +327,7 @@ void IO_Init (dev_config_t * p_dev_config)
 			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;						// PP or OD?
 			GPIO_Init (GPIOB,&GPIO_InitStructure);
 
-			HardSPI_Init();
+			SPI_Start();
 		}
 		else if (p_dev_config->pins[i] == I2C_SCL && i == 19)			// PB8
 		{		
@@ -342,7 +343,7 @@ void IO_Init (dev_config_t * p_dev_config)
 			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;						
 			GPIO_Init (GPIOB,&GPIO_InitStructure);
 			
-			HardI2C_Init();
+			I2C_Start();
 		}
 		else if (p_dev_config->pins[i] == TLE5011_CS || 
 						 p_dev_config->pins[i] == MCP3201_CS ||

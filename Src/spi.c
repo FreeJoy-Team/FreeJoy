@@ -32,7 +32,7 @@ uint8_t spi_outbuf[10];
   * @param None
   * @retval None
   */
-void HardSPI_Init(void)
+void SPI_Start(void)
 {
 	SPI_InitTypeDef SPI_InitStructure;
 	
@@ -62,7 +62,7 @@ void HardSPI_Init(void)
 	* @param length: length of data to transmit
   * @retval None
   */
-void HardSPI_HalfDuplex_Transmit(uint8_t * data, uint16_t length)
+void SPI_HalfDuplex_Transmit(uint8_t * data, uint16_t length)
 {	
 	GPIO_InitTypeDef 					GPIO_InitStructure;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
@@ -102,7 +102,7 @@ void HardSPI_HalfDuplex_Transmit(uint8_t * data, uint16_t length)
 	* @param length: length of data to receive
   * @retval None
   */
-void HardSPI_HalfDuplex_Receive(uint8_t * data, uint16_t length)
+void SPI_HalfDuplex_Receive(uint8_t * data, uint16_t length)
 {
 	DMA_InitTypeDef DMA_InitStructure;
 		
@@ -136,7 +136,7 @@ void HardSPI_HalfDuplex_Receive(uint8_t * data, uint16_t length)
 	* @param length: length of data to receive/transmit
   * @retval None
   */
-void HardSPI_FullDuplex_TransmitReceive(uint8_t * tx_data, uint8_t * rx_data, uint16_t length)
+void SPI_FullDuplex_TransmitReceive(uint8_t * tx_data, uint8_t * rx_data, uint16_t length)
 {
 	DMA_InitTypeDef DMA_InitStructure;
 		

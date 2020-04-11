@@ -36,7 +36,7 @@ void MLX90393_NOP(uint8_t * in_data)
 	
 	tmp_buf[0] = 0x00;
 	
-	HardSPI_FullDuplex_TransmitReceive(tmp_buf, in_data, 1);
+	SPI_FullDuplex_TransmitReceive(tmp_buf, in_data, 1);
 }
 
 /**
@@ -50,7 +50,7 @@ void MLX90393_Reset(uint8_t * in_data)
 	
 	tmp_buf[0] = 0xF0;
 	
-	HardSPI_FullDuplex_TransmitReceive(tmp_buf, in_data, 1);
+	SPI_FullDuplex_TransmitReceive(tmp_buf, in_data, 1);
 }
 
 /**
@@ -66,7 +66,7 @@ void MLX90393_WriteCommand(uint8_t command, uint8_t * in_data)
 	tmp_buf[0] = command;
 	tmp_buf[1] = 0;
 	
-	HardSPI_FullDuplex_TransmitReceive(tmp_buf, in_data, 2);
+	SPI_FullDuplex_TransmitReceive(tmp_buf, in_data, 2);
 }
 
 /**
@@ -86,7 +86,7 @@ void MLX90393_WriteRegister(uint16_t data,  uint8_t addr , uint8_t * in_data)
 	tmp_buf[3] = addr<<2;							// Register address	
 	tmp_buf[4] = 0;										// Status
 	
-	HardSPI_FullDuplex_TransmitReceive(tmp_buf, in_data, 5);
+	SPI_FullDuplex_TransmitReceive(tmp_buf, in_data, 5);
 }
 
 /**
@@ -106,7 +106,7 @@ void MLX90393_ReadRegister(uint8_t addr , uint8_t * in_data)
 	tmp_buf[3] = 0;										// MSB
 	tmp_buf[4] = 0;										// LSB
 	
-	HardSPI_FullDuplex_TransmitReceive(tmp_buf, in_data, 5);
+	SPI_FullDuplex_TransmitReceive(tmp_buf, in_data, 5);
 }
 
 /**
@@ -120,79 +120,79 @@ void MLX90393_Start(sensor_t * sensor)
 	uint16_t tmp_data;
 	
 	// Exit
-	pin_config[sensor->cs_pin].port->ODR &= ~pin_config[sensor->cs_pin].pin;
+	pin_config[sensor->source].port->ODR &= ~pin_config[sensor->source].pin;
 	MLX90393_WriteCommand(MLX_EXIT, rx_buf);							
 	Delay_us(30);
-	pin_config[sensor->cs_pin].port->ODR |= pin_config[sensor->cs_pin].pin;
+	pin_config[sensor->source].port->ODR |= pin_config[sensor->source].pin;
 	Delay_ms(15);
 	
 	// Reset
-	pin_config[sensor->cs_pin].port->ODR &= ~pin_config[sensor->cs_pin].pin;
+	pin_config[sensor->source].port->ODR &= ~pin_config[sensor->source].pin;
 	MLX90393_Reset(rx_buf);							
 	Delay_us(30);
-	pin_config[sensor->cs_pin].port->ODR |= pin_config[sensor->cs_pin].pin;
+	pin_config[sensor->source].port->ODR |= pin_config[sensor->source].pin;
 	Delay_ms(50);
 
 	// -------------- Register 0 ----------------- //
 	
 	// Read register value
-	pin_config[sensor->cs_pin].port->ODR &= ~pin_config[sensor->cs_pin].pin;
+	pin_config[sensor->source].port->ODR &= ~pin_config[sensor->source].pin;
 	MLX90393_ReadRegister(0x00, rx_buf);					
 	Delay_us(60);
-	pin_config[sensor->cs_pin].port->ODR |= pin_config[sensor->cs_pin].pin;
+	pin_config[sensor->source].port->ODR |= pin_config[sensor->source].pin;
 	Delay_us(10);	
 	// Modify register value
 	tmp_data = rx_buf[3]<<8|rx_buf[4];
 	tmp_data &= ~0x01FF;
 	tmp_data |= GAIN_SEL(0)|HAL_CONF(0x00);
 	// Write register value
-	pin_config[sensor->cs_pin].port->ODR &= ~pin_config[sensor->cs_pin].pin;
+	pin_config[sensor->source].port->ODR &= ~pin_config[sensor->source].pin;
 	MLX90393_WriteRegister(tmp_data, 0x00, rx_buf);					
 	Delay_us(60);
-	pin_config[sensor->cs_pin].port->ODR |= pin_config[sensor->cs_pin].pin;
+	pin_config[sensor->source].port->ODR |= pin_config[sensor->source].pin;
 	Delay_ms(15);	
 
 	// -------------- Register 1 ----------------- //
 	
 	// Read register value
-	pin_config[sensor->cs_pin].port->ODR &= ~pin_config[sensor->cs_pin].pin;
+	pin_config[sensor->source].port->ODR &= ~pin_config[sensor->source].pin;
 	MLX90393_ReadRegister(0x01, rx_buf);					
 	Delay_us(60);
-	pin_config[sensor->cs_pin].port->ODR |= pin_config[sensor->cs_pin].pin;
+	pin_config[sensor->source].port->ODR |= pin_config[sensor->source].pin;
 	Delay_us(10);
 	// Set register value
 	tmp_data = SPI_MODE|I2C_MODE|BURST_SEL_X|BURST_SEL_Y|BURST_SEL_Z;
 	// Write register value
-	pin_config[sensor->cs_pin].port->ODR &= ~pin_config[sensor->cs_pin].pin;
+	pin_config[sensor->source].port->ODR &= ~pin_config[sensor->source].pin;
 	MLX90393_WriteRegister(tmp_data, 0x01, rx_buf);					
 	Delay_us(60);
-	pin_config[sensor->cs_pin].port->ODR |= pin_config[sensor->cs_pin].pin;
+	pin_config[sensor->source].port->ODR |= pin_config[sensor->source].pin;
 	Delay_ms(15);
 
 	// -------------- Register 2 ----------------- //
 	
 	// Read register value
-	pin_config[sensor->cs_pin].port->ODR &= ~pin_config[sensor->cs_pin].pin;
+	pin_config[sensor->source].port->ODR &= ~pin_config[sensor->source].pin;
 	MLX90393_ReadRegister(0x02, rx_buf);					
 	Delay_us(60);
-	pin_config[sensor->cs_pin].port->ODR |= pin_config[sensor->cs_pin].pin;
+	pin_config[sensor->source].port->ODR |= pin_config[sensor->source].pin;
 	Delay_us(10);
 	// Modify register value
 	tmp_data = rx_buf[3]<<8|rx_buf[4];
 	tmp_data &= ~0x1FFF;
 	tmp_data |= RES(1,1,1)|OSR(0)|DIG_FILT(0);
 	// Write register value
-	pin_config[sensor->cs_pin].port->ODR &= ~pin_config[sensor->cs_pin].pin;
+	pin_config[sensor->source].port->ODR &= ~pin_config[sensor->source].pin;
 	MLX90393_WriteRegister(tmp_data, 0x02, rx_buf);					
 	Delay_us(60);
-	pin_config[sensor->cs_pin].port->ODR |= pin_config[sensor->cs_pin].pin;
+	pin_config[sensor->source].port->ODR |= pin_config[sensor->source].pin;
 	Delay_ms(15);	
 	
 	// Burst mode XYZ	
-	pin_config[sensor->cs_pin].port->ODR &= ~pin_config[sensor->cs_pin].pin;
+	pin_config[sensor->source].port->ODR &= ~pin_config[sensor->source].pin;
 	MLX90393_WriteCommand(MLX_START_BURST|MLX_X|MLX_Y|MLX_Z, rx_buf);							
 	Delay_us(30);
-	pin_config[sensor->cs_pin].port->ODR |= pin_config[sensor->cs_pin].pin;
+	pin_config[sensor->source].port->ODR |= pin_config[sensor->source].pin;
 	Delay_ms(15);
 }
 
@@ -240,15 +240,15 @@ void MLX90393_StartDMA(sensor_t * sensor)
 	NVIC_DisableIRQ(TIM3_IRQn);
 	
 	// CS low
-	pin_config[sensor->cs_pin].port->ODR &= ~pin_config[sensor->cs_pin].pin;
-	HardSPI_FullDuplex_TransmitReceive(tmp_buf, sensor->data, 8);
+	pin_config[sensor->source].port->ODR &= ~pin_config[sensor->source].pin;
+	SPI_FullDuplex_TransmitReceive(tmp_buf, sensor->data, 8);
 }
 
 void MLX90393_StopDMA(sensor_t * sensor)
 {	
 	DMA_Cmd(DMA1_Channel2, DISABLE);
 	// CS high
-	pin_config[sensor->cs_pin].port->ODR |= pin_config[sensor->cs_pin].pin;
+	pin_config[sensor->source].port->ODR |= pin_config[sensor->source].pin;
 	sensor->rx_complete = 1;
 	sensor->tx_complete = 1;
 }

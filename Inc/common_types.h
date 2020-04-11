@@ -72,23 +72,29 @@ enum
 	MCP3202,
 	MCP3204,
 	MCP3208,
-	MLX90393,
+	MLX90393_SPI,
+	MLX90393_I2C,
+	ADS1115,
 };
 
 typedef struct
 {
 	uint8_t		type;
 	uint8_t		channel;
+	uint8_t		address;
 	uint8_t 	data[16];
 	uint8_t 	rx_complete;
 	uint8_t 	tx_complete;
-	int8_t 		cs_pin;
+	int8_t 		source;
 	uint32_t	ok_cnt;
 	uint32_t 	err_cnt;
 } sensor_t;
 
 enum
 {
+	SOURCE_I2C = -2,
+	SOURCE_BUTTONS = -1,
+	
 	NOT_USED = 0,
 	
 	BUTTON_GND,
@@ -126,7 +132,7 @@ enum
 	I2C_SDA,
 
 };
-typedef uint8_t pin_t;
+typedef int8_t pin_t;
 
 enum
 {
