@@ -62,7 +62,7 @@
 
 void MLX90393_Start(sensor_t * sensor);
 void MLX90393_StartDMA(sensor_t * sensor);
-int MLX90393_GetData(uint16_t * data, sensor_t * sensor);
+int MLX90393_GetData(uint16_t * data, sensor_t * sensor, uint8_t channel);
 void MLX90393_StopDMA(sensor_t * sensor);
 
 #endif 	/* __MLX90393_H__ */

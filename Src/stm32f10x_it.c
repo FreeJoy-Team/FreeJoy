@@ -238,7 +238,9 @@ void TIM1_UP_IRQHandler(void)
 			{
 				if (sensors[i].source == (pin_t)SOURCE_I2C && sensors[i].rx_complete && sensors[i].tx_complete)
 				{
-					status = ADS1115_StartDMA(&sensors[i]);
+					GPIOB->ODR |= GPIO_Pin_12;
+					status += ADS1115_StartDMA(&sensors[i], sensors[i].curr_channel);
+					GPIOB->ODR &= ~GPIO_Pin_12;
 					break;
 				}
 			}
@@ -257,7 +259,7 @@ void TIM1_UP_IRQHandler(void)
 									 sensors[i].type == MCP3204 ||
 									 sensors[i].type == MCP3208)
 					{
-						MCP320x_StartDMA(&sensors[i]);
+						MCP320x_StartDMA(&sensors[i], 0);
 						return;
 					}
 					else if (sensors[i].type == MLX90393_SPI)
@@ -303,27 +305,23 @@ void DMA1_Channel2_IRQHandler(void)
 			{
 				TLE501x_StopDMA(&sensors[i++]);
 			}
-			else if (sensors[i].type == MCP3201 ||
+			else if (sensors[i].type == MCP3201 ||			// TODO: separate sensors
 							 sensors[i].type == MCP3202 ||
 							 sensors[i].type == MCP3204 ||
 							 sensors[i].type == MCP3208)
 			{
-				MCP320x_StopDMA(&sensors[i++]);
+				MCP320x_StopDMA(&sensors[i]);
+				// get data from next channel
+				if (sensors[i].curr_channel < 7)	
+				{
+					MCP320x_StartDMA(&sensors[i], sensors[i].curr_channel + 1);
+					return;
+				}
+				i++;
 			}
 			else if (sensors[i].type == MLX90393_SPI)
 			{
-				MLX90393_StopDMA(&sensors[i]);
-				
-				// search for last logical sensor for this physical sensor (in case of multiple channels)
-				for (uint8_t k=0;k<MAX_AXIS_NUM;k++)
-				{
-					if (sensors[k].source == sensors[i].source)
-					{
-						memcpy(sensors[k].data, sensors[i].data, sizeof(sensors[k].data));
-						i=k;
-					}
-				}
-				i++;
+				MLX90393_StopDMA(&sensors[i++]);
 			}
 		}
 		// Enable other peripery IRQs
@@ -345,7 +343,7 @@ void DMA1_Channel2_IRQHandler(void)
 								 sensors[i].type == MCP3204 ||
 								 sensors[i].type == MCP3208)
 				{
-					MCP320x_StartDMA(&sensors[i]);
+					MCP320x_StartDMA(&sensors[i], 0);
 					return;
 				}
 				else if (sensors[i].type == MLX90393_SPI)
@@ -446,9 +444,9 @@ void DMA1_Channel6_IRQHandler(void)
 		for (uint8_t k = i+1; k < MAX_AXIS_NUM; k++)
 		{
 			if (sensors[k].source == (pin_t)SOURCE_I2C && 
-					!sensors[k].rx_complete && sensors[k].address != sensors[i].address)
+					!sensors[k].rx_complete)
 			{
-				status = ADS1115_StartDMA(&sensors[i]);
+				status += ADS1115_StartDMA(&sensors[i], 0);
 				return;
 			}
 		}
@@ -486,24 +484,12 @@ void DMA1_Channel7_IRQHandler(void)
 				//sensors[i].tx_complete = 1;
 				sensors[i].rx_complete = 1;
 				
-				// search for next logical sensor for this physical sensor (in case of multiple channels)
-				for (uint8_t k=i+1;k<MAX_AXIS_NUM;k++)
-				{
-					if (sensors[k].address == sensors[i].address)
-					{
-						status = ADS1115_SetMuxDMA(&sensors[k]);
-						return;
-					}
-					// that was the last one
-					for (uint8_t k=0;k<MAX_AXIS_NUM;k++)
-					{
-						if (sensors[k].address == sensors[i].address)
-						{
-							status = ADS1115_SetMuxDMA(&sensors[k]);		// setting mux for first used channel
-							return;
-						}
-					}
-				}
+				GPIOB->ODR |= GPIO_Pin_12;
+				// set mux for next channel
+				uint8_t channel = (sensors[i].curr_channel < 3) ? (sensors[i].curr_channel + 1) : 0;
+				status += ADS1115_SetMuxDMA(&sensors[i], channel);
+				GPIOB->ODR &= ~GPIO_Pin_12;
+				
 			}
 		}
 	}

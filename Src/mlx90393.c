@@ -202,14 +202,14 @@ void MLX90393_Start(sensor_t * sensor)
   * @param sensor: Sensor struct
   * @retval status
   */
-int MLX90393_GetData(uint16_t * data, sensor_t * sensor)
+int MLX90393_GetData(uint16_t * data, sensor_t * sensor, uint8_t channel)
 {
 	int ret = 0;
 	
 	if (sensor->data[1] & 0x10)	ret = -1;
 	else
 	{
-		*data = (sensor->data[2 + sensor->channel*2]<<8|sensor->data[3 + sensor->channel*2]);
+		*data = (sensor->data[2 + channel*2]<<8|sensor->data[3 + channel*2]);
 	}
 	return ret;
 }

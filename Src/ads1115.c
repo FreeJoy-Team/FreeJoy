@@ -39,7 +39,7 @@ void ADS1115_Init(sensor_t * sensor)
 	
 	if (status == 0)
 	{
-		tmp_buf[0] = 0x44;
+		tmp_buf[0] = 0xC3;
 		tmp_buf[1] = 0xE3;
 		I2C_WriteBlocking(sensor->address << 1, 1, tmp_buf, 2);
 	}
@@ -51,12 +51,9 @@ void ADS1115_Init(sensor_t * sensor)
   * @param sensor: Sensor struct
   * @retval data
   */
-uint16_t ADS1115_GetData(sensor_t * sensor)
+int16_t ADS1115_GetData(sensor_t * sensor, uint8_t channel)
 {
-	int ret = 0;
-	
-
-	return ret;
+	return sensor->data[2*channel]<<8|sensor->data[1 + 2*channel];
 }
 
 /**
@@ -64,7 +61,7 @@ uint16_t ADS1115_GetData(sensor_t * sensor)
   * @param sensor: Sensor struct
   * @retval status
   */
-int ADS1115_StartDMA(sensor_t * sensor)
+int ADS1115_StartDMA(sensor_t * sensor, uint8_t channel)
 {	
 	uint32_t ticks = I2C_TIMEOUT;
 	
@@ -78,7 +75,7 @@ int ADS1115_StartDMA(sensor_t * sensor)
 	// DMA initialization
 	DMA_InitTypeDef DMA_InitStructure;
 	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t) &I2C1->DR;
-	DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t) sensor->data;
+	DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t) &sensor->data[2*channel];
 	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
 	DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
 	DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
@@ -95,7 +92,6 @@ int ADS1115_StartDMA(sensor_t * sensor)
 	// set transmittion flags
 	sensor->rx_complete = 0;
 	sensor->tx_complete = 1;
-	
 	
 	
 	// Writting pointer register in blocking mode 
@@ -170,17 +166,18 @@ int ADS1115_StartDMA(sensor_t * sensor)
   * @param sensor: Sensor struct
   * @retval status
   */
-int ADS1115_SetMuxDMA(sensor_t * sensor)
+int ADS1115_SetMuxDMA(sensor_t * sensor, uint8_t channel)
 {
 	uint8_t tmp_buf[3];
 	uint32_t ticks = I2C_TIMEOUT;
 	
 	tmp_buf[0] = 0x01;															// config register address
-	tmp_buf[1] = 0x44 | (sensor->channel << 4);			// config reg MSB
+	tmp_buf[1] = 0xC3 | (channel << 4);							// config reg MSB
 	tmp_buf[2] = 0xE3;															// config reg LSB
 	
 	sensor->rx_complete = 1;
 	sensor->tx_complete = 0;
+	sensor->curr_channel = channel;
 	
 	// disable DMA
 	I2C_DMACmd(I2C1,DISABLE);

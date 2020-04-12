@@ -14,8 +14,8 @@
 
 #define MCP32xx_SPI_MODE						3
 
-uint16_t MCP320x_GetData(sensor_t * sensor);
-void MCP320x_StartDMA(sensor_t * sensor);
+uint16_t MCP320x_GetData(sensor_t * sensor, uint8_t channel);
+void MCP320x_StartDMA(sensor_t * sensor, uint8_t channel);
 void MCP320x_StopDMA(sensor_t * sensor);
 
 #endif 	/* __MCP320X_H__ */
