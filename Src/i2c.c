@@ -93,7 +93,8 @@ int I2C_WriteBlocking(uint8_t dev_addr, uint8_t reg_addr, uint8_t * data, uint16
 	
 	I2C_GenerateSTOP(I2C1, ENABLE);
 	while(I2C_GetFlagStatus(I2C1, I2C_FLAG_BUSY) && --ticks);
-
+	if (ticks == 0) return -1;
+	
 	return 0;
 }
 

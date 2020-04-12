@@ -67,6 +67,14 @@ typedef struct
 
 enum
 {
+	SOURCE_I2C = -2,
+	SOURCE_BUTTONS = -1,
+};
+typedef int8_t axis_source_t;
+
+
+enum
+{
 	TLE5011 = 1,
 	MCP3201,
 	MCP3202,
@@ -94,9 +102,6 @@ typedef struct
 
 enum
 {
-	SOURCE_I2C = -2,
-	SOURCE_BUTTONS = -1,
-	
 	NOT_USED = 0,
 	
 	BUTTON_GND,

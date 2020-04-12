@@ -17,7 +17,6 @@
 #endif
 
 #define TLE5011_SPI_MODE			0
-#define TLE501x_TIMEOUT				100
 
 void TLE501x_StartDMA(sensor_t * sensor);
 void TLE501x_StopDMA(sensor_t * sensor);

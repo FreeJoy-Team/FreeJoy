@@ -238,9 +238,16 @@ void TIM1_UP_IRQHandler(void)
 			{
 				if (sensors[i].source == (pin_t)SOURCE_I2C && sensors[i].rx_complete && sensors[i].tx_complete)
 				{
-					GPIOB->ODR |= GPIO_Pin_12;
-					status += ADS1115_StartDMA(&sensors[i], sensors[i].curr_channel);
-					GPIOB->ODR &= ~GPIO_Pin_12;
+#ifdef ADS1115_DMA_MODE
+					
+					status = ADS1115_StartDMA(&sensors[i], sensors[i].curr_channel);
+					
+#else				
+					status = ADS1115_ReadBlocking(&sensors[i], sensors[i].curr_channel);					
+					uint8_t channel = (sensors[i].curr_channel < 3) ? (sensors[i].curr_channel + 1) : 0;
+					status = ADS1115_SetMuxBlocking(&sensors[i], channel);
+					
+#endif	/* ADS1115_DMA_MODE */
 					break;
 				}
 			}
@@ -264,7 +271,7 @@ void TIM1_UP_IRQHandler(void)
 					}
 					else if (sensors[i].type == MLX90393_SPI)
 					{
-						MLX90393_StartDMA(&sensors[i++]);
+						MLX90393_StartDMA(&sensors[i]);
 						return;
 					}
 				}
@@ -305,10 +312,33 @@ void DMA1_Channel2_IRQHandler(void)
 			{
 				TLE501x_StopDMA(&sensors[i++]);
 			}
-			else if (sensors[i].type == MCP3201 ||			// TODO: separate sensors
-							 sensors[i].type == MCP3202 ||
-							 sensors[i].type == MCP3204 ||
-							 sensors[i].type == MCP3208)
+			else if (sensors[i].type == MCP3201)
+			{
+				MCP320x_StopDMA(&sensors[i++]);
+			}
+			else if (sensors[i].type == MCP3202)
+			{
+				MCP320x_StopDMA(&sensors[i]);
+				// get data from next channel
+				if (sensors[i].curr_channel < 1)	
+				{
+					MCP320x_StartDMA(&sensors[i], sensors[i].curr_channel + 1);
+					return;
+				}
+				i++;
+			}	
+			else if (sensors[i].type == MCP3204)
+			{
+				MCP320x_StopDMA(&sensors[i]);
+				// get data from next channel
+				if (sensors[i].curr_channel < 3)	
+				{
+					MCP320x_StartDMA(&sensors[i], sensors[i].curr_channel + 1);
+					return;
+				}
+				i++;
+			}	
+			else if (sensors[i].type == MCP3208)
 			{
 				MCP320x_StopDMA(&sensors[i]);
 				// get data from next channel
@@ -348,11 +378,6 @@ void DMA1_Channel2_IRQHandler(void)
 				}
 				else if (sensors[i].type == MLX90393_SPI)
 				{
-					// search for last logical sensor for this physical sensor (in case of multiple channels)
-					for (uint8_t k=i;k<MAX_AXIS_NUM;k++)
-					{
-						if (sensors[k].source == sensors[i].source) i=k;
-					}
 					MLX90393_StartDMA(&sensors[i]);
 					return;
 				}
@@ -393,6 +418,8 @@ void DMA1_Channel3_IRQHandler(void)
 	}
 }
 
+#ifdef ADS1115_DMA_MODE
+
 // I2C Tx Complete
 void DMA1_Channel6_IRQHandler(void)  
 {
@@ -406,13 +433,15 @@ void DMA1_Channel6_IRQHandler(void)
 		
 		I2C_DMACmd(I2C1,DISABLE);	
 		DMA_Cmd(DMA1_Channel6,DISABLE);
-		
+
 		/* EV8_2: Wait until BTF is set before programming the STOP */
     while ((I2C1->SR1 & 0x00004) != 0x000004 && --ticks);
 		if (ticks == 0)	
 		{
 			sensors[i].tx_complete = 1;
 			sensors[i].rx_complete = 1;
+			NVIC_EnableIRQ(TIM1_UP_IRQn);
+			NVIC_EnableIRQ(TIM3_IRQn);	
 			return;
 		}
 		ticks = I2C_TIMEOUT;
@@ -425,8 +454,16 @@ void DMA1_Channel6_IRQHandler(void)
 		{
 			sensors[i].tx_complete = 1;
 			sensors[i].rx_complete = 1;
+			
+			// Enable other peripery IRQs
+			NVIC_EnableIRQ(TIM1_UP_IRQn);
+			NVIC_EnableIRQ(TIM3_IRQn);	
 			return;
 		}
+		
+		// Enable other peripery IRQs
+		NVIC_EnableIRQ(TIM1_UP_IRQn);
+		NVIC_EnableIRQ(TIM3_IRQn);	
 		
 		for (i = 0; i < MAX_AXIS_NUM; i++)
 		{
@@ -446,7 +483,7 @@ void DMA1_Channel6_IRQHandler(void)
 			if (sensors[k].source == (pin_t)SOURCE_I2C && 
 					!sensors[k].rx_complete)
 			{
-				status += ADS1115_StartDMA(&sensors[i], 0);
+				status = ADS1115_StartDMA(&sensors[i], 0);
 				return;
 			}
 		}
@@ -473,8 +510,16 @@ void DMA1_Channel7_IRQHandler(void)
 		{
 			sensors[i].tx_complete = 1;
 			sensors[i].rx_complete = 1;
+			
+			// Enable other peripery IRQs
+			NVIC_EnableIRQ(TIM1_UP_IRQn);
+			NVIC_EnableIRQ(TIM3_IRQn);	
 			return;
 		}
+		
+		// Enable other peripery IRQs
+		NVIC_EnableIRQ(TIM1_UP_IRQn);
+		NVIC_EnableIRQ(TIM3_IRQn);	
 		
 		for (i = 0; i < MAX_AXIS_NUM; i++)
 		{
@@ -484,57 +529,56 @@ void DMA1_Channel7_IRQHandler(void)
 				//sensors[i].tx_complete = 1;
 				sensors[i].rx_complete = 1;
 				
-				GPIOB->ODR |= GPIO_Pin_12;
 				// set mux for next channel
 				uint8_t channel = (sensors[i].curr_channel < 3) ? (sensors[i].curr_channel + 1) : 0;
-				status += ADS1115_SetMuxDMA(&sensors[i], channel);
-				GPIOB->ODR &= ~GPIO_Pin_12;
-				
+				status = ADS1115_SetMuxDMA(&sensors[i], channel);			
 			}
 		}
 	}
 }
 
+#endif	/* ADS1115_DMA_MODE */
+
 // I2C error
 void I2C1_ER_IRQHandler(void)
 {
+	__IO uint32_t SR1Register =0;
 
-    __IO uint32_t SR1Register =0;
+	/* Read the I2C1 status register */
+	SR1Register = I2C1->SR1;
+	/* If AF = 1 */
+	if ((SR1Register & 0x0400) == 0x0400)
+	{
+		I2C1->SR1 &= 0xFBFF;
+		SR1Register = 0;
+	}
+	/* If ARLO = 1 */
+	if ((SR1Register & 0x0200) == 0x0200)
+	{
+		I2C1->SR1 &= 0xFBFF;
+		SR1Register = 0;
+	}
+	/* If BERR = 1 */
+	if ((SR1Register & 0x0100) == 0x0100)
+	{
+		I2C1->SR1 &= 0xFEFF;
+		SR1Register = 0;
+	}
 
-    /* Read the I2C1 status register */
-    SR1Register = I2C1->SR1;
-    /* If AF = 1 */
-    if ((SR1Register & 0x0400) == 0x0400)
-    {
-        I2C1->SR1 &= 0xFBFF;
-        SR1Register = 0;
-    }
-    /* If ARLO = 1 */
-    if ((SR1Register & 0x0200) == 0x0200)
-    {
-        I2C1->SR1 &= 0xFBFF;
-        SR1Register = 0;
-    }
-    /* If BERR = 1 */
-    if ((SR1Register & 0x0100) == 0x0100)
-    {
-        I2C1->SR1 &= 0xFEFF;
-        SR1Register = 0;
-    }
-
-    /* If OVR = 1 */
-
-    if ((SR1Register & 0x0800) == 0x0800)
-    {
-        I2C1->SR1 &= 0xF7FF;
-        SR1Register = 0;
-    }
+	/* If OVR = 1 */
+	if ((SR1Register & 0x0800) == 0x0800)
+	{
+		I2C1->SR1 &= 0xF7FF;
+		SR1Register = 0;
+	}
 		
-//	// Reset I2C
-//	I2C1->CR1 |= I2C_CR1_SWRST;
-//	I2C1->CR1 &= ~I2C_CR1_SWRST;
-//	I2C_Start();
+	// Reset I2C
+	I2C1->CR1 |= I2C_CR1_SWRST;
+	I2C1->CR1 &= ~I2C_CR1_SWRST;
+	I2C_Start();
 }
+
+
 
 /**
 * @brief This function handles USB low priority or CAN RX0 interrupts.

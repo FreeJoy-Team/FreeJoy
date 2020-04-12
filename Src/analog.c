@@ -449,10 +449,10 @@ void AxesInit (dev_config_t * p_dev_config)
 			{
 				if (p_dev_config->axis_config[k].source_main == i)
 				{
-					sensors[sensors_cnt].type = MCP3202;
-					//sensors[sensors_cnt].channel = p_dev_config->axis_config[k].channel;		
+					sensors[sensors_cnt].type = MCP3202;	
 					sensors[sensors_cnt].source = i;
 					sensors_cnt++;
+					break;
 				}
 			}
 		}
@@ -462,8 +462,7 @@ void AxesInit (dev_config_t * p_dev_config)
 			{
 				if (p_dev_config->axis_config[k].source_main == i)
 				{
-					sensors[sensors_cnt].type = MCP3204;
-					//sensors[sensors_cnt].channel = p_dev_config->axis_config[k].channel;					
+					sensors[sensors_cnt].type = MCP3204;				
 					sensors[sensors_cnt].source = i;
 					sensors_cnt++;
 					break;
@@ -477,7 +476,6 @@ void AxesInit (dev_config_t * p_dev_config)
 				if (p_dev_config->axis_config[k].source_main == i)
 				{
 					sensors[sensors_cnt].type = MCP3208;	
-					//sensors[sensors_cnt].channel = p_dev_config->axis_config[k].channel;
 					sensors[sensors_cnt].source = i;
 					sensors_cnt++;
 					break;
@@ -491,7 +489,6 @@ void AxesInit (dev_config_t * p_dev_config)
 				if (p_dev_config->axis_config[k].source_main == i)
 				{
 					sensors[sensors_cnt].type = MLX90393_SPI;
-					//sensors[sensors_cnt].channel = p_dev_config->axis_config[k].channel;
 					sensors[sensors_cnt].source = i;
 					
 					MLX90393_Start(&sensors[sensors_cnt]);
@@ -661,7 +658,7 @@ void AxesProcess (dev_config_t * p_dev_config)
 		uint8_t channel = p_dev_config->axis_config[i].channel;
 		uint8_t address = p_dev_config->axis_config[i].i2c_address;
 		
-		if (source >= 0 || source == (pin_t) SOURCE_I2C)
+		if (source >= 0 || source == (axis_source_t)SOURCE_I2C)
 		{
 			if (p_dev_config->pins[source] == AXIS_ANALOG)					// source analog
 			{
@@ -780,7 +777,7 @@ void AxesProcess (dev_config_t * p_dev_config)
 					sensors[k].err_cnt++;
 				}
 			}	
-			else if (source == (pin_t)SOURCE_I2C)
+			else if (source == (axis_source_t)SOURCE_I2C)
 			{
 				uint8_t k=0;
 				// search for needed sensor
@@ -802,7 +799,7 @@ void AxesProcess (dev_config_t * p_dev_config)
 				raw_axis_data[i] = map2(tmp[i], 0, 32767, AXIS_MIN_VALUE, AXIS_MAX_VALUE);
 			}				
 		}
-    else if (source == (pin_t) SOURCE_BUTTONS)				// buttons/encoders source
+    else if (source == (axis_source_t) SOURCE_BUTTONS)				// buttons/encoders source
     {
 			uint64_t millis = GetTick();
 			int32_t tmp32 = raw_axis_data[i];

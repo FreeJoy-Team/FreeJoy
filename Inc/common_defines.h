@@ -9,7 +9,8 @@
 #ifndef __COMMON_DEFINES_H__
 #define __COMMON_DEFINES_H__
 
-#define DEBUG
+//#define DEBUG
+//#define ADS1115_DMA_MODE
 
 #define FIRMWARE_VERSION					0x1511			// v1.5.1b1
 #define USED_PINS_NUM							30					// constant for BluePill and BlackPill boards

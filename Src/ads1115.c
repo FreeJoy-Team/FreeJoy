@@ -35,15 +35,18 @@ void ADS1115_Init(sensor_t * sensor)
 	int status;
 	uint8_t tmp_buf[2];
 	
-	status = I2C_ReadBlocking(sensor->address << 1, 1, tmp_buf, 2);
-	
+	GPIOB->ODR |= GPIO_Pin_12;
+	tmp_buf[0] = 0xC3;
+	tmp_buf[1] = 0xE3;
+	status = I2C_WriteBlocking(sensor->address << 1, 1, tmp_buf, 2);
+
+	tmp_buf[0] = 0x00;
+	tmp_buf[1] = 0x00;
 	if (status == 0)
 	{
-		tmp_buf[0] = 0xC3;
-		tmp_buf[1] = 0xE3;
-		I2C_WriteBlocking(sensor->address << 1, 1, tmp_buf, 2);
+		status = I2C_ReadBlocking(sensor->address << 1, 1, tmp_buf, 2);
 	}
-	
+	GPIOB->ODR &= ~GPIO_Pin_12;
 }
 
 /**
@@ -55,6 +58,41 @@ int16_t ADS1115_GetData(sensor_t * sensor, uint8_t channel)
 {
 	return sensor->data[2*channel]<<8|sensor->data[1 + 2*channel];
 }
+
+/**
+  * @brief ADS1115 start processing data in blocking mode
+  * @param sensor: Sensor struct
+  * @retval status
+  */
+int ADS1115_ReadBlocking(sensor_t * sensor, uint8_t channel)
+{
+	int ret;	
+	ret = I2C_ReadBlocking(sensor->address << 1, 0, &sensor->data[2*channel], 2);
+
+	return ret;
+}
+
+/**
+  * @brief ADS1115 set mux in blocking mode
+  * @param sensor: Sensor struct
+  * @retval status
+  */
+int ADS1115_SetMuxBlocking(sensor_t * sensor, uint8_t channel)
+{
+	int ret;
+	uint8_t tmp_buf[3];
+	
+	tmp_buf[0] = 0xC3 | (channel << 4);							// config reg MSB
+	tmp_buf[1] = 0xE3;															// config reg LSB
+	
+	ret = I2C_WriteBlocking(sensor->address << 1, 1, tmp_buf, 2);
+	
+	sensor->curr_channel = channel;
+	
+	return ret;
+}
+
+#ifdef ADS1115_DMA_MODE
 
 /**
   * @brief ADS1115 start processing data with DMA
@@ -93,6 +131,9 @@ int ADS1115_StartDMA(sensor_t * sensor, uint8_t channel)
 	sensor->rx_complete = 0;
 	sensor->tx_complete = 1;
 	
+	// Disable other interrupts
+	NVIC_DisableIRQ(TIM1_UP_IRQn);
+	NVIC_DisableIRQ(TIM3_IRQn);
 	
 	// Writting pointer register in blocking mode 
 	I2C_GenerateSTART(I2C1, ENABLE);
@@ -162,7 +203,7 @@ int ADS1115_StartDMA(sensor_t * sensor, uint8_t channel)
 }
 
 /**
-  * @brief ADS1115 set mux for next channel data with DMA
+  * @brief ADS1115 set mux with DMA
   * @param sensor: Sensor struct
   * @retval status
   */
@@ -205,6 +246,10 @@ int ADS1115_SetMuxDMA(sensor_t * sensor, uint8_t channel)
 	DMA_ITConfig(DMA1_Channel6,DMA_IT_TC,ENABLE);
 	NVIC_EnableIRQ(DMA1_Channel6_IRQn);
 	
+	// Disable other interrupts
+	NVIC_DisableIRQ(TIM1_UP_IRQn);
+	NVIC_DisableIRQ(TIM3_IRQn);
+	
 	// Start reading conversion register in non-blocking mode
 	I2C_DMACmd(I2C1,ENABLE);
 	DMA_Cmd(DMA1_Channel6, ENABLE);
@@ -233,20 +278,5 @@ int ADS1115_SetMuxDMA(sensor_t * sensor, uint8_t channel)
 	return 0;
 }
 
-///**
-//  * @brief ADS1115 stop DMA transmittion
-//  * @param sensor: Sensor struct
-//  * @retval None
-//  */
-//void ADS1115_StopDMA(sensor_t * sensor)
-//{	
-//	// disable DMA
-//	I2C_DMACmd(I2C1,DISABLE);
-//	DMA_Cmd(DMA1_Channel6,DISABLE);
-
-//	sensor->tx_complete = 1;
-//	sensor->rx_complete = 1;
-//}
-
-
+#endif	/* ADS1115_DMA_MODE */
 

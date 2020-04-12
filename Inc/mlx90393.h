@@ -12,13 +12,7 @@
 #include "common_types.h"
 #include "periphery.h"
 
-#ifndef M_PI
-	#define M_PI												3.1415926535897932384626433832795
-#endif
-
 #define MLX90393_SPI_MODE							3
-#define MLX90393_TIMEOUT							100
-
 
 // Commands
 #define	MLX_START_BURST 							0x10

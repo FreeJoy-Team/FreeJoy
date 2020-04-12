@@ -12,7 +12,7 @@
 #include "stm32f10x.h"
 #include "stm32f10x_conf.h"
 
-#define I2C_TIMEOUT		100000
+#define I2C_TIMEOUT		10000
 
 void I2C_Start(void);
 int I2C_WriteBlocking(uint8_t dev_addr, uint8_t reg_addr, uint8_t * data, uint16_t length);
