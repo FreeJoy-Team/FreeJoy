@@ -36,7 +36,7 @@ void MLX90393_NOP(uint8_t * in_data)
 	
 	tmp_buf[0] = 0x00;
 	
-	SPI_FullDuplex_TransmitReceive(tmp_buf, in_data, 1);
+	SPI_FullDuplex_TransmitReceive(tmp_buf, in_data, 1, MLX90393_SPI_MODE);
 }
 
 /**
@@ -50,7 +50,7 @@ void MLX90393_Reset(uint8_t * in_data)
 	
 	tmp_buf[0] = 0xF0;
 	
-	SPI_FullDuplex_TransmitReceive(tmp_buf, in_data, 1);
+	SPI_FullDuplex_TransmitReceive(tmp_buf, in_data, 1, MLX90393_SPI_MODE);
 }
 
 /**
@@ -66,7 +66,7 @@ void MLX90393_WriteCommand(uint8_t command, uint8_t * in_data)
 	tmp_buf[0] = command;
 	tmp_buf[1] = 0;
 	
-	SPI_FullDuplex_TransmitReceive(tmp_buf, in_data, 2);
+	SPI_FullDuplex_TransmitReceive(tmp_buf, in_data, 2, MLX90393_SPI_MODE);
 }
 
 /**
@@ -86,7 +86,7 @@ void MLX90393_WriteRegister(uint16_t data,  uint8_t addr , uint8_t * in_data)
 	tmp_buf[3] = addr<<2;							// Register address	
 	tmp_buf[4] = 0;										// Status
 	
-	SPI_FullDuplex_TransmitReceive(tmp_buf, in_data, 5);
+	SPI_FullDuplex_TransmitReceive(tmp_buf, in_data, 5, MLX90393_SPI_MODE);
 }
 
 /**
@@ -106,7 +106,7 @@ void MLX90393_ReadRegister(uint8_t addr , uint8_t * in_data)
 	tmp_buf[3] = 0;										// MSB
 	tmp_buf[4] = 0;										// LSB
 	
-	SPI_FullDuplex_TransmitReceive(tmp_buf, in_data, 5);
+	SPI_FullDuplex_TransmitReceive(tmp_buf, in_data, 5, MLX90393_SPI_MODE);
 }
 
 /**
@@ -241,7 +241,7 @@ void MLX90393_StartDMA(sensor_t * sensor)
 	
 	// CS low
 	pin_config[sensor->source].port->ODR &= ~pin_config[sensor->source].pin;
-	SPI_FullDuplex_TransmitReceive(tmp_buf, sensor->data, 8);
+	SPI_FullDuplex_TransmitReceive(tmp_buf, sensor->data, 8, MLX90393_SPI_MODE);
 }
 
 void MLX90393_StopDMA(sensor_t * sensor)

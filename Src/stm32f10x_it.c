@@ -229,7 +229,7 @@ void TIM1_UP_IRQHandler(void)
 			Generator_Start();
 		}
 		// External sensors data receiption
-		if (millis - sensors_millis >= ADC_PERIOD_MS)
+		if (millis - sensors_millis >= SENSORS_PERIOD_MS)
 		{
 			sensors_millis = millis;
 
@@ -250,7 +250,7 @@ void TIM1_UP_IRQHandler(void)
 					if (sensors[i].type == TLE5011)
 					{
 						TLE501x_StartDMA(&sensors[i]);
-						break;
+						return;
 					}
 					else if (sensors[i].type == MCP3201 ||
 									 sensors[i].type == MCP3202 ||
@@ -258,12 +258,12 @@ void TIM1_UP_IRQHandler(void)
 									 sensors[i].type == MCP3208)
 					{
 						MCP320x_StartDMA(&sensors[i]);
-						break;
+						return;
 					}
 					else if (sensors[i].type == MLX90393_SPI)
 					{
 						MLX90393_StartDMA(&sensors[i++]);
-						break;
+						return;
 					}
 				}
 			}
@@ -387,7 +387,7 @@ void DMA1_Channel3_IRQHandler(void)
 				sensors[i].rx_complete = 0;
 				if (sensors[i].type == TLE5011)
 				{
-					SPI_HalfDuplex_Receive(&sensors[i].data[1], 5);					
+					SPI_HalfDuplex_Receive(&sensors[i].data[1], 5, TLE5011_SPI_MODE);					
 				}
 				return;
 			}

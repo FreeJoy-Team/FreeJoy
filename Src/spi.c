@@ -43,7 +43,7 @@ void SPI_Start(void)
   SPI_InitStructure.SPI_Direction = SPI_Direction_1Line_Tx;
   SPI_InitStructure.SPI_Mode = SPI_Mode_Master;
   SPI_InitStructure.SPI_DataSize = SPI_DataSize_8b;
-  SPI_InitStructure.SPI_CPOL = SPI_CPOL_High;
+  SPI_InitStructure.SPI_CPOL = SPI_CPOL_High;					// SPI Mode 3
   SPI_InitStructure.SPI_CPHA = SPI_CPHA_2Edge;
   SPI_InitStructure.SPI_NSS = SPI_NSS_Soft;
   SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_64;
@@ -60,9 +60,10 @@ void SPI_Start(void)
   * @brief Hardware SPI Send Half-Duplex Function
 	* @param data: data to transmit
 	* @param length: length of data to transmit
+	* @param spi_mode: SPI mode
   * @retval None
   */
-void SPI_HalfDuplex_Transmit(uint8_t * data, uint16_t length)
+void SPI_HalfDuplex_Transmit(uint8_t * data, uint16_t length, uint8_t spi_mode)
 {	
 	GPIO_InitTypeDef 					GPIO_InitStructure;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
@@ -90,7 +91,8 @@ void SPI_HalfDuplex_Transmit(uint8_t * data, uint16_t length)
 	NVIC_EnableIRQ(DMA1_Channel3_IRQn);
 	
 	// Set haft-duplex tx
-	SPI1->CR1 |= SPI_CR1_BIDIMODE;
+	SPI1->CR1 &= ~(SPI_CR1_CPOL|SPI_CR1_CPHA);
+	SPI1->CR1 |= SPI_CR1_BIDIMODE | (spi_mode & 0x03);
 	SPI_BiDirectionalLineConfig(SPI1, SPI_Direction_Tx);
 	
 	DMA_Cmd(DMA1_Channel3, ENABLE);
@@ -100,9 +102,10 @@ void SPI_HalfDuplex_Transmit(uint8_t * data, uint16_t length)
   * @brief Hardware SPI Receive Half-Duplex Function
 	* @param data: buffer for storing received data
 	* @param length: length of data to receive
+	* @param spi_mode: SPI mode
   * @retval None
   */
-void SPI_HalfDuplex_Receive(uint8_t * data, uint16_t length)
+void SPI_HalfDuplex_Receive(uint8_t * data, uint16_t length, uint8_t spi_mode)
 {
 	DMA_InitTypeDef DMA_InitStructure;
 		
@@ -124,7 +127,8 @@ void SPI_HalfDuplex_Receive(uint8_t * data, uint16_t length)
 	NVIC_EnableIRQ(DMA1_Channel2_IRQn);
 	
 	// Set haft-duplex tx
-	SPI1->CR1 |= SPI_CR1_BIDIMODE;
+	SPI1->CR1 &= ~(SPI_CR1_CPOL|SPI_CR1_CPHA);
+	SPI1->CR1 |= SPI_CR1_BIDIMODE | (spi_mode & 0x03);
 	SPI_BiDirectionalLineConfig(SPI1, SPI_Direction_Rx);
 	
 	DMA_Cmd(DMA1_Channel2, ENABLE);
@@ -134,9 +138,10 @@ void SPI_HalfDuplex_Receive(uint8_t * data, uint16_t length)
   * @brief Hardware SPI Transmit-Receive Full-Duplex Function
 	* @param data: buffer for storing rx/tx data
 	* @param length: length of data to receive/transmit
+	* @param spi_mode: SPI mode
   * @retval None
   */
-void SPI_FullDuplex_TransmitReceive(uint8_t * tx_data, uint8_t * rx_data, uint16_t length)
+void SPI_FullDuplex_TransmitReceive(uint8_t * tx_data, uint8_t * rx_data, uint16_t length, uint8_t spi_mode)
 {
 	DMA_InitTypeDef DMA_InitStructure;
 		
@@ -175,9 +180,8 @@ void SPI_FullDuplex_TransmitReceive(uint8_t * tx_data, uint8_t * rx_data, uint16
 	NVIC_EnableIRQ(DMA1_Channel3_IRQn);
 	
 	// Set full-duplex
-	SPI1->CR1 &= ~SPI_CR1_BIDIMODE;
-	SPI1->CR1 &= ~SPI_CR1_BIDIOE;
-	SPI1->CR1 &= ~SPI_CR1_RXONLY;	
+	SPI1->CR1 &= ~(SPI_CR1_BIDIMODE|SPI_CR1_BIDIOE|SPI_CR1_RXONLY|SPI_CR1_CPOL|SPI_CR1_CPHA);
+	SPI1->CR1 |= spi_mode & 0x03;
 	
 	DMA_Cmd(DMA1_Channel2, ENABLE);
 	DMA_Cmd(DMA1_Channel3, ENABLE);
