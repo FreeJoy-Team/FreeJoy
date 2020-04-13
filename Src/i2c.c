@@ -39,11 +39,9 @@ void I2C_Start(void)
 	I2C_InitStructure.I2C_Ack = I2C_Ack_Enable;
 	I2C_InitStructure.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
 	I2C_InitStructure.I2C_ClockSpeed = 400000;
-	I2C_InitStructure.I2C_DutyCycle = I2C_DutyCycle_16_9;
+	I2C_InitStructure.I2C_DutyCycle = I2C_DutyCycle_2;
 	I2C_InitStructure.I2C_Mode = I2C_Mode_I2C;
-	I2C_InitStructure.I2C_OwnAddress1 = 0x07;
-	
-	
+	I2C_InitStructure.I2C_OwnAddress1 = 0x00;	
 	I2C_Init(I2C1,&I2C_InitStructure);
 	I2C_Cmd(I2C1,ENABLE);
 	
@@ -67,6 +65,8 @@ void I2C_Start(void)
 int I2C_WriteBlocking(uint8_t dev_addr, uint8_t reg_addr, uint8_t * data, uint16_t length)
 {	
 	uint32_t ticks = I2C_TIMEOUT;			// number of flag checks before stop i2c transmition 
+	
+	I2C_AcknowledgeConfig(I2C1, ENABLE);
 	
 	I2C_GenerateSTART(I2C1, ENABLE);
 	while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT) && --ticks);
@@ -104,11 +104,15 @@ int I2C_WriteBlocking(uint8_t dev_addr, uint8_t reg_addr, uint8_t * data, uint16
 	* @param reg_addr: address of internal register
 	* @param data: buffer for storing received data
 	* @param length: length of data to receive
+	* @param stop: generate STOP signal before read cycle
+	* @param stop: do not generate ACK after last read byte
   * @retval None
   */
-int I2C_ReadBlocking(uint8_t dev_addr, uint8_t reg_addr, uint8_t * data, uint16_t length)
+int I2C_ReadBlocking(uint8_t dev_addr, uint8_t reg_addr, uint8_t * data, uint16_t length, uint8_t nack)
 {
 	uint32_t ticks = I2C_TIMEOUT;
+	
+	I2C_AcknowledgeConfig(I2C1, ENABLE);
 	
 	I2C_GenerateSTART(I2C1, ENABLE);
 	while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT) && --ticks);
@@ -128,6 +132,7 @@ int I2C_ReadBlocking(uint8_t dev_addr, uint8_t reg_addr, uint8_t * data, uint16_
 	I2C_GenerateSTOP(I2C1, ENABLE);
 	while(I2C_GetFlagStatus(I2C1, I2C_FLAG_BUSY) && --ticks);
 	if (ticks == 0) return -1;
+	ticks = I2C_TIMEOUT;
 	
 	I2C_GenerateSTART(I2C1, ENABLE);
 	while((!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT)) && --ticks);
@@ -140,12 +145,18 @@ int I2C_ReadBlocking(uint8_t dev_addr, uint8_t reg_addr, uint8_t * data, uint16_
 	ticks = I2C_TIMEOUT;
 	
 	for (uint8_t i=0; i<length; i++)
-	{
+	{		
 		while((!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_RECEIVED)) && --ticks);
 		if (ticks == 0) return -1;
 		ticks = I2C_TIMEOUT;
 		
 		data[i] = I2C1->DR;
+		
+		if (nack && i == length - 2) 
+		{
+			I2C_AcknowledgeConfig(I2C1, DISABLE);
+			I2C_NACKPositionConfig(I2C1, I2C_NACKPosition_Current);
+		}
 	}
 	
 	I2C_GenerateSTOP(I2C1, ENABLE);

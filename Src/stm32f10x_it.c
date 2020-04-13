@@ -32,6 +32,7 @@
 #include "mcp320x.h"
 #include "mlx90393.h"
 #include "ads1115.h"
+#include "as5600.h"
 #include "config.h"
 
 /** @addtogroup STM32F10x_StdPeriph_Template
@@ -237,20 +238,21 @@ void TIM1_UP_IRQHandler(void)
  			for (uint8_t i=0; i<MAX_AXIS_NUM; i++)
 			{
 				if (sensors[i].source == (pin_t)SOURCE_I2C && sensors[i].rx_complete && sensors[i].tx_complete)
-				{
-#ifdef ADS1115_DMA_MODE
-					
-					status = ADS1115_StartDMA(&sensors[i], sensors[i].curr_channel);
-					
-#else				
-					RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE);
-					status = ADS1115_ReadBlocking(&sensors[i], sensors[i].curr_channel);					
-					uint8_t channel = (sensors[i].curr_channel < 3) ? (sensors[i].curr_channel + 1) : 0;
-					status = ADS1115_SetMuxBlocking(&sensors[i], channel);
-					RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, DISABLE);		// workaround of errata 2.8.7 issue
-					
-#endif	/* ADS1115_DMA_MODE */
-					break;
+				{		
+					if (sensors[i].type == AS5600)
+					{
+						RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE);
+						status = AS5600_ReadBlocking(&sensors[i]);
+						RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, DISABLE);		// workaround of errata 2.8.7 issue
+					}
+					if (sensors[i].type == ADS1115)
+					{
+						RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE);
+						status = ADS1115_ReadBlocking(&sensors[i], sensors[i].curr_channel);					
+						uint8_t channel = (sensors[i].curr_channel < 3) ? (sensors[i].curr_channel + 1) : 0;
+						status = ADS1115_SetMuxBlocking(&sensors[i], channel);
+						RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, DISABLE);		// workaround of errata 2.8.7 issue
+					}
 				}
 			}
 			// start SPI sensors 
@@ -419,127 +421,6 @@ void DMA1_Channel3_IRQHandler(void)
 		}
 	}
 }
-
-#ifdef ADS1115_DMA_MODE
-
-// I2C Tx Complete
-void DMA1_Channel6_IRQHandler(void)  
-{
-	uint8_t i=0;
-	uint32_t ticks = I2C_TIMEOUT;
-	
-	if (DMA_GetFlagStatus(DMA1_FLAG_TC6))
-	{
-		// Clear transmission complete flag 
-		DMA_ClearFlag(DMA1_FLAG_TC6);
-		
-		I2C_DMACmd(I2C1,DISABLE);	
-		DMA_Cmd(DMA1_Channel6,DISABLE);
-
-		/* EV8_2: Wait until BTF is set before programming the STOP */
-    while ((I2C1->SR1 & 0x00004) != 0x000004 && --ticks);
-		if (ticks == 0)	
-		{
-			sensors[i].tx_complete = 1;
-			sensors[i].rx_complete = 1;
-			NVIC_EnableIRQ(TIM1_UP_IRQn);
-			NVIC_EnableIRQ(TIM3_IRQn);	
-			return;
-		}
-		ticks = I2C_TIMEOUT;
-		
-    /* Program the STOP */
-    I2C_GenerateSTOP(I2C1, ENABLE);
-    /* Make sure that the STOP bit is cleared by Hardware */
-		while ((I2C1->CR1&0x200) == 0x200 && --ticks);
-		if (ticks == 0)	
-		{
-			sensors[i].tx_complete = 1;
-			sensors[i].rx_complete = 1;
-			
-			// Enable other peripery IRQs
-			NVIC_EnableIRQ(TIM1_UP_IRQn);
-			NVIC_EnableIRQ(TIM3_IRQn);	
-			return;
-		}
-		
-		// Enable other peripery IRQs
-		NVIC_EnableIRQ(TIM1_UP_IRQn);
-		NVIC_EnableIRQ(TIM3_IRQn);	
-		
-		for (i = 0; i < MAX_AXIS_NUM; i++)
-		{
-			// searching for active sensor
-			if (sensors[i].source == (pin_t)SOURCE_I2C && !sensors[i].tx_complete) // mux is set
-			{			
-				sensors[i].tx_complete = 1;
-//				sensors[i].rx_complete = 0;
-//				i++;
-				break;							
-			}
-		}
-		
-		// start processing for next I2C sensor 
-		for (uint8_t k = i+1; k < MAX_AXIS_NUM; k++)
-		{
-			if (sensors[k].source == (pin_t)SOURCE_I2C && 
-					!sensors[k].rx_complete)
-			{
-				status = ADS1115_StartDMA(&sensors[i], 0);
-				return;
-			}
-		}
-	}
-}
-
-// I2C Rx Complete
-void DMA1_Channel7_IRQHandler(void)  
-{
-	uint8_t i=0;
-	uint32_t ticks = I2C_TIMEOUT;
-	
-	if (DMA_GetFlagStatus(DMA1_FLAG_TC7))
-	{
-		// Clear transmission complete flag 
-		DMA_ClearFlag(DMA1_FLAG_TC7);
-		
-		I2C_DMACmd(I2C1,DISABLE);	
-		DMA_Cmd(DMA1_Channel7,DISABLE);		
-		
-		I2C_GenerateSTOP(I2C1, ENABLE);
-		while ((I2C1->CR1&0x200) == 0x200 && --ticks);
-		if (ticks == 0)	
-		{
-			sensors[i].tx_complete = 1;
-			sensors[i].rx_complete = 1;
-			
-			// Enable other peripery IRQs
-			NVIC_EnableIRQ(TIM1_UP_IRQn);
-			NVIC_EnableIRQ(TIM3_IRQn);	
-			return;
-		}
-		
-		// Enable other peripery IRQs
-		NVIC_EnableIRQ(TIM1_UP_IRQn);
-		NVIC_EnableIRQ(TIM3_IRQn);	
-		
-		for (i = 0; i < MAX_AXIS_NUM; i++)
-		{
-			// searching for active sensor
-			if (sensors[i].source == (pin_t)SOURCE_I2C && !sensors[i].rx_complete)		// data is read
-			{
-				//sensors[i].tx_complete = 1;
-				sensors[i].rx_complete = 1;
-				
-				// set mux for next channel
-				uint8_t channel = (sensors[i].curr_channel < 3) ? (sensors[i].curr_channel + 1) : 0;
-				status = ADS1115_SetMuxDMA(&sensors[i], channel);			
-			}
-		}
-	}
-}
-
-#endif	/* ADS1115_DMA_MODE */
 
 // I2C error
 void I2C1_ER_IRQHandler(void)

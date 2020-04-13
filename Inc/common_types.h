@@ -83,6 +83,8 @@ enum
 	MLX90393_SPI,
 	MLX90393_I2C,
 	ADS1115,
+	AS5600,
+	
 };
 
 typedef struct

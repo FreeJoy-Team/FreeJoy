@@ -29,6 +29,7 @@
 #include "mcp320x.h"
 #include "mlx90393.h"
 #include "ads1115.h"
+#include "as5600.h"
 #include "buttons.h"
 
 sensor_t sensors[MAX_AXIS_NUM];
@@ -500,13 +501,13 @@ void AxesInit (dev_config_t * p_dev_config)
 		else if (p_dev_config->pins[i] == I2C_SCL)
 		{
 			// look for ADS1115 sensors with different addresses
-			for (uint8_t addr = 0x48; addr <= 0x4B; addr ++)
+			for (uint8_t addr = ADS1115_I2C_ADDR_MIN; addr <= ADS1115_I2C_ADDR_MAX; addr ++)
 			{
 				for (uint8_t k=0; k<MAX_AXIS_NUM; k++)
 				{
 					if (p_dev_config->axis_config[k].source_main == (pin_t) SOURCE_I2C)
 					{
-						if ((p_dev_config->axis_config[k].i2c_address & 0xFC) == addr)
+						if ((p_dev_config->axis_config[k].i2c_address) == addr)
 						{
 							sensors[sensors_cnt].address = p_dev_config->axis_config[k].i2c_address;
 							sensors[sensors_cnt].type = ADS1115;
@@ -519,6 +520,22 @@ void AxesInit (dev_config_t * p_dev_config)
 					}
 				}
 			}
+			// look for AS5600
+			for (uint8_t k=0; k<MAX_AXIS_NUM; k++)
+				{
+					if (p_dev_config->axis_config[k].source_main == (pin_t) SOURCE_I2C)
+					{
+						if ((p_dev_config->axis_config[k].i2c_address) == AS5600_I2C_ADDR)
+						{
+							sensors[sensors_cnt].address = p_dev_config->axis_config[k].i2c_address;
+							sensors[sensors_cnt].type = AS5600;
+							sensors[sensors_cnt].source = (pin_t) SOURCE_I2C;
+							sensors_cnt++;
+							AS5600_Init(&sensors[sensors_cnt]);
+							break;
+						}
+					}
+				}
 		}
 	}
 
@@ -777,7 +794,7 @@ void AxesProcess (dev_config_t * p_dev_config)
 					sensors[k].err_cnt++;
 				}
 			}	
-			else if (source == (axis_source_t)SOURCE_I2C)
+			else if (source == (axis_source_t)SOURCE_I2C)				// source I2C sensor
 			{
 				uint8_t k=0;
 				// search for needed sensor
@@ -786,17 +803,34 @@ void AxesProcess (dev_config_t * p_dev_config)
 					if (sensors[k].address == address) break;
 				}
 				// get data
-				if (p_dev_config->axis_config[i].offset_angle > 0)	// offset enabled
-				{
-					tmp[i] = ADS1115_GetData(&sensors[k], channel) - p_dev_config->axis_config[i].offset_angle * 2730;
-					if (tmp[i] < 0) tmp[i] += 32767;
-					else if (tmp[i] > 32767) tmp[i] -= 32767;
+				if (sensors[k].type == ADS1115)
+				{					
+					if (p_dev_config->axis_config[i].offset_angle > 0)	// offset enabled
+					{
+						tmp[i] = ADS1115_GetData(&sensors[k], channel) - p_dev_config->axis_config[i].offset_angle * 2730;
+						if (tmp[i] < 0) tmp[i] += 32767;
+						else if (tmp[i] > 32767) tmp[i] -= 32767;
+					}
+					else		// offset disabled
+					{
+						tmp[i] = ADS1115_GetData(&sensors[k], channel);
+					}
+					raw_axis_data[i] = map2(tmp[i], 0, 32767, AXIS_MIN_VALUE, AXIS_MAX_VALUE);
 				}
-				else		// offset disabled
+				else if (sensors[k].type == AS5600)
 				{
-					tmp[i] = ADS1115_GetData(&sensors[k], channel);
+					if (p_dev_config->axis_config[i].offset_angle > 0)	// offset enabled
+					{
+						tmp[i] = AS5600_GetData(&sensors[k]) - p_dev_config->axis_config[i].offset_angle * 170;
+						if (tmp[i] < 0) tmp[i] += 4095;
+						else if (tmp[i] > 4095) tmp[i] -= 4095;
+					}
+					else		// offset disabled
+					{
+						tmp[i] = AS5600_GetData(&sensors[k]);
+					}					
+					raw_axis_data[i] = map2(tmp[i], 0, 4095, AXIS_MIN_VALUE, AXIS_MAX_VALUE);
 				}
-				raw_axis_data[i] = map2(tmp[i], 0, 32767, AXIS_MIN_VALUE, AXIS_MAX_VALUE);
 			}				
 		}
     else if (source == (axis_source_t) SOURCE_BUTTONS)				// buttons/encoders source
