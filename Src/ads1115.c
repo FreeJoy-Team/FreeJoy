@@ -35,18 +35,16 @@ void ADS1115_Init(sensor_t * sensor)
 	int status;
 	uint8_t tmp_buf[2];
 	
-	GPIOB->ODR |= GPIO_Pin_12;
 	tmp_buf[0] = 0xC3;
 	tmp_buf[1] = 0xE3;
-	status = I2C_WriteBlocking(sensor->address << 1, 1, tmp_buf, 2);
+	status = I2C_WriteBlocking(sensor->address, 1, tmp_buf, 2);
 
 	tmp_buf[0] = 0x00;
 	tmp_buf[1] = 0x00;
 	if (status == 0)
 	{
-		status = I2C_ReadBlocking(sensor->address << 1, 1, tmp_buf, 2);
+		status = I2C_ReadBlocking(sensor->address, 1, tmp_buf, 2);
 	}
-	GPIOB->ODR &= ~GPIO_Pin_12;
 }
 
 /**
@@ -67,7 +65,7 @@ int16_t ADS1115_GetData(sensor_t * sensor, uint8_t channel)
 int ADS1115_ReadBlocking(sensor_t * sensor, uint8_t channel)
 {
 	int ret;	
-	ret = I2C_ReadBlocking(sensor->address << 1, 0, &sensor->data[2*channel], 2);
+	ret = I2C_ReadBlocking(sensor->address, 0, &sensor->data[2*channel], 2);
 
 	return ret;
 }
@@ -85,7 +83,7 @@ int ADS1115_SetMuxBlocking(sensor_t * sensor, uint8_t channel)
 	tmp_buf[0] = 0xC3 | (channel << 4);							// config reg MSB
 	tmp_buf[1] = 0xE3;															// config reg LSB
 	
-	ret = I2C_WriteBlocking(sensor->address << 1, 1, tmp_buf, 2);
+	ret = I2C_WriteBlocking(sensor->address, 1, tmp_buf, 2);
 	
 	sensor->curr_channel = channel;
 	

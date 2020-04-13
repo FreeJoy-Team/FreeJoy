@@ -243,9 +243,11 @@ void TIM1_UP_IRQHandler(void)
 					status = ADS1115_StartDMA(&sensors[i], sensors[i].curr_channel);
 					
 #else				
+					RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE);
 					status = ADS1115_ReadBlocking(&sensors[i], sensors[i].curr_channel);					
 					uint8_t channel = (sensors[i].curr_channel < 3) ? (sensors[i].curr_channel + 1) : 0;
 					status = ADS1115_SetMuxBlocking(&sensors[i], channel);
+					RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, DISABLE);		// workaround of errata 2.8.7 issue
 					
 #endif	/* ADS1115_DMA_MODE */
 					break;
