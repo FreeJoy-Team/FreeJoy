@@ -142,9 +142,14 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 				p_button_state->cnt++;
 			}
 			// release button after push time
+			else if (!p_button_state->pin_state && p_button_state->prev_state)
+			{				
+				p_button_state->prev_state = 0;
+				p_button_state->changed = 0;	
+			}
 			else if (	millis - p_button_state->time_last > p_dev_config->toggle_press_time_ms)
 			{
-				p_button_state->prev_state = p_button_state->pin_state;
+				p_button_state->prev_state = 1;
 				p_button_state->current_state = 0;
 				p_button_state->changed = 0;
 			}
@@ -167,6 +172,11 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 				p_button_state->cnt++;
 			}
 			// release button after push time
+			else if (p_button_state->pin_state && !p_button_state->prev_state)
+			{				
+				p_button_state->prev_state = 1;
+				p_button_state->changed = 0;
+			}
 			else if (	millis - p_button_state->time_last > p_dev_config->toggle_press_time_ms)
 			{
 				p_button_state->prev_state = p_button_state->pin_state;
