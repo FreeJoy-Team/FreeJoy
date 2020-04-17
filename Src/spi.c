@@ -24,9 +24,6 @@
 
 #include "spi.h"
 
-uint8_t spi_inbuf[10];
-uint8_t spi_outbuf[10];
-
 /**
   * @brief Software SPI Initialization Function
   * @param None

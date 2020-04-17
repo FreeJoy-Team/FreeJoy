@@ -10,9 +10,8 @@
 #define __COMMON_DEFINES_H__
 
 //#define DEBUG
-//#define ADS1115_DMA_MODE
 
-#define FIRMWARE_VERSION					0x1511			// v1.5.1b1
+#define FIRMWARE_VERSION					0x1512			// v1.5.1b2
 #define USED_PINS_NUM							30					// constant for BluePill and BlackPill boards
 #define MAX_AXIS_NUM							8						// max 8
 #define MAX_BUTTONS_NUM						128					// power of 2, max 128

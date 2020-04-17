@@ -14,9 +14,9 @@
 
 #define AS5600_I2C_ADDR				0x36
 
-void AS5600_Init(sensor_t * sensor);
-int16_t AS5600_GetData(sensor_t * sensor);
-
+void AS5600_Init(sensor_t * sensor, uint16_t min, uint16_t max);
+int16_t AS5600_GetRawData(sensor_t * sensor);
+int16_t AS5600_GetScaledData(sensor_t * sensor);
 int AS5600_ReadBlocking(sensor_t * sensor);
 
 #endif 	/* __AS5600_H__ */

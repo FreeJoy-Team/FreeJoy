@@ -530,8 +530,12 @@ void AxesInit (dev_config_t * p_dev_config)
 							sensors[sensors_cnt].address = p_dev_config->axis_config[k].i2c_address;
 							sensors[sensors_cnt].type = AS5600;
 							sensors[sensors_cnt].source = (pin_t) SOURCE_I2C;
-							sensors_cnt++;
-							AS5600_Init(&sensors[sensors_cnt]);
+							
+							uint16_t calib_min = map2(p_dev_config->axis_config[k].calib_min, AXIS_MIN_VALUE, AXIS_MAX_VALUE, 0, 4095);
+							uint16_t calib_max = map2(p_dev_config->axis_config[k].calib_max, AXIS_MIN_VALUE, AXIS_MAX_VALUE, 0, 4095);
+							
+							AS5600_Init(&sensors[sensors_cnt], calib_min, calib_max);						
+							sensors_cnt++;						
 							break;
 						}
 					}
@@ -821,13 +825,13 @@ void AxesProcess (dev_config_t * p_dev_config)
 				{
 					if (p_dev_config->axis_config[i].offset_angle > 0)	// offset enabled
 					{
-						tmp[i] = AS5600_GetData(&sensors[k]) - p_dev_config->axis_config[i].offset_angle * 170;
+						tmp[i] = AS5600_GetScaledData(&sensors[k]) - p_dev_config->axis_config[i].offset_angle * 170;
 						if (tmp[i] < 0) tmp[i] += 4095;
 						else if (tmp[i] > 4095) tmp[i] -= 4095;
 					}
 					else		// offset disabled
 					{
-						tmp[i] = AS5600_GetData(&sensors[k]);
+						tmp[i] = AS5600_GetScaledData(&sensors[k]);
 					}					
 					raw_axis_data[i] = map2(tmp[i], 0, 4095, AXIS_MIN_VALUE, AXIS_MAX_VALUE);
 				}

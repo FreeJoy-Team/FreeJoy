@@ -26,26 +26,6 @@
 
 uint16_t crctable[256];
 
-//uint16_t crc16( uint8_t *buf, uint16_t num )
-//{
-//int i;
-//uint16_t crc = 0xffff;
-
-// while ( num-- )
-// { 
-//	 crc ^= *buf++;
-//   i = 8;
-//   do
-//   { if ( crc & 1 )
-//       crc = ( crc >> 1 ) ^ POLINOM;
-//     else
-//       crc >>= 1;
-//   } while ( --i );
-// }
-// return( crc );
-
-//}
-
 void MakeCrc16Table(void)
 {
 	uint16_t value;

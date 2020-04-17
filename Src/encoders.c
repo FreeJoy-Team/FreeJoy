@@ -24,8 +24,6 @@
 
 #include "encoders.h"
 
-uint8_t		physical_buttons_state[MAX_BUTTONS_NUM];
-
 #if (ENC_COUNT == 1)
 int8_t enc_array [16] =
 {
@@ -56,6 +54,7 @@ encoder_t encoders_state[MAX_ENCODERS_NUM];
 
 void EncoderProcess (buttons_state_t * button_state_buf, dev_config_t * p_dev_config)
 {	
+	uint8_t	physical_buttons_state[MAX_BUTTONS_NUM];
 	uint8_t encoders_present = 0;
 	
 	// search if there is at least one encoder present
