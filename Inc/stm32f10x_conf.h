@@ -37,7 +37,7 @@
 #include "stm32f10x_flash.h"
 //#include "stm32f10x_fsmc.h"
 #include "stm32f10x_gpio.h"
-//#include "stm32f10x_i2c.h"
+#include "stm32f10x_i2c.h"
 //#include "stm32f10x_iwdg.h"
 //#include "stm32f10x_pwr.h"
 #include "stm32f10x_rcc.h"

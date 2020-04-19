@@ -48,7 +48,7 @@ typedef struct
 	
 	int8_t				 	curve_shape[11];
 	uint8_t					resolution : 4;
-	uint8_t					adc_channel : 4;
+	uint8_t					channel : 4;
 	uint8_t					deadband_size: 7;
 	uint8_t					is_dynamic_deadband: 1;
 	
@@ -60,19 +60,47 @@ typedef struct
 	int8_t					center_button;
 	int8_t					increment_button;
 	uint8_t					step;
-	uint8_t					reserved[4];
+	uint8_t					i2c_address;
+	uint8_t					reserved[3];
 	
 } axis_config_t;
 
+enum
+{
+	SOURCE_I2C = -2,
+	SOURCE_BUTTONS = -1,
+};
+typedef int8_t axis_source_t;
+
+
+enum
+{
+	TLE5011 = 1,
+	MCP3201,
+	MCP3202,
+	MCP3204,
+	MCP3208,
+	MLX90393_SPI,
+	MLX90393_I2C,
+	ADS1115,
+	AS5600,
+	
+};
+
 typedef struct
 {
-	uint8_t 	data[6];
+	int8_t 		source;
+	uint8_t		type;
+	uint8_t		address;
+	uint8_t 	data[24];
+	
 	uint8_t 	rx_complete;
 	uint8_t 	tx_complete;
-	int8_t 		cs_pin;
+	uint8_t		curr_channel;
+	
 	uint32_t	ok_cnt;
 	uint32_t 	err_cnt;
-} tle_t;
+} sensor_t;
 
 enum
 {
@@ -88,21 +116,32 @@ enum
 //	RESERVED,
 	
 	SPI_SCK = 7,
+  SPI_MOSI,
+  SPI_MISO,
 
   TLE5011_CS,
-  SPI_DATA,
   TLE5011_GEN,
 
-  SHIFT_REG_CS,
+  MCP3201_CS,
+  MCP3202_CS,
+  MCP3204_CS,
+  MCP3208_CS,
+
+  MLX90393_CS,
+
+  SHIFT_REG_LATCH,
   SHIFT_REG_DATA,
 	
 	LED_PWM,
 	LED_SINGLE,
 	LED_ROW,
 	LED_COLUMN,
+	
+	I2C_SCL,
+	I2C_SDA,
 
 };
-typedef uint8_t pin_t;
+typedef int8_t pin_t;
 
 enum
 {
@@ -138,6 +177,7 @@ enum
 	RADIO_BUTTON3,
 	RADIO_BUTTON4,
 	
+	SEQUENTIAL_TOGGLE,
 	SEQUENTIAL_BUTTON,
 	
 	
@@ -179,7 +219,7 @@ typedef struct
 
 typedef struct
 {
-	int8_t points[13];
+	uint8_t points[13];
 	uint8_t buttons_cnt;
 	uint8_t is_enabled;
 	
@@ -198,8 +238,16 @@ typedef struct
 {	
 	uint8_t 			type;
 	uint8_t 			button_cnt;	
-	int8_t 				pin_cs;
+	int8_t 				pin_latch;
 	int8_t 				pin_data;
+	
+} shift_reg_t;
+
+typedef struct
+{	
+	uint8_t 			type;
+	uint8_t 			button_cnt;	
+	int8_t 				reserved[2];
 	
 } shift_reg_config_t;
 

@@ -18,7 +18,7 @@
 
 #define PREBUF_SIZE											8
 
-extern tle_t sensors[MAX_AXIS_NUM];
+extern sensor_t sensors[MAX_AXIS_NUM];
 
 typedef struct
 {

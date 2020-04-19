@@ -34,9 +34,14 @@ C_SOURCES =  \
 ../Src/leds.c \
 ../Src/main.c \
 ../Src/periphery.c \
-../Src/sensors.c \
+../Src/tle5011.c \
+../Src/as5600.c \
+../Src/ads1115.c \
+../Src/mlx90393.c \
+../Src/mcp320x.c \
 ../Src/shift_registers.c \
 ../Src/spi.c \
+../Src/i2c.c \
 ../Src/stm32f10x_it.c \
 ../Src/usb_desc.c \
 ../Src/usb_endp.c \
@@ -44,7 +49,6 @@ C_SOURCES =  \
 ../Src/usb_istr.c \
 ../Src/usb_prop.c \
 ../Src/usb_pwr.c \
-../Drivers/CMSIS/CM3/CoreSupport/core_cm3.c \
 ../Drivers/CMSIS/CM3/DeviceSupport/ST/STM32F10x/system_stm32f10x.c \
 ../Drivers/STM32F10x_StdPeriph_Driver/src/misc.c \
 ../Drivers/STM32F10x_StdPeriph_Driver/src/stm32f10x_adc.c \
@@ -53,6 +57,7 @@ C_SOURCES =  \
 ../Drivers/STM32F10x_StdPeriph_Driver/src/stm32f10x_gpio.c \
 ../Drivers/STM32F10x_StdPeriph_Driver/src/stm32f10x_rcc.c \
 ../Drivers/STM32F10x_StdPeriph_Driver/src/stm32f10x_spi.c \
+../Drivers/STM32F10x_StdPeriph_Driver/src/stm32f10x_i2c.c \
 ../Drivers/STM32F10x_StdPeriph_Driver/src/stm32f10x_tim.c \
 ../Drivers/STM32_USB-FS-Device_Driver/src/usb_core.c \
 ../Drivers/STM32_USB-FS-Device_Driver/src/usb_init.c \
@@ -149,8 +154,8 @@ LIBDIR =
 LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
 
 # default action: build all
-all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET).bin
-
+#all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET).bin
+all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).bin
 
 #######################################
 # build the application
