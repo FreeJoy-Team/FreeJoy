@@ -24,6 +24,15 @@
 
 #include "bootloader.h"
 
+/**
+  \brief   Set Main Stack Pointer
+  \details Assigns the given value to the Main Stack Pointer (MSP).
+  \param [in]    topOfMainStack  Main Stack Pointer value to set
+ */
+__INLINE void __set_MSP(uint32_t topOfMainStack)
+{
+  __ASM volatile ("MSR msp, %0" : : "r" (topOfMainStack) : );
+}
 
 int main(void)
 {

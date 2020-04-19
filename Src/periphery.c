@@ -25,6 +25,25 @@
 
 #include "periphery.h"
 
+/* define compiler specific symbols */
+#if defined ( __CC_ARM   )
+  #define __ASM            __asm                                      /*!< asm keyword for ARM Compiler          */
+  #define __INLINE         __inline                                   /*!< inline keyword for ARM Compiler       */
+
+#elif defined ( __ICCARM__ )
+  #define __ASM           __asm                                       /*!< asm keyword for IAR Compiler          */
+  #define __INLINE        inline                                      /*!< inline keyword for IAR Compiler. Only avaiable in High optimization mode! */
+
+#elif defined   (  __GNUC__  )
+  #define __ASM            __asm                                      /*!< asm keyword for GNU Compiler          */
+  #define __INLINE         inline                                     /*!< inline keyword for GNU Compiler       */
+
+#elif defined   (  __TASKING__  )
+  #define __ASM            __asm                                      /*!< asm keyword for TASKING Compiler      */
+  #define __INLINE         inline                                     /*!< inline keyword for TASKING Compiler   */
+
+#endif
+
 volatile uint64_t Ticks;
 volatile uint32_t TimingDelay;
 
@@ -61,6 +80,17 @@ pin_config_t pin_config[USED_PINS_NUM] =
 	{GPIOC, GPIO_Pin_14, 14},				// 28
 	{GPIOC, GPIO_Pin_15, 15},				// 29
 };
+
+/**
+  \brief   Set Main Stack Pointer
+  \details Assigns the given value to the Main Stack Pointer (MSP).
+  \param [in]    topOfMainStack  Main Stack Pointer value to set
+ */
+__INLINE void __set_MSP(uint32_t topOfMainStack)
+{
+  __ASM volatile ("MSR msp, %0" : : "r" (topOfMainStack) : );
+}
+
 
 /**
   * @brief SysTick Configuration
