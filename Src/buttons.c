@@ -142,9 +142,14 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 				p_button_state->cnt++;
 			}
 			// release button after push time
+			else if (!p_button_state->pin_state && p_button_state->prev_state)
+			{				
+				p_button_state->prev_state = 0;
+				p_button_state->changed = 0;	
+			}
 			else if (	millis - p_button_state->time_last > p_dev_config->toggle_press_time_ms)
 			{
-				p_button_state->prev_state = p_button_state->pin_state;
+				p_button_state->prev_state = 1;
 				p_button_state->current_state = 0;
 				p_button_state->changed = 0;
 			}
@@ -167,6 +172,11 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 				p_button_state->cnt++;
 			}
 			// release button after push time
+			else if (p_button_state->pin_state && !p_button_state->prev_state)
+			{				
+				p_button_state->prev_state = 1;
+				p_button_state->changed = 0;
+			}
 			else if (	millis - p_button_state->time_last > p_dev_config->toggle_press_time_ms)
 			{
 				p_button_state->prev_state = p_button_state->pin_state;
@@ -407,7 +417,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 			}
 			break;
 			
-		case SEQUENTIAL_BUTTON:
+		case SEQUENTIAL_TOGGLE:
 			// set timestamp if state changed to HIGH
 			if (!p_button_state->changed && 
 					p_button_state->pin_state > p_button_state->prev_state)		
@@ -426,7 +436,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 				for (int16_t i=num-1; i>=0; i--)
 				{
 					if (p_dev_config->buttons[i].physical_num == p_dev_config->buttons[num].physical_num &&
-							p_dev_config->buttons[i].type == SEQUENTIAL_BUTTON)														
+							p_dev_config->buttons[i].type == SEQUENTIAL_TOGGLE)														
 					{
 						is_first = 0;
 						if (buttons_state[i].current_state && !buttons_state[i].prev_state)
@@ -447,7 +457,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 					{
 						// check last
 						if (p_dev_config->buttons[i].physical_num == p_dev_config->buttons[num].physical_num &&
-								p_dev_config->buttons[i].type == SEQUENTIAL_BUTTON)
+								p_dev_config->buttons[i].type == SEQUENTIAL_TOGGLE)
 						{
 							if (!buttons_state[i].current_state) break;
 							else if (!buttons_state[i].prev_state)
@@ -508,7 +518,7 @@ void SequentialButtons_Init (dev_config_t * p_dev_config)
 	{
 		for (uint8_t i=0; i<MAX_BUTTONS_NUM; i++)
 		{
-			if (p_dev_config->buttons[i].type == SEQUENTIAL_BUTTON &&
+			if (p_dev_config->buttons[i].type == SEQUENTIAL_TOGGLE &&
 					p_dev_config->buttons[i].physical_num == physical_num)
 			{
 				buttons_state[i].current_state = 1;
@@ -759,13 +769,17 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 	{
 			uint8_t is_hidden = 0;
 			
-			// buttons is mapped to shift
+			// skip buttons is mapped to shift
 			if (i == p_dev_config->shift_config[0].button ||
 					i == p_dev_config->shift_config[1].button ||
 					i == p_dev_config->shift_config[2].button ||
 					i == p_dev_config->shift_config[3].button ||
-					i == p_dev_config->shift_config[4].button)	continue;
-			
+					i == p_dev_config->shift_config[4].button)	
+			{
+						k++;
+						continue;
+			}
+			// skip buttons mapped to POVs
 			if (p_dev_config->buttons[i].type == POV1_DOWN ||
 					p_dev_config->buttons[i].type == POV1_UP ||
 					p_dev_config->buttons[i].type == POV1_LEFT ||
@@ -781,11 +795,14 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 					p_dev_config->buttons[i].type == POV4_DOWN ||
 					p_dev_config->buttons[i].type == POV4_UP ||
 					p_dev_config->buttons[i].type == POV4_LEFT ||
-					p_dev_config->buttons[i].type == POV4_RIGHT) continue;	
-			
+					p_dev_config->buttons[i].type == POV4_RIGHT)
+			{
+						k++;
+						continue;
+			}
+			// skip buttons mapped to axes
 			for (uint8_t j=0; j<MAX_AXIS_NUM; j++)
 			{
-				// button is mapped to axis
 				if (i == p_dev_config->axis_config[j].decrement_button ||
 						i == p_dev_config->axis_config[j].increment_button)
 				{
@@ -808,7 +825,7 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 			}
 	}
 	
-	// convert encoders data to report format
+	// convert POV data to report format
 	for (int i=0; i<MAX_POVS_NUM; i++)
 	{
 		switch (pov_pos[i])

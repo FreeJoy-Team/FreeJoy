@@ -19,6 +19,7 @@ DebugConfig
 *.OBJ
 *.crf
 *.htm
+*._2i
 
 # Listing Files
 *.axf

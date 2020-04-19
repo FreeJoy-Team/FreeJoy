@@ -11,18 +11,22 @@ Welcome to wiki pages of FreeJoy and FreeJoy-Configurator projects to get instuc
 ## Features
 FreeJoy supports the following external periphery:
 
-* 8 analog inputs
-* 128 push buttons or toggle switches
-* 4 POV hats
-* 16 Incremental encoders
-* Converting analog inputs to buttons (up to 12 buttons per axis)
-* Shift registers 74HC165 and CD4021 for extending inpits number
-* TLE5010/TLE5011 sensors as axes sources
-* 3 PWM channels for LED lighting
-* LEDs bindable to buttons states
+- 8 analog inputs (12 bit output resolution)
+- axis to buttons function (up to 12 buttons per axis)
+- buttons/encoders to axis functions
+- 128 digital inputs (buttons, toggle switches, hat povs, encoders)
+- 5 shift modificators
+- 4 hat povs
+- 16 incremental encoders
+- shift registers 74HC165 and CD4021
+- digital sensors  TLE5010/5011, AS5600, MLX90393 (SPI interface only)
+- external ADCs ADS1115 and MCP3201/02/04/08
+- 3 PWM channels for lighting
+- 24 LEDs (single or matrix) bindable to button's states
+- device name and other USB settings
 
 ## Axes
-FreeJoy supports up to 8 analog inputs at pins A0-A7 and TLE5010/5011 sensors as axes sources. Every axis has its own settings as:
+FreeJoy supports up to 8 analog inputs at pins A0-A7 and digital sensors as axes sources. Every axis has its own settings as:
 
 * Source/destination (X, Y, Z, Rx, Ry, Rz, Slider1, Slider2)
 * Output enabling/disabling
@@ -34,6 +38,7 @@ FreeJoy supports up to 8 analog inputs at pins A0-A7 and TLE5010/5011 sensors as
 * Axis offset option (magnet offset)
 * Curve shaping
 * Functions for combined axes
+* Buttons from axes
 * Axes from buttons/encoders
 
 ## Buttons

@@ -1,7 +1,7 @@
 /**
   ******************************************************************************
-  * @file           : sensors.c
-  * @brief          : Sensors driver implementation
+  * @file           : tle5011.c
+  * @brief          : TLE5011 sensors driver implementation
 			
 		FreeJoy software for game device controllers
     Copyright (C) 2020  Yury Vostrenkov (yuvostrenkov@gmail.com)
@@ -22,7 +22,7 @@
   ******************************************************************************
   */
 
-#include "sensors.h"
+#include "tle5011.h"
 #include <math.h>
 
 uint8_t MathCRC8(uint8_t crc, uint8_t data)
@@ -60,10 +60,10 @@ void TLE501x_Read(uint8_t * data, uint8_t addr, uint8_t length)
 {
 	uint8_t cmd = 0x80 | (addr & 0x0F)<<3 | (length & 0x07);
 	
-	UserSPI_HalfDuplex_Transmit(&cmd, 1);
+	SPI_HalfDuplex_Transmit(&cmd, 1, TLE5011_SPI_MODE);
 	if (length > 0)
 	{
-		UserSPI_HalfDuplex_Receive(data, length+1);
+		SPI_HalfDuplex_Receive(data, length+1, TLE5011_SPI_MODE);
 	}
 
 }
@@ -71,31 +71,18 @@ void TLE501x_Read(uint8_t * data, uint8_t addr, uint8_t length)
 void TLE501x_Write(uint8_t * data, uint8_t addr, uint8_t length)
 {
 	uint8_t cmd = addr<<3 | (addr & 0x0F)<<3 | (length & 0x07);
-	UserSPI_HalfDuplex_Transmit(&cmd, 1);
+	SPI_HalfDuplex_Transmit(&cmd, 1, TLE5011_SPI_MODE);
 	if (length > 0)
 	{
-		UserSPI_HalfDuplex_Transmit(data, length);
+		SPI_HalfDuplex_Transmit(data, length, TLE5011_SPI_MODE);
 	}
 }
 
-int TLE501x_GetAngle(tle_t * sensor, float * angle)
+int TLE501x_GetAngle(sensor_t * sensor, float * angle)
 {
 	int16_t x_value, y_value;
 	float out = 0;
 	int ret = 0;
-
-	
-#if (!SPI_USE_DMA)
-	// Update command
-	sensor->data[0] = 0x00;
-	pin_config[sensor->cs_pin].port->ODR &= ~pin_config[sensor->cs_pin].pin;	
-	TLE501x_Write(&sensor->data[0], 0x00, 0);	
-	
-	// Get sensor data	
-	TLE501x_Read(&sensor->data[1], 0x01, 4);	
-	pin_config[sensor->cs_pin].port->ODR |= pin_config[sensor->cs_pin].pin;
-
-#endif
 	
 	if (CheckCrc(&sensor->data[1], sensor->data[5], 0xFB, 4))
 	{
@@ -116,13 +103,12 @@ int TLE501x_GetAngle(tle_t * sensor, float * angle)
 	return ret;
 }
 
-#if (SPI_USE_DMA)	
-void TLE501x_StartDMA(tle_t * sensor)
+void TLE501x_StartDMA(sensor_t * sensor)
 {	
 	sensor->rx_complete = 1;
 	sensor->tx_complete = 0;
 	// CS low
-	pin_config[sensor->cs_pin].port->ODR &= ~pin_config[sensor->cs_pin].pin;
+	pin_config[sensor->source].port->ODR &= ~pin_config[sensor->source].pin;
 	sensor->data[0] = 0x00;
 	sensor->data[1] = 0x8C;
 	
@@ -130,18 +116,18 @@ void TLE501x_StartDMA(tle_t * sensor)
 	NVIC_DisableIRQ(TIM1_UP_IRQn);
 	NVIC_DisableIRQ(TIM3_IRQn);
 	
-	UserSPI_HalfDuplex_Transmit(&sensor->data[0], 2);
+	SPI_HalfDuplex_Transmit(&sensor->data[0], 2, TLE5011_SPI_MODE);
 }
 
-void TLE501x_StopDMA(tle_t * sensor)
+void TLE501x_StopDMA(sensor_t * sensor)
 {	
 	DMA_Cmd(DMA1_Channel2, DISABLE);
 	SPI_BiDirectionalLineConfig(SPI1, SPI_Direction_Tx);
 	// CS high
-	pin_config[sensor->cs_pin].port->ODR |= pin_config[sensor->cs_pin].pin;
+	pin_config[sensor->source].port->ODR |= pin_config[sensor->source].pin;
 	sensor->rx_complete = 1;
 	sensor->tx_complete = 1;
 }
-#endif
+
 
 

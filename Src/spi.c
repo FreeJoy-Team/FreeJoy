@@ -24,91 +24,12 @@
 
 #include "spi.h"
 
-uint8_t spi_inbuf[10];
-uint8_t spi_outbuf[10];
-
 /**
   * @brief Software SPI Initialization Function
   * @param None
   * @retval None
   */
-void SoftSPI_Init(void)
-{
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB,ENABLE);
-
-	GPIO_InitTypeDef	GPIO_InitStructureure;	
-	GPIO_InitStructureure.GPIO_Pin = GPIO_Pin_3|GPIO_Pin_5;
-	GPIO_InitStructureure.GPIO_Mode = GPIO_Mode_Out_PP;
-	GPIO_InitStructureure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init (GPIOB,&GPIO_InitStructureure);
-}
-/**
-  * @brief Software SPI Send Half-Duplex Function
-  * @param None
-  * @retval None
-  */
-void SoftSPI_HalfDuplex_Transmit(uint8_t * data, uint16_t length)
-{
-	GPIO_InitTypeDef 					GPIO_InitStructureure;
-	
-	GPIO_InitStructureure.GPIO_Mode = GPIO_Mode_Out_PP;
-	GPIO_InitStructureure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_InitStructureure.GPIO_Pin = GPIO_Pin_5;
-	GPIO_Init(GPIOB, &GPIO_InitStructureure);
-	// Set SCK low
-	GPIO_WriteBit(GPIOB, GPIO_Pin_3, Bit_RESET);
-	
-	for (uint16_t i=0; i<length; i++)
-	{
-		int8_t j = 7;
-		do
-		{
-			GPIO_WriteBit(GPIOB, GPIO_Pin_5, (data[i] & (1<<j)) ? Bit_SET : Bit_RESET);
-			GPIO_WriteBit(GPIOB, GPIO_Pin_3, Bit_SET);
-			__NOP();
-			GPIO_WriteBit(GPIOB, GPIO_Pin_3, Bit_RESET);
-			
-			j--;
-		} while(j>=0);
-	}
-}
-/**
-  * @brief Software SPI Receive Half-Duplex Function
-  * @param None
-  * @retval None
-  */
-void SoftSPI_HalfDuplex_Receive(uint8_t * data, uint16_t length)
-{
-	GPIO_InitTypeDef 					GPIO_InitStructure;
-	
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
-	GPIO_Init(GPIOB, &GPIO_InitStructure);
-	// Set SCK low
-	GPIO_WriteBit(GPIOB, GPIO_Pin_3, Bit_RESET);
-	
-	for (uint16_t i=0; i<length; i++)
-	{
-		data[i] = 0;
-		int8_t j = 7;
-		do
-		{
-			GPIO_WriteBit(GPIOB, GPIO_Pin_3, Bit_SET);			
-			data[i] |= GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_5) << j;
-			GPIO_WriteBit(GPIOB, GPIO_Pin_3, Bit_RESET);
-			
-			j--;
-		} while(j>=0);
-	}
-}
-
-/**
-  * @brief Software SPI Initialization Function
-  * @param None
-  * @retval None
-  */
-void HardSPI_Init(void)
+void SPI_Start(void)
 {
 	SPI_InitTypeDef SPI_InitStructure;
 	
@@ -119,7 +40,7 @@ void HardSPI_Init(void)
   SPI_InitStructure.SPI_Direction = SPI_Direction_1Line_Tx;
   SPI_InitStructure.SPI_Mode = SPI_Mode_Master;
   SPI_InitStructure.SPI_DataSize = SPI_DataSize_8b;
-  SPI_InitStructure.SPI_CPOL = SPI_CPOL_Low;
+  SPI_InitStructure.SPI_CPOL = SPI_CPOL_High;					// SPI Mode 3
   SPI_InitStructure.SPI_CPHA = SPI_CPHA_2Edge;
   SPI_InitStructure.SPI_NSS = SPI_NSS_Soft;
   SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_64;
@@ -127,18 +48,19 @@ void HardSPI_Init(void)
   SPI_InitStructure.SPI_CRCPolynomial = 7;
   SPI_Init(SPI1, &SPI_InitStructure);
 
-#if SPI_USE_DMA	
 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
-	SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Tx|SPI_I2S_DMAReq_Rx, ENABLE);
-#endif	
+	SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Tx|SPI_I2S_DMAReq_Rx, ENABLE);	
   SPI_Cmd(SPI1, ENABLE);
 }
+
 /**
   * @brief Hardware SPI Send Half-Duplex Function
-  * @param None
+	* @param data: data to transmit
+	* @param length: length of data to transmit
+	* @param spi_mode: SPI mode
   * @retval None
   */
-void HardSPI_HalfDuplex_Transmit(uint8_t * data, uint16_t length)
+void SPI_HalfDuplex_Transmit(uint8_t * data, uint16_t length, uint8_t spi_mode)
 {	
 	GPIO_InitTypeDef 					GPIO_InitStructure;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
@@ -146,7 +68,6 @@ void HardSPI_HalfDuplex_Transmit(uint8_t * data, uint16_t length)
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;	
 	GPIO_Init (GPIOB,&GPIO_InitStructure);
 
-#if SPI_USE_DMA	
 	DMA_InitTypeDef DMA_InitStructure;
 		
 	DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t) data;
@@ -166,27 +87,23 @@ void HardSPI_HalfDuplex_Transmit(uint8_t * data, uint16_t length)
 	NVIC_SetPriority(DMA1_Channel3_IRQn, 4);
 	NVIC_EnableIRQ(DMA1_Channel3_IRQn);
 	
+	// Set haft-duplex tx
+	SPI1->CR1 &= ~(SPI_CR1_CPOL|SPI_CR1_CPHA);
+	SPI1->CR1 |= SPI_CR1_BIDIMODE | (spi_mode & 0x03);
 	SPI_BiDirectionalLineConfig(SPI1, SPI_Direction_Tx);
 	
 	DMA_Cmd(DMA1_Channel3, ENABLE);
-	
-#else
-	for (uint16_t i=0; i<length; i++)
-	{
-		while (SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_TXE) == RESET); //wait buffer empty
-    SPI_I2S_SendData(SPI1, data[i]);
-    while (SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_BSY) == SET); //wait finish sending
-	}
-#endif
 }
+
 /**
   * @brief Hardware SPI Receive Half-Duplex Function
-  * @param None
+	* @param data: buffer for storing received data
+	* @param length: length of data to receive
+	* @param spi_mode: SPI mode
   * @retval None
   */
-void HardSPI_HalfDuplex_Receive(uint8_t * data, uint16_t length)
+void SPI_HalfDuplex_Receive(uint8_t * data, uint16_t length, uint8_t spi_mode)
 {
-#if SPI_USE_DMA	
 	DMA_InitTypeDef DMA_InitStructure;
 		
 	DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t) data;
@@ -206,48 +123,65 @@ void HardSPI_HalfDuplex_Receive(uint8_t * data, uint16_t length)
 	NVIC_SetPriority(DMA1_Channel2_IRQn, 4);
 	NVIC_EnableIRQ(DMA1_Channel2_IRQn);
 	
-//	SPI_I2S_ITConfig(SPI1, SPI_I2S_IT_RXNE, ENABLE);
-//	NVIC_EnableIRQ(SPI1_IRQn);
-	
+	// Set haft-duplex tx
+	SPI1->CR1 &= ~(SPI_CR1_CPOL|SPI_CR1_CPHA);
+	SPI1->CR1 |= SPI_CR1_BIDIMODE | (spi_mode & 0x03);
 	SPI_BiDirectionalLineConfig(SPI1, SPI_Direction_Rx);
 	
 	DMA_Cmd(DMA1_Channel2, ENABLE);
-	
-#else
-	for (uint16_t i=0; i<length; i++)
-	{
-		SPI_I2S_ReceiveData(SPI1);
-    SPI_BiDirectionalLineConfig(SPI1, SPI_Direction_Rx);
-    while (!(SPI1->SR & SPI_I2S_FLAG_RXNE)) ; // wait data received
-    SPI1->CR1 |= SPI_Direction_Tx;  // Set Tx mode to stop Rx clock
-    data[i] = SPI_I2S_ReceiveData(SPI1);
-	}
-#endif
 }
 
-void UserSPI_Init(void)
+/**
+  * @brief Hardware SPI Transmit-Receive Full-Duplex Function
+	* @param data: buffer for storing rx/tx data
+	* @param length: length of data to receive/transmit
+	* @param spi_mode: SPI mode
+  * @retval None
+  */
+void SPI_FullDuplex_TransmitReceive(uint8_t * tx_data, uint8_t * rx_data, uint16_t length, uint8_t spi_mode)
 {
-#if USE_SOFT_SPI
-	SoftSPI_Init();
-#else
-	HardSPI_Init();
-#endif
-}
-void UserSPI_HalfDuplex_Transmit(uint8_t * data, uint16_t length)
-{
-#if USE_SOFT_SPI
-	SoftSPI_HalfDuplex_Transmit(data, length);
-#else
-	HardSPI_HalfDuplex_Transmit(data, length);
-#endif	
-}
-void UserSPI_HalfDuplex_Receive(uint8_t * data, uint16_t length)
-{
-#if USE_SOFT_SPI
-	SoftSPI_HalfDuplex_Receive(data, length);
-#else
-	HardSPI_HalfDuplex_Receive(data, length);
-#endif	
+	DMA_InitTypeDef DMA_InitStructure;
+		
+	DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t) rx_data;
+	DMA_InitStructure.DMA_BufferSize = length;
+	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t) &SPI1->DR;
+	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
+	DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
+	DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
+	DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
+	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+	DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
+	DMA_InitStructure.DMA_Priority = DMA_Priority_Medium;
+	DMA_Init(DMA1_Channel2, &DMA_InitStructure);
+	
+	DMA_ITConfig(DMA1_Channel2, DMA_IT_TC, ENABLE);
+	NVIC_SetPriority(DMA1_Channel2_IRQn, 4);
+	NVIC_EnableIRQ(DMA1_Channel2_IRQn);
+	
+	DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t) tx_data;
+	DMA_InitStructure.DMA_BufferSize = length;
+	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t) &SPI1->DR;
+	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
+	DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
+	DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
+	DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
+	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+	DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
+	DMA_InitStructure.DMA_Priority = DMA_Priority_Medium;
+	DMA_Init(DMA1_Channel3, &DMA_InitStructure);
+	
+	DMA_ITConfig(DMA1_Channel3, DMA_IT_TC, ENABLE);
+	NVIC_SetPriority(DMA1_Channel3_IRQn, 4);
+	NVIC_EnableIRQ(DMA1_Channel3_IRQn);
+	
+	// Set full-duplex
+	SPI1->CR1 &= ~(SPI_CR1_BIDIMODE|SPI_CR1_BIDIOE|SPI_CR1_RXONLY|SPI_CR1_CPOL|SPI_CR1_CPHA);
+	SPI1->CR1 |= spi_mode & 0x03;
+	
+	DMA_Cmd(DMA1_Channel2, ENABLE);
+	DMA_Cmd(DMA1_Channel3, ENABLE);
 }
 
 
