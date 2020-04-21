@@ -122,14 +122,14 @@ void MLX90393_Start(sensor_t * sensor)
 	// Exit
 	pin_config[sensor->source].port->ODR &= ~pin_config[sensor->source].pin;
 	MLX90393_WriteCommand(MLX_EXIT, rx_buf);							
-	Delay_us(30);
+	Delay_us(50);
 	pin_config[sensor->source].port->ODR |= pin_config[sensor->source].pin;
-	Delay_ms(15);
+	Delay_ms(20);
 	
 	// Reset
 	pin_config[sensor->source].port->ODR &= ~pin_config[sensor->source].pin;
 	MLX90393_Reset(rx_buf);							
-	Delay_us(30);
+	Delay_us(50);
 	pin_config[sensor->source].port->ODR |= pin_config[sensor->source].pin;
 	Delay_ms(50);
 
@@ -138,7 +138,7 @@ void MLX90393_Start(sensor_t * sensor)
 	// Read register value
 	pin_config[sensor->source].port->ODR &= ~pin_config[sensor->source].pin;
 	MLX90393_ReadRegister(0x00, rx_buf);					
-	Delay_us(60);
+	Delay_us(70);
 	pin_config[sensor->source].port->ODR |= pin_config[sensor->source].pin;
 	Delay_us(10);	
 	// Modify register value
@@ -148,35 +148,35 @@ void MLX90393_Start(sensor_t * sensor)
 	// Write register value
 	pin_config[sensor->source].port->ODR &= ~pin_config[sensor->source].pin;
 	MLX90393_WriteRegister(tmp_data, 0x00, rx_buf);					
-	Delay_us(60);
+	Delay_us(70);
 	pin_config[sensor->source].port->ODR |= pin_config[sensor->source].pin;
-	Delay_ms(15);	
+	Delay_ms(20);	
 
 	// -------------- Register 1 ----------------- //
 	
 	// Read register value
 	pin_config[sensor->source].port->ODR &= ~pin_config[sensor->source].pin;
 	MLX90393_ReadRegister(0x01, rx_buf);					
-	Delay_us(60);
+	Delay_us(70);
 	pin_config[sensor->source].port->ODR |= pin_config[sensor->source].pin;
-	Delay_us(10);
+	Delay_us(20);
 	// Set register value
-	tmp_data = SPI_MODE|I2C_MODE|BURST_SEL_X|BURST_SEL_Y|BURST_SEL_Z;
+	tmp_data = SPI_MODE|BURST_SEL_X|BURST_SEL_Y|BURST_SEL_Z;
 	// Write register value
 	pin_config[sensor->source].port->ODR &= ~pin_config[sensor->source].pin;
 	MLX90393_WriteRegister(tmp_data, 0x01, rx_buf);					
-	Delay_us(60);
+	Delay_us(70);
 	pin_config[sensor->source].port->ODR |= pin_config[sensor->source].pin;
-	Delay_ms(15);
+	Delay_ms(20);
 
 	// -------------- Register 2 ----------------- //
 	
 	// Read register value
 	pin_config[sensor->source].port->ODR &= ~pin_config[sensor->source].pin;
 	MLX90393_ReadRegister(0x02, rx_buf);					
-	Delay_us(60);
+	Delay_us(70);
 	pin_config[sensor->source].port->ODR |= pin_config[sensor->source].pin;
-	Delay_us(10);
+	Delay_us(20);
 	// Modify register value
 	tmp_data = rx_buf[3]<<8|rx_buf[4];
 	tmp_data &= ~0x1FFF;
@@ -184,16 +184,16 @@ void MLX90393_Start(sensor_t * sensor)
 	// Write register value
 	pin_config[sensor->source].port->ODR &= ~pin_config[sensor->source].pin;
 	MLX90393_WriteRegister(tmp_data, 0x02, rx_buf);					
-	Delay_us(60);
+	Delay_us(70);
 	pin_config[sensor->source].port->ODR |= pin_config[sensor->source].pin;
-	Delay_ms(15);	
+	Delay_ms(20);	
 	
 	// Burst mode XYZ	
 	pin_config[sensor->source].port->ODR &= ~pin_config[sensor->source].pin;
 	MLX90393_WriteCommand(MLX_START_BURST|MLX_X|MLX_Y|MLX_Z, rx_buf);							
-	Delay_us(30);
+	Delay_us(50);
 	pin_config[sensor->source].port->ODR |= pin_config[sensor->source].pin;
-	Delay_ms(15);
+	Delay_ms(20);
 }
 
 /**
