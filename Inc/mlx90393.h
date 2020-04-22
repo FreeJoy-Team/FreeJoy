@@ -12,12 +12,7 @@
 #include "common_types.h"
 #include "periphery.h"
 
-#ifndef M_PI
-	#define M_PI												3.1415926535897932384626433832795
-#endif
-
-#define MLX90393_TIMEOUT							100
-
+#define MLX90393_SPI_MODE							3
 
 // Commands
 #define	MLX_START_BURST 							0x10
@@ -61,7 +56,7 @@
 
 void MLX90393_Start(sensor_t * sensor);
 void MLX90393_StartDMA(sensor_t * sensor);
-int MLX90393_GetData(uint16_t * data, sensor_t * sensor);
+int MLX90393_GetData(uint16_t * data, sensor_t * sensor, uint8_t channel);
 void MLX90393_StopDMA(sensor_t * sensor);
 
 #endif 	/* __MLX90393_H__ */

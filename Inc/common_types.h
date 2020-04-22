@@ -60,9 +60,18 @@ typedef struct
 	int8_t					center_button;
 	int8_t					increment_button;
 	uint8_t					step;
-	uint8_t					reserved[4];
+	uint8_t					i2c_address;
+	uint8_t					reserved[3];
 	
 } axis_config_t;
+
+enum
+{
+	SOURCE_I2C = -2,
+	SOURCE_BUTTONS = -1,
+};
+typedef int8_t axis_source_t;
+
 
 enum
 {
@@ -71,17 +80,24 @@ enum
 	MCP3202,
 	MCP3204,
 	MCP3208,
-	MLX90393,
+	MLX90393_SPI,
+	MLX90393_I2C,
+	ADS1115,
+	AS5600,
+	
 };
 
 typedef struct
 {
+	int8_t 		source;
 	uint8_t		type;
-	uint8_t		channel;
-	uint8_t 	data[16];
+	uint8_t		address;
+	uint8_t 	data[24];
+	
 	uint8_t 	rx_complete;
 	uint8_t 	tx_complete;
-	int8_t 		cs_pin;
+	uint8_t		curr_channel;
+	
 	uint32_t	ok_cnt;
 	uint32_t 	err_cnt;
 } sensor_t;
@@ -120,9 +136,12 @@ enum
 	LED_SINGLE,
 	LED_ROW,
 	LED_COLUMN,
+	
+	I2C_SCL,
+	I2C_SDA,
 
 };
-typedef uint8_t pin_t;
+typedef int8_t pin_t;
 
 enum
 {

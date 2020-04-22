@@ -25,6 +25,25 @@
 
 #include "periphery.h"
 
+/* define compiler specific symbols */
+#if defined ( __CC_ARM   )
+  #define __ASM            __asm                                      /*!< asm keyword for ARM Compiler          */
+  #define __INLINE         __inline                                   /*!< inline keyword for ARM Compiler       */
+
+#elif defined ( __ICCARM__ )
+  #define __ASM           __asm                                       /*!< asm keyword for IAR Compiler          */
+  #define __INLINE        inline                                      /*!< inline keyword for IAR Compiler. Only avaiable in High optimization mode! */
+
+#elif defined   (  __GNUC__  )
+  #define __ASM            __asm                                      /*!< asm keyword for GNU Compiler          */
+  #define __INLINE         inline                                     /*!< inline keyword for GNU Compiler       */
+
+#elif defined   (  __TASKING__  )
+  #define __ASM            __asm                                      /*!< asm keyword for TASKING Compiler      */
+  #define __INLINE         inline                                     /*!< inline keyword for TASKING Compiler   */
+
+#endif
+
 volatile uint64_t Ticks;
 volatile uint32_t TimingDelay;
 
@@ -61,6 +80,17 @@ pin_config_t pin_config[USED_PINS_NUM] =
 	{GPIOC, GPIO_Pin_14, 14},				// 28
 	{GPIOC, GPIO_Pin_15, 15},				// 29
 };
+
+/**
+  \brief   Set Main Stack Pointer
+  \details Assigns the given value to the Main Stack Pointer (MSP).
+  \param [in]    topOfMainStack  Main Stack Pointer value to set
+ */
+__INLINE void __set_MSP(uint32_t topOfMainStack)
+{
+  __ASM volatile ("MSR msp, %0" : : "r" (topOfMainStack) : );
+}
+
 
 /**
   * @brief SysTick Configuration
@@ -235,6 +265,7 @@ void IO_Init (dev_config_t * p_dev_config)
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
 	GPIO_PinRemapConfig(GPIO_Remap_SWJ_NoJTRST, ENABLE);
 	GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE);
+	GPIO_PinRemapConfig(GPIO_Remap_I2C1, ENABLE);
 	GPIO_PinRemapConfig(GPIO_PartialRemap_TIM3, ENABLE);
 	
 	
@@ -326,7 +357,23 @@ void IO_Init (dev_config_t * p_dev_config)
 			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;						// PP or OD?
 			GPIO_Init (GPIOB,&GPIO_InitStructure);
 
-			HardSPI_Init();
+			SPI_Start();
+		}
+		else if (p_dev_config->pins[i] == I2C_SCL && i == 19)			// PB8
+		{		
+			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+			GPIO_InitStructure.GPIO_Pin = pin_config[i].pin;
+			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;
+			GPIO_Init (GPIOB,&GPIO_InitStructure);
+		}
+		else if (p_dev_config->pins[i] == I2C_SDA && i == 20)			// PB9
+		{		
+			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+			GPIO_InitStructure.GPIO_Pin = pin_config[i].pin;
+			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;						
+			GPIO_Init (GPIOB,&GPIO_InitStructure);
+			
+			I2C_Start();
 		}
 		else if (p_dev_config->pins[i] == TLE5011_CS || 
 						 p_dev_config->pins[i] == MCP3201_CS ||
