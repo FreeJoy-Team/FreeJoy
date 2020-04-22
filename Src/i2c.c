@@ -45,11 +45,7 @@ void I2C_Start(void)
 	I2C_Init(I2C1,&I2C_InitStructure);
 	I2C_Cmd(I2C1,ENABLE);
 	
-	//I2C_ITConfig(I2C1, I2C_IT_EVT/*|I2C_IT_BUF*/, ENABLE);
-	I2C_ITConfig(I2C1,I2C_IT_ERR,ENABLE);
-	
-	NVIC_EnableIRQ (I2C1_EV_IRQn);
-	NVIC_SetPriority(I2C1_EV_IRQn,3);
+	I2C_ITConfig(I2C1,I2C_IT_ERR,ENABLE);	
 	NVIC_EnableIRQ (I2C1_ER_IRQn);
 	NVIC_SetPriority(I2C1_ER_IRQn,3);
 }
