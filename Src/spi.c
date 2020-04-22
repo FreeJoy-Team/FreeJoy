@@ -140,6 +140,12 @@ void SPI_HalfDuplex_Receive(uint8_t * data, uint16_t length, uint8_t spi_mode)
   */
 void SPI_FullDuplex_TransmitReceive(uint8_t * tx_data, uint8_t * rx_data, uint16_t length, uint8_t spi_mode)
 {
+	GPIO_InitTypeDef 					GPIO_InitStructure;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;	
+	GPIO_Init (GPIOB,&GPIO_InitStructure);
+	
 	DMA_InitTypeDef DMA_InitStructure;
 		
 	DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t) rx_data;
