@@ -91,7 +91,7 @@ void EP1_OUT_Callback(void)
 		{
 			config_in_cnt = hid_buf[1];			// requested config packet number
 			
-			if ((config_in_cnt > 0) & (config_in_cnt <= 13))
+			if ((config_in_cnt > 0) & (config_in_cnt <= 15))
 			{		
 				
 				uint8_t pos = 2;
@@ -153,45 +153,59 @@ void EP1_OUT_Callback(void)
 						break;
 					
 					case 6:
-						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.buttons[0]), 62);
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.buttons[0]), 60);
+					
+						memcpy(&tmp_buf[63-sizeof(tmp_dev_config.button_delay1_ms)], (uint8_t *) &(tmp_dev_config.button_delay1_ms), sizeof(tmp_dev_config.button_delay1_ms));
 						break;
 					
 					case 7:
-						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.buttons[31]), 62);
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.buttons[20]), 60);
+					
+						memcpy(&tmp_buf[63-sizeof(tmp_dev_config.button_delay2_ms)], (uint8_t *) &(tmp_dev_config.button_delay2_ms), sizeof(tmp_dev_config.button_delay2_ms));
 						break;
 					
 					case 8:
-						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.buttons[62]), 62);
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.buttons[40]), 60);
+					
+						memcpy(&tmp_buf[63-sizeof(tmp_dev_config.button_delay3_ms)], (uint8_t *) &(tmp_dev_config.button_delay3_ms), sizeof(tmp_dev_config.button_delay3_ms));
 						break;
 					
 					case 9:
-						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.buttons[93]), 62);
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.buttons[60]), 60);
 						break;
 					
 					case 10:
-						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.buttons[124]), 4*sizeof(button_t));
-						pos += 4*sizeof(button_t);
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.buttons[80]), 60);
+						break;
+					
+					case 11:
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.buttons[100]), 60);
+						break;	
+					
+					case 12:
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.buttons[120]), 8*sizeof(button_t));
+						pos += 8*sizeof(button_t);
 					
 						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.axes_to_buttons[0]), sizeof(axis_to_buttons_t));	
 						pos += sizeof(axis_to_buttons_t);
 						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.axes_to_buttons[1]), sizeof(axis_to_buttons_t));	
 						pos += sizeof(axis_to_buttons_t);					
-						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.axes_to_buttons[2]), sizeof(axis_to_buttons_t));	
-						pos += sizeof(axis_to_buttons_t);		
 						break;
 					
-					case 11:
+					case 13:
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.axes_to_buttons[2]), sizeof(axis_to_buttons_t));	
+						pos += sizeof(axis_to_buttons_t);		
 						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.axes_to_buttons[3]), sizeof(axis_to_buttons_t));	
 						pos += sizeof(axis_to_buttons_t);
 						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.axes_to_buttons[4]), sizeof(axis_to_buttons_t));	
 						pos += sizeof(axis_to_buttons_t);					
 						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.axes_to_buttons[5]), sizeof(axis_to_buttons_t));	
 						pos += sizeof(axis_to_buttons_t);	
-						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.axes_to_buttons[6]), sizeof(axis_to_buttons_t));	
-						pos += sizeof(axis_to_buttons_t);	
 						break;
 					
-					case 12:
+					case 14:
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.axes_to_buttons[6]), sizeof(axis_to_buttons_t));	
+						pos += sizeof(axis_to_buttons_t);	
 						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.axes_to_buttons[7]), sizeof(axis_to_buttons_t));	
 						pos += sizeof(axis_to_buttons_t);	
 					
@@ -201,17 +215,22 @@ void EP1_OUT_Callback(void)
 							pos += sizeof(shift_reg_config_t);
 						}
 						
-						
-						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.shift_config[0]), sizeof(shift_modificator_t));
-						pos += sizeof(shift_modificator_t);
-						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.shift_config[1]), sizeof(shift_modificator_t));
-						pos += sizeof(shift_modificator_t);
-						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.shift_config[2]), sizeof(shift_modificator_t));
-						pos += sizeof(shift_modificator_t);
-						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.shift_config[3]), sizeof(shift_modificator_t));
-						pos += sizeof(shift_modificator_t);
-						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.shift_config[4]), sizeof(shift_modificator_t));
-						pos += sizeof(shift_modificator_t);
+						for (i=0; i<5; i++)
+						{
+							memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.shift_config[i]), sizeof(shift_modificator_t));
+							pos += sizeof(shift_modificator_t);
+						}
+
+//						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.shift_config[0]), sizeof(shift_modificator_t));
+//						pos += sizeof(shift_modificator_t);
+//						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.shift_config[1]), sizeof(shift_modificator_t));
+//						pos += sizeof(shift_modificator_t);
+//						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.shift_config[2]), sizeof(shift_modificator_t));
+//						pos += sizeof(shift_modificator_t);
+//						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.shift_config[3]), sizeof(shift_modificator_t));
+//						pos += sizeof(shift_modificator_t);
+//						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.shift_config[4]), sizeof(shift_modificator_t));
+//						pos += sizeof(shift_modificator_t);
 						
 						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.vid), sizeof(tmp_dev_config.vid));
 						pos += sizeof(tmp_dev_config.vid);
@@ -219,20 +238,19 @@ void EP1_OUT_Callback(void)
 						pos += sizeof(tmp_dev_config.pid);
 						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.is_dynamic_config), sizeof(tmp_dev_config.is_dynamic_config));
 						pos += sizeof(tmp_dev_config.is_dynamic_config);
-						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.led_pwm_config), sizeof(tmp_dev_config.led_pwm_config));
-						pos += sizeof(tmp_dev_config.led_pwm_config);
 						break;
 						
-						case 13:
-							memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.leds[0]), MAX_LEDS_NUM*sizeof(led_config_t));
-							pos += MAX_LEDS_NUM*sizeof(led_config_t);
+					case 15:
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.led_pwm_config), sizeof(tmp_dev_config.led_pwm_config));
+						pos += sizeof(tmp_dev_config.led_pwm_config);
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.leds[0]), MAX_LEDS_NUM*sizeof(led_config_t));
+						pos += MAX_LEDS_NUM*sizeof(led_config_t);
 						
 						break;
 						
 					default:
 						break;
-						
-					
+											
 				}
 					
 				USB_CUSTOM_HID_SendReport((uint8_t *)&(tmp_buf), 64);
@@ -303,32 +321,47 @@ void EP1_OUT_Callback(void)
 				
 				case 6:
 				{
-					memcpy((uint8_t *) &(tmp_dev_config.buttons[0]), &hid_buf[pos], 62);
+					memcpy((uint8_t *) &(tmp_dev_config.buttons[0]), &hid_buf[pos], 60);
+					memcpy((uint8_t *) &(tmp_dev_config.button_delay1_ms), &hid_buf[63-sizeof(tmp_dev_config.button_delay1_ms)], sizeof(tmp_dev_config.button_delay1_ms));
 				}
 				break;
 				
 				case 7:
 				{
-					memcpy((uint8_t *) &(tmp_dev_config.buttons[31]), &hid_buf[pos], 62);
+					memcpy((uint8_t *) &(tmp_dev_config.buttons[20]), &hid_buf[pos], 60);
+					memcpy((uint8_t *) &(tmp_dev_config.button_delay2_ms), &hid_buf[63-sizeof(tmp_dev_config.button_delay2_ms)], sizeof(tmp_dev_config.button_delay2_ms));
 				}
 				break;
 				
 				case 8:
 				{
-					memcpy((uint8_t *) &(tmp_dev_config.buttons[62]), &hid_buf[pos], 62);
+					memcpy((uint8_t *) &(tmp_dev_config.buttons[40]), &hid_buf[pos], 60);
+					memcpy((uint8_t *) &(tmp_dev_config.button_delay3_ms), &hid_buf[63-sizeof(tmp_dev_config.button_delay3_ms)], sizeof(tmp_dev_config.button_delay3_ms));
 				}
 				break;
 				
 				case 9:
 				{
-					memcpy((uint8_t *) &(tmp_dev_config.buttons[93]), &hid_buf[pos], 62);
+					memcpy((uint8_t *) &(tmp_dev_config.buttons[60]), &hid_buf[pos], 60);
 				}
 				break;
 				
 				case 10:
 				{
-					memcpy((uint8_t *) &(tmp_dev_config.buttons[124]), &hid_buf[pos], 4*sizeof(button_t));
-					pos += 4*sizeof(button_t);
+					memcpy((uint8_t *) &(tmp_dev_config.buttons[80]), &hid_buf[pos], 60);
+				}
+				break;
+				
+				case 11:
+				{
+					memcpy((uint8_t *) &(tmp_dev_config.buttons[100]), &hid_buf[pos], 60);
+				}
+				break;
+				
+				case 12:
+				{
+					memcpy((uint8_t *) &(tmp_dev_config.buttons[120]), &hid_buf[pos], 8*sizeof(button_t));
+					pos += 8*sizeof(button_t);
 					
 					memcpy((uint8_t *) &(tmp_dev_config.axes_to_buttons[0]), &hid_buf[pos], sizeof(axis_to_buttons_t));
 					pos += sizeof(axis_to_buttons_t);
@@ -339,20 +372,22 @@ void EP1_OUT_Callback(void)
 				}
 				break;
 				
-				case 11:
+				case 13:
 				{
+					memcpy((uint8_t *) &(tmp_dev_config.axes_to_buttons[2]), &hid_buf[pos], sizeof(axis_to_buttons_t));
+					pos += sizeof(axis_to_buttons_t);
 					memcpy((uint8_t *) &(tmp_dev_config.axes_to_buttons[3]), &hid_buf[pos], sizeof(axis_to_buttons_t));
 					pos += sizeof(axis_to_buttons_t);
 					memcpy((uint8_t *) &(tmp_dev_config.axes_to_buttons[4]), &hid_buf[pos], sizeof(axis_to_buttons_t));
 					pos += sizeof(axis_to_buttons_t);
 					memcpy((uint8_t *) &(tmp_dev_config.axes_to_buttons[5]), &hid_buf[pos], sizeof(axis_to_buttons_t));
 					pos += sizeof(axis_to_buttons_t);
-					memcpy((uint8_t *) &(tmp_dev_config.axes_to_buttons[6]), &hid_buf[pos], sizeof(axis_to_buttons_t));
-					pos += sizeof(axis_to_buttons_t);
 					break;
 				}
-				case 12:
+				case 14:
 				{
+					memcpy((uint8_t *) &(tmp_dev_config.axes_to_buttons[6]), &hid_buf[pos], sizeof(axis_to_buttons_t));
+					pos += sizeof(axis_to_buttons_t);
 					memcpy((uint8_t *) &(tmp_dev_config.axes_to_buttons[7]), &hid_buf[pos], sizeof(axis_to_buttons_t));
 					pos += sizeof(axis_to_buttons_t);
 					
@@ -380,14 +415,14 @@ void EP1_OUT_Callback(void)
 					pos += sizeof(tmp_dev_config.pid);
 					memcpy((uint8_t *) &(tmp_dev_config.is_dynamic_config), &hid_buf[pos], sizeof(tmp_dev_config.is_dynamic_config));
 					pos += sizeof(tmp_dev_config.is_dynamic_config);
-					memcpy((uint8_t *) &(tmp_dev_config.led_pwm_config), &hid_buf[pos], sizeof(tmp_dev_config.led_pwm_config));
-					pos += sizeof(tmp_dev_config.led_pwm_config);
 					
 				}					
 					break;
 				
-				case 13:
+				case 15:
 				{
+					memcpy((uint8_t *) &(tmp_dev_config.led_pwm_config), &hid_buf[pos], sizeof(tmp_dev_config.led_pwm_config));
+					pos += sizeof(tmp_dev_config.led_pwm_config);
 					memcpy((uint8_t *) &(tmp_dev_config.leds[0]), &hid_buf[pos], MAX_LEDS_NUM*sizeof(led_config_t));
 					pos += MAX_LEDS_NUM*sizeof(led_config_t);
 				}
@@ -396,7 +431,7 @@ void EP1_OUT_Callback(void)
 				default:
 					break;
 			}
-			if (hid_buf[1] < 13)		// request new packet
+			if (hid_buf[1] < 15)		// request new packet
 			{
 				config_out_cnt = hid_buf[1] + 1;
 				

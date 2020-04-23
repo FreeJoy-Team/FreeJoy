@@ -188,7 +188,9 @@ typedef struct button_t
 {
 	int8_t					physical_num;
 	button_type_t 	type : 5;
-	uint8_t					shift_modificator: 3;	
+	uint8_t					shift_modificator : 3;	
+	uint8_t					button_delay_number;				// :2
+	//uint8_t					:0;
 	
 }	button_t;
 
@@ -199,7 +201,8 @@ typedef struct buttons_state_t
 	//uint8_t pin_prev_state;
 	uint8_t prev_state;
 	uint8_t current_state;
-	uint8_t changed;	
+	uint8_t changed;
+	uint8_t delay_act;					//!!!!!
 	uint8_t cnt;
 	
 } buttons_state_t;
@@ -220,9 +223,9 @@ typedef struct
 typedef struct
 {
 	uint8_t points[13];
-	uint8_t buttons_cnt;
-	uint8_t is_enabled;
-	
+	uint8_t buttons_cnt;									// :4
+	uint8_t is_enabled;										// :1
+
 } axis_to_buttons_t;
 
 enum
@@ -288,38 +291,48 @@ typedef struct
 	
 } led_config_t;
 
+
+//1				-	2 bytes free (possibly 5)
+//9,10,11 - 2
+//12			-	8	(possibly 11)
+//13			- 2	(possibly 6)
+//14			- 6	(possibly 12)
+//15			- 4
+//15 x 64 = 960 (max 1024)
 typedef struct 
 {
 	// config 1
 	uint16_t 						firmware_version;
 	char 								device_name[20];
-	uint16_t						button_debounce_ms;
+	uint16_t						button_debounce_ms;					//uint8_t?
 	uint16_t						toggle_press_time_ms;
-	uint16_t						encoder_press_time_ms;
-	uint16_t 						exchange_period_ms;	
+	uint16_t						encoder_press_time_ms;			//uint8_t?
+	uint16_t 						exchange_period_ms;					//uint8_t?
 	uint8_t							reserved_1[2];
 	pin_t 							pins[USED_PINS_NUM];
-	
 	
 	// config 2-5
 	axis_config_t 			axis_config[MAX_AXIS_NUM];
 	
-	// config 6-7-8-9-10
+	// config 6-7-8-9-10-11-12
 	button_t 						buttons[MAX_BUTTONS_NUM];
+	uint16_t						button_delay1_ms;						// config 6				
+	uint16_t						button_delay2_ms;						// config 7
+	uint16_t						button_delay3_ms;						// config 8
 	
-	// config 10-11-12
+	// config 12-13-14
 	axis_to_buttons_t		axes_to_buttons[MAX_AXIS_NUM];
 	
-	// config 12	
+	// config 14	
 	shift_reg_config_t	shift_registers[4];
 	shift_modificator_t	shift_config[5];
 	uint16_t						vid;
 	uint16_t						pid;
 	uint8_t							is_dynamic_config;
-	led_pwm_config_t		led_pwm_config;
-	uint8_t							reserved_10[16];
+	//uint8_t							reserved_10[16];
 	
-	// config 13;
+	// config 15;
+	led_pwm_config_t		led_pwm_config;
 	led_config_t				leds[MAX_LEDS_NUM];
 	
 	

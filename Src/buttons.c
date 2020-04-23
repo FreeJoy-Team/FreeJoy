@@ -45,14 +45,158 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 	uint32_t 	millis;
 	
 	millis = GetTick();
-	// choose config for current button
-	switch (p_dev_config->buttons[num].type)
-	{		
+	
+	//get delay
+	uint16_t tmp_button_delay;
+	if(p_dev_config->buttons[num].button_delay_number)
+	{
+		switch (p_dev_config->buttons[num].button_delay_number)
+		{	
+		case 1:
+			tmp_button_delay = p_dev_config->button_delay1_ms;
+		break;
+		case 2:
+			tmp_button_delay = p_dev_config->button_delay2_ms;
+		break;
+		case 3:
+			tmp_button_delay = p_dev_config->button_delay3_ms;
+		break;
+		}
+		
+		// get max delay for sequential buttons
+		if (p_dev_config->buttons[num].type == SEQUENTIAL_TOGGLE)
+		{
+			if(p_dev_config->button_delay1_ms > p_dev_config->button_delay2_ms && p_dev_config->button_delay1_ms > p_dev_config->button_delay3_ms)
+					tmp_button_delay = p_dev_config->button_delay1_ms;
+			else if(p_dev_config->button_delay2_ms > p_dev_config->button_delay1_ms && p_dev_config->button_delay2_ms > p_dev_config->button_delay3_ms)
+					tmp_button_delay = p_dev_config->button_delay2_ms;
+			else
+					tmp_button_delay = p_dev_config->button_delay3_ms;
+		}
+	}
+	
+	// delay activated after debounce
+	if ((p_dev_config->buttons[num].button_delay_number && !p_button_state->delay_act) || p_button_state->delay_act == 3)
+	{
+		// set timestamp if state changed
+		if (!p_button_state->changed && 
+				 (p_dev_config->buttons[num].type == SEQUENTIAL_TOGGLE ? p_button_state->pin_state > p_button_state->prev_state : p_button_state->pin_state != p_button_state->prev_state))
+		{
+			p_button_state->time_last = millis;
+			p_button_state->changed = 1;
+		}
+		// set delay activated after debounce if state have not changed
+		else if (p_button_state->changed &&
+						(p_dev_config->buttons[num].type == BUTTON_TOGGLE			? p_button_state->pin_state :
+						 p_dev_config->buttons[num].type == SEQUENTIAL_TOGGLE ? (p_button_state->pin_state && p_button_state->delay_act < 3) :
+						 p_button_state->pin_state != p_button_state->prev_state) &&
+						 millis - p_button_state->time_last > p_dev_config->button_debounce_ms && p_button_state->delay_act < 3) // <<< sequent 
+		{
+			p_button_state->delay_act = 1;
+			//p_button_state->changed = 0;				//sequent
+		}
+		// reset if state changed during debounce period
+		else if (p_dev_config->buttons[num].type == SEQUENTIAL_TOGGLE && !p_button_state->pin_state &&
+						 millis - p_button_state->time_last > p_dev_config->button_debounce_ms)
+		{
+			p_button_state->changed = 0;
+			p_button_state->prev_state = 0;
+			if (p_button_state->delay_act == 3) p_button_state->delay_act = 0;
+		}	
+			
+			
+		else if (	p_button_state->changed && p_button_state->delay_act != 1 && p_dev_config->buttons[num].type != SEQUENTIAL_TOGGLE &&
+							millis - p_button_state->time_last > p_dev_config->button_debounce_ms)
+		{
+			p_button_state->changed = 0;
+		}
+		
+		
+		else if (p_dev_config->buttons[num].type == TOGGLE_SWITCH_ON && !p_button_state->pin_state && p_button_state->prev_state)
+		{				
+			p_button_state->prev_state = 0;
+			p_button_state->changed = 0;	
+		}
+		else if (p_dev_config->buttons[num].type == TOGGLE_SWITCH_OFF && p_button_state->pin_state && !p_button_state->prev_state)
+		{				
+			p_button_state->prev_state = 1;
+			p_button_state->changed = 0;
+		}
+	}
+	
+	else if (!p_dev_config->buttons[num].button_delay_number || (p_button_state->delay_act == 1 && millis - p_button_state->time_last > tmp_button_delay) || p_button_state->delay_act == 2)
+	{
+		uint16_t tmp_debounce = p_dev_config->button_debounce_ms;
+		
+		// enable button after delay
+		if (p_button_state->delay_act == 1 && millis - p_button_state->time_last < p_dev_config->toggle_press_time_ms + tmp_button_delay)
+		{
+			if (p_dev_config->buttons[num].type == TOGGLE_SWITCH_OFF) 
+			{
+				p_button_state->pin_state = 0;
+			}
+			else 																			// SNIZU !!!!!!!!!!!!!
+			{
+				//p_button_state->pin_state = 1;
+				if (p_dev_config->buttons[num].type == TOGGLE_SWITCH && (p_button_state->prev_state != p_button_state->pin_state || 
+						(!p_button_state->pin_state && !p_button_state->current_state)))	
+				{
+					p_button_state->prev_state ? (p_button_state->pin_state = 0) : (p_button_state->pin_state = 1);					// !!!!!!!!!!!!!!!
+					//p_button_state->delay_act++;
+				}			
+				else if (p_dev_config->buttons[num].type != TOGGLE_SWITCH) p_button_state->pin_state = 1;							// IF IF NAH
+				
+				if (p_dev_config->buttons[num].type == SEQUENTIAL_TOGGLE) p_button_state->delay_act++;
+			}
+			tmp_debounce = 0;
+			p_button_state->changed = 1;
+		}
+		// disable delay
+		else if (p_button_state->delay_act && 
+			((p_dev_config->buttons[num].type == SEQUENTIAL_TOGGLE || p_dev_config->buttons[num].type == TOGGLE_SWITCH ||
+				p_dev_config->buttons[num].type == TOGGLE_SWITCH_ON || p_dev_config->buttons[num].type == TOGGLE_SWITCH_OFF) ? 1 :	
+				p_button_state->pin_state != p_button_state->prev_state))
+		{
+			p_button_state->delay_act = 0;
+			tmp_debounce = 0;
+			p_button_state->time_last = millis-1;
+			//p_button_state->changed = 1;
+			if (p_dev_config->buttons[num].type == SEQUENTIAL_TOGGLE)
+			{
+				p_button_state->changed = 1;			//!!!!
+				p_button_state->delay_act = 3;
+				//if(!p_button_state->pin_state) p_button_state->prev_state = 0;
+				//p_button_state->pin_state = 0;
+			}
+			else if (p_dev_config->buttons[num].type == TOGGLE_SWITCH)
+			{
+				//p_button_state->prev_state = 1;
+				p_button_state->current_state = 0;
+				p_button_state->changed = 0;
+			}
+			else if (p_dev_config->buttons[num].type == TOGGLE_SWITCH_ON)
+			{
+				p_button_state->prev_state = 1;
+				p_button_state->current_state = 0;
+				p_button_state->changed = 0;
+			}
+			else if (p_dev_config->buttons[num].type == TOGGLE_SWITCH_OFF)
+			{
+				p_button_state->prev_state = p_button_state->pin_state;
+				p_button_state->current_state = 0;
+				p_button_state->changed = 0;
+			}
+			else
+				p_button_state->changed = 1;
+		}
+
+		
+		switch (p_dev_config->buttons[num].type)
+		{
 		case BUTTON_INVERTED:
 			// invert state for inverted button
 			p_button_state->pin_state = !p_button_state->pin_state;						
 		case BUTTON_NORMAL:
-			
 			// set timestamp if state changed
 			if (!p_button_state->changed && p_button_state->pin_state != p_button_state->prev_state)		
 			{
@@ -61,7 +205,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 			}
 			// set state after debounce if state have not changed
 			else if (	p_button_state->changed && p_button_state->pin_state != p_button_state->prev_state &&
-								millis - p_button_state->time_last > p_dev_config->button_debounce_ms)
+								millis - p_button_state->time_last > tmp_debounce)
 			{
 				p_button_state->changed = 0;
 				p_button_state->current_state = p_button_state->pin_state;
@@ -70,7 +214,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 			}
 			// reset if state changed during debounce period
 			else if (	p_button_state->changed && 
-								millis - p_button_state->time_last > p_dev_config->button_debounce_ms)
+								millis - p_button_state->time_last > tmp_debounce)
 			{
 				p_button_state->changed = 0;
 			}
@@ -86,15 +230,17 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 			}
 			// set state after debounce if state have not changed
 			else if (	p_button_state->changed && p_button_state->pin_state &&
-								millis - p_button_state->time_last > p_dev_config->button_debounce_ms)
+								millis - p_button_state->time_last > tmp_debounce)
 			{
 				p_button_state->changed = 0;
 				p_button_state->prev_state = 1;
 				p_button_state->current_state = !p_button_state->current_state;
 				p_button_state->cnt++;
+				
+				p_button_state->delay_act = 0;				//????
 			}
 			// reset if state changed during debounce period
-			else if (!p_button_state->pin_state && millis - p_button_state->time_last > p_dev_config->button_debounce_ms)
+			else if (!p_button_state->pin_state && millis - p_button_state->time_last > tmp_debounce)
 			{
 				p_button_state->changed = 0;
 				p_button_state->prev_state = 0;
@@ -110,7 +256,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 			}
 			// set state after debounce if state have not changed
 			else if (	p_button_state->changed && p_button_state->pin_state != p_button_state->prev_state &&
-								millis - p_button_state->time_last > p_dev_config->button_debounce_ms)
+								millis - p_button_state->time_last > tmp_debounce)
 			{
 				p_button_state->changed = 0;
 				p_button_state->current_state = 1;
@@ -118,7 +264,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 				p_button_state->cnt++;
 			}
 			// release button after push time
-			else if (	millis - p_button_state->time_last > p_dev_config->toggle_press_time_ms)
+			else if (	millis - p_button_state->time_last > p_dev_config->toggle_press_time_ms + tmp_button_delay)
 			{
 				p_button_state->current_state = 0;
 				p_button_state->changed = 0;
@@ -134,7 +280,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 			}
 			// set state after debounce if state have not changed
 			else if (	p_button_state->changed && p_button_state->pin_state > p_button_state->prev_state &&
-								millis - p_button_state->time_last > p_dev_config->button_debounce_ms)
+								millis - p_button_state->time_last > tmp_debounce)
 			{
 				p_button_state->changed = 0;
 				p_button_state->current_state = 1;
@@ -147,14 +293,14 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 				p_button_state->prev_state = 0;
 				p_button_state->changed = 0;	
 			}
-			else if (	millis - p_button_state->time_last > p_dev_config->toggle_press_time_ms)
+			else if (	millis - p_button_state->time_last > p_dev_config->toggle_press_time_ms + tmp_button_delay)			//toggle_press_time_ms + tmp_button_delay
 			{
 				p_button_state->prev_state = 1;
 				p_button_state->current_state = 0;
 				p_button_state->changed = 0;
 			}
 			break;
-		
+		 
 		case TOGGLE_SWITCH_OFF:
 			// set timestamp if state changed
 			if (!p_button_state->changed && p_button_state->pin_state != p_button_state->prev_state)		
@@ -164,7 +310,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 			}
 			// set state after debounce if state have not changed
 			else if (	p_button_state->changed && p_button_state->pin_state < p_button_state->prev_state &&
-								millis - p_button_state->time_last > p_dev_config->button_debounce_ms)
+								millis - p_button_state->time_last > tmp_debounce)
 			{
 				p_button_state->changed = 0;
 				p_button_state->current_state = 1;
@@ -177,7 +323,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 				p_button_state->prev_state = 1;
 				p_button_state->changed = 0;
 			}
-			else if (	millis - p_button_state->time_last > p_dev_config->toggle_press_time_ms)
+			else if (	millis - p_button_state->time_last > p_dev_config->toggle_press_time_ms + tmp_button_delay)
 			{
 				p_button_state->prev_state = p_button_state->pin_state;
 				p_button_state->current_state = 0;
@@ -197,7 +343,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 			}
 			// set state after debounce if state have not changed
 			else if (	p_button_state->changed && p_button_state->pin_state != p_button_state->prev_state &&
-								millis - p_button_state->time_last > p_dev_config->button_debounce_ms)
+								millis - p_button_state->time_last > tmp_debounce)
 			{
 				p_button_state->changed = 0;
 				//p_button_state->current_state = p_button_state->pin_state;
@@ -228,7 +374,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 			}
 			// reset if state changed during debounce period
 			else if (	p_button_state->changed && 
-								millis - p_button_state->time_last > p_dev_config->button_debounce_ms )
+								millis - p_button_state->time_last > tmp_debounce )
 			{
 				p_button_state->changed = 0;
 			}
@@ -246,7 +392,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 			}
 			// set state after debounce if state have not changed
 			else if (	p_button_state->changed && p_button_state->pin_state != p_button_state->prev_state &&
-								millis - p_button_state->time_last > p_dev_config->button_debounce_ms)
+								millis - p_button_state->time_last > tmp_debounce)
 			{
 				p_button_state->changed = 0;
 				//p_button_state->current_state = p_button_state->pin_state;
@@ -277,7 +423,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 			}
 			// reset if state changed during debounce period
 			else if (	p_button_state->changed && 
-								millis - p_button_state->time_last > p_dev_config->button_debounce_ms )
+								millis - p_button_state->time_last > tmp_debounce )
 			{
 				p_button_state->changed = 0;
 			}
@@ -295,7 +441,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 			}
 			// set state after debounce if state have not changed
 			else if (	p_button_state->changed && p_button_state->pin_state != p_button_state->prev_state &&
-								millis - p_button_state->time_last > p_dev_config->button_debounce_ms)
+								millis - p_button_state->time_last > tmp_debounce)
 			{
 				p_button_state->changed = 0;
 				//p_button_state->current_state = p_button_state->pin_state;
@@ -326,7 +472,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 			}
 			// reset if state changed during debounce period
 			else if (	p_button_state->changed && 
-								millis - p_button_state->time_last > p_dev_config->button_debounce_ms )
+								millis - p_button_state->time_last > tmp_debounce )
 			{
 				p_button_state->changed = 0;
 			}
@@ -344,7 +490,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 			}
 			// set state after debounce if state have not changed
 			else if (	p_button_state->changed && p_button_state->pin_state != p_button_state->prev_state &&
-								millis - p_button_state->time_last > p_dev_config->button_debounce_ms)
+								millis - p_button_state->time_last > tmp_debounce)
 			{
 				p_button_state->changed = 0;
 				//p_button_state->current_state = p_button_state->pin_state;
@@ -375,7 +521,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 			}
 			// reset if state changed during debounce period
 			else if (	p_button_state->changed && 
-								millis - p_button_state->time_last > p_dev_config->button_debounce_ms )
+								millis - p_button_state->time_last > tmp_debounce )
 			{
 				p_button_state->changed = 0;
 			}
@@ -394,7 +540,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 			}
 			// set state after debounce if state have not changed
 			else if (	p_button_state->changed && p_button_state->pin_state &&
-								millis - p_button_state->time_last > p_dev_config->button_debounce_ms)
+								millis - p_button_state->time_last > tmp_debounce)
 			{
 				p_button_state->changed = 0;
 				p_button_state->prev_state = 1;
@@ -410,7 +556,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 				}
 			}
 			// reset if state changed during debounce period
-			else if (!p_button_state->pin_state && millis - p_button_state->time_last > p_dev_config->button_debounce_ms)
+			else if (!p_button_state->pin_state && millis - p_button_state->time_last > tmp_debounce)
 			{
 				p_button_state->changed = 0;
 				p_button_state->prev_state = 0;
@@ -427,7 +573,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 			}
 			// set state after debounce if state have not changed
 			else if (	p_button_state->changed && p_button_state->pin_state &&
-								millis - p_button_state->time_last > p_dev_config->button_debounce_ms)
+								millis - p_button_state->time_last > tmp_debounce)
 			{
 				uint8_t is_first = 1;
 				p_button_state->changed = 0;
@@ -444,7 +590,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 							buttons_state[i].current_state = 0;
 							p_button_state->current_state = 1;
 							p_button_state->prev_state = p_button_state->pin_state;
-							p_button_state->time_last = millis;
+							p_button_state->time_last = millis;// - p_dev_config->button_delay3_ms;				//!!!!!
 							break;
 						}
 					}
@@ -465,7 +611,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 								buttons_state[i].current_state = 0;
 								p_button_state->current_state = 1;
 								p_button_state->prev_state = p_button_state->pin_state;
-								p_button_state->time_last = millis;
+								p_button_state->time_last = millis;// - p_dev_config->button_delay3_ms;				//!!!!!;
 								break;
 							}
 						}	
@@ -474,7 +620,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 				
 			}
 			// reset if state changed during debounce period
-			else if (!p_button_state->pin_state && millis - p_button_state->time_last > p_dev_config->button_debounce_ms)
+			else if (!p_button_state->pin_state && millis - p_button_state->time_last > tmp_debounce)//tmp_debounce)
 			{
 				p_button_state->changed = 0;
 				p_button_state->prev_state = 0;
@@ -483,7 +629,7 @@ void LogicalButtonProcessState (buttons_state_t * p_button_state, uint8_t * pov_
 		
 		default:
 			break;
-		
+			}		
 	}
 }
 
@@ -631,7 +777,7 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 	{
 		uint8_t shift_num = 0;
 		
-		// check logical buttons to have shift modificators
+		// check logical buttons to have shift modificators							// disable if no shift?
 		for (uint8_t j=0; j<MAX_BUTTONS_NUM; j++)
 		{
 			int8_t btn = p_dev_config->buttons[j].physical_num;
@@ -653,7 +799,7 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 					buttons_state[j].time_last = 0;			
 					LogicalButtonProcessState(&buttons_state[j], pov_pos, p_dev_config, j);
 				}
-			}				
+			}
 		}
 		
 		if (shift_num == 0)		// we found not shift modificated physical button
