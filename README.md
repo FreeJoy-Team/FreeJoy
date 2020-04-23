@@ -6,7 +6,7 @@ FreeJoy is widely configurable game device controller based on cheap STM32F103C8
 
 ## Getting started
 
-Welcome to wiki pages of FreeJoy and FreeJoy-Configurator projects to get instuctions [how to flash firmware to your board](https://github.com/vostrenkov/FreeJoy/wiki) and [how to configure device for your application](https://github.com/FreeJoy-Team/FreeJoyConfigurator/wiki).
+Welcome to [our wiki pages](https://github.com/FreeJoy-Team/FreeJoyWiki) to get instuctions how to flash firmware to your board and how to configure device for your application.
 
 ## Features
 FreeJoy supports the following external periphery:
