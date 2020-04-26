@@ -52,6 +52,7 @@ int8_t enc_array [16] =
 
 encoder_t encoders_state[MAX_ENCODERS_NUM];
 
+
 void EncoderProcess (buttons_state_t * button_state_buf, dev_config_t * p_dev_config)
 {	
 	uint8_t	physical_buttons_state[MAX_BUTTONS_NUM];
@@ -122,7 +123,9 @@ void EncoderProcess (buttons_state_t * button_state_buf, dev_config_t * p_dev_co
 			}
 		}
 		
-		if (millis - encoders_state[i].time_last > p_dev_config->encoder_press_time_ms)
+		// release button of encoder
+		if (encoders_state[i].pin_a >=0 && encoders_state[i].pin_b >=0 &&
+				millis - encoders_state[i].time_last > p_dev_config->encoder_press_time_ms)
 		{	
 			button_state_buf[encoders_state[i].pin_a].current_state = 0;
 			button_state_buf[encoders_state[i].pin_b].current_state = 0;

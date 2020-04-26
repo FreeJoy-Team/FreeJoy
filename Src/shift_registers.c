@@ -163,6 +163,12 @@ void ShiftRegisterRead(shift_reg_t * shift_register, uint8_t * data)
   */
 void ShiftRegistersGet (uint8_t * raw_button_data_buf, dev_config_t * p_dev_config, uint8_t * pos)
 {	
+	static uint8_t is_in_use = 0;
+	
+	// TODO: workaround for shift registers reading in interrupt
+	if (is_in_use == 1) return;		// registers are on reading now (mutex latched)
+	is_in_use = 1;
+	
 	uint8_t input_data[16];
 	for (uint8_t i=0; i<MAX_SHIFT_REG_NUM; i++)
 	{
@@ -182,5 +188,6 @@ void ShiftRegistersGet (uint8_t * raw_button_data_buf, dev_config_t * p_dev_conf
 
 		}
 	}
+	is_in_use = 0;		// release mutex
 }
 
