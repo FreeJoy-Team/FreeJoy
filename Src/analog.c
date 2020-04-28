@@ -152,7 +152,7 @@ static int32_t map3(	int32_t x,
 	if ((tmp > in_center && (tmp - in_center) < dead_zone_right) || 
 			(tmp < in_center &&	(in_center - tmp) < dead_zone_left))
 	{
-		return in_center;
+		return out_center;
 	}		
 	
 	if (tmp < in_center)
