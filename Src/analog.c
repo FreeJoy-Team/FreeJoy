@@ -150,9 +150,10 @@ static int32_t map3(	int32_t x,
 	if (tmp < in_min)	return out_min;
 	if (tmp > in_max)	return out_max; 
 	if ((tmp > in_center && (tmp - in_center) < dead_zone_right) || 
-			(tmp < in_center &&	(in_center - tmp) < dead_zone_left))
+			(tmp < in_center &&	(in_center - tmp) < dead_zone_left) ||
+			 tmp == in_center)
 	{
-		return in_center;
+		return out_center;
 	}		
 	
 	if (tmp < in_center)
