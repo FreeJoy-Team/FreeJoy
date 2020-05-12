@@ -67,7 +67,6 @@ __IO uint8_t PrevXferComplete = 1;
 void EP1_OUT_Callback(void)
 {
 	static  dev_config_t tmp_dev_config;
-	static  uint16_t firmware_len = 0;
 	
 	uint8_t config_in_cnt;
 	uint8_t config_out_cnt;
@@ -220,17 +219,6 @@ void EP1_OUT_Callback(void)
 							memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.shift_config[i]), sizeof(shift_modificator_t));
 							pos += sizeof(shift_modificator_t);
 						}
-
-//						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.shift_config[0]), sizeof(shift_modificator_t));
-//						pos += sizeof(shift_modificator_t);
-//						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.shift_config[1]), sizeof(shift_modificator_t));
-//						pos += sizeof(shift_modificator_t);
-//						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.shift_config[2]), sizeof(shift_modificator_t));
-//						pos += sizeof(shift_modificator_t);
-//						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.shift_config[3]), sizeof(shift_modificator_t));
-//						pos += sizeof(shift_modificator_t);
-//						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.shift_config[4]), sizeof(shift_modificator_t));
-//						pos += sizeof(shift_modificator_t);
 						
 						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.vid), sizeof(tmp_dev_config.vid));
 						pos += sizeof(tmp_dev_config.vid);
@@ -475,84 +463,6 @@ void EP1_OUT_Callback(void)
 			
 		case REPORT_ID_FIRMWARE:
 		{
-			uint16_t crc_in = 0;
-			uint16_t crc_comp = 0;
-			uint16_t firmware_in_cnt = 0;
-			
-			uint16_t cnt = hid_buf[1]<<8 | hid_buf[2];
-			
-			if (cnt == 0)			// first packet with info data
-			{
-				firmware_len = hid_buf[5]<<8 | hid_buf[4];
-				
-				if (firmware_len <= 0x7000)	// check new firmware size
-				{
-					FLASH_Unlock();
-					for (uint8_t i=0; i<28; i++)
-					{
-						if (FLASH_ErasePage(FIRMWARE_COPY_ADDR +i*0x400) != FLASH_COMPLETE)
-						{
-							firmware_in_cnt = 0xF003;	// flash erase error
-						}							
-					}
-					for (uint8_t i=0;i<60;i+=2)
-					{
-						uint16_t tmp16 = hid_buf[i + 5]<<8 | hid_buf[i + 4];
-						FLASH_ProgramHalfWord(FIRMWARE_COPY_ADDR + (cnt)*60 + i, tmp16);
-					}
-					FLASH_Lock();
-					firmware_in_cnt = cnt+1;
-				}
-				else // firmware size error
-				{
-					firmware_in_cnt = 0xF001;
-				}
-			}
-			else if ( (firmware_len > 0) && (cnt*60 < firmware_len) )		// body of firmware data
-			{
-				FLASH_Unlock();
-				for (uint8_t i=0;i<60;i+=2)
-				{
-					uint16_t tmp16 = hid_buf[i + 5]<<8 | hid_buf[i + 4];
-					FLASH_ProgramHalfWord(FIRMWARE_COPY_ADDR + (cnt)*60 + i, tmp16);
-				}
-				FLASH_Lock();
-				firmware_in_cnt = cnt+1;
-			}
-			else if (firmware_len > 0)		// last packet
-			{
-				FLASH_Unlock();
-				for (uint8_t i=0;i<60;i+=2)
-				{
-					uint16_t tmp16 = hid_buf[i + 5]<<8 | hid_buf[i + 4];
-					FLASH_ProgramHalfWord(FIRMWARE_COPY_ADDR + (cnt)*60 + i, tmp16);
-				}
-				FLASH_Lock();
-				
-				// check CRC16
-				crc_in = (*(uint8_t *) (FIRMWARE_COPY_ADDR + 3)) << 8 | (*(uint8_t *) (FIRMWARE_COPY_ADDR + 2));				
-				crc_comp = Crc16((uint8_t*)FIRMWARE_COPY_ADDR + 60, firmware_len);				
-				if (crc_in == crc_comp && crc_comp != 0)
-				{
-					bootloader = 1;
-					firmware_in_cnt = 0xF000;	// OK
-				}
-				else	// CRC error
-				{
-					firmware_in_cnt = 0xF002;
-				}
-			}
-			
-			if (firmware_in_cnt > 0)
-			{
-				uint8_t tmp_buf[3];
-				tmp_buf[0] = REPORT_ID_FIRMWARE;
-				tmp_buf[1] = (firmware_in_cnt)>>8;
-				tmp_buf[2] = (firmware_in_cnt)&0xFF;
-				
-				USB_CUSTOM_HID_SendReport(tmp_buf,3);
-
-			}
 			
 		}
 		break;

@@ -49,7 +49,10 @@ volatile uint8_t bootloader = 0;
   * @retval None
   */
 int main(void)
-{
+{	
+	// Relocate vector table
+	WRITE_REG(SCB->VTOR, 0x8002000);
+	
 	SysTick_Init();
 	// getting configuration from flash memory
 	DevConfigGet(&dev_config);
@@ -64,7 +67,7 @@ int main(void)
 	
 	Delay_ms(50);
 	
-	USB_HW_Init(&dev_config);
+	USB_HW_Init();
 	IO_Init(&dev_config);
 	AxesInit(&dev_config); 
 	EncodersInit(&dev_config);	
@@ -97,20 +100,7 @@ int main(void)
   */
 void EnterBootloader (void)
 {
-	uint32_t bootloader_addr;
-	typedef void(*pFunction)(void);
-	pFunction Bootloader;
-	
-	bootloader = 0;
-	
-	__disable_irq();
-	bootloader_addr = *(uint32_t*) (BOOTLOADER_ADDR + 4);
-	
-	Bootloader = (pFunction) bootloader_addr;
-	
-	__set_MSP(*(__IO uint32_t*) BOOTLOADER_ADDR);
-	
-	Bootloader();
+
 }
 
 

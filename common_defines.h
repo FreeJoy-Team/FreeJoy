@@ -26,8 +26,7 @@
 #define AXIS_FULLSCALE						(AXIS_MAX_VALUE - AXIS_MIN_VALUE)
 
 #define CONFIG_ADDR								(0x0800FC00)
-#define FIRMWARE_COPY_ADDR				(0x8000000 + 0x7000)
-#define BOOTLOADER_ADDR						(0x0800F400)
+
 
 enum
 {
