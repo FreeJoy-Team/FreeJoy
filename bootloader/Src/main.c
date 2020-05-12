@@ -68,15 +68,16 @@ int main(void)
 		if (!flash_started)
 		{
 			LED1_ON;
-			Delay(500000L);
+			Delay(500000);
 			LED1_OFF;
-			Delay(10000000L);
+			Delay(10000000);
 		}
 		if (flash_finished)
 		{
+			Delay(100000);
 			USB_Shutdown();
+			Delay(1000000);
 			EnterProgram();
-//			NVIC_SystemReset();
 		}
   }
 }

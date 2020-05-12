@@ -112,7 +112,7 @@ void EP1_OUT_Callback(void)
 							memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.button_debounce_ms), 8);
 							pos += 8;
 							
-							memcpy(&tmp_buf[63-sizeof(tmp_dev_config.pins)], (uint8_t *) &(tmp_dev_config.pins), sizeof(tmp_dev_config.pins));
+							memcpy(&tmp_buf[64-sizeof(tmp_dev_config.pins)], (uint8_t *) &(tmp_dev_config.pins), sizeof(tmp_dev_config.pins));
 						break;
 					
 					case 2:
@@ -154,19 +154,19 @@ void EP1_OUT_Callback(void)
 					case 6:
 						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.buttons[0]), 60);
 					
-						memcpy(&tmp_buf[63-sizeof(tmp_dev_config.button_delay1_ms)], (uint8_t *) &(tmp_dev_config.button_delay1_ms), sizeof(tmp_dev_config.button_delay1_ms));
+						memcpy(&tmp_buf[64-sizeof(tmp_dev_config.button_delay1_ms)], (uint8_t *) &(tmp_dev_config.button_delay1_ms), sizeof(tmp_dev_config.button_delay1_ms));
 						break;
 					
 					case 7:
 						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.buttons[20]), 60);
 					
-						memcpy(&tmp_buf[63-sizeof(tmp_dev_config.button_delay2_ms)], (uint8_t *) &(tmp_dev_config.button_delay2_ms), sizeof(tmp_dev_config.button_delay2_ms));
+						memcpy(&tmp_buf[64-sizeof(tmp_dev_config.button_delay2_ms)], (uint8_t *) &(tmp_dev_config.button_delay2_ms), sizeof(tmp_dev_config.button_delay2_ms));
 						break;
 					
 					case 8:
 						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.buttons[40]), 60);
 					
-						memcpy(&tmp_buf[63-sizeof(tmp_dev_config.button_delay3_ms)], (uint8_t *) &(tmp_dev_config.button_delay3_ms), sizeof(tmp_dev_config.button_delay3_ms));
+						memcpy(&tmp_buf[64-sizeof(tmp_dev_config.button_delay3_ms)], (uint8_t *) &(tmp_dev_config.button_delay3_ms), sizeof(tmp_dev_config.button_delay3_ms));
 						break;
 					
 					case 9:
@@ -260,7 +260,7 @@ void EP1_OUT_Callback(void)
 						memcpy((uint8_t *) &(tmp_dev_config.button_debounce_ms), &hid_buf[pos], 8);
 						pos += 8;
 						
-						memcpy((uint8_t *) &(tmp_dev_config.pins), &hid_buf[63-sizeof(tmp_dev_config.pins)], sizeof(tmp_dev_config.pins));
+						memcpy((uint8_t *) &(tmp_dev_config.pins), &hid_buf[64-sizeof(tmp_dev_config.pins)], sizeof(tmp_dev_config.pins));
 					}
 				break;
 				
@@ -310,21 +310,21 @@ void EP1_OUT_Callback(void)
 				case 6:
 				{
 					memcpy((uint8_t *) &(tmp_dev_config.buttons[0]), &hid_buf[pos], 60);
-					memcpy((uint8_t *) &(tmp_dev_config.button_delay1_ms), &hid_buf[63-sizeof(tmp_dev_config.button_delay1_ms)], sizeof(tmp_dev_config.button_delay1_ms));
+					memcpy((uint8_t *) &(tmp_dev_config.button_delay1_ms), &hid_buf[64-sizeof(tmp_dev_config.button_delay1_ms)], sizeof(tmp_dev_config.button_delay1_ms));
 				}
 				break;
 				
 				case 7:
 				{
 					memcpy((uint8_t *) &(tmp_dev_config.buttons[20]), &hid_buf[pos], 60);
-					memcpy((uint8_t *) &(tmp_dev_config.button_delay2_ms), &hid_buf[63-sizeof(tmp_dev_config.button_delay2_ms)], sizeof(tmp_dev_config.button_delay2_ms));
+					memcpy((uint8_t *) &(tmp_dev_config.button_delay2_ms), &hid_buf[64-sizeof(tmp_dev_config.button_delay2_ms)], sizeof(tmp_dev_config.button_delay2_ms));
 				}
 				break;
 				
 				case 8:
 				{
 					memcpy((uint8_t *) &(tmp_dev_config.buttons[40]), &hid_buf[pos], 60);
-					memcpy((uint8_t *) &(tmp_dev_config.button_delay3_ms), &hid_buf[63-sizeof(tmp_dev_config.button_delay3_ms)], sizeof(tmp_dev_config.button_delay3_ms));
+					memcpy((uint8_t *) &(tmp_dev_config.button_delay3_ms), &hid_buf[64-sizeof(tmp_dev_config.button_delay3_ms)], sizeof(tmp_dev_config.button_delay3_ms));
 				}
 				break;
 				
@@ -463,7 +463,12 @@ void EP1_OUT_Callback(void)
 			
 		case REPORT_ID_FIRMWARE:
 		{
-			
+			const char tmp_str[] = "bootloader run";
+
+			if (strcmp(tmp_str, (const char *) &hid_buf[1]) == 0)
+			{
+				bootloader = 1;
+			}
 		}
 		break;
 		

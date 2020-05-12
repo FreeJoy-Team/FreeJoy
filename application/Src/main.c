@@ -82,12 +82,13 @@ int main(void)
 		ButtonsReadLogical(&dev_config);
 		LEDs_PhysicalProcess(&dev_config);
 		
-		// jump to bootloader if new firmware received
+		// Enter flasher command received
 		if (bootloader > 0)
 		{
 			Delay_ms(50);	// time to let HID end last transmission
 			// Disable USB
 			PowerOff();
+			Delay_ms(200);
 			EnterBootloader();
 		}
   }
@@ -100,7 +101,21 @@ int main(void)
   */
 void EnterBootloader (void)
 {
+	/* Enable the power and backup interface clocks by setting the
+	 * PWREN and BKPEN bits in the RCC_APB1ENR register
+	 */
+	SET_BIT(RCC->APB1ENR, RCC_APB1ENR_BKPEN | RCC_APB1ENR_PWREN);
 
+	/* Enable write access to the backup registers and the
+		* RTC.
+		*/
+	SET_BIT(PWR->CR, PWR_CR_DBP);
+	WRITE_REG(BKP->DR4, 0x424C);
+	CLEAR_BIT(PWR->CR, PWR_CR_DBP);
+	
+	CLEAR_BIT(RCC->APB1ENR, RCC_APB1ENR_BKPEN | RCC_APB1ENR_PWREN);
+	
+	NVIC_SystemReset();
 }
 
 
