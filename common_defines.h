@@ -11,7 +11,7 @@
 
 //#define DEBUG
 
-#define FIRMWARE_VERSION					0x1514			// v1.5.1b4
+#define FIRMWARE_VERSION					0x1600			// v1.6.0b0
 #define USED_PINS_NUM							30					// constant for BluePill and BlackPill boards
 #define MAX_AXIS_NUM							8						// max 8
 #define MAX_BUTTONS_NUM						128					// power of 2, max 128
@@ -26,8 +26,7 @@
 #define AXIS_FULLSCALE						(AXIS_MAX_VALUE - AXIS_MIN_VALUE)
 
 #define CONFIG_ADDR								(0x0800FC00)
-#define FIRMWARE_COPY_ADDR				(0x8000000 + 0x7000)
-#define BOOTLOADER_ADDR						(0x0800F400)
+
 
 enum
 {

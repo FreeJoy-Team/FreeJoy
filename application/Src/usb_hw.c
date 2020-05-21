@@ -302,7 +302,7 @@ void Get_ReportDesc(void)
 	CustomHID_ReportDescriptor[96] = (tmp_app_config.povs & 0x08) ? 0x39 : 0x00;
 }
 
-void USB_HW_Init(dev_config_t * p_dev_config)
+void USB_HW_Init(void)
 {
 	Set_System();
 

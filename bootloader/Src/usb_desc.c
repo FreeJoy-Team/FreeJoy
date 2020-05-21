@@ -40,14 +40,12 @@
 #include "usb_lib.h"
 #include "usb_desc.h"
 
-#include "common_defines.h"
-
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 uint16_t usb_vid = 0x0483;
-uint16_t usb_pid = 0x5750;
+uint16_t usb_pid = 0xBEBA;
 /* Extern variables ----------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
@@ -65,8 +63,8 @@ uint8_t CustomHID_DeviceDescriptor[CUSTOMHID_SIZ_DEVICE_DESC] =
     0x40,                       /*bMaxPacketSize40*/
     0x83,            						/*idVendor = 0x0483 */
     0x04,
-    0x50,						            /*idProduct = 0x5750*/
-    0x57,            
+    0xBA,						            /*idProduct = 0xBEBA*/
+    0xBE,            
     0x00,                       /*bcdDevice rel. 2.00*/
     0x02,
     1,                          /*Index of string descriptor describing
@@ -147,109 +145,18 @@ uint8_t CustomHID_ReportDescriptor[CUSTOMHID_SIZ_REPORT_DESC] =
     0x05, 0x01,                    // USAGE_PAGE (Generic Desktop)
     0x09, 0x04,                    // USAGE (Joystick)
     0xa1, 0x01,                    // COLLECTION (Application)
-
-		0x85, REPORT_ID_JOY,				 	 //		REPORT_ID	(JOY_REPORT_ID)	
-	  
-		// raw axis data
-		0x06, 0x00, 0xff,              // 	USAGE_PAGE (Vendor Defined Page 1)
-    0x09, 0x01,                    //   USAGE (Vendor Usage 1)
-    0x16, 0x01, 0x80,              //  	LOGICAL_MINIMUM (-32767)
-    0x26, 0xFF, 0x7F,						   //   LOGICAL_MAXIMUM (32767)
-    0x75, 0x10,                    //   REPORT_SIZE (16)
-    0x95, MAX_AXIS_NUM,            //   REPORT_COUNT (MAX_AXIS_NUM)
-    0x81, 0x00,                    //   INPUT (Data,Ary,Abs)
 		
-		// raw button serial data
-    0x09, 0x02,                    //   USAGE (Vendor Usage 2)
-    0x15, 0x00,                    //   LOGICAL_MINIMUM (0)
-    0x26, 0xff, 0x00,              //   LOGICAL_MAXIMUM (255)
-    0x75, 0x08,                    //   REPORT_SIZE (8)
-    0x95, 0x0A,                    //   REPORT_COUNT (10)
-    0x81, 0x00,                    //   INPUT (Data,Ary,Abs)
-		
-		// axes data
-		0x05, 0x01,                    // 	USAGE_PAGE (Generic Desktop)
-		0x09, 0x30,                    //   USAGE (X)
-    0x09, 0x31,                    //   USAGE (Y)
-    0x09, 0x32,                    //   USAGE (Z)
-    0x09, 0x33,                    //   USAGE (Rx)
-    0x09, 0x34,                    //   USAGE (Ry)
-    0x09, 0x35,                    //   USAGE (Rz)
-		0x09, 0x36,                    //   USAGE (Slider)
-		0x09, 0x36,                    //  	USAGE (Slider)
-    0x16, 0x01, 0x80,              //  	LOGICAL_MINIMUM (-32767)
-    0x26, 0xFF, 0x7F,						   //   LOGICAL_MAXIMUM (32767)
-    0x75, 0x10,                    //   REPORT_SIZE (16)
-    0x95, MAX_AXIS_NUM,       		 //   REPORT_COUNT (MAX_AXIS_NUM)
-    0x81, 0x02,                    //   INPUT (Data,Var,Abs)
-		
-		// POV data
-		0x09, 0x39, 									 //   USAGE (Hat switch)
-		0x15, 0x00, 									 //   LOGICAL_MINIMUM (0)
-		0x25, 0x07, 									 //   LOGICAL_MAXIMUM (7)
-		0x35, 0x00, 									 //   PHYSICAL_MINIMUM (0)
-		0x46, 0x3B, 0x01,							 //   PHYSICAL_MAXIMUM (315)
-		0x65, 0x12, 									 //   UNIT (SI Rot:Angular Pos) 
-		0x75, 0x08, 									 //   REPORT_SIZE (8) 
-		0x95, 0x01, 								   //   REPORT_COUNT (1)
-		0x81, 0x02, 									 //   INPUT (Data,Var,Abs)
-		0x09, 0x39, 									 //   USAGE (Hat switch)
-		0x81, 0x02, 									 //   INPUT (Data,Var,Abs)
-		0x09, 0x39, 									 //   USAGE (Hat switch)
-		0x81, 0x02, 									 //   INPUT (Data,Var,Abs)
-		0x09, 0x39, 									 //   USAGE (Hat switch)
-		0x81, 0x02, 									 //   INPUT (Data,Var,Abs)
-		
-		// buttons data
-		0x05, 0x09,                    //   USAGE_PAGE (Button)		
-    0x19, 0x01,                    //   USAGE_MINIMUM (Button 1)
-    0x29, MAX_BUTTONS_NUM,         //   USAGE_MAXIMUM (Button MAX_BUTTONS_NUM)
-    0x15, 0x00,                    //   LOGICAL_MINIMUM (0)
-    0x25, 0x01,                    //   LOGICAL_MAXIMUM (1)
-    0x75, 0x01,                    //   REPORT_SIZE (1)
-    0x95, MAX_BUTTONS_NUM,         //   REPORT_COUNT (MAX_BUTTONS_NUM)
-    0x81, 0x02,                    //   INPUT (Data,Var,Abs)
-		
-		
-		
-		// config data
-		0x85, REPORT_ID_CONFIG_IN,     //   REPORT_ID (2)
-		0x06, 0x00, 0xff,              // 	USAGE_PAGE (Vendor Defined Page 1)
-    0x09, 0x03,                    //   USAGE (Vendor Usage 3)
-    0x15, 0x00,                    //   LOGICAL_MINIMUM (0)
-    0x26, 0xff, 0x00,              //   LOGICAL_MAXIMUM (255)
-    0x75, 0x08,                    //   REPORT_SIZE (8)
-    0x95, 0x3f,                    //   REPORT_COUNT (63)
-    0x81, 0x00,                    //   INPUT (Data,Ary,Abs)
-		
-    0x09, 0x03,                    //   USAGE (Vendor Usage 3)
-    0x75, 0x08,                    //   REPORT_SIZE (8)
-    0x95, 0x01,                    //   REPORT_COUNT (1)
-    0x91, 0x00,                    //   OUTPUT (Data,Ary,Abs)
-		
-    0x85, REPORT_ID_CONFIG_OUT,    //   REPORT_ID (3)	
-    0x09, 0x04,                    //   USAGE (Vendor Usage 4)
-    0x75, 0x08,                    //   REPORT_SIZE (8)
-    0x95, 0x01,                    //   REPORT_COUNT (1)
-		0x81, 0x00,                    //   INPUT (Data,Ary,Abs)
-		
-    0x09, 0x05,                    //   USAGE (Vendor Usage 5)
-    0x75, 0x08,                    //   REPORT_SIZE (8)
-    0x95, 0x3f,                    //   REPORT_COUNT (63)
-		0x91, 0x00,                    //   OUTPUT (Data,Ary,Abs)
-		
-		0x85, REPORT_ID_FIRMWARE,    	 //   REPORT_ID (3)	
+		0x85, 0x04,    	 							 //   REPORT_ID (4)	
     0x09, 0x06,                    //   USAGE (Vendor Usage 6)
     0x75, 0x08,                    //   REPORT_SIZE (8)
-    0x95, 0x02,                    //   REPORT_COUNT (1)
+    0x95, 0x02,                    //   REPORT_COUNT (2)
 		0x81, 0x00,                    //   INPUT (Data,Ary,Abs)
 		
     0x09, 0x07,                    //   USAGE (Vendor Usage 7)
     0x75, 0x08,                    //   REPORT_SIZE (8)
 		0x95, 0x3f,                    //   REPORT_COUNT (63)
 		0x91, 0x00,                    //   OUTPUT (Data,Ary,Abs)
-		
-		
+			
 		0xc0,                           // END_COLLECTION
   }; /* CustomHID_ReportDescriptor */
 
@@ -277,9 +184,9 @@ uint8_t CustomHID_StringProduct[CUSTOMHID_SIZ_STRING_PRODUCT] =
   {
     CUSTOMHID_SIZ_STRING_PRODUCT,          /* bLength */
     USB_STRING_DESCRIPTOR_TYPE,        /* bDescriptorType */
-    'S', 0, 'T', 0, 'M', 0, '3', 0, '2', 0, ' ', 0, 'C', 0,
-    'u', 0, 's', 0, 't', 0, 'm', 0, ' ', 0, 'H', 0, 'I', 0,
-    'D', 0
+    'F', 0, 'r', 0, 'e', 0, 'e', 0, 'J', 0, 'o', 0, 'y', 0,
+    ' ', 0, 'F', 0, 'l', 0, 'a', 0, 's', 0, 'h', 0, 'e', 0,
+    'r', 0
   };
 uint8_t CustomHID_StringSerial[CUSTOMHID_SIZ_STRING_SERIAL] =
   {

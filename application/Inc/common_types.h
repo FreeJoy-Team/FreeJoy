@@ -316,9 +316,9 @@ typedef struct
 	
 	// config 6-7-8-9-10-11-12
 	button_t 						buttons[MAX_BUTTONS_NUM];
-	uint16_t						button_delay1_ms;						// config 6				
-	uint16_t						button_delay2_ms;						// config 7
-	uint16_t						button_delay3_ms;						// config 8
+	uint16_t						button_delay1_ms;						// config packet 6				
+	uint16_t						button_delay2_ms;						// config packet 7
+	uint16_t						button_delay3_ms;						// config packet 8
 	
 	// config 12-13-14
 	axis_to_buttons_t		axes_to_buttons[MAX_AXIS_NUM];

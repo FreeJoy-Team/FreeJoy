@@ -81,16 +81,6 @@ pin_config_t pin_config[USED_PINS_NUM] =
 	{GPIOC, GPIO_Pin_15, 15},				// 29
 };
 
-/**
-  \brief   Set Main Stack Pointer
-  \details Assigns the given value to the Main Stack Pointer (MSP).
-  \param [in]    topOfMainStack  Main Stack Pointer value to set
- */
-__INLINE void __set_MSP(uint32_t topOfMainStack)
-{
-  __ASM volatile ("MSR msp, %0" : : "r" (topOfMainStack) : );
-}
-
 
 /**
   * @brief SysTick Configuration

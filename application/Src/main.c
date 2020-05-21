@@ -49,7 +49,10 @@ volatile uint8_t bootloader = 0;
   * @retval None
   */
 int main(void)
-{
+{	
+	// Relocate vector table
+	WRITE_REG(SCB->VTOR, 0x8002000);
+	
 	SysTick_Init();
 	// getting configuration from flash memory
 	DevConfigGet(&dev_config);
@@ -64,7 +67,7 @@ int main(void)
 	
 	Delay_ms(50);
 	
-	USB_HW_Init(&dev_config);
+	USB_HW_Init();
 	IO_Init(&dev_config);
 	AxesInit(&dev_config); 
 	EncodersInit(&dev_config);	
@@ -79,12 +82,13 @@ int main(void)
 		ButtonsReadLogical(&dev_config);
 		LEDs_PhysicalProcess(&dev_config);
 		
-		// jump to bootloader if new firmware received
+		// Enter flasher command received
 		if (bootloader > 0)
 		{
 			Delay_ms(50);	// time to let HID end last transmission
 			// Disable USB
 			PowerOff();
+			Delay_ms(200);
 			EnterBootloader();
 		}
   }
@@ -97,20 +101,21 @@ int main(void)
   */
 void EnterBootloader (void)
 {
-	uint32_t bootloader_addr;
-	typedef void(*pFunction)(void);
-	pFunction Bootloader;
+	/* Enable the power and backup interface clocks by setting the
+	 * PWREN and BKPEN bits in the RCC_APB1ENR register
+	 */
+	SET_BIT(RCC->APB1ENR, RCC_APB1ENR_BKPEN | RCC_APB1ENR_PWREN);
+
+	/* Enable write access to the backup registers and the
+		* RTC.
+		*/
+	SET_BIT(PWR->CR, PWR_CR_DBP);
+	WRITE_REG(BKP->DR4, 0x424C);
+	CLEAR_BIT(PWR->CR, PWR_CR_DBP);
 	
-	bootloader = 0;
+	CLEAR_BIT(RCC->APB1ENR, RCC_APB1ENR_BKPEN | RCC_APB1ENR_PWREN);
 	
-	__disable_irq();
-	bootloader_addr = *(uint32_t*) (BOOTLOADER_ADDR + 4);
-	
-	Bootloader = (pFunction) bootloader_addr;
-	
-	__set_MSP(*(__IO uint32_t*) BOOTLOADER_ADDR);
-	
-	Bootloader();
+	NVIC_SystemReset();
 }
 
 
