@@ -188,9 +188,12 @@ typedef struct button_t
 {
 	int8_t					physical_num;
 	button_type_t 	type : 5;
-	uint8_t					shift_modificator : 3;	
-	uint8_t					button_delay_number;				// :2
-	//uint8_t					:0;
+	uint8_t					shift_modificator : 3;
+	
+	uint8_t					is_inverted :1;
+	uint8_t					is_ONOFF :1;							// not used
+	uint8_t					button_delay_number :3;
+	uint8_t					button_toggle_number :3;
 	
 }	button_t;
 
@@ -202,7 +205,7 @@ typedef struct buttons_state_t
 	uint8_t prev_state;
 	uint8_t current_state;
 	uint8_t changed;
-	uint8_t delay_act;					//!!!!!
+	uint8_t delay_act;
 	uint8_t cnt;
 	
 } buttons_state_t;
@@ -292,7 +295,7 @@ typedef struct
 } led_config_t;
 
 
-//1				-	2 bytes free (possibly 5)
+//1				-	4 bytes free (possibly 7)
 //9,10,11 - 2
 //12			-	8	(possibly 11)
 //13			- 2	(possibly 6)
@@ -305,7 +308,7 @@ typedef struct
 	uint16_t 						firmware_version;
 	char 								device_name[20];
 	uint16_t						button_debounce_ms;					//uint8_t?
-	uint16_t						toggle_press_time_ms;
+	//uint16_t						toggle_press_time_ms;
 	uint16_t						encoder_press_time_ms;			//uint8_t?
 	uint16_t 						exchange_period_ms;					//uint8_t?
 	uint8_t							reserved_1[2];
@@ -316,9 +319,9 @@ typedef struct
 	
 	// config 6-7-8-9-10-11-12
 	button_t 						buttons[MAX_BUTTONS_NUM];
-	uint16_t						button_delay1_ms;						// config packet 6				
-	uint16_t						button_delay2_ms;						// config packet 7
-	uint16_t						button_delay3_ms;						// config packet 8
+	uint16_t						button_timer1_ms;						// config packet 6				
+	uint16_t						button_timer2_ms;						// config packet 7
+	uint16_t						button_timer3_ms;						// config packet 8
 	
 	// config 12-13-14
 	axis_to_buttons_t		axes_to_buttons[MAX_AXIS_NUM];
