@@ -46,7 +46,7 @@ static const dev_config_t init_config =
 	
 	.button_debounce_ms = 50,					// debounce time for all buttons
 	
-	.toggle_press_time_ms = 200,			// amount of milliseconds virtual button 
+	//.toggle_press_time_ms = 200,			// amount of milliseconds virtual button 
 																		// will be pressed at toggle switch event
 	
 	.encoder_press_time_ms = 10,			// amount of milliseconds virtual button 
@@ -54,12 +54,10 @@ static const dev_config_t init_config =
 																		
 	.exchange_period_ms = 5,					// amount of millisecond between joystick data sending
 	
-	.button_delay1_ms = 100,					// amount of milliseconds of delay1 for a virtual button
-																		
-	.button_delay2_ms = 200,					// amount of milliseconds of delay2 for a virtual button
-
-	.button_delay3_ms = 2000,					// amount of milliseconds of delay3 for a virtual button
-
+	.button_timer1_ms = 50,						// amount of milliseconds of delay1 for a virtual button
+	.button_timer2_ms = 200,					// amount of milliseconds of delay2 for a virtual button
+	.button_timer3_ms = 300,					// amount of milliseconds of delay3 for a virtual button
+	
 	/*
 		Device pins configuration. Available values:
 		- AXIS_ANALOG (only for pins 0-7)
