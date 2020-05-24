@@ -109,10 +109,10 @@ void EP1_OUT_Callback(void)
 							pos += sizeof(tmp_dev_config.firmware_version);
 							memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.device_name), sizeof(tmp_dev_config.device_name));
 							pos += sizeof(tmp_dev_config.device_name);
-							memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.button_debounce_ms), 6);
-							pos += 6;
-							
-							memcpy(&tmp_buf[64-sizeof(tmp_dev_config.pins)], (uint8_t *) &(tmp_dev_config.pins), sizeof(tmp_dev_config.pins));
+							memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.button_debounce_ms), 4);
+							pos += 4;							
+							memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.pins), sizeof(tmp_dev_config.pins));
+							pos += sizeof(tmp_dev_config.pins);
 						break;
 					
 					case 2:
@@ -254,10 +254,10 @@ void EP1_OUT_Callback(void)
 						pos += sizeof(tmp_dev_config.firmware_version);
 						memcpy((uint8_t *) &(tmp_dev_config.device_name), &hid_buf[pos], sizeof(tmp_dev_config.device_name));
 						pos += sizeof(tmp_dev_config.device_name);
-						memcpy((uint8_t *) &(tmp_dev_config.button_debounce_ms), &hid_buf[pos], 6);
-						pos += 6;
-						
-						memcpy((uint8_t *) &(tmp_dev_config.pins), &hid_buf[64-sizeof(tmp_dev_config.pins)], sizeof(tmp_dev_config.pins));
+						memcpy((uint8_t *) &(tmp_dev_config.button_debounce_ms), &hid_buf[pos], 4);
+						pos += 4;					
+						memcpy((uint8_t *) &(tmp_dev_config.pins), &hid_buf[pos], sizeof(tmp_dev_config.pins));
+						pos += sizeof(tmp_dev_config.pins);
 					}
 				break;
 				
