@@ -91,14 +91,14 @@ static void LogicalButtonProcessTimer (logical_buttons_state_t * p_button_state,
 				tmp_press_time = p_dev_config->button_timer3_ms;
 				break;
 			default:
-				tmp_press_time = 50;
+				tmp_press_time = 100;
 				break;
 		}
 	
 	// get delay 	
 		if(tmp_press_time <= 0)
 		{
-			tmp_press_time = 50;
+			tmp_press_time = 100;
 		}
 		switch (p_dev_config->buttons[num].delay_timer)
 		{	
@@ -420,7 +420,73 @@ void LogicalButtonProcessState (logical_buttons_state_t * p_button_state, uint8_
 				}
 				
 				break;
-			
+
+			case SEQUENTIAL_BUTTON:
+					if (p_button_state->delay_act == BUTTON_ACTION_DELAY)
+				{
+					// nop
+				}
+				else if (p_button_state->delay_act == BUTTON_ACTION_PRESS)
+				{
+					p_button_state->current_state = p_button_state->on_state;
+				}
+				else if (p_button_state->curr_physical_state > p_button_state->prev_physical_state)		// triggered in IDLE
+				{
+					// searching for enabled button
+					uint8_t is_last = 1;
+					uint8_t is_set_found = 0;
+					for (uint8_t i=0; i<MAX_BUTTONS_NUM; i++)
+					{
+						if (p_dev_config->buttons[i].physical_num == p_dev_config->buttons[num].physical_num &&
+							p_dev_config->buttons[i].type == SEQUENTIAL_BUTTON)
+						{
+							//disable enabled button
+							if (logical_buttons_state[i].on_state == 1 && 
+									logical_buttons_state[i].delay_act == BUTTON_ACTION_IDLE)	// prevent multiple enabling
+							{
+								logical_buttons_state[i].on_state = 0;
+								logical_buttons_state[i].off_state = 0;
+								is_set_found = 1;
+							}
+							else if (is_set_found)	// enable next button in list
+							{
+								logical_buttons_state[i].delay_act = BUTTON_ACTION_DELAY;
+								logical_buttons_state[i].time_last = millis;
+								
+								logical_buttons_state[i].on_state = 1;
+								logical_buttons_state[i].off_state = 0;
+								is_last = 0;
+								break;
+							}
+						}
+					}
+					
+					// previously enabled button was last in list
+					// finding first in list and enable it
+					if (is_last && is_set_found)
+					{
+						for (uint8_t i=0; i<MAX_BUTTONS_NUM; i++)
+						{
+							if (p_dev_config->buttons[i].physical_num == p_dev_config->buttons[num].physical_num &&
+								p_dev_config->buttons[i].type == SEQUENTIAL_BUTTON)
+							{
+								logical_buttons_state[i].delay_act = BUTTON_ACTION_DELAY;
+								logical_buttons_state[i].time_last = millis;
+								
+								logical_buttons_state[i].on_state = 1;
+								logical_buttons_state[i].off_state = 0;
+								break;
+							}
+						}
+					}
+					
+				}
+				else	// IDLE state
+				{
+					p_button_state->current_state = p_button_state->off_state;
+				}			
+				break;
+				
 			default:
 				break;
 		}		
@@ -456,6 +522,7 @@ void RadioButtons_Init (dev_config_t * p_dev_config)
   */
 void SequentialButtons_Init (dev_config_t * p_dev_config)
 {
+	// enable first
 	for (uint8_t physical_num=0; physical_num<MAX_BUTTONS_NUM; physical_num++)
 	{
 		for (uint8_t i=0; i<MAX_BUTTONS_NUM; i++)
@@ -467,6 +534,21 @@ void SequentialButtons_Init (dev_config_t * p_dev_config)
 				break;
 			}
 		}
+	}
+	// enable last
+	for (uint8_t physical_num=0; physical_num<MAX_BUTTONS_NUM; physical_num++)
+	{
+		uint8_t k=0;
+		for (uint8_t i=0; i<MAX_BUTTONS_NUM; i++)
+		{
+			if (p_dev_config->buttons[i].type == SEQUENTIAL_BUTTON &&
+					p_dev_config->buttons[i].physical_num == physical_num)
+			{
+				k++;
+			}
+		}
+		if (k>0) logical_buttons_state[k-1].on_state = 1;
+		
 	}
 }
 
