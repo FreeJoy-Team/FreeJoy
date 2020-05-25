@@ -116,11 +116,9 @@ static void LogicalButtonProcessTimer (logical_buttons_state_t * p_button_state,
 				break;
 		}
 		
-	// set max delay timer for sequential and radio buttons
+	// set max delay timer for sequential and radio buttons // heroviy kostil`, need if for check all seq buttons for types of timings
 //	if (p_dev_config->buttons[num].delay_timer && 
-//		 (p_dev_config->buttons[num].type == SEQUENTIAL_TOGGLE || p_dev_config->buttons[num].type == SEQUENTIAL_BUTTON ||
-//			p_dev_config->buttons[num].type == RADIO_BUTTON1 || p_dev_config->buttons[num].type == RADIO_BUTTON2 ||
-//			p_dev_config->buttons[num].type == RADIO_BUTTON3 || p_dev_config->buttons[num].type == RADIO_BUTTON4))
+//		 (p_dev_config->buttons[num].type == SEQUENTIAL_TOGGLE || p_dev_config->buttons[num].type == SEQUENTIAL_BUTTON))
 //	{
 //		if(p_dev_config->button_timer1_ms > p_dev_config->button_timer2_ms && p_dev_config->button_timer1_ms > p_dev_config->button_timer3_ms)
 //				tmp_delay_time = p_dev_config->button_timer1_ms;
@@ -363,7 +361,7 @@ void LogicalButtonProcessState (logical_buttons_state_t * p_button_state, uint8_
 						}
 					}
 				}
-				else if (p_button_state->curr_physical_state > p_button_state->prev_physical_state)		// triggered in IDLE
+				else if (p_button_state->curr_physical_state)// > p_button_state->prev_physical_state)		// triggered in IDLE
 				{
 					p_button_state->delay_act = BUTTON_ACTION_DELAY;
 					p_button_state->time_last = millis;
