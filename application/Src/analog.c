@@ -51,7 +51,7 @@ analog_data_t FILTER_LEVEL_7_COEF[FILTER_BUF_SIZE] = {8, 8, 7, 7, 7, 6, 6, 6, 6,
 analog_data_t filter_buffer[MAX_AXIS_NUM][FILTER_BUF_SIZE];
 analog_data_t deadband_buffer[MAX_AXIS_NUM][DEADBAND_BUF_SIZE];
 	
-buttons_state_t axes_buttons[MAX_AXIS_NUM][3];
+logical_buttons_state_t axes_buttons[MAX_AXIS_NUM][3];
 
 uint8_t adc_cnt = 0;
 uint8_t sensors_cnt = 0;	
@@ -842,31 +842,32 @@ void AxesProcess (dev_config_t * p_dev_config)
 			uint64_t millis = GetTick();
 			int32_t tmp32 = raw_axis_data[i];
 			
-			axes_buttons[i][0].prev_state = axes_buttons[i][0].current_state;
-			axes_buttons[i][1].prev_state = axes_buttons[i][1].current_state;
-			axes_buttons[i][2].prev_state = axes_buttons[i][2].current_state;
+			// TODO: exact press counting
+			axes_buttons[i][0].prev_physical_state = axes_buttons[i][0].current_state;
+			axes_buttons[i][1].prev_physical_state = axes_buttons[i][1].current_state;
+			axes_buttons[i][2].prev_physical_state = axes_buttons[i][2].current_state;
 			
-			axes_buttons[i][0].current_state = buttons_state[p_dev_config->axis_config[i].decrement_button].current_state;
-			axes_buttons[i][1].current_state = buttons_state[p_dev_config->axis_config[i].increment_button].current_state;
-			axes_buttons[i][2].current_state = buttons_state[p_dev_config->axis_config[i].center_button].current_state;			
+			axes_buttons[i][0].current_state = logical_buttons_state[p_dev_config->axis_config[i].decrement_button].current_state;
+			axes_buttons[i][1].current_state = logical_buttons_state[p_dev_config->axis_config[i].increment_button].current_state;
+			axes_buttons[i][2].current_state = logical_buttons_state[p_dev_config->axis_config[i].center_button].current_state;			
 			
       // decrement
-      if (axes_buttons[i][0].current_state && !axes_buttons[i][0].prev_state)
+      if (axes_buttons[i][0].current_state && !axes_buttons[i][0].prev_physical_state)
       {
         tmp32 -= AXIS_FULLSCALE * p_dev_config->axis_config[i].step / 255;
       }
-			else if (axes_buttons[i][0].prev_state && millis - axes_buttons[i][0].time_last > 200)
+			else if (axes_buttons[i][0].prev_physical_state && millis - axes_buttons[i][0].time_last > 200)
 			{
 				axes_buttons[i][0].time_last = millis;
         tmp32 -= AXIS_FULLSCALE * p_dev_config->axis_config[i].step / 255;
 			}
 			
 			// increment
-      if (axes_buttons[i][1].current_state && !axes_buttons[i][1].prev_state)
+      if (axes_buttons[i][1].current_state && !axes_buttons[i][1].prev_physical_state)
       {
         tmp32 += AXIS_FULLSCALE * p_dev_config->axis_config[i].step / 255;
       }
-			else if (axes_buttons[i][1].prev_state && millis - axes_buttons[i][1].time_last > 200)
+			else if (axes_buttons[i][1].prev_physical_state && millis - axes_buttons[i][1].time_last > 200)
 			{
 				axes_buttons[i][1].time_last = millis;
         tmp32 += AXIS_FULLSCALE * p_dev_config->axis_config[i].step / 255;

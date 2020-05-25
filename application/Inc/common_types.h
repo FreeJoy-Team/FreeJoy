@@ -146,7 +146,6 @@ typedef int8_t pin_t;
 enum
 {
 	BUTTON_NORMAL = 0,
-	BUTTON_INVERTED,
 	BUTTON_TOGGLE,
 	TOGGLE_SWITCH,
 	TOGGLE_SWITCH_ON,
@@ -178,11 +177,19 @@ enum
 	RADIO_BUTTON4,
 	
 	SEQUENTIAL_TOGGLE,
-	SEQUENTIAL_BUTTON,
-	
-	
+	SEQUENTIAL_BUTTON,	
 };
 typedef uint8_t button_type_t;
+
+enum
+{
+	BUTTON_TIMER_OFF = 0,
+	BUTTON_TIMER_1,
+	BUTTON_TIMER_2,
+	BUTTON_TIMER_3,
+	
+};
+typedef uint8_t button_timer_t;
 
 typedef struct button_t
 {
@@ -192,23 +199,42 @@ typedef struct button_t
 	
 	uint8_t					is_inverted :1;
 	uint8_t					is_ONOFF :1;							// not used
-	uint8_t					button_delay_number :3;
-	uint8_t					button_toggle_number :3;
+	button_timer_t	delay_timer :3;
+	button_timer_t	press_timer :3;
 	
 }	button_t;
 
-typedef struct buttons_state_t
+typedef struct physical_buttons_state_t
 {
-  uint64_t time_last;	
+  uint32_t time_last;	
 	uint8_t pin_state;
-	//uint8_t pin_prev_state;
-	uint8_t prev_state;
+	uint8_t prev_pin_state;
 	uint8_t current_state;
 	uint8_t changed;
-	uint8_t delay_act;
 	uint8_t cnt;
 	
-} buttons_state_t;
+} physical_buttons_state_t;
+
+enum
+{
+	BUTTON_ACTION_IDLE = 0,
+	BUTTON_ACTION_DELAY,
+	BUTTON_ACTION_PRESS,
+	
+};
+typedef uint8_t button_action_t;
+
+typedef struct logical_buttons_state_t
+{
+  uint32_t time_last;	
+	uint8_t curr_physical_state;
+	uint8_t prev_physical_state;
+	uint8_t on_state;
+	uint8_t off_state;
+	uint8_t current_state;
+	uint8_t delay_act;
+	
+} logical_buttons_state_t;
 
 
 typedef struct
@@ -295,23 +321,21 @@ typedef struct
 } led_config_t;
 
 
-//1				-	4 bytes free (possibly 7)
+//1				-	0 bytes free
 //9,10,11 - 2
 //12			-	8	(possibly 11)
 //13			- 2	(possibly 6)
 //14			- 6	(possibly 12)
 //15			- 4
-//15 x 64 = 960 (max 1024)
+//15 x 62 = 930 (max 2048)
 typedef struct 
 {
 	// config 1
 	uint16_t 						firmware_version;
-	char 								device_name[20];
-	uint16_t						button_debounce_ms;					//uint8_t?
-	//uint16_t						toggle_press_time_ms;
-	uint16_t						encoder_press_time_ms;			//uint8_t?
-	uint16_t 						exchange_period_ms;					//uint8_t?
-	uint8_t							reserved_1[2];
+	char 								device_name[26];
+	uint16_t						button_debounce_ms;
+	uint8_t							encoder_press_time_ms;
+	uint8_t 						exchange_period_ms;
 	pin_t 							pins[USED_PINS_NUM];
 	
 	// config 2-5
@@ -332,7 +356,6 @@ typedef struct
 	uint16_t						vid;
 	uint16_t						pid;
 	uint8_t							is_dynamic_config;
-	//uint8_t							reserved_10[16];
 	
 	// config 15;
 	led_pwm_config_t		led_pwm_config;

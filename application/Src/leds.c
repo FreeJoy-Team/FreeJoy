@@ -36,11 +36,11 @@ void LEDs_LogicalProcess (dev_config_t * p_dev_config)
 			{
 				default:
 				case LED_NORMAL:
-					leds_state[i] = buttons_state[p_dev_config->leds[i].input_num].current_state;
+					leds_state[i] = logical_buttons_state[p_dev_config->leds[i].input_num].current_state;
 				break;
 				
 				case LED_INVERTED:
-					leds_state[i] = !buttons_state[p_dev_config->leds[i].input_num].current_state;
+					leds_state[i] = !logical_buttons_state[p_dev_config->leds[i].input_num].current_state;
 				break;
 				
 			}
