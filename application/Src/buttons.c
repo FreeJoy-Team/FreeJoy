@@ -62,7 +62,7 @@ static void ButtonsDebouceProcess (dev_config_t * p_dev_config)
 
 				physical_buttons_state[i].changed = 0;
 				physical_buttons_state[i].current_state = physical_buttons_state[i].pin_state;
-				physical_buttons_state[i].cnt++;
+				//physical_buttons_state[i].cnt++;
 			}
 			// reset if state changed during debounce period
 			else if (physical_buttons_state[i].changed &&
@@ -115,6 +115,20 @@ static void LogicalButtonProcessTimer (logical_buttons_state_t * p_button_state,
 				tmp_delay_time = 0;
 				break;
 		}
+		
+	// set max delay timer for sequential and radio buttons
+//	if (p_dev_config->buttons[num].delay_timer && 
+//		 (p_dev_config->buttons[num].type == SEQUENTIAL_TOGGLE || p_dev_config->buttons[num].type == SEQUENTIAL_BUTTON ||
+//			p_dev_config->buttons[num].type == RADIO_BUTTON1 || p_dev_config->buttons[num].type == RADIO_BUTTON2 ||
+//			p_dev_config->buttons[num].type == RADIO_BUTTON3 || p_dev_config->buttons[num].type == RADIO_BUTTON4))
+//	{
+//		if(p_dev_config->button_timer1_ms > p_dev_config->button_timer2_ms && p_dev_config->button_timer1_ms > p_dev_config->button_timer3_ms)
+//				tmp_delay_time = p_dev_config->button_timer1_ms;
+//		else if(p_dev_config->button_timer2_ms > p_dev_config->button_timer1_ms && p_dev_config->button_timer2_ms > p_dev_config->button_timer3_ms)
+//				tmp_delay_time = p_dev_config->button_timer2_ms;
+//		else
+//				tmp_delay_time = p_dev_config->button_timer3_ms;
+//	}
 	
 	// check if delay timer elapsed
 	if ((p_button_state->delay_act == BUTTON_ACTION_DELAY && millis - p_button_state->time_last > tmp_delay_time &&
@@ -128,7 +142,6 @@ static void LogicalButtonProcessTimer (logical_buttons_state_t * p_button_state,
 	{
 		p_button_state->delay_act = BUTTON_ACTION_IDLE;
 	}
-
 }
 
 /**
@@ -281,7 +294,7 @@ void LogicalButtonProcessState (logical_buttons_state_t * p_button_state, uint8_
 			case POV1_RIGHT:
 			case POV1_DOWN:
 			case POV1_LEFT:
-				pov_group = 0;
+				if (pov_group<=0) pov_group = 0;
 				
 				if (p_button_state->delay_act == BUTTON_ACTION_DELAY)
 				{
@@ -300,21 +313,25 @@ void LogicalButtonProcessState (logical_buttons_state_t * p_button_state, uint8_
 				}
 				else	// IDLE state
 				{
-					p_button_state->current_state = p_button_state->off_state;
+					//p_button_state->current_state = p_button_state->off_state;
+					p_button_state->current_state = p_button_state->curr_physical_state;
 				}
 					
 				// set bit in povs data
-				if ((p_dev_config->buttons[num].type) == POV1_UP)
+				if (p_dev_config->buttons[num].type == POV1_UP || p_dev_config->buttons[num].type == POV2_UP ||
+						p_dev_config->buttons[num].type == POV3_UP || p_dev_config->buttons[num].type == POV4_UP)
 				{
 					pov_buf[pov_group] &= ~(1 << 3);
 					pov_buf[pov_group] |= (p_button_state->current_state << 3);
 				}
-				else if ((p_dev_config->buttons[num].type) == POV1_RIGHT)
+				else if (p_dev_config->buttons[num].type == POV1_RIGHT || p_dev_config->buttons[num].type == POV2_RIGHT ||
+								 p_dev_config->buttons[num].type == POV3_RIGHT || p_dev_config->buttons[num].type == POV4_RIGHT)
 				{
 					pov_buf[pov_group] &= ~(1 << 2);
 					pov_buf[pov_group] |= (p_button_state->current_state << 2);
 				}
-				else if ((p_dev_config->buttons[num].type) == POV1_DOWN)
+				else if (p_dev_config->buttons[num].type == POV1_DOWN || p_dev_config->buttons[num].type == POV2_DOWN ||
+								 p_dev_config->buttons[num].type == POV3_DOWN || p_dev_config->buttons[num].type == POV4_DOWN)
 				{
 					pov_buf[pov_group] &= ~(1 << 1);
 					pov_buf[pov_group] |= (p_button_state->current_state << 1);
@@ -422,7 +439,7 @@ void LogicalButtonProcessState (logical_buttons_state_t * p_button_state, uint8_
 				break;
 
 			case SEQUENTIAL_BUTTON:
-					if (p_button_state->delay_act == BUTTON_ACTION_DELAY)
+				if (p_button_state->delay_act == BUTTON_ACTION_DELAY)
 				{
 					// nop
 				}
@@ -481,7 +498,7 @@ void LogicalButtonProcessState (logical_buttons_state_t * p_button_state, uint8_
 					}
 					
 				}
-				else	// IDLE state
+				else if (!p_button_state->curr_physical_state)	// IDLE state
 				{
 					p_button_state->current_state = p_button_state->off_state;
 				}			
@@ -490,7 +507,6 @@ void LogicalButtonProcessState (logical_buttons_state_t * p_button_state, uint8_
 			default:
 				break;
 		}		
-	
 }
 
 /**
@@ -536,19 +552,34 @@ void SequentialButtons_Init (dev_config_t * p_dev_config)
 		}
 	}
 	// enable last
-	for (uint8_t physical_num=0; physical_num<MAX_BUTTONS_NUM; physical_num++)
+//	for (uint8_t physical_num=0; physical_num<MAX_BUTTONS_NUM; physical_num++)
+//	{
+//		uint8_t k=0;
+//		for (uint8_t i=0; i<MAX_BUTTONS_NUM; i++)
+//		{
+//			if (p_dev_config->buttons[i].type == SEQUENTIAL_BUTTON &&
+//					p_dev_config->buttons[i].physical_num == physical_num)
+//			{
+//				k++;
+//			}
+//		}
+//		if (k>0) logical_buttons_state[k-1].on_state = 1;
+//		
+//	}
+	
+		for (uint8_t physical_num=MAX_BUTTONS_NUM; physical_num>0; physical_num--)
 	{
-		uint8_t k=0;
-		for (uint8_t i=0; i<MAX_BUTTONS_NUM; i++)
+		for (uint8_t i=MAX_BUTTONS_NUM; i>0; i--)
 		{
 			if (p_dev_config->buttons[i].type == SEQUENTIAL_BUTTON &&
-					p_dev_config->buttons[i].physical_num == physical_num)
+					p_dev_config->buttons[i].physical_num != physical_num)
 			{
-				k++;
+				logical_buttons_state[i].on_state = 1;
+				//buttons_state[i].current_state = 1;
+				//buttons_state[i].prev_state = 1;
+				break;
 			}
 		}
-		if (k>0) logical_buttons_state[k-1].on_state = 1;
-		
 	}
 }
 
