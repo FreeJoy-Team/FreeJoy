@@ -207,11 +207,11 @@ typedef struct button_t
 typedef struct physical_buttons_state_t
 {
   uint32_t time_last;	
-	uint8_t pin_state;
-	uint8_t prev_pin_state;
-	uint8_t current_state;
-	uint8_t changed;
-	uint8_t cnt;
+	uint8_t pin_state;			// :1;
+	uint8_t prev_pin_state;	// :1;
+	uint8_t current_state;	// :1;
+	uint8_t changed;				// :1;
+	//uint8_t cnt;
 	
 } physical_buttons_state_t;
 
@@ -227,25 +227,25 @@ typedef uint8_t button_action_t;
 typedef struct logical_buttons_state_t
 {
   uint32_t time_last;	
-	uint8_t curr_physical_state;
-	uint8_t prev_physical_state;
-	uint8_t on_state;
-	uint8_t off_state;
-	uint8_t current_state;
-	uint8_t delay_act;
+	uint8_t curr_physical_state :4;		//:1
+	uint8_t prev_physical_state :4;		//:1
+	uint8_t on_state :4;							//:1
+	uint8_t off_state :4;							//:1
+	uint8_t current_state;						//:1
+	uint8_t delay_act;								//:2
 	
 } logical_buttons_state_t;
 
 
 typedef struct
 {
-  uint64_t 				time_last;
-	uint8_t 				state;
-	int16_t 				cnt;	
+  uint32_t 				time_last;
+	uint8_t 				state;					//:4?
+	//int16_t 				cnt;	
 	int8_t 					pin_a;
 	int8_t 					pin_b;
-	int8_t					dir;
-	int8_t					last_dir;
+	int8_t					dir :4;					//:2?
+	int8_t					last_dir :4;		//:2?
 	
 } encoder_t;
 
