@@ -173,7 +173,7 @@ void SysTick_Handler(void)
 
 void TIM1_UP_IRQHandler(void)
 {
-	uint8_t btn_num = 0;
+	static uint8_t btn_num = 0;
 	uint8_t	physical_buttons_data[MAX_BUTTONS_NUM];
 	joy_report_t joy_report;
 	
