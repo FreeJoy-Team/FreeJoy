@@ -385,9 +385,6 @@ void LogicalButtonProcessState (logical_buttons_state_t * p_button_state, uint8_
 				}
 				else if (p_button_state->curr_physical_state > p_button_state->prev_physical_state)		// triggered in IDLE
 				{
-					p_button_state->delay_act = BUTTON_ACTION_DELAY;
-					p_button_state->time_last = millis;
-					
 					// searching for enabled button
 					uint8_t is_last = 1;
 					uint8_t is_set_found = 0;
@@ -396,14 +393,20 @@ void LogicalButtonProcessState (logical_buttons_state_t * p_button_state, uint8_
 						if (p_dev_config->buttons[i].physical_num == p_dev_config->buttons[num].physical_num &&
 							p_dev_config->buttons[i].type == SEQUENTIAL_TOGGLE)
 						{
-							if (logical_buttons_state[i].current_state == 1)	// disable enabled button
+							//disable enabled button
+							if (logical_buttons_state[i].on_state == 1 && 
+									logical_buttons_state[i].delay_act == BUTTON_ACTION_IDLE)	// prevent multiple enabling
 							{
 								logical_buttons_state[i].on_state = 0;
 								logical_buttons_state[i].off_state = 0;
+								logical_buttons_state[i].current_state = 0;
 								is_set_found = 1;
 							}
 							else if (is_set_found)	// enable next button in list
 							{
+								logical_buttons_state[i].delay_act = BUTTON_ACTION_DELAY;
+								logical_buttons_state[i].time_last = millis;
+								
 								logical_buttons_state[i].on_state = 1;
 								logical_buttons_state[i].off_state = 0;
 								is_last = 0;
@@ -414,13 +417,16 @@ void LogicalButtonProcessState (logical_buttons_state_t * p_button_state, uint8_
 					
 					// previously enabled button was last in list
 					// finding first in list and enable it
-					if (is_last)
+					if (is_last && is_set_found)
 					{
 						for (uint8_t i=0; i<MAX_BUTTONS_NUM; i++)
 						{
 							if (p_dev_config->buttons[i].physical_num == p_dev_config->buttons[num].physical_num &&
 								p_dev_config->buttons[i].type == SEQUENTIAL_TOGGLE)
 							{
+								logical_buttons_state[i].delay_act = BUTTON_ACTION_DELAY;
+								logical_buttons_state[i].time_last = millis;
+								
 								logical_buttons_state[i].on_state = 1;
 								logical_buttons_state[i].off_state = 0;
 								break;
@@ -429,10 +435,10 @@ void LogicalButtonProcessState (logical_buttons_state_t * p_button_state, uint8_
 					}
 					
 				}
-				else	// IDLE state
+				else if (!p_button_state->curr_physical_state)	// IDLE state
 				{
 					// nop
-				}
+				}	
 				
 				break;
 
@@ -544,6 +550,7 @@ void SequentialButtons_Init (dev_config_t * p_dev_config)
 			if (p_dev_config->buttons[i].type == SEQUENTIAL_TOGGLE &&
 					p_dev_config->buttons[i].physical_num == physical_num)
 			{
+				logical_buttons_state[i].on_state = 1;
 				logical_buttons_state[i].current_state = 1;
 				break;
 			}

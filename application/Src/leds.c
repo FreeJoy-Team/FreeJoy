@@ -54,7 +54,7 @@ void LED_SetSingle(uint8_t * state_buf, dev_config_t * p_dev_config, uint8_t * p
 	{
 		if (p_dev_config->pins[i] == LED_SINGLE)
 		{
-			leds_state[(*pos)] ? (pin_config[i].port->ODR |= pin_config[i].pin) : (pin_config[i].port->ODR &= !pin_config[i].pin); 
+			leds_state[*pos] ? (pin_config[i].port->ODR |= pin_config[i].pin) : (pin_config[i].port->ODR &= ~pin_config[i].pin); 
 			(*pos)++;
 		}
 	}
