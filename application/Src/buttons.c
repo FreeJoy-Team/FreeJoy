@@ -711,11 +711,11 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 						logical_buttons_state[j].prev_physical_state = logical_buttons_state[j].curr_physical_state;
 						if (!p_dev_config->buttons[j].is_inverted)
 						{
-							logical_buttons_state[j].curr_physical_state = physical_buttons_state[j].current_state;//raw_buttons_data[p_dev_config->buttons[j].physical_num];
+							logical_buttons_state[j].curr_physical_state = physical_buttons_state[p_dev_config->buttons[j].physical_num].current_state;
 						}
 						else
 						{
-							logical_buttons_state[j].curr_physical_state = !physical_buttons_state[j].current_state;;
+							logical_buttons_state[j].curr_physical_state = !physical_buttons_state[p_dev_config->buttons[j].physical_num].current_state;;
 						}
 						
 						LogicalButtonProcessState(&logical_buttons_state[j], pov_pos, p_dev_config, j);
@@ -723,9 +723,11 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 					else if (logical_buttons_state[j].current_state)	// shift released for this button
 					{
 						// disable button
+						logical_buttons_state[j].delay_act = BUTTON_ACTION_IDLE;
 						logical_buttons_state[j].on_state = 0;
 						logical_buttons_state[j].off_state = 0;
 						logical_buttons_state[j].current_state = 0;
+						logical_buttons_state[j].curr_physical_state = 0;
 						logical_buttons_state[j].time_last = 0;			
 						LogicalButtonProcessState(&logical_buttons_state[j], pov_pos, p_dev_config, j);
 					}
@@ -742,11 +744,11 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 					logical_buttons_state[j].prev_physical_state = logical_buttons_state[j].curr_physical_state;
 					if (!p_dev_config->buttons[j].is_inverted)
 					{
-						logical_buttons_state[j].curr_physical_state = physical_buttons_state[i].current_state;
+						logical_buttons_state[j].curr_physical_state = physical_buttons_state[p_dev_config->buttons[j].physical_num].current_state;
 					}
 					else
 					{
-						logical_buttons_state[j].curr_physical_state = !physical_buttons_state[i].current_state;		
+						logical_buttons_state[j].curr_physical_state = !physical_buttons_state[p_dev_config->buttons[j].physical_num].current_state;		
 					}					
 					LogicalButtonProcessState(&logical_buttons_state[j], pov_pos, p_dev_config, j);
 				}
@@ -762,11 +764,11 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 					logical_buttons_state[j].prev_physical_state = logical_buttons_state[j].curr_physical_state;
 					if (!p_dev_config->buttons[j].is_inverted)
 					{
-						logical_buttons_state[j].curr_physical_state = physical_buttons_state[i].current_state;
+						logical_buttons_state[j].curr_physical_state = physical_buttons_state[p_dev_config->buttons[i].physical_num].current_state;
 					}
 					else
 					{
-						logical_buttons_state[j].curr_physical_state = !physical_buttons_state[i].current_state;		
+						logical_buttons_state[j].curr_physical_state = !physical_buttons_state[p_dev_config->buttons[i].physical_num].current_state;		
 					}		
 					LogicalButtonProcessState(&logical_buttons_state[j], pov_pos, p_dev_config, j);
 				}
@@ -777,9 +779,11 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 					// disable button
 					if (logical_buttons_state[j].current_state)	
 					{
+						logical_buttons_state[j].delay_act = BUTTON_ACTION_IDLE;
 						logical_buttons_state[j].on_state = 0;
 						logical_buttons_state[j].off_state = 0;
 						logical_buttons_state[j].current_state = 0;
+						logical_buttons_state[j].curr_physical_state = 0;
 						logical_buttons_state[j].time_last = 0;
 						LogicalButtonProcessState(&logical_buttons_state[j], pov_pos, p_dev_config, j);
 					}	
@@ -790,9 +794,11 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 					// disable button
 					if (logical_buttons_state[j].current_state)	
 					{
+						logical_buttons_state[j].delay_act = BUTTON_ACTION_IDLE;
 						logical_buttons_state[j].on_state = 0;
 						logical_buttons_state[j].off_state = 0;
 						logical_buttons_state[j].current_state = 0;	
+						logical_buttons_state[j].curr_physical_state = 0;
 						logical_buttons_state[j].time_last = 0;						
 						LogicalButtonProcessState(&logical_buttons_state[j], pov_pos, p_dev_config, j);
 					}		
@@ -803,9 +809,11 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 					// disable button
 					if (logical_buttons_state[j].current_state)	
 					{
+						logical_buttons_state[j].delay_act = BUTTON_ACTION_IDLE;
 						logical_buttons_state[j].on_state = 0;
 						logical_buttons_state[j].off_state = 0;
-						logical_buttons_state[j].current_state = 0;			
+						logical_buttons_state[j].current_state = 0;	
+						logical_buttons_state[j].curr_physical_state = 0;						
 						logical_buttons_state[j].time_last = 0;						
 						LogicalButtonProcessState(&logical_buttons_state[j], pov_pos, p_dev_config, j);
 					}	
@@ -816,9 +824,11 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 					// disable button
 					if (logical_buttons_state[j].current_state)	
 					{
+						logical_buttons_state[j].delay_act = BUTTON_ACTION_IDLE;
 						logical_buttons_state[j].on_state = 0;
 						logical_buttons_state[j].off_state = 0;
-						logical_buttons_state[j].current_state = 0;		
+						logical_buttons_state[j].current_state = 0;
+						logical_buttons_state[j].curr_physical_state = 0;
 						logical_buttons_state[j].time_last = 0;									
 						LogicalButtonProcessState(&logical_buttons_state[j], pov_pos, p_dev_config, j);
 					}		
@@ -829,9 +839,11 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 					// disable button
 					if (logical_buttons_state[j].current_state)	
 					{
+						logical_buttons_state[j].delay_act = BUTTON_ACTION_IDLE;
 						logical_buttons_state[j].on_state = 0;
 						logical_buttons_state[j].off_state = 0;
-						logical_buttons_state[j].current_state = 0;		
+						logical_buttons_state[j].current_state = 0;
+						logical_buttons_state[j].curr_physical_state = 0;
 						logical_buttons_state[j].time_last = 0;									
 						LogicalButtonProcessState(&logical_buttons_state[j], pov_pos, p_dev_config, j);
 					}	
