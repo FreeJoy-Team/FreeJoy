@@ -709,14 +709,7 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 					if (shifts_state & 1<<(shift_num-1))											// shift pressed for this button
 					{
 						logical_buttons_state[j].prev_physical_state = logical_buttons_state[j].curr_physical_state;
-						if (!p_dev_config->buttons[j].is_inverted)
-						{
-							logical_buttons_state[j].curr_physical_state = physical_buttons_state[p_dev_config->buttons[j].physical_num].current_state;
-						}
-						else
-						{
-							logical_buttons_state[j].curr_physical_state = !physical_buttons_state[p_dev_config->buttons[j].physical_num].current_state;;
-						}
+						logical_buttons_state[j].curr_physical_state = physical_buttons_state[p_dev_config->buttons[j].physical_num].current_state;
 						
 						LogicalButtonProcessState(&logical_buttons_state[j], pov_pos, p_dev_config, j);
 					}
@@ -742,14 +735,8 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 				if (p_dev_config->buttons[j].physical_num == i)		// we found corresponding logical button
 				{
 					logical_buttons_state[j].prev_physical_state = logical_buttons_state[j].curr_physical_state;
-					if (!p_dev_config->buttons[j].is_inverted)
-					{
-						logical_buttons_state[j].curr_physical_state = physical_buttons_state[p_dev_config->buttons[j].physical_num].current_state;
-					}
-					else
-					{
-						logical_buttons_state[j].curr_physical_state = !physical_buttons_state[p_dev_config->buttons[j].physical_num].current_state;		
-					}					
+					logical_buttons_state[j].curr_physical_state = physical_buttons_state[p_dev_config->buttons[j].physical_num].current_state;		
+					
 					LogicalButtonProcessState(&logical_buttons_state[j], pov_pos, p_dev_config, j);
 				}
 			}
@@ -762,14 +749,8 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 					(p_dev_config->buttons[j].shift_modificator) == 0)
 				{
 					logical_buttons_state[j].prev_physical_state = logical_buttons_state[j].curr_physical_state;
-					if (!p_dev_config->buttons[j].is_inverted)
-					{
-						logical_buttons_state[j].curr_physical_state = physical_buttons_state[p_dev_config->buttons[i].physical_num].current_state;
-					}
-					else
-					{
-						logical_buttons_state[j].curr_physical_state = !physical_buttons_state[p_dev_config->buttons[i].physical_num].current_state;		
-					}		
+					logical_buttons_state[j].curr_physical_state = physical_buttons_state[p_dev_config->buttons[i].physical_num].current_state;
+					
 					LogicalButtonProcessState(&logical_buttons_state[j], pov_pos, p_dev_config, j);
 				}
 				// shift pressed
@@ -921,8 +902,14 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 				NVIC_DisableIRQ(TIM1_UP_IRQn);
 				
 				buttons_data[(k & 0xF8)>>3] &= ~(1 << (k & 0x07));
-				buttons_data[(k & 0xF8)>>3] |= (logical_buttons_state[i].current_state << (k & 0x07));
-				
+				if (!p_dev_config->buttons[i].is_inverted)
+				{					
+					buttons_data[(k & 0xF8)>>3] |= (logical_buttons_state[i].current_state << (k & 0x07));
+				}
+				else
+				{
+					buttons_data[(k & 0xF8)>>3] |= (!logical_buttons_state[i].current_state << (k & 0x07));
+				}
 				
 				// resume IRQ
 				NVIC_EnableIRQ(TIM1_UP_IRQn);
