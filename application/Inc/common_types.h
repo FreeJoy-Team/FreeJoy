@@ -12,6 +12,8 @@
 #include "stdint.h"
 #include "common_defines.h"
 
+
+/******************** AXES **********************/
 enum
 {
 	FILTER_NO = 0,
@@ -59,7 +61,7 @@ typedef struct
 	int8_t					decrement_button;
 	int8_t					center_button;
 	int8_t					increment_button;
-	uint8_t					step;
+	uint8_t					divider;
 	uint8_t					i2c_address;
 	uint8_t					reserved[3];
 	
@@ -67,11 +69,11 @@ typedef struct
 
 enum
 {
+	SOURCE_ENCODER = -3,
 	SOURCE_I2C = -2,
-	SOURCE_BUTTONS = -1,
+	SOURCE_NO = -1,
 };
 typedef int8_t axis_source_t;
-
 
 enum
 {
@@ -102,6 +104,8 @@ typedef struct
 	uint32_t 	err_cnt;
 } sensor_t;
 
+
+/******************** PINS **********************/
 enum
 {
 	NOT_USED = 0,
@@ -143,6 +147,8 @@ enum
 };
 typedef int8_t pin_t;
 
+
+/******************** BUTTONS **********************/
 enum
 {
 	BUTTON_NORMAL = 0,
@@ -198,7 +204,7 @@ typedef struct button_t
 	uint8_t					shift_modificator : 3;
 	
 	uint8_t					is_inverted :1;
-	uint8_t					is_ONOFF :1;							// not used
+	uint8_t					is_hidden 	:1;		// not used yet
 	button_timer_t	delay_timer :3;
 	button_timer_t	press_timer :3;
 	
@@ -207,10 +213,10 @@ typedef struct button_t
 typedef struct physical_buttons_state_t
 {
   uint32_t time_last;	
-	uint8_t pin_state;			// :1;
-	uint8_t prev_pin_state;	// :1;
-	uint8_t current_state;	// :1;
-	uint8_t changed;				// :1;
+	uint8_t pin_state						:1;
+	uint8_t prev_pin_state			:1;
+	uint8_t current_state				:1;
+	uint8_t changed							:1;
 	//uint8_t cnt;
 	
 } physical_buttons_state_t;
@@ -227,21 +233,39 @@ typedef uint8_t button_action_t;
 typedef struct logical_buttons_state_t
 {
   uint32_t time_last;	
-	uint8_t curr_physical_state :4;		//:1
-	uint8_t prev_physical_state :4;		//:1
-	uint8_t on_state :4;							//:1
-	uint8_t off_state :4;							//:1
-	uint8_t current_state;						//:1
-	uint8_t delay_act;								//:2
+	uint8_t curr_physical_state		:1;
+	uint8_t prev_physical_state		:1;	
+	uint8_t on_state 							:1;	
+	uint8_t off_state 						:1;	
+	uint8_t current_state					:1;	
+	uint8_t delay_act 						:2;	
 	
 } logical_buttons_state_t;
 
 
+/******************** ENCODERS **********************/
+enum
+{
+	ENCODER_TYPE_1_1 = 0,
+	ENCODER_TYPE_1_2,
+	ENCODER_TYPE_1_4,
+	
+};
+typedef uint8_t encoder_type_t;
+
+typedef struct
+{
+	encoder_type_t 	type				:2;
+	uint8_t 				is_fast			:1;
+	uint8_t 										:0;
+	
+} encoder_conf_t;
+
 typedef struct
 {
   uint32_t 				time_last;
-	uint8_t 				state;					//:4?
-	//int16_t 				cnt;	
+	int32_t 				cnt;
+	uint8_t 				state;					//:4?	
 	int8_t 					pin_a;
 	int8_t 					pin_b;
 	int8_t					dir :4;					//:2?
@@ -249,6 +273,8 @@ typedef struct
 	
 } encoder_t;
 
+
+/******************** AXES TO BUTTONS **********************/
 typedef struct
 {
 	uint8_t points[13];
@@ -257,6 +283,8 @@ typedef struct
 
 } axis_to_buttons_t;
 
+
+/******************** SHIFT REGISTERS **********************/
 enum
 {
 	HC165_PULL_DOWN = 0,
@@ -283,13 +311,8 @@ typedef struct
 	
 } shift_reg_config_t;
 
-enum
-{
-	SHIFT_NORMAL = 0,
-	SHIFT_INVERTED,
-	
-};
 
+/******************** SHIFT MODIFICATORS **********************/
 typedef struct 
 {
 	int8_t 				button;
@@ -297,6 +320,7 @@ typedef struct
 } shift_modificator_t;
 
 
+/******************** LEDS **********************/
 enum 
 {
 	LED_NORMAL = 0,
@@ -310,8 +334,6 @@ typedef struct
 	
 } led_pwm_config_t;
 
-
-
 typedef struct
 {
 	int8_t				input_num;
@@ -321,13 +343,8 @@ typedef struct
 } led_config_t;
 
 
-//1				-	0 bytes free
-//9,10,11 - 2
-//12			-	8	(possibly 11)
-//13			- 2	(possibly 6)
-//14			- 6	(possibly 12)
-//15			- 4
-//15 x 62 = 930 (max 2048)
+
+/******************** DEVICE CONFIGURATION **********************/
 typedef struct 
 {
 	// config 1
@@ -364,6 +381,8 @@ typedef struct
 	
 }dev_config_t;
 
+
+/******************** APPLICATION CONFIGURATION **********************/
 typedef struct
 {
 	uint8_t							axes;
@@ -372,16 +391,18 @@ typedef struct
 	
 } app_config_t;
 
+
+/******************** HID REPORT CONFIGURATION **********************/
 typedef struct
 {
-	uint8_t					dummy;		// alighning
-	uint8_t 				id;
-	int16_t					raw_axis_data[MAX_AXIS_NUM];
-	uint8_t					raw_button_data[9];
-	uint8_t					shift_button_data;	
-	int16_t			 		axis_data[MAX_AXIS_NUM];
-	uint8_t 				pov_data[MAX_POVS_NUM];
-	uint8_t 				button_data[MAX_BUTTONS_NUM/8];
+	uint8_t							dummy;		// alighning
+	uint8_t 						id;
+	analog_data_t				raw_axis_data[MAX_AXIS_NUM];
+	uint8_t							raw_button_data[9];
+	uint8_t							shift_button_data;	
+	analog_data_t			 	axis_data[MAX_AXIS_NUM];
+	uint8_t 						pov_data[MAX_POVS_NUM];
+	uint8_t 						button_data[MAX_BUTTONS_NUM/8];
 	
 } joy_report_t;
 

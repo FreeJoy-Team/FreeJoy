@@ -52,6 +52,7 @@ analog_data_t filter_buffer[MAX_AXIS_NUM][FILTER_BUF_SIZE];
 analog_data_t deadband_buffer[MAX_AXIS_NUM][DEADBAND_BUF_SIZE];
 	
 logical_buttons_state_t axes_buttons[MAX_AXIS_NUM][3];
+int32_t	axes_trim_value[MAX_AXIS_NUM];
 
 uint8_t adc_cnt = 0;
 uint8_t sensors_cnt = 0;	
@@ -837,53 +838,6 @@ void AxesProcess (dev_config_t * p_dev_config)
 				}
 			}				
 		}
-    else if (source == (axis_source_t) SOURCE_BUTTONS)				// buttons/encoders source
-    {
-			uint64_t millis = GetTick();
-			int32_t tmp32 = raw_axis_data[i];
-			
-			// TODO: exact press counting
-			axes_buttons[i][0].prev_physical_state = axes_buttons[i][0].current_state;
-			axes_buttons[i][1].prev_physical_state = axes_buttons[i][1].current_state;
-			axes_buttons[i][2].prev_physical_state = axes_buttons[i][2].current_state;
-			
-			axes_buttons[i][0].current_state = logical_buttons_state[p_dev_config->axis_config[i].decrement_button].current_state;
-			axes_buttons[i][1].current_state = logical_buttons_state[p_dev_config->axis_config[i].increment_button].current_state;
-			axes_buttons[i][2].current_state = logical_buttons_state[p_dev_config->axis_config[i].center_button].current_state;			
-			
-      // decrement
-      if (axes_buttons[i][0].current_state && !axes_buttons[i][0].prev_physical_state)
-      {
-        tmp32 -= AXIS_FULLSCALE * p_dev_config->axis_config[i].step / 255;
-      }
-			else if (axes_buttons[i][0].prev_physical_state && millis - axes_buttons[i][0].time_last > 200)
-			{
-				axes_buttons[i][0].time_last = millis;
-        tmp32 -= AXIS_FULLSCALE * p_dev_config->axis_config[i].step / 255;
-			}
-			
-			// increment
-      if (axes_buttons[i][1].current_state && !axes_buttons[i][1].prev_physical_state)
-      {
-        tmp32 += AXIS_FULLSCALE * p_dev_config->axis_config[i].step / 255;
-      }
-			else if (axes_buttons[i][1].prev_physical_state && millis - axes_buttons[i][1].time_last > 200)
-			{
-				axes_buttons[i][1].time_last = millis;
-        tmp32 += AXIS_FULLSCALE * p_dev_config->axis_config[i].step / 255;
-			}
-			
-			// center
-      if (axes_buttons[i][2].current_state)
-      {
-        tmp32 = AXIS_CENTER_VALUE;
-      }
-			
-			if (tmp32 > AXIS_MAX_VALUE) tmp32 = AXIS_MAX_VALUE;
-			if (tmp32 < AXIS_MIN_VALUE) tmp32 = AXIS_MIN_VALUE;
-			
-			raw_axis_data[i] = (analog_data_t) tmp32;
-    }
 		
 		// Filtering
 		tmp[i] = Filter(raw_axis_data[i], filter_buffer[i], p_dev_config->axis_config[i].filter);
@@ -939,7 +893,71 @@ void AxesProcess (dev_config_t * p_dev_config)
 			{
 				tmp[i] = 0 - tmp[i];
 			}
-		}		
+		}
+		
+		// Trimming by buttons
+    if (p_dev_config->axis_config[i].decrement_button >= 0 ||
+				p_dev_config->axis_config[i].increment_button >= 0 ||
+				p_dev_config->axis_config[i].center_button >= 0)
+    {
+			int64_t millis = GetTick();
+			
+			axes_buttons[i][0].prev_physical_state = axes_buttons[i][0].current_state;
+			axes_buttons[i][1].prev_physical_state = axes_buttons[i][1].current_state;
+			axes_buttons[i][2].prev_physical_state = axes_buttons[i][2].current_state;
+			
+			// get new button's states
+			if (p_dev_config->axis_config[i].decrement_button >= 0)
+			{
+				axes_buttons[i][0].current_state = logical_buttons_state[p_dev_config->axis_config[i].decrement_button].current_state;
+			}
+			if (p_dev_config->axis_config[i].increment_button >= 0)
+			{
+				axes_buttons[i][1].current_state = logical_buttons_state[p_dev_config->axis_config[i].increment_button].current_state;
+			}
+			if (p_dev_config->axis_config[i].center_button >= 0)
+			{
+				axes_buttons[i][2].current_state = logical_buttons_state[p_dev_config->axis_config[i].center_button].current_state;
+			}				
+			
+      // decrement
+      if (axes_buttons[i][0].current_state > axes_buttons[i][0].prev_physical_state)
+      {
+				axes_buttons[i][0].time_last = millis + 500;
+        axes_trim_value[i] -=  (AXIS_FULLSCALE>>1)/p_dev_config->axis_config[i].divider;
+      }
+			else if (axes_buttons[i][0].prev_physical_state && millis - axes_buttons[i][0].time_last > 50)
+			{
+				axes_buttons[i][0].time_last = millis;
+        axes_trim_value[i] -= (AXIS_FULLSCALE>>1)/p_dev_config->axis_config[i].divider;
+			}
+			
+			// increment
+      if (axes_buttons[i][1].current_state > axes_buttons[i][1].prev_physical_state)
+      {
+				axes_buttons[i][1].time_last = millis + 500;
+        axes_trim_value[i] += (AXIS_FULLSCALE>>1)/p_dev_config->axis_config[i].divider;
+      }
+			else if (axes_buttons[i][1].prev_physical_state && millis - axes_buttons[i][1].time_last > 50)
+			{
+				axes_buttons[i][1].time_last = millis;
+        axes_trim_value[i] += (AXIS_FULLSCALE>>1)/p_dev_config->axis_config[i].divider;
+			}
+			
+			// center
+      if (axes_buttons[i][2].current_state)
+      {
+        axes_trim_value[i] = 0;
+      }
+			
+			if (axes_trim_value[i] > AXIS_MAX_VALUE) axes_trim_value[i] = AXIS_MAX_VALUE;
+			if (axes_trim_value[i] < AXIS_MIN_VALUE) axes_trim_value[i] = AXIS_MIN_VALUE;
+			
+			tmp[i] += axes_trim_value[i];
+			
+			if (tmp[i] > AXIS_MAX_VALUE) tmp[i] = AXIS_MAX_VALUE;
+			if (tmp[i] < AXIS_MIN_VALUE) tmp[i] = AXIS_MIN_VALUE;	
+    }
 	}  
 	
 	for (uint8_t i=0; i<MAX_AXIS_NUM; i++)

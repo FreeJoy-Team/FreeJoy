@@ -11,7 +11,7 @@
 
 //#define DEBUG
 
-#define FIRMWARE_VERSION					0x1601			// v1.6.0b0
+#define FIRMWARE_VERSION					0x1602			// v1.6.0b2
 #define USED_PINS_NUM							30					// constant for BluePill and BlackPill boards
 #define MAX_AXIS_NUM							8						// max 8
 #define MAX_BUTTONS_NUM						128					// power of 2, max 128
@@ -23,7 +23,7 @@
 #define AXIS_MIN_VALUE						(-32767)
 #define AXIS_MAX_VALUE						(32767)
 #define AXIS_CENTER_VALUE					(AXIS_MIN_VALUE + (AXIS_MAX_VALUE-AXIS_MIN_VALUE)/2)
-#define AXIS_FULLSCALE						(AXIS_MAX_VALUE - AXIS_MIN_VALUE)
+#define AXIS_FULLSCALE						(AXIS_MAX_VALUE - AXIS_MIN_VALUE + 1)
 
 #define CONFIG_ADDR								(0x0800FC00)
 
