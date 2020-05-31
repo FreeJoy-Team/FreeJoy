@@ -428,6 +428,13 @@ void IO_Init (dev_config_t * p_dev_config)
 			GPIO_Init(pin_config[i].port, &GPIO_InitStructure);
 			pin_config[i].port->ODR |=  pin_config[i].pin;
 		}
+		else if (p_dev_config->pins[i] == FAST_ENCODER && (i == 8 || i == 9))		// PA8 or PA9
+		{
+			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+			GPIO_InitStructure.GPIO_Pin = pin_config[i].pin;
+			GPIO_Init(pin_config[i].port, &GPIO_InitStructure);
+		}
 		else if (p_dev_config->pins[i] == NOT_USED)
 		{
 			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;

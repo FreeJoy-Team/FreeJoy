@@ -52,13 +52,18 @@ int8_t enc_array [16] =
 
 encoder_t encoders_state[MAX_ENCODERS_NUM];
 
+static void EncoderFastInit(void)
+{
+	
+}
+
 void EncoderProcess (logical_buttons_state_t * button_state_buf, dev_config_t * p_dev_config)
 {	
 	uint8_t	physical_buttons_state[MAX_BUTTONS_NUM];
 	uint8_t encoders_present = 0;
 	
-	// search if there is at least one encoder present
-	for (int i=0; i<MAX_ENCODERS_NUM; i++)
+	// search if there is at least one polling encoder present
+	for (int i=1; i<MAX_ENCODERS_NUM; i++)
 	{
 		if (encoders_state[i].pin_a >=0 && encoders_state[i].pin_b >=0) 
 		{
@@ -136,7 +141,7 @@ void EncoderProcess (logical_buttons_state_t * button_state_buf, dev_config_t * 
 
 void EncodersInit(dev_config_t * p_dev_config)
 {
-	uint8_t pos = 0;
+	uint8_t pos = 1;		// polling encoders start from pos = 1
 	int8_t prev_a = -1;
 	int8_t prev_b = -1;
 	
@@ -146,6 +151,20 @@ void EncodersInit(dev_config_t * p_dev_config)
 		encoders_state[i].pin_b = -1;
 	}
 	
+	// check if fast encoder connected
+	if (p_dev_config->pins[8] == FAST_ENCODER &&
+			p_dev_config->pins[9] == FAST_ENCODER)
+	{
+		// fast ancoder always at pos=0
+		encoders_state[0].pin_a = 8;
+		encoders_state[0].pin_b = 9;
+//		encoders_state[0].dir = 1;
+//		encoders_state[0].last_dir = 1;
+		
+		EncoderFastInit();
+	}
+	
+	// check if slow encoders connected to buttons inputs
 	for (int i=0; i<MAX_BUTTONS_NUM; i++)
 	{
 		if ((p_dev_config->buttons[i].type) == ENCODER_INPUT_A &&  i > prev_a)

@@ -143,6 +143,8 @@ enum
 	
 	I2C_SCL,
 	I2C_SDA,
+	
+	FAST_ENCODER,
 
 };
 typedef int8_t pin_t;
