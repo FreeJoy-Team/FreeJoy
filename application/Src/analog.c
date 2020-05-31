@@ -31,6 +31,7 @@
 #include "ads1115.h"
 #include "as5600.h"
 #include "buttons.h"
+#include "encoders.h"
 
 sensor_t sensors[MAX_AXIS_NUM];
 analog_data_t input_data[MAX_AXIS_NUM];
@@ -680,7 +681,7 @@ void AxesProcess (dev_config_t * p_dev_config)
 		uint8_t channel = p_dev_config->axis_config[i].channel;
 		uint8_t address = p_dev_config->axis_config[i].i2c_address;
 		
-		if (source >= 0 || source == (axis_source_t)SOURCE_I2C)
+		if (source >= 0 || source == (axis_source_t)SOURCE_I2C)		// sources sensors or ADC
 		{
 			if (p_dev_config->pins[source] == AXIS_ANALOG)					// source analog
 			{
@@ -837,6 +838,26 @@ void AxesProcess (dev_config_t * p_dev_config)
 					raw_axis_data[i] = map2(tmp[i], 0, 4095, AXIS_MIN_VALUE, AXIS_MAX_VALUE);
 				}
 			}				
+		}
+		else if (source == SOURCE_ENCODER)		// source encoder
+		{
+			uint8_t encoder_num = p_dev_config->axis_config[i].channel;
+			
+			if (encoders_state[encoder_num].cnt > AXIS_MAX_VALUE) encoders_state[encoder_num].cnt = AXIS_MAX_VALUE;
+			if (encoders_state[encoder_num].cnt < AXIS_MIN_VALUE) encoders_state[encoder_num].cnt = AXIS_MIN_VALUE;
+			
+			if (p_dev_config->axis_config[i].offset_angle > 0)	// offset enabled
+			{
+				tmp[i] = encoders_state[p_dev_config->axis_config[i].channel].cnt - p_dev_config->axis_config[i].offset_angle * 170;
+				if (tmp[i] < 0) tmp[i] += 32767;
+				else if (tmp[i] > 32767) tmp[i] -= 32767;
+			}
+			else		// offset disabled
+			{	
+				tmp[i] = encoders_state[p_dev_config->axis_config[i].channel].cnt;
+			}
+			
+			raw_axis_data[i] = tmp[i];
 		}
 		
 		// Filtering

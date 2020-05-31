@@ -15,6 +15,7 @@
 
 #define   ENC_COUNT      1
 
+extern encoder_t encoders_state[MAX_ENCODERS_NUM];
 
 void EncoderProcess (logical_buttons_state_t * button_state_buf, dev_config_t * p_dev_config);
 void EncodersInit (dev_config_t * p_dev_config);

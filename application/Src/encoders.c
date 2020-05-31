@@ -104,7 +104,11 @@ void EncoderProcess (logical_buttons_state_t * button_state_buf, dev_config_t * 
 								encoders_state[i].last_dir = -1;
 							}						
 							encoders_state[i].time_last = millis;
-							//encoders_state[i].cnt += stt;
+							encoders_state[i].cnt += stt;
+							
+							if (encoders_state[i].cnt > AXIS_MAX_VALUE) encoders_state[i].cnt = AXIS_MAX_VALUE;
+							if (encoders_state[i].cnt < AXIS_MIN_VALUE) encoders_state[i].cnt = AXIS_MIN_VALUE;
+							
 						}
 						else if (millis - encoders_state[i].time_last <= 200 && encoders_state[i].dir != encoders_state[i].last_dir)
 						{
