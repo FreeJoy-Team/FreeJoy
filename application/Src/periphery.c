@@ -106,18 +106,18 @@ void Timers_Init(dev_config_t * p_dev_config)
 	RCC_GetClocksFreq(&RCC_Clocks);	
 	
 	// Encoders, Axes and HID timer
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 		
 	TIM_TimeBaseStructInit(&TIM_TimeBaseInitStructure);	
-	TIM_TimeBaseInitStructure.TIM_Prescaler = RCC_Clocks.PCLK2_Frequency/10000 - 1;
+	TIM_TimeBaseInitStructure.TIM_Prescaler = RCC_Clocks.PCLK1_Frequency/5000 - 1;
 	TIM_TimeBaseInitStructure.TIM_Period = 10 - 1;			// 1ms
-	TIM_TimeBaseInit(TIM1, &TIM_TimeBaseInitStructure);
+	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseInitStructure);
 	
-	TIM_ITConfig(TIM1, TIM_IT_Update, ENABLE);	
-	NVIC_SetPriority(TIM1_UP_IRQn, 3);
-	NVIC_EnableIRQ(TIM1_UP_IRQn);
+	TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);	
+	NVIC_SetPriority(TIM2_IRQn, 3);
+	NVIC_EnableIRQ(TIM2_IRQn);
 
-	TIM_Cmd(TIM1, ENABLE);	
+	TIM_Cmd(TIM2, ENABLE);	
 	
 	// LED PWM timer
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);		

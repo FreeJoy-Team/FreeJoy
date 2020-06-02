@@ -24,43 +24,79 @@
 
 #include "encoders.h"
 
-#if (ENC_COUNT == 1)
-int8_t enc_array [16] =
+
+int8_t enc_array_1 [16] =
 {
 0,  0,  0,  0,
 -1,  0,  0,  0,
 1,  0,  0,  0,
 0,  0,  0,  0
 };
-#elif (ENC_COUNT == 2)
-int8_t enc_array [16] =
+
+int8_t enc_array_2 [16] =
 {
 0,  0,  0,  0,
 -1,  0,  0,  1,
 1,  0,  0, -1,
 0,  0,  0,  0
 };
-#else
-int8_t enc_array [16] =
+
+int8_t enc_array_4 [16] =
 {
 0,  1, -1,  0,
 -1,  0,  0,  1,
 1,  0,  0, -1,
 0, -1,  1,  0
 };
-#endif
 
-encoder_t encoders_state[MAX_ENCODERS_NUM];
 
-static void EncoderFastInit(void)
+encode_stater_t encoders_state[MAX_ENCODERS_NUM];
+
+static void EncoderFastInit(dev_config_t * p_dev_config)
 {
+	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure;	
+	RCC_ClocksTypeDef RCC_Clocks;
 	
+	RCC_GetClocksFreq(&RCC_Clocks);
+	
+	// Encoder timer
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);		
+	//TIM_TimeBaseStructInit(&TIM_TimeBaseInitStructure);	
+	TIM_TimeBaseInitStructure.TIM_Prescaler = 0;
+	TIM_TimeBaseInitStructure.TIM_Period = 65535;
+	TIM_TimeBaseInitStructure.TIM_ClockDivision = 0;
+	TIM_TimeBaseInitStructure.TIM_CounterMode = TIM_CounterMode_Up | TIM_CounterMode_Down;
+	TIM_TimeBaseInit(TIM1, &TIM_TimeBaseInitStructure);
+	
+	switch (p_dev_config->encoders[0])
+	{
+		default:	
+		case ENCODER_CONF_2x:
+			TIM_EncoderInterfaceConfig(TIM1, TIM_EncoderMode_TI1, TIM_ICPolarity_Falling, TIM_ICPolarity_Falling);
+			break;
+		
+		case ENCODER_CONF_4x:
+			TIM_EncoderInterfaceConfig(TIM1, TIM_EncoderMode_TI12, TIM_ICPolarity_Falling, TIM_ICPolarity_Falling);
+			break;
+	}
+//  TIM_ITConfig(TIM1, TIM_IT_Update, ENABLE);
+//  NVIC_EnableIRQ(TIM1_UP_IRQn);
+	
+	TIM1->CNT = 0;
+	TIM_Cmd(TIM1, ENABLE);
 }
 
 void EncoderProcess (logical_buttons_state_t * button_state_buf, dev_config_t * p_dev_config)
 {	
 	uint8_t	physical_buttons_state[MAX_BUTTONS_NUM];
 	uint8_t encoders_present = 0;
+	
+	// check if fast encoder present
+	if (encoders_state[0].pin_a >=0 && encoders_state[0].pin_b >=0) 
+		{
+			encoders_state[0].cnt = (int16_t)(TIM1->CNT);
+		}
+	
 	
 	// search if there is at least one polling encoder present
 	for (int i=1; i<MAX_ENCODERS_NUM; i++)
@@ -75,8 +111,7 @@ void EncoderProcess (logical_buttons_state_t * button_state_buf, dev_config_t * 
 	
 	ButtonsReadPhysical(p_dev_config, physical_buttons_state);		// read raw buttons state
 	
-	
-	for (int i=0; i<MAX_ENCODERS_NUM; i++)
+	for (int i=1; i<MAX_ENCODERS_NUM; i++)
 	{
 		uint32_t millis = GetTick();
 		if (encoders_state[i].pin_a >=0 && encoders_state[i].pin_b >=0)
@@ -89,7 +124,21 @@ void EncoderProcess (logical_buttons_state_t * button_state_buf, dev_config_t * 
 			
 			if ((encoders_state[i].state & 0x03) != ((encoders_state[i].state >> 2) & 0x03))							// Current state != Prev state
 			{
-				stt = enc_array[encoders_state[i].state & 0x0F];
+				switch (p_dev_config->encoders[i])
+				{
+					default:
+					case ENCODER_CONF_1x:
+						stt = enc_array_1[encoders_state[i].state & 0x0F];
+					break;
+					
+					case ENCODER_CONF_2x:
+						stt = enc_array_2[encoders_state[i].state & 0x0F];
+						break;
+					
+					case ENCODER_CONF_4x:
+						stt = enc_array_4[encoders_state[i].state & 0x0F];
+						break;
+				}
 				
 				if (stt != 0)		// changed
 				{
@@ -161,7 +210,7 @@ void EncodersInit(dev_config_t * p_dev_config)
 //		encoders_state[0].dir = 1;
 //		encoders_state[0].last_dir = 1;
 		
-		EncoderFastInit();
+		EncoderFastInit(p_dev_config);
 	}
 	
 	// check if slow encoders connected to buttons inputs

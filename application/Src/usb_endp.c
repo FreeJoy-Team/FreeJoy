@@ -90,7 +90,7 @@ void EP1_OUT_Callback(void)
 		{
 			config_in_cnt = hid_buf[1];			// requested config packet number
 			
-			if ((config_in_cnt > 0) & (config_in_cnt <= 15))
+			if ((config_in_cnt > 0) & (config_in_cnt <= 16))
 			{		
 				
 				uint8_t pos = 2;
@@ -230,6 +230,12 @@ void EP1_OUT_Callback(void)
 						pos += sizeof(tmp_dev_config.led_pwm_config);
 						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.leds[0]), MAX_LEDS_NUM*sizeof(led_config_t));
 						pos += MAX_LEDS_NUM*sizeof(led_config_t);
+						
+						break;
+					
+					case 16:												
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.encoders[0]), MAX_ENCODERS_NUM*sizeof(encoder_t));
+						pos += MAX_ENCODERS_NUM*sizeof(encoder_t);
 						
 						break;
 						
@@ -394,6 +400,8 @@ void EP1_OUT_Callback(void)
 					memcpy((uint8_t *) &(tmp_dev_config.shift_config[4]), &hid_buf[pos], sizeof(shift_modificator_t));
 					pos += sizeof(shift_modificator_t);
 					
+					
+					
 					memcpy((uint8_t *) &(tmp_dev_config.vid), &hid_buf[pos], sizeof(tmp_dev_config.vid));
 					pos += sizeof(tmp_dev_config.vid);
 					memcpy((uint8_t *) &(tmp_dev_config.pid), &hid_buf[pos], sizeof(tmp_dev_config.pid));
@@ -413,10 +421,17 @@ void EP1_OUT_Callback(void)
 				}
 				break;
 				
+				case 16:
+				{
+					memcpy((uint8_t *) &(tmp_dev_config.encoders[0]), &hid_buf[pos], MAX_ENCODERS_NUM*sizeof(encoder_t));
+					pos += MAX_ENCODERS_NUM*sizeof(encoder_t);
+				}
+				break;
+				
 				default:
 					break;
 			}
-			if (hid_buf[1] < 15)		// request new packet
+			if (hid_buf[1] < 16)		// request new packet
 			{
 				config_out_cnt = hid_buf[1] + 1;
 				

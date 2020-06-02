@@ -116,10 +116,9 @@ enum
 	BUTTON_COLUMN,
 	
 	AXIS_ANALOG,
+	FAST_ENCODER,
 	
-//	RESERVED,
-	
-	SPI_SCK = 7,
+	SPI_SCK,
   SPI_MOSI,
   SPI_MISO,
 
@@ -144,8 +143,6 @@ enum
 	I2C_SCL,
 	I2C_SDA,
 	
-	FAST_ENCODER,
-
 };
 typedef int8_t pin_t;
 
@@ -248,20 +245,13 @@ typedef struct logical_buttons_state_t
 /******************** ENCODERS **********************/
 enum
 {
-	ENCODER_TYPE_1_1 = 0,
-	ENCODER_TYPE_1_2,
-	ENCODER_TYPE_1_4,
+	ENCODER_CONF_1x = 0,
+	ENCODER_CONF_2x,
+	ENCODER_CONF_4x,
 	
 };
-typedef uint8_t encoder_type_t;
+typedef uint8_t encoder_t;
 
-typedef struct
-{
-	encoder_type_t 	type				:2;
-	uint8_t 				is_fast			:1;
-	uint8_t 										:0;
-	
-} encoder_conf_t;
 
 typedef struct
 {
@@ -273,7 +263,7 @@ typedef struct
 	int8_t					dir :4;					//:2?
 	int8_t					last_dir :4;		//:2?
 	
-} encoder_t;
+} encode_stater_t;
 
 
 /******************** AXES TO BUTTONS **********************/
@@ -379,6 +369,9 @@ typedef struct
 	// config 15;
 	led_pwm_config_t		led_pwm_config;
 	led_config_t				leds[MAX_LEDS_NUM];
+	
+	// config 16;
+	encoder_t						encoders[MAX_ENCODERS_NUM];
 	
 	
 }dev_config_t;

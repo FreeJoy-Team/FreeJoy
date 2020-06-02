@@ -171,15 +171,15 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 
-void TIM1_UP_IRQHandler(void)
+void TIM2_IRQHandler(void)
 {
 	static uint8_t btn_num = 0;
 	uint8_t	physical_buttons_data[MAX_BUTTONS_NUM];
 	joy_report_t joy_report;
 	
-	if (TIM_GetITStatus(TIM1, TIM_IT_Update))
+	if (TIM_GetITStatus(TIM2, TIM_IT_Update))
 	{
-		TIM_ClearITPendingBit(TIM1, TIM_IT_Update);
+		TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
 
 		millis = GetTick();
 		// check if it is time to send joystick data
