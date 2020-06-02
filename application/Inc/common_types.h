@@ -203,7 +203,7 @@ typedef struct button_t
 	uint8_t					shift_modificator : 3;
 	
 	uint8_t					is_inverted :1;
-	uint8_t					is_hidden 	:1;		// not used yet
+	uint8_t					is_disabled :1;
 	button_timer_t	delay_timer :3;
 	button_timer_t	press_timer :3;
 	

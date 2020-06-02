@@ -49,7 +49,7 @@ static const dev_config_t init_config =
 	.encoder_press_time_ms = 10,			// amount of milliseconds virtual button 
 																		// will be pressed at encoder increment/decrement
 																		
-	.exchange_period_ms = 5,					// amount of millisecond between joystick data sending
+	.exchange_period_ms = 2,					// amount of millisecond between joystick data sending
 	
 	.button_timer1_ms = 50,						// amount of milliseconds of delay1 for a virtual button
 	.button_timer2_ms = 200,					// amount of milliseconds of delay2 for a virtual button
@@ -71,14 +71,14 @@ static const dev_config_t init_config =
 	.pins[5] 	= NOT_USED,							// PA5
 	.pins[6] 	= NOT_USED,							// PA6
 	.pins[7] 	= NOT_USED,							// PA7
-	.pins[8] 	= FAST_ENCODER,							// PA8
-	.pins[9] 	= FAST_ENCODER,							// PA9
+	.pins[8] 	= NOT_USED,							// PA8
+	.pins[9] 	= NOT_USED,							// PA9
 	.pins[10] = NOT_USED,							// PA10
 	.pins[11] = NOT_USED,							// PA15
-	.pins[12] = NOT_USED,							// PB0
-	.pins[13] = NOT_USED,							// PB1
-	.pins[14] = NOT_USED,							// PB3
-	.pins[15] = NOT_USED,							// PB4
+	.pins[12] = BUTTON_GND,						// PB0
+	.pins[13] = BUTTON_GND,						// PB1
+	.pins[14] = BUTTON_GND,						// PB3
+	.pins[15] = BUTTON_GND,						// PB4
 	.pins[16] = NOT_USED,							// PB5
 	.pins[17] = NOT_USED,							// PB6
 	.pins[18] = NOT_USED,							// PB7
@@ -367,13 +367,13 @@ static const dev_config_t init_config =
 		- ENCODER_INPUT_A
 		- ENCODER_INPUT_B
 	*/
-	.buttons[0].physical_num = -1,
+	.buttons[0].physical_num = 12,
 	.buttons[0].type = BUTTON_NORMAL,
-	.buttons[1].physical_num = -1,
+	.buttons[1].physical_num = 13,
 	.buttons[1].type = BUTTON_NORMAL,
-	.buttons[2].physical_num = -1,
+	.buttons[2].physical_num = 14,
 	.buttons[2].type = BUTTON_NORMAL,
-	.buttons[3].physical_num = -1,
+	.buttons[3].physical_num = 15,
 	.buttons[3].type = BUTTON_NORMAL,
 	.buttons[4].physical_num = -1,
 	.buttons[4].type = BUTTON_NORMAL,

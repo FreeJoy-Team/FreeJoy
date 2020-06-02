@@ -88,59 +88,37 @@ void AppConfigInit (dev_config_t * p_dev_config)
 
 		for (uint8_t i=0; i<MAX_BUTTONS_NUM; i++)
 		{
-			uint8_t is_hidden = 0;
-			
-			if (i == p_dev_config->shift_config[0].button ||
-						i == p_dev_config->shift_config[1].button ||
-						i == p_dev_config->shift_config[2].button ||
-						i == p_dev_config->shift_config[3].button ||
-						i == p_dev_config->shift_config[4].button)	continue;
-			
+		
 			if (p_dev_config->buttons[i].type == POV1_DOWN ||
 						p_dev_config->buttons[i].type == POV1_UP ||
 						p_dev_config->buttons[i].type == POV1_LEFT ||
 						p_dev_config->buttons[i].type == POV1_RIGHT)
 			{
 				app_config.povs |= 0x01;
-				continue;
 			}
-			if (p_dev_config->buttons[i].type == POV2_DOWN ||
+			else if (p_dev_config->buttons[i].type == POV2_DOWN ||
 						p_dev_config->buttons[i].type == POV2_UP ||
 						p_dev_config->buttons[i].type == POV2_LEFT ||
 						p_dev_config->buttons[i].type == POV2_RIGHT)
 			{
 				app_config.povs |= 0x02;
-				continue;
 			}
-			if (p_dev_config->buttons[i].type == POV3_DOWN ||
+			else if (p_dev_config->buttons[i].type == POV3_DOWN ||
 						p_dev_config->buttons[i].type == POV3_UP ||
 						p_dev_config->buttons[i].type == POV3_LEFT ||
 						p_dev_config->buttons[i].type == POV3_RIGHT)
 			{
 				app_config.povs |= 0x04;
-				continue;
 			}
-			if (p_dev_config->buttons[i].type == POV4_DOWN ||
+			else if (p_dev_config->buttons[i].type == POV4_DOWN ||
 						p_dev_config->buttons[i].type == POV4_UP ||
 						p_dev_config->buttons[i].type == POV4_LEFT ||
 						p_dev_config->buttons[i].type == POV4_RIGHT)
 			{
 				app_config.povs |= 0x08;
-				continue;
-			}
-
-			for (uint8_t j=0; j<MAX_AXIS_NUM; j++)
-			{
-					// button is mapped to axis
-					if (i == p_dev_config->axis_config[j].decrement_button ||
-							i == p_dev_config->axis_config[j].increment_button)
-					{
-						is_hidden = 1;
-						break;
-					}
 			}
 			
-			if (!is_hidden && p_dev_config->buttons[i].physical_num >=0)
+			if (!p_dev_config->buttons[i].is_disabled && p_dev_config->buttons[i].physical_num >=0)
 			{
 				app_config.buttons_cnt++;
 			}

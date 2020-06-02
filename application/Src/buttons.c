@@ -852,51 +852,7 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 	uint8_t k = 0;
 	for (int i=0;i<MAX_BUTTONS_NUM;i++)
 	{
-			uint8_t is_hidden = 0;
-			
-			// skip buttons is mapped to shift
-			if (i == p_dev_config->shift_config[0].button ||
-					i == p_dev_config->shift_config[1].button ||
-					i == p_dev_config->shift_config[2].button ||
-					i == p_dev_config->shift_config[3].button ||
-					i == p_dev_config->shift_config[4].button)	
-			{
-						k++;
-						continue;
-			}
-			// skip buttons mapped to POVs
-			if (p_dev_config->buttons[i].type == POV1_DOWN ||
-					p_dev_config->buttons[i].type == POV1_UP ||
-					p_dev_config->buttons[i].type == POV1_LEFT ||
-					p_dev_config->buttons[i].type == POV1_RIGHT ||
-					p_dev_config->buttons[i].type == POV2_DOWN ||
-					p_dev_config->buttons[i].type == POV2_UP ||
-					p_dev_config->buttons[i].type == POV2_LEFT ||
-					p_dev_config->buttons[i].type == POV2_RIGHT ||
-					p_dev_config->buttons[i].type == POV3_DOWN ||
-					p_dev_config->buttons[i].type == POV3_UP ||
-					p_dev_config->buttons[i].type == POV3_LEFT ||
-					p_dev_config->buttons[i].type == POV3_RIGHT ||
-					p_dev_config->buttons[i].type == POV4_DOWN ||
-					p_dev_config->buttons[i].type == POV4_UP ||
-					p_dev_config->buttons[i].type == POV4_LEFT ||
-					p_dev_config->buttons[i].type == POV4_RIGHT)
-			{
-						k++;
-						continue;
-			}
-			// skip buttons mapped to axes
-			for (uint8_t j=0; j<MAX_AXIS_NUM; j++)
-			{
-				if (i == p_dev_config->axis_config[j].decrement_button ||
-						i == p_dev_config->axis_config[j].increment_button)
-				{
-					is_hidden = 1;
-					break;
-				}
-			}
-
-			if (!is_hidden)
+			if (!p_dev_config->buttons[i].is_disabled)
 			{
 				// prevent not atomic read
 				NVIC_DisableIRQ(TIM1_UP_IRQn);
