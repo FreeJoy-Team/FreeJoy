@@ -1064,24 +1064,18 @@ void AxesProcess (dev_config_t * p_dev_config)
 		
 	} 
 	
+	// Multi-axis process
 	for (uint8_t i=0; i<MAX_AXIS_NUM; i++)
 	{
-		uint8_t function_en = 0;
 		
-		// check if axis function activation button exist
-		if(p_dev_config->axis_config[i].button1_type == AXIS_BUTTON_FUNC_EN ||
-			 p_dev_config->axis_config[i].button2_type == AXIS_BUTTON_FUNC_EN ||
-		   p_dev_config->axis_config[i].button3_type == AXIS_BUTTON_FUNC_EN)
-		{
-				for (uint8_t n=0; n<3; n++)	function_en += axes_buttons[i][n].current_state;	// check activation buttons state					
-		}
-		else
-		{
-			function_en = 1;
-		}
-		
-		// Multi-axis process
-		if (function_en > 0 && p_dev_config->axis_config[i].function != NO_FUNCTION)
+		// check axis function activation 
+		if(((axes_buttons[i][0].current_state && p_dev_config->axis_config[i].button1_type == AXIS_BUTTON_FUNC_EN) ||
+			 (axes_buttons[i][1].current_state && p_dev_config->axis_config[i].button2_type == AXIS_BUTTON_FUNC_EN) ||
+		   (axes_buttons[i][2].current_state && p_dev_config->axis_config[i].button3_type == AXIS_BUTTON_FUNC_EN) ||
+		   (p_dev_config->axis_config[i].button1_type != AXIS_BUTTON_FUNC_EN && 
+				p_dev_config->axis_config[i].button2_type != AXIS_BUTTON_FUNC_EN && 
+				p_dev_config->axis_config[i].button3_type != AXIS_BUTTON_FUNC_EN)) && 
+				p_dev_config->axis_config[i].function != NO_FUNCTION)
 		{
 			{
 				switch (p_dev_config->axis_config[i].function)
@@ -1097,6 +1091,9 @@ void AxesProcess (dev_config_t * p_dev_config)
 						break;
 					case FUNCTION_MINUS_REL:
 						tmp[i] = tmp[i] - tmp[p_dev_config->axis_config[i].source_secondary] + AXIS_MIN_VALUE;
+						break;
+					case FUNCTION_EQUAL:
+						tmp[i] = tmp[p_dev_config->axis_config[i].source_secondary];
 						break;
 					default:
 						break;
