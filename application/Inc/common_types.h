@@ -36,6 +36,17 @@ enum
 	FUNCTION_PLUS_REL,
 	FUNCTION_MINUS_ABS,
 	FUNCTION_MINUS_REL,
+	FUNCTION_EQUAL,
+};
+
+enum
+{
+	AXIS_BUTTON_FUNC_EN = 0,
+	AXIS_BUTTON_CALIB,
+	AXIS_BUTTON_CENTER,
+	AXIS_BUTTON_RESET,
+	AXIS_BUTTON_DOWN,
+	AXIS_BUTTON_UP,
 };
 
 typedef struct
@@ -58,12 +69,16 @@ typedef struct
 	uint8_t					source_secondary: 3;
 	uint8_t					offset_angle: 5;
 	
-	int8_t					decrement_button;
-	int8_t					center_button;
-	int8_t					increment_button;
+	int8_t					button1;
+	int8_t					button2;
+	int8_t					button3;
 	uint8_t					divider;
 	uint8_t					i2c_address;
-	uint8_t					reserved[3];
+	uint8_t					button1_type	:3;
+	uint8_t					button2_type	:2;
+	uint8_t					button3_type	:3;
+	uint8_t					prescaler;
+	uint8_t					reserved[1];
 	
 } axis_config_t;
 
