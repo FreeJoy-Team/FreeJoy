@@ -916,6 +916,12 @@ void AxesProcess (dev_config_t * p_dev_config)
 			}
 		}
 		
+		// Prescaling
+		if (p_dev_config->axis_config[i].prescaler != 100)
+		{
+			tmp[i] = tmp[i]  * p_dev_config->axis_config[i].prescaler / 100;
+		}
+		
 		// Buttons section
     {
 			int64_t millis = GetTick();
