@@ -917,7 +917,10 @@ void AxesProcess (dev_config_t * p_dev_config)
 		}
 		
 		// Prescaling
-		if (p_dev_config->axis_config[i].prescaler != 100)
+		if (p_dev_config->axis_config[i].prescaler != 100 &&  
+			 ((axes_buttons[i][0].current_state && p_dev_config->axis_config[i].button1_type == AXIS_BUTTON_PRESCALER_EN) ||
+			 (axes_buttons[i][1].current_state && p_dev_config->axis_config[i].button2_type == AXIS_BUTTON_PRESCALER_EN) ||
+		   (axes_buttons[i][2].current_state && p_dev_config->axis_config[i].button3_type == AXIS_BUTTON_PRESCALER_EN)) )
 		{
 			tmp[i] = tmp[i]  * p_dev_config->axis_config[i].prescaler / 100;
 		}
