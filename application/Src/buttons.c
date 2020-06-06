@@ -25,6 +25,8 @@
 #include "buttons.h"
 #include "string.h"
 
+#include "SEGGER_SYSVIEW.h"
+
 uint8_t												raw_buttons_data[MAX_BUTTONS_NUM];
 physical_buttons_state_t 			physical_buttons_state[MAX_BUTTONS_NUM];
 logical_buttons_state_t 			logical_buttons_state[MAX_BUTTONS_NUM];
@@ -152,6 +154,8 @@ static void LogicalButtonProcessTimer (logical_buttons_state_t * p_button_state,
   */
 void LogicalButtonProcessState (logical_buttons_state_t * p_button_state, uint8_t * pov_buf, dev_config_t * p_dev_config, uint8_t num)
 {	
+	SEGGER_SYSVIEW_RecordVoid(49);
+	
 	uint32_t millis;
 	uint8_t pov_group = 0;
 	
@@ -511,6 +515,7 @@ void LogicalButtonProcessState (logical_buttons_state_t * p_button_state, uint8_
 			default:
 				break;
 		}		
+		SEGGER_SYSVIEW_RecordEndCall(49);
 }
 
 /**
@@ -665,12 +670,16 @@ void SingleButtonsGet (uint8_t * raw_button_data_buf, dev_config_t * p_dev_confi
 
 uint8_t ButtonsReadPhysical(dev_config_t * p_dev_config, uint8_t * p_buf)
 {
+	SEGGER_SYSVIEW_RecordVoid(47);
+	
 	uint8_t pos = 0;
 	// Getting physical buttons states
 	MaxtrixButtonsGet(p_buf, p_dev_config, &pos);
 	ShiftRegistersGet(p_buf, p_dev_config, &pos);
 	AxesToButtonsGet(p_buf, p_dev_config, &pos);
 	SingleButtonsGet(p_buf, p_dev_config, &pos);
+	
+	SEGGER_SYSVIEW_RecordEndCall(47);
 	
 	return pos;
 }
@@ -682,6 +691,8 @@ uint8_t ButtonsReadPhysical(dev_config_t * p_dev_config, uint8_t * p_buf)
   */
 void ButtonsReadLogical (dev_config_t * p_dev_config)
 {
+	SEGGER_SYSVIEW_RecordVoid(48);
+	
 	uint8_t pos = 0;
 	
 	pos = ButtonsReadPhysical(p_dev_config, raw_buttons_data);
@@ -855,7 +866,7 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 			if (!p_dev_config->buttons[i].is_disabled)
 			{
 				// prevent not atomic read
-				NVIC_DisableIRQ(TIM1_UP_IRQn);
+				NVIC_DisableIRQ(TIM2_IRQn);
 				
 				buttons_data[(k & 0xF8)>>3] &= ~(1 << (k & 0x07));
 				if (!p_dev_config->buttons[i].is_inverted)
@@ -868,7 +879,7 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 				}
 				
 				// resume IRQ
-				NVIC_EnableIRQ(TIM1_UP_IRQn);
+				NVIC_EnableIRQ(TIM2_IRQn);
 			}
 			k++;
 	}
@@ -907,6 +918,8 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 				break;
 		}
 	}
+	
+	SEGGER_SYSVIEW_RecordEndCall(48);
 }
 
 /**

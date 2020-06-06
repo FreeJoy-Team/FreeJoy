@@ -236,7 +236,7 @@ void MLX90393_StartDMA(sensor_t * sensor)
 	tmp_buf[7] = 0x00;		// Z LSB
 	
 	// Disable other interrupts
-	NVIC_DisableIRQ(TIM1_UP_IRQn);
+	NVIC_DisableIRQ(TIM2_IRQn);
 	NVIC_DisableIRQ(TIM3_IRQn);
 	
 	// CS low

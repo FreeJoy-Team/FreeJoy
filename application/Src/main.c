@@ -25,6 +25,8 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
+#include "SEGGER_SYSVIEW.h"
+
 #include "periphery.h"
 #include "config.h"
 #include "analog.h"
@@ -54,6 +56,10 @@ int main(void)
 	WRITE_REG(SCB->VTOR, 0x8002000);
 	
 	SysTick_Init();
+	
+	// Configure and initialize SystemView
+	SEGGER_SYSVIEW_Conf(); 
+	
 	// getting configuration from flash memory
 	DevConfigGet(&dev_config);
 	

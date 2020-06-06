@@ -46,7 +46,7 @@ void MCP320x_StartDMA(sensor_t * sensor, uint8_t channel)
 	sensor->curr_channel = channel;
 	
 	// Disable timer's interrupts
-	NVIC_DisableIRQ(TIM1_UP_IRQn);
+	NVIC_DisableIRQ(TIM2_IRQn);
 	NVIC_DisableIRQ(TIM3_IRQn);
 	
 	// CS low

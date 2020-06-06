@@ -23,6 +23,9 @@
   */
 
 #include "analog.h"
+
+#include "SEGGER_SYSVIEW.h"
+
 #include <string.h>
 #include <math.h>
 #include "tle5011.h"
@@ -424,7 +427,7 @@ void AxesInit (dev_config_t * p_dev_config)
 		{
 			for (uint8_t k=0; k<MAX_AXIS_NUM; k++)
 			{
-				if (p_dev_config->axis_config[k].source_main == i)
+				if (p_dev_config->axis_config[k].source_main == i && sensors_cnt < MAX_AXIS_NUM)
 				{
 					sensors[sensors_cnt].type = TLE5011;			
 					sensors[sensors_cnt].source = i;
@@ -437,7 +440,7 @@ void AxesInit (dev_config_t * p_dev_config)
 		{
 			for (uint8_t k=0; k<MAX_AXIS_NUM; k++)
 			{
-				if (p_dev_config->axis_config[k].source_main == i)
+				if (p_dev_config->axis_config[k].source_main == i && sensors_cnt < MAX_AXIS_NUM)
 				{
 					sensors[sensors_cnt].type = MCP3201;			
 					sensors[sensors_cnt].source = i;
@@ -450,7 +453,7 @@ void AxesInit (dev_config_t * p_dev_config)
 		{
 			for (uint8_t k=0; k<MAX_AXIS_NUM; k++)
 			{
-				if (p_dev_config->axis_config[k].source_main == i)
+				if (p_dev_config->axis_config[k].source_main == i && sensors_cnt < MAX_AXIS_NUM)
 				{
 					sensors[sensors_cnt].type = MCP3202;	
 					sensors[sensors_cnt].source = i;
@@ -463,7 +466,7 @@ void AxesInit (dev_config_t * p_dev_config)
 		{
 			for (uint8_t k=0; k<MAX_AXIS_NUM; k++)
 			{
-				if (p_dev_config->axis_config[k].source_main == i)
+				if (p_dev_config->axis_config[k].source_main == i && sensors_cnt < MAX_AXIS_NUM)
 				{
 					sensors[sensors_cnt].type = MCP3204;				
 					sensors[sensors_cnt].source = i;
@@ -476,7 +479,7 @@ void AxesInit (dev_config_t * p_dev_config)
 		{
 			for (uint8_t k=0; k<MAX_AXIS_NUM; k++)
 			{
-				if (p_dev_config->axis_config[k].source_main == i)
+				if (p_dev_config->axis_config[k].source_main == i && sensors_cnt < MAX_AXIS_NUM)
 				{
 					sensors[sensors_cnt].type = MCP3208;	
 					sensors[sensors_cnt].source = i;
@@ -489,7 +492,7 @@ void AxesInit (dev_config_t * p_dev_config)
 		{
 			for (uint8_t k=0; k<MAX_AXIS_NUM; k++)
 			{
-				if (p_dev_config->axis_config[k].source_main == i)
+				if (p_dev_config->axis_config[k].source_main == i && sensors_cnt < MAX_AXIS_NUM)
 				{
 					sensors[sensors_cnt].type = MLX90393_SPI;
 					sensors[sensors_cnt].source = i;
@@ -544,14 +547,6 @@ void AxesInit (dev_config_t * p_dev_config)
 				}
 		}
 	}
-
-	
-	if ((adc_cnt + sensors_cnt) > MAX_AXIS_NUM)
-	{
-		// Error
-		adc_cnt = 0;
-		sensors_cnt = 0;
-	}
 	
 	// Init ADC
 	if (adc_cnt > 0)
@@ -583,7 +578,7 @@ void AxesInit (dev_config_t * p_dev_config)
 		if (p_dev_config->pins[i] == AXIS_ANALOG)		// Configure ADC channels
 		{
 			/* ADC1 regular channel configuration */ 
-			ADC_RegularChannelConfig(ADC1, channel_config[i].channel, i+1, ADC_SampleTime_71Cycles5);
+			ADC_RegularChannelConfig(ADC1, channel_config[i].channel, i+1, ADC_SampleTime_239Cycles5);
 			axis_num++;
 		}
 		
@@ -627,6 +622,8 @@ void AxesInit (dev_config_t * p_dev_config)
   */
 void ADC_Conversion (void)
 {
+	SEGGER_SYSVIEW_RecordVoid(45);
+	
 	uint8_t num_of_conv = 0;
 	analog_data_t tmp = 0;
 	
@@ -662,6 +659,7 @@ void ADC_Conversion (void)
 			}
 		}
 	}
+	SEGGER_SYSVIEW_RecordEndCall(45);
 }
 
 /**
@@ -671,6 +669,8 @@ void ADC_Conversion (void)
   */
 void AxesProcess (dev_config_t * p_dev_config)
 {
+	SEGGER_SYSVIEW_RecordVoid(46);
+	
 	int32_t tmp[MAX_AXIS_NUM];
 	float tmpf;
 	
@@ -1107,7 +1107,7 @@ void AxesProcess (dev_config_t * p_dev_config)
 		}
 		
 		// disable data updating from IRQ
-		NVIC_DisableIRQ(TIM1_UP_IRQn);
+		NVIC_DisableIRQ(TIM2_IRQn);
 		
     // setting technical axis data
     scaled_axis_data[i] = tmp[i];
@@ -1116,10 +1116,10 @@ void AxesProcess (dev_config_t * p_dev_config)
     else  out_axis_data[i] = 0;
 		
 		// restore IRQ
-		NVIC_EnableIRQ(TIM1_UP_IRQn);
+		NVIC_EnableIRQ(TIM2_IRQn);
 	}
 	
-	
+	SEGGER_SYSVIEW_RecordEndCall(46);
 }
 
 /**

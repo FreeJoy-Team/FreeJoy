@@ -79,8 +79,6 @@ static void EncoderFastInit(dev_config_t * p_dev_config)
 			TIM_EncoderInterfaceConfig(TIM1, TIM_EncoderMode_TI12, TIM_ICPolarity_Falling, TIM_ICPolarity_Falling);
 			break;
 	}
-//  TIM_ITConfig(TIM1, TIM_IT_Update, ENABLE);
-//  NVIC_EnableIRQ(TIM1_UP_IRQn);
 	
 	TIM1->CNT = 0;
 	TIM_Cmd(TIM1, ENABLE);

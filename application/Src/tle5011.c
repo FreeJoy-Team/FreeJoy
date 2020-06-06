@@ -113,7 +113,7 @@ void TLE501x_StartDMA(sensor_t * sensor)
 	sensor->data[1] = 0x8C;
 	
 	// Disable other interrupts
-	NVIC_DisableIRQ(TIM1_UP_IRQn);
+	NVIC_DisableIRQ(TIM2_IRQn);
 	NVIC_DisableIRQ(TIM3_IRQn);
 	
 	SPI_HalfDuplex_Transmit(&sensor->data[0], 2, TLE5011_SPI_MODE);
