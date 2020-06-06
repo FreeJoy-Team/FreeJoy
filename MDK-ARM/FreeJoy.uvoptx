@@ -200,6 +200,11 @@
           <WinNumber>1</WinNumber>
           <ItemText>sensors</ItemText>
         </Ww>
+        <Ww>
+          <count>9</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>raw_buttons_data</ItemText>
+        </Ww>
       </WatchWindow1>
       <MemoryWindow1>
         <Mm>

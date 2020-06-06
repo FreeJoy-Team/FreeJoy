@@ -93,11 +93,10 @@ void ShiftRegisterRead(shift_reg_t * shift_register, uint8_t * data)
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;	
 	GPIO_Init (GPIOB,&GPIO_InitStructure);
 	
-	// set SCK low
-	GPIOB->ODR &= ~GPIO_Pin_3;
-	
 	if (shift_register->type == CD4021_PULL_DOWN || shift_register->type == CD4021_PULL_UP)		// positive polarity
 	{
+		// set SCK low
+		GPIOB->ODR &= ~GPIO_Pin_3;
 		// Latch impulse
 		pin_config[shift_register->pin_latch].port->ODR |= pin_config[shift_register->pin_latch].pin;
 		for (int i=0; i<SHIFTREG_TICK_DELAY; i++) __NOP();
@@ -106,6 +105,8 @@ void ShiftRegisterRead(shift_reg_t * shift_register, uint8_t * data)
 	}
 	else	// HC165 negative polarity
 	{
+		// set SCK high
+		GPIOB->ODR |= GPIO_Pin_3;
 		// Latch impulse
 		pin_config[shift_register->pin_latch].port->ODR &= ~pin_config[shift_register->pin_latch].pin;
 		for (int i=0; i<SHIFTREG_TICK_DELAY; i++) __NOP();
@@ -168,7 +169,9 @@ void ShiftRegistersGet (uint8_t * raw_button_data_buf, dev_config_t * p_dev_conf
 	{
 		if (shift_registers[i].pin_latch >=0 && shift_registers[i].pin_data >=0)
 		{
+			NVIC_DisableIRQ(TIM2_IRQn);
 			ShiftRegisterRead(&shift_registers[i], input_data);
+			NVIC_EnableIRQ(TIM2_IRQn);
 			for (uint8_t j=0; j<shift_registers[i].button_cnt; j++)
 			{
 				if ((*pos) <128)
