@@ -63,9 +63,16 @@ int16_t ADS1115_GetData(sensor_t * sensor, uint8_t channel)
   */
 int ADS1115_ReadBlocking(sensor_t * sensor, uint8_t channel)
 {
-	int ret;	
-	ret = I2C_ReadBlocking(sensor->address, 0, &sensor->data[2*channel], 2, 0);
-	if (ret == 0 ) sensor->ok_cnt++;
+	int ret;
+	uint8_t tmp_buf[2];
+	
+	ret = I2C_ReadBlocking(sensor->address, 0, tmp_buf, 2, 0);
+	
+	if (ret == 0 ) 
+	{
+		memcpy(&sensor->data[2*channel], tmp_buf, 2);
+		sensor->ok_cnt++;
+	}
 	else sensor->err_cnt++;
 	
 	return ret;

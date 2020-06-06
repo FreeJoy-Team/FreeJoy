@@ -247,17 +247,23 @@ void TIM2_IRQHandler(void)
 				{		
 					if (sensors[i].type == AS5600)
 					{
+						uint32_t tmp_pb = GPIOB->CRL;														// workaround of errata 2.9.8 issue
+						GPIOB->CRL &= ~GPIO_CRL_MODE5;
 						RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE);
 						status = AS5600_ReadBlocking(&sensors[i]);
-						RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, DISABLE);		// workaround of errata 2.8.7 issue
+						RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, DISABLE);		// workaround of errata 2.9.7 issue
+						GPIOB->CRL = tmp_pb;
 					}
 					if (sensors[i].type == ADS1115)
 					{
+						uint32_t tmp_pb = GPIOB->CRL;														// workaround of errata 2.9.8 issue
+						GPIOB->CRL &= ~GPIO_CRL_MODE5;
 						RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE);
 						status = ADS1115_ReadBlocking(&sensors[i], sensors[i].curr_channel);					
 						uint8_t channel = (sensors[i].curr_channel < 3) ? (sensors[i].curr_channel + 1) : 0;
 						status = ADS1115_SetMuxBlocking(&sensors[i], channel);
-						RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, DISABLE);		// workaround of errata 2.8.7 issue
+						RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, DISABLE);		// workaround of errata 2.9.7 issue
+						GPIOB->CRL = tmp_pb;
 					}
 				}
 			}

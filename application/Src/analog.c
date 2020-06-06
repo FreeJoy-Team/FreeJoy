@@ -503,7 +503,7 @@ void AxesInit (dev_config_t * p_dev_config)
 				}
 			}
 		}
-		else if (p_dev_config->pins[i] == I2C_SCL)
+		else if (p_dev_config->pins[19] == I2C_SCL && p_dev_config->pins[20] == I2C_SDA)			// PB8 and PB9
 		{
 			// look for ADS1115 sensors with different addresses
 			for (uint8_t addr = ADS1115_I2C_ADDR_MIN; addr <= ADS1115_I2C_ADDR_MAX; addr ++)
@@ -681,7 +681,7 @@ void AxesProcess (dev_config_t * p_dev_config)
 		uint8_t channel = p_dev_config->axis_config[i].channel;
 		uint8_t address = p_dev_config->axis_config[i].i2c_address;
 		
-		if (source >= 0 || source == (axis_source_t)SOURCE_I2C)		// sources sensors or ADC
+		if (source >= 0)		// source SPI sensors or internal ADC
 		{
 			if (p_dev_config->pins[source] == AXIS_ANALOG)					// source analog
 			{
@@ -800,45 +800,46 @@ void AxesProcess (dev_config_t * p_dev_config)
 					sensors[k].err_cnt++;
 				}
 			}	
-			else if (source == (axis_source_t)SOURCE_I2C)				// source I2C sensor
-			{
-				uint8_t k=0;
-				// search for needed sensor
-				for (k=0; k<MAX_AXIS_NUM; k++)
-				{
-					if (sensors[k].address == address) break;
-				}
-				// get data
-				if (sensors[k].type == ADS1115)
-				{					
-					if (p_dev_config->axis_config[i].offset_angle > 0)	// offset enabled
-					{
-						tmp[i] = ADS1115_GetData(&sensors[k], channel) - p_dev_config->axis_config[i].offset_angle * 2730;
-						if (tmp[i] < 0) tmp[i] += 32767;
-						else if (tmp[i] > 32767) tmp[i] -= 32767;
-					}
-					else		// offset disabled
-					{
-						tmp[i] = ADS1115_GetData(&sensors[k], channel);
-					}
-					raw_axis_data[i] = map2(tmp[i], 0, 32767, AXIS_MIN_VALUE, AXIS_MAX_VALUE);
-				}
-				else if (sensors[k].type == AS5600)
-				{
-					if (p_dev_config->axis_config[i].offset_angle > 0)	// offset enabled
-					{
-						tmp[i] = AS5600_GetScaledData(&sensors[k]) - p_dev_config->axis_config[i].offset_angle * 170;
-						if (tmp[i] < 0) tmp[i] += 4095;
-						else if (tmp[i] > 4095) tmp[i] -= 4095;
-					}
-					else		// offset disabled
-					{
-						tmp[i] = AS5600_GetScaledData(&sensors[k]);
-					}					
-					raw_axis_data[i] = map2(tmp[i], 0, 4095, AXIS_MIN_VALUE, AXIS_MAX_VALUE);
-				}
-			}				
 		}
+		else if (source == (axis_source_t)SOURCE_I2C)				// source I2C sensor
+		{
+			uint8_t k=0;
+			// search for needed sensor
+			for (k=0; k<MAX_AXIS_NUM; k++)
+			{
+				if (sensors[k].address == address) break;
+			}
+			// get data
+			if (sensors[k].type == ADS1115)
+			{					
+				if (p_dev_config->axis_config[i].offset_angle > 0)	// offset enabled
+				{
+					tmp[i] = ADS1115_GetData(&sensors[k], channel) - p_dev_config->axis_config[i].offset_angle * 2730;
+					if (tmp[i] < 0) tmp[i] += 32767;
+					else if (tmp[i] > 32767) tmp[i] -= 32767;
+				}
+				else		// offset disabled
+				{
+					tmp[i] = ADS1115_GetData(&sensors[k], channel);
+				}
+				raw_axis_data[i] = map2(tmp[i], 0, 32767, AXIS_MIN_VALUE, AXIS_MAX_VALUE);
+			}
+			else if (sensors[k].type == AS5600)
+			{
+				if (p_dev_config->axis_config[i].offset_angle > 0)	// offset enabled
+				{
+					tmp[i] = AS5600_GetScaledData(&sensors[k]) - p_dev_config->axis_config[i].offset_angle * 170;
+					if (tmp[i] < 0) tmp[i] += 4095;
+					else if (tmp[i] > 4095) tmp[i] -= 4095;
+				}
+				else		// offset disabled
+				{
+					tmp[i] = AS5600_GetScaledData(&sensors[k]);
+				}					
+				raw_axis_data[i] = map2(tmp[i], 0, 4095, AXIS_MIN_VALUE, AXIS_MAX_VALUE);
+			}
+		}				
+		
 		else if (source == SOURCE_ENCODER)		// source encoder
 		{
 			uint8_t encoder_num = p_dev_config->axis_config[i].channel;

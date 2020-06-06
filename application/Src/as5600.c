@@ -78,8 +78,15 @@ int16_t AS5600_GetScaledData(sensor_t * sensor)
 int AS5600_ReadBlocking(sensor_t * sensor)
 {
 	int ret;	
-	ret = I2C_ReadBlocking(sensor->address, 0x0C, &sensor->data[0], 4, 1);
-	if (ret == 0 ) sensor->ok_cnt++;
+	uint8_t tmp_buf[4];
+	
+	ret = I2C_ReadBlocking(sensor->address, 0x0C, tmp_buf, 4, 1);
+	
+	if (ret == 0 ) 
+	{
+		memcpy(&sensor->data[0], tmp_buf, 4);
+		sensor->ok_cnt++;
+	}
 	else sensor->err_cnt++;
 	
 	return ret;
