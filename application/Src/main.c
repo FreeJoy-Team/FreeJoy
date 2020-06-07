@@ -91,10 +91,9 @@ int main(void)
 		// Enter flasher command received
 		if (bootloader > 0)
 		{
-			Delay_ms(50);	// time to let HID end last transmission
+			//Delay_ms(50);	// time to let HID end last transmission
 			// Disable USB
 			PowerOff();
-			Delay_ms(200);
 			EnterBootloader();
 		}
   }

@@ -104,15 +104,17 @@ void EP1_OUT_Callback(void)
 				
 				switch(config_in_cnt)
 				{
-						case 1:	
-							memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.firmware_version), sizeof(tmp_dev_config.firmware_version));
-							pos += sizeof(tmp_dev_config.firmware_version);
-							memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.device_name), sizeof(tmp_dev_config.device_name));
-							pos += sizeof(tmp_dev_config.device_name);
-							memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.button_debounce_ms), 4);
-							pos += 4;							
-							memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.pins), sizeof(tmp_dev_config.pins));
-							pos += sizeof(tmp_dev_config.pins);
+					case 1:	
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.firmware_version), sizeof(tmp_dev_config.firmware_version));
+						pos += sizeof(tmp_dev_config.firmware_version);
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.device_name), sizeof(tmp_dev_config.device_name));
+						pos += sizeof(tmp_dev_config.device_name);
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.button_debounce_ms), 4);
+						pos += 4;							
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.pins), sizeof(tmp_dev_config.pins));
+						pos += sizeof(tmp_dev_config.pins);
+					
+						USB_CUSTOM_HID_SendReport((uint8_t *)&(tmp_buf), 64);
 						break;
 					
 					case 2:
@@ -122,6 +124,7 @@ void EP1_OUT_Callback(void)
 							memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.axis_config[i++]), sizeof(axis_config_t));
 							pos += sizeof(axis_config_t);
 						}
+						USB_CUSTOM_HID_SendReport((uint8_t *)&(tmp_buf), 64);
 						break;
 					
 					case 3:
@@ -131,6 +134,7 @@ void EP1_OUT_Callback(void)
 							memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.axis_config[i++]), sizeof(axis_config_t));
 							pos += sizeof(axis_config_t);
 						}
+						USB_CUSTOM_HID_SendReport((uint8_t *)&(tmp_buf), 64);
 						break;
 					
 					case 4:
@@ -140,6 +144,7 @@ void EP1_OUT_Callback(void)
 							memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.axis_config[i++]), sizeof(axis_config_t));
 							pos += sizeof(axis_config_t);
 						}
+						USB_CUSTOM_HID_SendReport((uint8_t *)&(tmp_buf), 64);
 						break;
 
 					case 5:
@@ -149,33 +154,46 @@ void EP1_OUT_Callback(void)
 						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.axis_config[7]), sizeof(axis_config_t));
 						pos += sizeof(axis_config_t);
 						
+						USB_CUSTOM_HID_SendReport((uint8_t *)&(tmp_buf), 64);
 						break;
 					
 					case 6:
 						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.buttons[0]), 60);				
 						memcpy(&tmp_buf[64-sizeof(tmp_dev_config.button_timer1_ms)], (uint8_t *) &(tmp_dev_config.button_timer1_ms), sizeof(tmp_dev_config.button_timer1_ms));
+						
+						USB_CUSTOM_HID_SendReport((uint8_t *)&(tmp_buf), 64);
 						break;
 					
 					case 7:
 						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.buttons[20]), 60);			
 						memcpy(&tmp_buf[64-sizeof(tmp_dev_config.button_timer2_ms)], (uint8_t *) &(tmp_dev_config.button_timer2_ms), sizeof(tmp_dev_config.button_timer2_ms));
+						
+						USB_CUSTOM_HID_SendReport((uint8_t *)&(tmp_buf), 64);
 						break;
 					
 					case 8:
 						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.buttons[40]), 60);			
 						memcpy(&tmp_buf[64-sizeof(tmp_dev_config.button_timer3_ms)], (uint8_t *) &(tmp_dev_config.button_timer3_ms), sizeof(tmp_dev_config.button_timer3_ms));
+						
+						USB_CUSTOM_HID_SendReport((uint8_t *)&(tmp_buf), 64);
 						break;
 					
 					case 9:
 						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.buttons[60]), 60);					
+					
+						USB_CUSTOM_HID_SendReport((uint8_t *)&(tmp_buf), 64);
 						break;
 					
 					case 10:
 						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.buttons[80]), 60);				
+					
+						USB_CUSTOM_HID_SendReport((uint8_t *)&(tmp_buf), 64);
 						break;
 					
 					case 11:
-						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.buttons[100]), 60);					
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.buttons[100]), 60);	
+
+						USB_CUSTOM_HID_SendReport((uint8_t *)&(tmp_buf), 64);
 						break;	
 					
 					case 12:
@@ -186,6 +204,8 @@ void EP1_OUT_Callback(void)
 						pos += sizeof(axis_to_buttons_t);
 						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.axes_to_buttons[1]), sizeof(axis_to_buttons_t));	
 						pos += sizeof(axis_to_buttons_t);
+					
+						USB_CUSTOM_HID_SendReport((uint8_t *)&(tmp_buf), 64);
 						break;
 					
 					case 13:
@@ -196,7 +216,9 @@ void EP1_OUT_Callback(void)
 						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.axes_to_buttons[4]), sizeof(axis_to_buttons_t));	
 						pos += sizeof(axis_to_buttons_t);					
 						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.axes_to_buttons[5]), sizeof(axis_to_buttons_t));	
-						pos += sizeof(axis_to_buttons_t);	
+						pos += sizeof(axis_to_buttons_t);
+					
+						USB_CUSTOM_HID_SendReport((uint8_t *)&(tmp_buf), 64);
 						break;
 					
 					case 14:
@@ -223,6 +245,8 @@ void EP1_OUT_Callback(void)
 						pos += sizeof(tmp_dev_config.pid);
 						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.is_dynamic_config), sizeof(tmp_dev_config.is_dynamic_config));
 						pos += sizeof(tmp_dev_config.is_dynamic_config);
+						
+						USB_CUSTOM_HID_SendReport((uint8_t *)&(tmp_buf), 64);
 						break;
 						
 					case 15:
@@ -230,13 +254,15 @@ void EP1_OUT_Callback(void)
 						pos += sizeof(tmp_dev_config.led_pwm_config);
 						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.leds[0]), MAX_LEDS_NUM*sizeof(led_config_t));
 						pos += MAX_LEDS_NUM*sizeof(led_config_t);
-						
+					
+						USB_CUSTOM_HID_SendReport((uint8_t *)&(tmp_buf), 64);
 						break;
 					
 					case 16:												
 						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.encoders[0]), MAX_ENCODERS_NUM*sizeof(encoder_t));
 						pos += MAX_ENCODERS_NUM*sizeof(encoder_t);
-						
+					
+						USB_CUSTOM_HID_SendReport((uint8_t *)&(tmp_buf), 64);
 						break;
 						
 					default:
@@ -244,8 +270,7 @@ void EP1_OUT_Callback(void)
 											
 				}
 					
-				USB_CUSTOM_HID_SendReport((uint8_t *)&(tmp_buf), 64);
-				config_in_cnt = 0;	
+				
 			}
 		}
 		break;
@@ -488,6 +513,7 @@ void EP1_OUT_Callback(void)
 			break;
 	}
 
+	memset(hid_buf, 0 ,64);
   SetEPRxStatus(ENDP1, EP_RX_VALID);
  
 }

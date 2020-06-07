@@ -60,7 +60,7 @@
 #define CUSTOMHID_SIZ_REPORT_DESC               178
 #define CUSTOMHID_SIZ_STRING_LANGID             4
 #define CUSTOMHID_SIZ_STRING_VENDOR             38
-#define CUSTOMHID_SIZ_STRING_PRODUCT            32
+#define CUSTOMHID_SIZ_STRING_PRODUCT            52
 #define CUSTOMHID_SIZ_STRING_SERIAL             26
 
 #define STANDARD_ENDPOINT_DESC_SIZE             0x09

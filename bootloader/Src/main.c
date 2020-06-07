@@ -68,8 +68,10 @@ int main(void)
 		if (!flash_started)
 		{
 			LED1_ON;
+			LED2_ON;
 			Delay(500000);
 			LED1_OFF;
+			LED2_OFF;
 			Delay(10000000);
 		}
 		if (flash_finished)
