@@ -55,6 +55,7 @@ void Get_ProductStr(void);
 void Get_VidPid(void);
 void Get_ReportDesc(void);
 void USB_HW_Init(void);
+void USB_HW_DeInit(void);
 
 #endif  /*__USB_HW_H*/
 

@@ -91,9 +91,13 @@ int main(void)
 		// Enter flasher command received
 		if (bootloader > 0)
 		{
-			//Delay_ms(50);	// time to let HID end last transmission
+			// Disable HID report generation
+			NVIC_DisableIRQ(TIM2_IRQn);
+			Delay_ms(50);	// time to let HID end last transmission
 			// Disable USB
 			PowerOff();
+			USB_HW_DeInit();
+			Delay_ms(500);	
 			EnterBootloader();
 		}
   }

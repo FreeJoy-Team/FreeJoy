@@ -51,10 +51,12 @@ void Set_System(void)
   
 #if defined(STM32L1XX_MD) || defined(STM32L1XX_HD)
   
-  /* Configure USB DM/DP pin. This is optional, and maintained only for user guidance.
+	  /* Enable all GPIOs Clock*/
+  RCC_AHBPeriphClockCmd(RCC_AHBPeriph_ALLGPIO, ENABLE);
+	
+	  /* Configure USB DM/DP pin. This is optional, and maintained only for user guidance.
   For the STM32L products there is no need to configure the PA12/PA11 pins couple 
-  as Alternate Function */
-  
+  as Alternate Function */ 
   GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11 | GPIO_Pin_12;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_40MHz;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
@@ -62,18 +64,16 @@ void Set_System(void)
   GPIO_Init(GPIOA, &GPIO_InitStructure);
   GPIO_InitStructure.GPIO_Pin = GPIO_Pin_All;
   
-  /* Enable all GPIOs Clock*/
-  RCC_AHBPeriphClockCmd(RCC_AHBPeriph_ALLGPIO, ENABLE);
-  
 #elif defined(STM32F10X_HD) || defined(STM32F10X_MD)  || defined(STM32F10X_XL)
+
+/* Enable all GPIOs Clock*/
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+	
   GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11 | GPIO_Pin_12;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
   GPIO_Init(GPIOA, &GPIO_InitStructure);
   
-  /* Enable all GPIOs Clock*/
-  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
-
 #else /* defined(STM32F37X) || defined(STM32F303xC) */
   
   GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11 | GPIO_Pin_12;
@@ -312,6 +312,22 @@ void USB_HW_Init(void)
 
   USB_Init();
 	
+}
+
+void USB_HW_DeInit(void)
+{
+	GPIO_InitTypeDef  GPIO_InitStructure;  
+
+	// Disable USB Clocks
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USB, DISABLE);
+
+	
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11 | GPIO_Pin_12;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+  GPIO_Init(GPIOA, &GPIO_InitStructure);
+	
+	GPIOA->ODR &= ~(GPIO_Pin_11 | GPIO_Pin_12);
 }
 
 
