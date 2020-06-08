@@ -49,7 +49,7 @@ static const dev_config_t init_config =
 	.encoder_press_time_ms = 10,			// amount of milliseconds virtual button 
 																		// will be pressed at encoder increment/decrement
 																		
-	.exchange_period_ms = 2,					// amount of millisecond between joystick data sending
+	.exchange_period_ms = 5,					// amount of millisecond between joystick data sending
 	
 	.button_timer1_ms = 50,						// amount of milliseconds of delay1 for a virtual button
 	.button_timer2_ms = 200,					// amount of milliseconds of delay2 for a virtual button
@@ -660,50 +660,50 @@ static const dev_config_t init_config =
 		AxesToButtons configuration
 	*/
 	.axes_to_buttons[0].points[0] = 0,
-	.axes_to_buttons[0].points[1] = 50,
-	.axes_to_buttons[0].points[2] = 100,
+	.axes_to_buttons[0].points[1] = 127,
+	.axes_to_buttons[0].points[2] = 255,
 	.axes_to_buttons[0].buttons_cnt = 2,
 	.axes_to_buttons[0].is_enabled = 0,
 	
 	.axes_to_buttons[1].points[0] = 0,
-	.axes_to_buttons[1].points[1] = 50,
-	.axes_to_buttons[1].points[2] = 100,
+	.axes_to_buttons[1].points[1] = 127,
+	.axes_to_buttons[1].points[2] = 255,
 	.axes_to_buttons[1].buttons_cnt = 2,
 	.axes_to_buttons[1].is_enabled = 0,
 	
 	.axes_to_buttons[2].points[0] = 0,
-	.axes_to_buttons[2].points[1] = 50,
-	.axes_to_buttons[2].points[2] = 100,
+	.axes_to_buttons[2].points[1] = 127,
+	.axes_to_buttons[2].points[2] = 255,
 	.axes_to_buttons[2].buttons_cnt = 2,
 	.axes_to_buttons[2].is_enabled = 0,
 	
 	.axes_to_buttons[3].points[0] = 0,
-	.axes_to_buttons[3].points[1] = 50,
-	.axes_to_buttons[3].points[2] = 100,
+	.axes_to_buttons[3].points[1] = 127,
+	.axes_to_buttons[3].points[2] = 255,
 	.axes_to_buttons[3].buttons_cnt = 2,
 	.axes_to_buttons[3].is_enabled = 0,
 	
 	.axes_to_buttons[4].points[0] = 0,
-	.axes_to_buttons[4].points[1] = 50,
-	.axes_to_buttons[4].points[2] = 100,
+	.axes_to_buttons[4].points[1] = 127,
+	.axes_to_buttons[4].points[2] = 255,
 	.axes_to_buttons[4].buttons_cnt = 2,
 	.axes_to_buttons[4].is_enabled = 0,
 	
 	.axes_to_buttons[5].points[0] = 0,
-	.axes_to_buttons[5].points[1] = 50,
-	.axes_to_buttons[5].points[2] = 100,
+	.axes_to_buttons[5].points[1] = 127,
+	.axes_to_buttons[5].points[2] = 255,
 	.axes_to_buttons[5].buttons_cnt = 2,
 	.axes_to_buttons[5].is_enabled = 0,
 	
 	.axes_to_buttons[6].points[0] = 0,
-	.axes_to_buttons[6].points[1] = 50,
-	.axes_to_buttons[6].points[2] = 100,
+	.axes_to_buttons[6].points[1] = 127,
+	.axes_to_buttons[6].points[2] = 255,
 	.axes_to_buttons[6].buttons_cnt = 2,
 	.axes_to_buttons[6].is_enabled = 0,
 	
 	.axes_to_buttons[7].points[0] = 0,
-	.axes_to_buttons[7].points[1] = 50,
-	.axes_to_buttons[7].points[2] = 100,
+	.axes_to_buttons[7].points[1] = 127,
+	.axes_to_buttons[7].points[2] = 255,
 	.axes_to_buttons[7].buttons_cnt = 2,
 	.axes_to_buttons[7].is_enabled = 0,
 	
