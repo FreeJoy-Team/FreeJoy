@@ -86,7 +86,7 @@ static void EncoderFastInit(dev_config_t * p_dev_config)
 
 void EncoderProcess (logical_buttons_state_t * button_state_buf, dev_config_t * p_dev_config)
 {	
-	uint8_t	physical_buttons_state[MAX_BUTTONS_NUM];
+	uint8_t	raw_buttons[MAX_BUTTONS_NUM];
 	uint8_t encoders_present = 0;
 	
 	// check if fast encoder present
@@ -107,7 +107,7 @@ void EncoderProcess (logical_buttons_state_t * button_state_buf, dev_config_t * 
 	}
 	if (!encoders_present) return;		// dont waste time if no encoders connected
 	
-	ButtonsReadPhysical(p_dev_config, physical_buttons_state);		// read raw buttons state
+	ButtonsReadPhysical(p_dev_config, raw_buttons);		// read raw buttons state
 	
 	for (int i=1; i<MAX_ENCODERS_NUM; i++)
 	{
@@ -117,8 +117,8 @@ void EncoderProcess (logical_buttons_state_t * button_state_buf, dev_config_t * 
 			int8_t stt;
 			encoders_state[i].state <<= 2;			// shift prev state to clear space for new data
 			
-			if (physical_buttons_state[p_dev_config->buttons[encoders_state[i].pin_a].physical_num])	encoders_state[i].state |= 0x01;		// Pin A high
-			if (physical_buttons_state[p_dev_config->buttons[encoders_state[i].pin_b].physical_num])	encoders_state[i].state |= 0x02;		// Pin B high
+			if (raw_buttons[p_dev_config->buttons[encoders_state[i].pin_a].physical_num])	encoders_state[i].state |= 0x01;		// Pin A high
+			if (raw_buttons[p_dev_config->buttons[encoders_state[i].pin_b].physical_num])	encoders_state[i].state |= 0x02;		// Pin B high
 			
 			if ((encoders_state[i].state & 0x03) != ((encoders_state[i].state >> 2) & 0x03))							// Current state != Prev state
 			{
@@ -181,7 +181,7 @@ void EncoderProcess (logical_buttons_state_t * button_state_buf, dev_config_t * 
 				encoders_state[i].state >>= 2;
 			}
 		}
-		
+		// unpress encoder button
 		if (encoders_state[i].pin_a >=0 && encoders_state[i].pin_b >=0 &&
 			millis - encoders_state[i].time_last > p_dev_config->encoder_press_time_ms)
 		{	
@@ -201,6 +201,8 @@ void EncodersInit(dev_config_t * p_dev_config)
 	{
 		encoders_state[i].pin_a = -1;
 		encoders_state[i].pin_b = -1;
+		encoders_state[i].state = 0;
+		encoders_state[i].time_last = 0;
 	}
 	
 	// check if fast encoder connected
