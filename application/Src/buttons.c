@@ -34,6 +34,8 @@ button_data_t 								buttons_data[MAX_BUTTONS_NUM/8];
 pov_data_t 										pov_data[MAX_POVS_NUM];
 uint8_t												pov_pos[MAX_POVS_NUM];
 uint8_t												shifts_state;
+uint8_t												a2b_first;
+uint8_t												a2b_last;
 
 /**
   * @brief  Processing debounce for raw buttons input
@@ -43,11 +45,22 @@ uint8_t												shifts_state;
 static void ButtonsDebouceProcess (dev_config_t * p_dev_config)
 {
 	uint32_t 	millis;
+	uint16_t	debounce;
 	
 	millis = GetTick();
 	
 	for (uint8_t i=0; i<MAX_BUTTONS_NUM; i++)
 	{
+			// set a2b debounce
+			if (a2b_first != a2b_last && i > a2b_first && i <= a2b_last)
+			{
+				debounce = p_dev_config->a2b_debounce_ms;
+			}
+			else 
+			{
+				debounce = p_dev_config->button_debounce_ms;
+			}
+		
 			physical_buttons_state[i].prev_pin_state = physical_buttons_state[i].pin_state;
 			physical_buttons_state[i].pin_state = raw_buttons_data[i];
 		
@@ -59,7 +72,7 @@ static void ButtonsDebouceProcess (dev_config_t * p_dev_config)
 			}
 			// set state after debounce if state have not changed
 			else if (	physical_buttons_state[i].changed && physical_buttons_state[i].pin_state == physical_buttons_state[i].prev_pin_state &&
-								millis - physical_buttons_state[i].time_last > p_dev_config->button_debounce_ms)
+								millis - physical_buttons_state[i].time_last > debounce)
 			{
 
 				physical_buttons_state[i].changed = 0;
@@ -68,7 +81,7 @@ static void ButtonsDebouceProcess (dev_config_t * p_dev_config)
 			}
 			// reset if state changed during debounce period
 			else if (physical_buttons_state[i].changed &&
-								millis - physical_buttons_state[i].time_last > p_dev_config->button_debounce_ms)
+								millis - physical_buttons_state[i].time_last > debounce)
 			{
 				physical_buttons_state[i].changed = 0;
 			}
@@ -676,7 +689,9 @@ uint8_t ButtonsReadPhysical(dev_config_t * p_dev_config, uint8_t * p_buf)
 	// Getting physical buttons states
 	MaxtrixButtonsGet(p_buf, p_dev_config, &pos);
 	ShiftRegistersGet(p_buf, p_dev_config, &pos);
+	a2b_first = pos;
 	AxesToButtonsGet(p_buf, p_dev_config, &pos);
+	a2b_last = pos;
 	SingleButtonsGet(p_buf, p_dev_config, &pos);
 	
 	SEGGER_SYSVIEW_RecordEndCall(47);
