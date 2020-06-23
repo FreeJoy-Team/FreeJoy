@@ -312,7 +312,7 @@
           </ArmAdsMisc>
           <Cads>
             <interw>1</interw>
-            <Optim>1</Optim>
+            <Optim>4</Optim>
             <oTime>0</oTime>
             <SplitLS>0</SplitLS>
             <OneElfS>1</OneElfS>
@@ -508,14 +508,14 @@
               <FilePath>..\application\Src\i2c.c</FilePath>
             </File>
             <File>
-              <FileName>common_defines.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\common_defines.h</FilePath>
-            </File>
-            <File>
               <FileName>common_types.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\application\Inc\common_types.h</FilePath>
+            </File>
+            <File>
+              <FileName>common_defines.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\application\Inc\common_defines.h</FilePath>
             </File>
             <File>
               <FileName>main.h</FileName>
@@ -1366,14 +1366,14 @@
               <FilePath>..\application\Src\i2c.c</FilePath>
             </File>
             <File>
-              <FileName>common_defines.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\common_defines.h</FilePath>
-            </File>
-            <File>
               <FileName>common_types.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\application\Inc\common_types.h</FilePath>
+            </File>
+            <File>
+              <FileName>common_defines.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\application\Inc\common_defines.h</FilePath>
             </File>
             <File>
               <FileName>main.h</FileName>
