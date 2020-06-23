@@ -760,7 +760,7 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 					(p_dev_config->buttons[j].shift_modificator) == 0)
 				{
 					logical_buttons_state[j].prev_physical_state = logical_buttons_state[j].curr_physical_state;
-					logical_buttons_state[j].curr_physical_state = physical_buttons_state[p_dev_config->buttons[i].physical_num].current_state;
+					logical_buttons_state[j].curr_physical_state = physical_buttons_state[p_dev_config->buttons[j].physical_num].current_state;
 					
 					LogicalButtonProcessState(&logical_buttons_state[j], pov_pos, p_dev_config, j);
 				}
