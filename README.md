@@ -58,5 +58,5 @@ FreeJoy allows you to connect up to 128 digital inputs as single inputs (tied to
 ## FreeJoy Configurator utility
 FreeJoy configuration is possible using external [utility](https://github.com/vostrenkov/FreeJoyConfigurator).
 
-<img src="https://github.com/FreeJoy-Team/FreeJoyWiki/blob/master/images/main.png" width="600"/>
+<img src="https://github.com/FreeJoy-Team/FreeJoyWiki/blob/master/images/main.png" width="800"/>
 
