@@ -380,7 +380,7 @@ void DMA1_Channel2_IRQHandler(void)
 		// Process next sensor
 		for ( ;i<MAX_AXIS_NUM;i++)
 		{
-			if (sensors[i].source >= 0 && sensors[i].rx_complete)
+			if (sensors[i].source >= 0 && sensors[i].rx_complete)		// && sensors[i].tx_complete - ????
 			{
 				if (sensors[i].type == TLE5011)
 				{
