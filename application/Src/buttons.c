@@ -590,9 +590,9 @@ void SequentialButtons_Init (dev_config_t * p_dev_config)
 //		
 //	}
 	
-		for (uint8_t physical_num=MAX_BUTTONS_NUM; physical_num>0; physical_num--)
+		for (int8_t physical_num = MAX_BUTTONS_NUM - 1; physical_num > -1; physical_num--)
 	{
-		for (uint8_t i=MAX_BUTTONS_NUM; i>0; i--)
+		for (int8_t i = MAX_BUTTONS_NUM - 1; i > -1; i--)
 		{
 			if (p_dev_config->buttons[i].type == SEQUENTIAL_BUTTON &&
 					p_dev_config->buttons[i].physical_num != physical_num)
@@ -775,7 +775,7 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 					(p_dev_config->buttons[j].shift_modificator) == 0)
 				{
 					logical_buttons_state[j].prev_physical_state = logical_buttons_state[j].curr_physical_state;
-					logical_buttons_state[j].curr_physical_state = physical_buttons_state[p_dev_config->buttons[i].physical_num].current_state;
+					logical_buttons_state[j].curr_physical_state = physical_buttons_state[p_dev_config->buttons[j].physical_num].current_state;
 					
 					LogicalButtonProcessState(&logical_buttons_state[j], pov_pos, p_dev_config, j);
 				}
