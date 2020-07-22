@@ -34,6 +34,8 @@ button_data_t 								buttons_data[MAX_BUTTONS_NUM/8];
 pov_data_t 										pov_data[MAX_POVS_NUM];
 uint8_t												pov_pos[MAX_POVS_NUM];
 uint8_t												shifts_state;
+uint8_t												a2b_first;
+uint8_t												a2b_last;
 
 /**
   * @brief  Processing debounce for raw buttons input
@@ -43,11 +45,22 @@ uint8_t												shifts_state;
 static void ButtonsDebouceProcess (dev_config_t * p_dev_config)
 {
 	uint32_t 	millis;
+	uint16_t	debounce;
 	
 	millis = GetTick();
 	
 	for (uint8_t i=0; i<MAX_BUTTONS_NUM; i++)
 	{
+			// set a2b debounce
+			if (a2b_first != a2b_last && i > a2b_first && i <= a2b_last)
+			{
+				debounce = p_dev_config->a2b_debounce_ms;
+			}
+			else 
+			{
+				debounce = p_dev_config->button_debounce_ms;
+			}
+		
 			physical_buttons_state[i].prev_pin_state = physical_buttons_state[i].pin_state;
 			physical_buttons_state[i].pin_state = raw_buttons_data[i];
 		
@@ -59,7 +72,7 @@ static void ButtonsDebouceProcess (dev_config_t * p_dev_config)
 			}
 			// set state after debounce if state have not changed
 			else if (	physical_buttons_state[i].changed && physical_buttons_state[i].pin_state == physical_buttons_state[i].prev_pin_state &&
-								millis - physical_buttons_state[i].time_last > p_dev_config->button_debounce_ms)
+								millis - physical_buttons_state[i].time_last > debounce)
 			{
 
 				physical_buttons_state[i].changed = 0;
@@ -68,7 +81,7 @@ static void ButtonsDebouceProcess (dev_config_t * p_dev_config)
 			}
 			// reset if state changed during debounce period
 			else if (physical_buttons_state[i].changed &&
-								millis - physical_buttons_state[i].time_last > p_dev_config->button_debounce_ms)
+								millis - physical_buttons_state[i].time_last > debounce)
 			{
 				physical_buttons_state[i].changed = 0;
 			}
@@ -165,6 +178,8 @@ void LogicalButtonProcessState (logical_buttons_state_t * p_button_state, uint8_
 		switch (p_dev_config->buttons[num].type)
 		{				
 			case BUTTON_NORMAL:
+			case POV1_CENTER:
+			case POV2_CENTER:
 				if (p_button_state->delay_act == BUTTON_ACTION_DELAY)
 				{
 					// nop
@@ -343,6 +358,42 @@ void LogicalButtonProcessState (logical_buttons_state_t * p_button_state, uint8_
 					pov_buf[pov_group] &= ~(1 << 0);
 					pov_buf[pov_group] |= (p_button_state->current_state << 0);
 				}
+				
+				// turn off POV center button if one of directions is pressed
+				if (pov_buf[pov_group] != 0)
+				{
+					if (pov_group == 0)
+					{
+						for (uint8_t i=0; i<MAX_BUTTONS_NUM; i++)	
+						{
+							if (p_dev_config->buttons[i].type == POV1_CENTER)	
+							{
+								logical_buttons_state[i].delay_act = BUTTON_ACTION_IDLE;
+								logical_buttons_state[i].on_state = 0;
+								logical_buttons_state[i].off_state = 0;
+								logical_buttons_state[i].current_state = 0;
+								logical_buttons_state[i].curr_physical_state = 0;
+								logical_buttons_state[i].time_last = 0;		 
+							}
+						}
+					}
+					else if (pov_group == 1)
+					{
+						for (uint8_t i=0; i<MAX_BUTTONS_NUM; i++)	
+						{
+							if (p_dev_config->buttons[i].type == POV2_CENTER)	
+							{
+								logical_buttons_state[i].delay_act = BUTTON_ACTION_IDLE;
+								logical_buttons_state[i].on_state = 0;
+								logical_buttons_state[i].off_state = 0;
+								logical_buttons_state[i].current_state = 0;
+								logical_buttons_state[i].curr_physical_state = 0;
+								logical_buttons_state[i].time_last = 0;		 
+							}
+						}
+					}
+				}
+				
 				break;
 							
 			case RADIO_BUTTON1:
@@ -577,9 +628,9 @@ void SequentialButtons_Init (dev_config_t * p_dev_config)
 //		
 //	}
 	
-		for (uint8_t physical_num=MAX_BUTTONS_NUM; physical_num>0; physical_num--)
+		for (int8_t physical_num = MAX_BUTTONS_NUM - 1; physical_num > -1; physical_num--)
 	{
-		for (uint8_t i=MAX_BUTTONS_NUM; i>0; i--)
+		for (int8_t i = MAX_BUTTONS_NUM - 1; i > -1; i--)
 		{
 			if (p_dev_config->buttons[i].type == SEQUENTIAL_BUTTON &&
 					p_dev_config->buttons[i].physical_num != physical_num)
@@ -682,7 +733,9 @@ uint8_t ButtonsReadPhysical(dev_config_t * p_dev_config, uint8_t * p_buf)
 	// Getting physical buttons states
 	MaxtrixButtonsGet(p_buf, p_dev_config, &pos);
 	ShiftRegistersGet(p_buf, p_dev_config, &pos);
+	a2b_first = pos;
 	AxesToButtonsGet(p_buf, p_dev_config, &pos);
+	a2b_last = pos;
 	SingleButtonsGet(p_buf, p_dev_config, &pos);
 	mutex = 0;
 	

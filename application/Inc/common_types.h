@@ -175,14 +175,19 @@ enum
 	POV1_RIGHT,
 	POV1_DOWN,
 	POV1_LEFT,
+	POV1_CENTER,
+	
 	POV2_UP,
 	POV2_RIGHT,
 	POV2_DOWN,
 	POV2_LEFT,
+	POV2_CENTER,
+	
 	POV3_UP,
 	POV3_RIGHT,
 	POV3_DOWN,
 	POV3_LEFT,
+	
 	POV4_UP,
 	POV4_RIGHT,
 	POV4_DOWN,
@@ -370,6 +375,7 @@ typedef struct
 	uint16_t						button_timer1_ms;						// config packet 6				
 	uint16_t						button_timer2_ms;						// config packet 7
 	uint16_t						button_timer3_ms;						// config packet 8
+	uint16_t 						a2b_debounce_ms;					// config packet 9
 	
 	// config 12-13-14
 	axis_to_buttons_t		axes_to_buttons[MAX_AXIS_NUM];

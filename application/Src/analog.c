@@ -789,7 +789,7 @@ void AxesProcess (dev_config_t * p_dev_config)
 					{
 						raw_axis_data[i] = tmp16 - p_dev_config->axis_config[i].offset_angle * 2730;
 						if (raw_axis_data[i] < AXIS_MIN_VALUE) raw_axis_data[i] += AXIS_FULLSCALE;
-						else if (raw_axis_data[i] > AXIS_MAX_VALUE) raw_axis_data[i] -= AXIS_FULLSCALE;
+						else if (raw_axis_data[i] > AXIS_MAX_VALUE) raw_axis_data[i] -= AXIS_FULLSCALE;		// always false
 					}
 					else
 					{
@@ -817,7 +817,7 @@ void AxesProcess (dev_config_t * p_dev_config)
 				{
 					tmp[i] = ADS1115_GetData(&sensors[k], channel) - p_dev_config->axis_config[i].offset_angle * 2730;
 					if (tmp[i] < 0) tmp[i] += 32767;
-					else if (tmp[i] > 32767) tmp[i] -= 32767;
+					else if (tmp[i] > 32767) tmp[i] -= 32767;		// always false, ADS1115_GetData return int16_t
 				}
 				else		// offset disabled
 				{

@@ -67,7 +67,7 @@ int I2C_WriteBlocking(uint8_t dev_addr, uint8_t reg_addr, uint8_t * data, uint16
 	I2C_GenerateSTART(I2C1, ENABLE);
 	while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT) && --ticks);
 	ticks = I2C_TIMEOUT;
-	if (ticks == 0) return -1;
+	if (ticks == 0) return -1;		// always false.	ticks = I2C_TIMEOUT;	#define I2C_TIMEOUT		1000
 	
 	I2C_Send7bitAddress(I2C1, dev_addr<<1, I2C_Direction_Transmitter);
 	while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED) && --ticks);
