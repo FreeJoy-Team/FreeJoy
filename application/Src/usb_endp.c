@@ -179,7 +179,8 @@ void EP1_OUT_Callback(void)
 						break;
 					
 					case 9:
-						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.buttons[60]), 60);					
+						memcpy(&tmp_buf[pos], (uint8_t *) &(tmp_dev_config.buttons[60]), 60);		
+						memcpy(&tmp_buf[64-sizeof(tmp_dev_config.a2b_debounce_ms)], (uint8_t *) &(tmp_dev_config.a2b_debounce_ms), sizeof(tmp_dev_config.a2b_debounce_ms));
 					
 						USB_CUSTOM_HID_SendReport((uint8_t *)&(tmp_buf), 64);
 						break;
@@ -359,6 +360,7 @@ void EP1_OUT_Callback(void)
 				case 9:
 				{
 					memcpy((uint8_t *) &(tmp_dev_config.buttons[60]), &hid_buf[pos], 60);
+					memcpy((uint8_t *) &(tmp_dev_config.a2b_debounce_ms), &hid_buf[64-sizeof(tmp_dev_config.a2b_debounce_ms)], sizeof(tmp_dev_config.a2b_debounce_ms));
 				}
 				break;
 				

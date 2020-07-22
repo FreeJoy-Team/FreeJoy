@@ -45,6 +45,7 @@ static const dev_config_t init_config =
 	.device_name[19] = 0,			
 	
 	.button_debounce_ms = 50,					// debounce time for all buttons
+	.a2b_debounce_ms = 50,						// debounce time for all axes to buttons
 	
 	.encoder_press_time_ms = 10,			// amount of milliseconds virtual button 
 																		// will be pressed at encoder increment/decrement
