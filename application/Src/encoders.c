@@ -49,7 +49,7 @@ int8_t enc_array_4 [16] =
 0, -1,  1,  0
 };
 
-
+uint8_t	raw_buttons[MAX_BUTTONS_NUM];
 encode_stater_t encoders_state[MAX_ENCODERS_NUM];
 
 static void EncoderFastInit(dev_config_t * p_dev_config)
@@ -86,7 +86,7 @@ static void EncoderFastInit(dev_config_t * p_dev_config)
 
 void EncoderProcess (logical_buttons_state_t * button_state_buf, dev_config_t * p_dev_config)
 {	
-	uint8_t	raw_buttons[MAX_BUTTONS_NUM];
+	
 	uint8_t encoders_present = 0;
 	
 	// check if fast encoder present

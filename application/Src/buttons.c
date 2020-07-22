@@ -672,12 +672,19 @@ uint8_t ButtonsReadPhysical(dev_config_t * p_dev_config, uint8_t * p_buf)
 {
 	SEGGER_SYSVIEW_RecordVoid(47);
 	
+	static uint8_t mutex = 0;
+	
+	if (mutex) return 0;
+	
 	uint8_t pos = 0;
+	
+	mutex = 1;
 	// Getting physical buttons states
 	MaxtrixButtonsGet(p_buf, p_dev_config, &pos);
 	ShiftRegistersGet(p_buf, p_dev_config, &pos);
 	AxesToButtonsGet(p_buf, p_dev_config, &pos);
 	SingleButtonsGet(p_buf, p_dev_config, &pos);
+	mutex = 0;
 	
 	SEGGER_SYSVIEW_RecordEndCall(47);
 	
@@ -696,6 +703,8 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 	uint8_t pos = 0;
 	
 	pos = ButtonsReadPhysical(p_dev_config, raw_buttons_data);
+	if (pos == 0) return;
+	
 	ButtonsDebouceProcess(p_dev_config);
 
 	// Process regular buttons
