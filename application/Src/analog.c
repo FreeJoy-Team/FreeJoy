@@ -115,9 +115,9 @@ static int32_t map_tle (int32_t x)
 	int32_t tmp;
 	int32_t ret;
 	
-	tmp = x+180;
+	tmp = x;
 	
-	ret = tmp * 100 / 549 - 32767;
+	ret = tmp * 100 / 549;
 	
 	return ret;
 }
