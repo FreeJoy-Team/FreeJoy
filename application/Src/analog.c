@@ -36,13 +36,14 @@
 #include "buttons.h"
 #include "encoders.h"
 
-sensor_t sensors[MAX_AXIS_NUM];
-analog_data_t input_data[MAX_AXIS_NUM];
+sensor_t sensors[MAX_AXIS_NUM];	
+uint16_t adc_data[MAX_AXIS_NUM];
+uint16_t tmp_adc_data[MAX_AXIS_NUM];
 
 analog_data_t scaled_axis_data[MAX_AXIS_NUM];
 analog_data_t raw_axis_data[MAX_AXIS_NUM];
 analog_data_t out_axis_data[MAX_AXIS_NUM];
-analog_data_t tmp_axis_data[PREBUF_SIZE][MAX_AXIS_NUM];
+
 
 analog_data_t FILTER_LEVEL_1_COEF[FILTER_BUF_SIZE] = {40, 30, 15, 10, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 analog_data_t FILTER_LEVEL_2_COEF[FILTER_BUF_SIZE] = {30, 20, 10, 10, 10, 6, 6, 4, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -59,7 +60,7 @@ logical_buttons_state_t axes_buttons[MAX_AXIS_NUM][3];
 int32_t	axes_trim_value[MAX_AXIS_NUM];
 
 uint8_t adc_cnt = 0;
-uint8_t sensors_cnt = 0;	
+uint8_t sensors_cnt = 0;
 	
 adc_channel_config_t channel_config[MAX_AXIS_NUM] =
 {
@@ -68,7 +69,6 @@ adc_channel_config_t channel_config[MAX_AXIS_NUM] =
 	{ADC_Channel_4, 4}, {ADC_Channel_5, 5}, 
 	{ADC_Channel_6, 6}, {ADC_Channel_7, 7}, 
 };
-
 
 unsigned int iabs (int x)
 {
@@ -558,7 +558,7 @@ void AxesInit (dev_config_t * p_dev_config)
 		ADC_InitStructure.ADC_ContinuousConvMode = ENABLE;
 		ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_None;
 		ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;
-		ADC_InitStructure.ADC_NbrOfChannel = MAX_AXIS_NUM;
+		ADC_InitStructure.ADC_NbrOfChannel = adc_cnt;
 		ADC_Init(ADC1, &ADC_InitStructure);
 
 		/* Enable ADC1 DMA */
@@ -574,12 +574,13 @@ void AxesInit (dev_config_t * p_dev_config)
 			axis_num++;
 		}
 	}
+	uint8_t tmp_rank = 1;
 	for (int i=0; i<MAX_AXIS_NUM; i++)
 	{ 
 		if (p_dev_config->pins[i] == AXIS_ANALOG)		// Configure ADC channels
 		{
 			/* ADC1 regular channel configuration */ 
-			ADC_RegularChannelConfig(ADC1, channel_config[i].channel, i+1, ADC_SampleTime_239Cycles5);
+			ADC_RegularChannelConfig(ADC1, channel_config[i].channel, tmp_rank++, ADC_SampleTime_239Cycles5);
 			axis_num++;
 		}
 		
@@ -590,9 +591,9 @@ void AxesInit (dev_config_t * p_dev_config)
 		/* DMA1 channel1 configuration ----------------------------------------------*/
 		DMA_DeInit(DMA1_Channel1);
 		DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&ADC1->DR;
-		DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t) &input_data[0];
+		DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t) &adc_data[0];
 		DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
-		DMA_InitStructure.DMA_BufferSize = MAX_AXIS_NUM;
+		DMA_InitStructure.DMA_BufferSize = adc_cnt;
 		DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
 		DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
 		DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
@@ -625,15 +626,12 @@ void ADC_Conversion (void)
 {
 	SEGGER_SYSVIEW_RecordVoid(45);
 	
-	uint8_t num_of_conv = 0;
-	analog_data_t tmp = 0;
-	
 	if (adc_cnt > 0)
 	{
-		for (uint8_t i=0; i<PREBUF_SIZE; i++)	
+		for (uint8_t i=0; i<ADC_CONV_NUM; i++)	
 		{
-			DMA1_Channel1->CMAR = (uint32_t) &tmp_axis_data[num_of_conv++];
-			DMA_SetCurrDataCounter(DMA1_Channel1, MAX_AXIS_NUM);	
+			DMA1_Channel1->CMAR = (uint32_t) &tmp_adc_data[0];
+			DMA_SetCurrDataCounter(DMA1_Channel1, adc_cnt);	
 			DMA_Cmd(DMA1_Channel1, ENABLE);
 			ADC_Cmd(ADC1, ENABLE);
 			/* Start ADC1 Software Conversion */ 
@@ -644,20 +642,15 @@ void ADC_Conversion (void)
 				
 			ADC_Cmd(ADC1, DISABLE);
 			DMA_Cmd(DMA1_Channel1, DISABLE);
-			
-			if (num_of_conv > PREBUF_SIZE - 1) 
+						
+			for (uint8_t j=0; j<MAX_AXIS_NUM; j++)
 			{
-				num_of_conv = 0;
-				for (uint8_t i=0; i<MAX_AXIS_NUM; i++)
-				{
-					tmp = 0;
-					for (uint8_t k=0; k<PREBUF_SIZE; k++)
-					{
-						tmp += tmp_axis_data[k][i];					
-					}
-					input_data[i] = tmp/PREBUF_SIZE;
-				}
+				adc_data[j] += tmp_adc_data[j];								
 			}
+		}
+		for (uint8_t j=0; j<MAX_AXIS_NUM; j++)
+		{
+			adc_data[j] /= ADC_CONV_NUM;								
 		}
 	}
 	SEGGER_SYSVIEW_RecordEndCall(45);
@@ -674,6 +667,7 @@ void AxesProcess (dev_config_t * p_dev_config)
 	
 	int32_t tmp[MAX_AXIS_NUM];
 	float tmpf;
+	uint8_t adc_num = 0;
 	
 	for (uint8_t i=0; i<MAX_AXIS_NUM; i++)
 	{
@@ -685,16 +679,16 @@ void AxesProcess (dev_config_t * p_dev_config)
 		if (source >= 0)		// source SPI sensors or internal ADC
 		{
 			if (p_dev_config->pins[source] == AXIS_ANALOG)					// source analog
-			{
+			{				
 				if (p_dev_config->axis_config[i].offset_angle > 0)
 				{
-						tmp[i] = input_data[source] - p_dev_config->axis_config[i].offset_angle * 170;
+						tmp[i] = adc_data[adc_num++] - p_dev_config->axis_config[i].offset_angle * 170;
 						if (tmp[i] < 0) tmp[i] += 4095;
 						else if (tmp[i] > 4095) tmp[i] -= 4095;
 				}
 				else
 				{
-					tmp[i] = input_data[source];
+					tmp[i] = adc_data[adc_num++];
 				}
 				
 				raw_axis_data[i] = map2(tmp[i], 0, 4095, AXIS_MIN_VALUE, AXIS_MAX_VALUE);

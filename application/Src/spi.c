@@ -84,13 +84,16 @@ void SPI_HalfDuplex_Transmit(uint8_t * data, uint16_t length, uint8_t spi_mode)
 	DMA_Init(DMA1_Channel3, &DMA_InitStructure);
 	
 	DMA_ITConfig(DMA1_Channel3, DMA_IT_TC, ENABLE);
-	NVIC_SetPriority(DMA1_Channel3_IRQn, 4);
+	NVIC_SetPriority(DMA1_Channel3_IRQn, 2);
 	NVIC_EnableIRQ(DMA1_Channel3_IRQn);
 	
 	// Set haft-duplex tx
 	SPI1->CR1 &= ~(SPI_CR1_CPOL|SPI_CR1_CPHA);
 	SPI1->CR1 |= SPI_CR1_BIDIMODE | (spi_mode & 0x03);
 	SPI_BiDirectionalLineConfig(SPI1, SPI_Direction_Tx);
+	
+	SPI_I2S_ReceiveData(SPI1);
+	SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_OVR);
 	
 	DMA_Cmd(DMA1_Channel3, ENABLE);
 }
@@ -120,13 +123,16 @@ void SPI_HalfDuplex_Receive(uint8_t * data, uint16_t length, uint8_t spi_mode)
 	DMA_Init(DMA1_Channel2, &DMA_InitStructure);
 	
 	DMA_ITConfig(DMA1_Channel2, DMA_IT_TC, ENABLE);
-	NVIC_SetPriority(DMA1_Channel2_IRQn, 4);
+	NVIC_SetPriority(DMA1_Channel2_IRQn, 2);
 	NVIC_EnableIRQ(DMA1_Channel2_IRQn);
 	
 	// Set haft-duplex tx
 	SPI1->CR1 &= ~(SPI_CR1_CPOL|SPI_CR1_CPHA);
 	SPI1->CR1 |= SPI_CR1_BIDIMODE | (spi_mode & 0x03);
 	SPI_BiDirectionalLineConfig(SPI1, SPI_Direction_Rx);
+	
+	SPI_I2S_ReceiveData(SPI1);
+	SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_OVR);
 	
 	DMA_Cmd(DMA1_Channel2, ENABLE);
 }
@@ -162,7 +168,7 @@ void SPI_FullDuplex_TransmitReceive(uint8_t * tx_data, uint8_t * rx_data, uint16
 	DMA_Init(DMA1_Channel2, &DMA_InitStructure);
 	
 	DMA_ITConfig(DMA1_Channel2, DMA_IT_TC, ENABLE);
-	NVIC_SetPriority(DMA1_Channel2_IRQn, 4);
+	NVIC_SetPriority(DMA1_Channel2_IRQn, 2);
 	NVIC_EnableIRQ(DMA1_Channel2_IRQn);
 	
 	DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t) tx_data;
@@ -179,7 +185,7 @@ void SPI_FullDuplex_TransmitReceive(uint8_t * tx_data, uint8_t * rx_data, uint16
 	DMA_Init(DMA1_Channel3, &DMA_InitStructure);
 	
 	DMA_ITConfig(DMA1_Channel3, DMA_IT_TC, ENABLE);
-	NVIC_SetPriority(DMA1_Channel3_IRQn, 4);
+	NVIC_SetPriority(DMA1_Channel3_IRQn, 2);
 	NVIC_EnableIRQ(DMA1_Channel3_IRQn);
 	
 	// Set full-duplex

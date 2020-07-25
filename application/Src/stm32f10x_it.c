@@ -213,6 +213,14 @@ void TIM2_IRQHandler(void)
 							
 			USB_CUSTOM_HID_SendReport((uint8_t *)&joy_report.id, sizeof(joy_report) - sizeof(joy_report.dummy));
 		}
+		
+		// encoders polling
+		if (millis - encoder_millis >= ENCODER_PERIOD_MS)
+		{
+			encoder_millis = millis;
+			EncoderProcess(logical_buttons_state, &dev_config);
+		}
+		
 		// Internal ADC conversion
 		if (millis - adc_millis >= ADC_PERIOD_MS)
 		{
@@ -275,6 +283,7 @@ void TIM2_IRQHandler(void)
 					if (sensors[i].type == TLE5011)
 					{
 						TLE501x_StartDMA(&sensors[i]);
+						SEGGER_SYSVIEW_RecordEndCall(33);
 						return;
 					}
 					else if (sensors[i].type == MCP3201 ||
@@ -288,16 +297,11 @@ void TIM2_IRQHandler(void)
 					else if (sensors[i].type == MLX90393_SPI)
 					{
 						MLX90393_StartDMA(&sensors[i]);
+						SEGGER_SYSVIEW_RecordEndCall(33);
 						return;
 					}
 				}
 			}
-		}
-		// encoders polling
-		if (millis - encoder_millis >= ENCODER_PERIOD_MS)
-		{
-			encoder_millis = millis;
-			EncoderProcess(logical_buttons_state, &dev_config);
 		}
 		
 	}
@@ -342,6 +346,7 @@ void DMA1_Channel2_IRQHandler(void)
 				if (sensors[i].curr_channel < 1)	
 				{
 					MCP320x_StartDMA(&sensors[i], sensors[i].curr_channel + 1);
+					SEGGER_SYSVIEW_RecordEndCall(34);
 					return;
 				}
 				i++;
@@ -353,6 +358,7 @@ void DMA1_Channel2_IRQHandler(void)
 				if (sensors[i].curr_channel < 3)	
 				{
 					MCP320x_StartDMA(&sensors[i], sensors[i].curr_channel + 1);
+					SEGGER_SYSVIEW_RecordEndCall(34);
 					return;
 				}
 				i++;
@@ -364,6 +370,7 @@ void DMA1_Channel2_IRQHandler(void)
 				if (sensors[i].curr_channel < 7)	
 				{
 					MCP320x_StartDMA(&sensors[i], sensors[i].curr_channel + 1);
+					SEGGER_SYSVIEW_RecordEndCall(34);
 					return;
 				}
 				i++;
@@ -375,16 +382,16 @@ void DMA1_Channel2_IRQHandler(void)
 		}
 		// Enable other peripery IRQs
 		NVIC_EnableIRQ(TIM2_IRQn);
-		NVIC_EnableIRQ(TIM3_IRQn);
 		
 		// Process next sensor
 		for ( ;i<MAX_AXIS_NUM;i++)
 		{
-			if (sensors[i].source >= 0 && sensors[i].rx_complete)		// && sensors[i].tx_complete - ????
+			if (sensors[i].source >= 0 && sensors[i].rx_complete && sensors[i].tx_complete)
 			{
 				if (sensors[i].type == TLE5011)
 				{
 					TLE501x_StartDMA(&sensors[i]);
+					SEGGER_SYSVIEW_RecordEndCall(34);
 					return;
 				}
 				else if (sensors[i].type == MCP3201 ||
@@ -393,11 +400,13 @@ void DMA1_Channel2_IRQHandler(void)
 								 sensors[i].type == MCP3208)
 				{
 					MCP320x_StartDMA(&sensors[i], 0);
+					SEGGER_SYSVIEW_RecordEndCall(34);
 					return;
 				}
 				else if (sensors[i].type == MLX90393_SPI)
 				{
 					MLX90393_StartDMA(&sensors[i]);
+					SEGGER_SYSVIEW_RecordEndCall(34);
 					return;
 				}
 			}
@@ -434,6 +443,7 @@ void DMA1_Channel3_IRQHandler(void)
 				{
 					SPI_HalfDuplex_Receive(&sensors[i].data[1], 5, TLE5011_SPI_MODE);					
 				}
+				SEGGER_SYSVIEW_RecordEndCall(35);
 				return;
 			}
 		}

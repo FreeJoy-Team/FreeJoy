@@ -42,7 +42,7 @@ uint8_t MathCRC8(uint8_t crc, uint8_t data)
 	return(crc);
 };
 
-int CheckCrc(uint8_t * data, uint8_t crc, uint8_t initial, uint8_t length) 
+uint8_t CheckCrc(uint8_t * data, uint8_t crc, uint8_t initial, uint8_t length) 
 {
   uint8_t ret = initial;
 	uint8_t index = 0;
@@ -88,8 +88,7 @@ int TLE501x_GetAngle(sensor_t * sensor, float * angle)
 	{
 		x_value = sensor->data[2]<<8 | sensor->data[1];
 		y_value = sensor->data[4]<<8 | sensor->data[3];
-		
-		
+				
 		out = atan2f((float)y_value, (float)x_value)/ M_PI * (float)180.0;			
 		*angle = out;
 		ret = 0;
@@ -98,8 +97,6 @@ int TLE501x_GetAngle(sensor_t * sensor, float * angle)
 	{
 		ret = -1;
 	}
-	
-	
 	return ret;
 }
 
@@ -114,7 +111,6 @@ void TLE501x_StartDMA(sensor_t * sensor)
 	
 	// Disable other interrupts
 	NVIC_DisableIRQ(TIM2_IRQn);
-	NVIC_DisableIRQ(TIM3_IRQn);
 	
 	SPI_HalfDuplex_Transmit(&sensor->data[0], 2, TLE5011_SPI_MODE);
 }
@@ -122,11 +118,15 @@ void TLE501x_StartDMA(sensor_t * sensor)
 void TLE501x_StopDMA(sensor_t * sensor)
 {	
 	DMA_Cmd(DMA1_Channel2, DISABLE);
-	SPI_BiDirectionalLineConfig(SPI1, SPI_Direction_Tx);
+	
 	// CS high
+	
 	pin_config[sensor->source].port->ODR |= pin_config[sensor->source].pin;
 	sensor->rx_complete = 1;
 	sensor->tx_complete = 1;
+	
+	SPI_BiDirectionalLineConfig(SPI1, SPI_Direction_Tx);	
+	Delay_us(1);			// a small delay for CS level setting		
 }
 
 

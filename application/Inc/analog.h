@@ -16,7 +16,7 @@
 #define DEADBAND_BUF_SIZE								8
 #define DEADBAND_HOLD_VALUE							2000
 
-#define PREBUF_SIZE											8
+#define ADC_CONV_NUM										8
 
 extern sensor_t sensors[MAX_AXIS_NUM];
 

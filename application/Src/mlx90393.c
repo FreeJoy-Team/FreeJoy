@@ -237,7 +237,6 @@ void MLX90393_StartDMA(sensor_t * sensor)
 	
 	// Disable other interrupts
 	NVIC_DisableIRQ(TIM2_IRQn);
-	NVIC_DisableIRQ(TIM3_IRQn);
 	
 	// CS low
 	pin_config[sensor->source].port->ODR &= ~pin_config[sensor->source].pin;

@@ -325,7 +325,7 @@
             <uThumb>0</uThumb>
             <uSurpInc>0</uSurpInc>
             <uC99>1</uC99>
-            <uGnu>0</uGnu>
+            <uGnu>1</uGnu>
             <useXO>0</useXO>
             <v6Lang>4</v6Lang>
             <v6LangP>3</v6LangP>
@@ -438,14 +438,14 @@
               <FilePath>..\application\Src\axis_to_buttons.c</FilePath>
             </File>
             <File>
-              <FileName>ads1115.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\application\Src\ads1115.c</FilePath>
-            </File>
-            <File>
               <FileName>leds.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\application\Src\leds.c</FilePath>
+            </File>
+            <File>
+              <FileName>ads1115.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\application\Src\ads1115.c</FilePath>
             </File>
             <File>
               <FileName>as5600.c</FileName>
@@ -1296,14 +1296,14 @@
               <FilePath>..\application\Src\axis_to_buttons.c</FilePath>
             </File>
             <File>
-              <FileName>ads1115.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\application\Src\ads1115.c</FilePath>
-            </File>
-            <File>
               <FileName>leds.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\application\Src\leds.c</FilePath>
+            </File>
+            <File>
+              <FileName>ads1115.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\application\Src\ads1115.c</FilePath>
             </File>
             <File>
               <FileName>as5600.c</FileName>

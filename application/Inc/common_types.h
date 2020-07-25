@@ -106,6 +106,9 @@ enum
 
 typedef struct
 {
+	uint32_t	ok_cnt;
+	uint32_t 	err_cnt;
+	
 	int8_t 		source;
 	uint8_t		type;
 	uint8_t		address;
@@ -113,10 +116,7 @@ typedef struct
 	
 	uint8_t 	rx_complete;
 	uint8_t 	tx_complete;
-	uint8_t		curr_channel;
-	
-	uint32_t	ok_cnt;
-	uint32_t 	err_cnt;
+	uint8_t		curr_channel;	
 } sensor_t;
 
 

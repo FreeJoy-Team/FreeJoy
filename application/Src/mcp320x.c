@@ -47,7 +47,6 @@ void MCP320x_StartDMA(sensor_t * sensor, uint8_t channel)
 	
 	// Disable timer's interrupts
 	NVIC_DisableIRQ(TIM2_IRQn);
-	NVIC_DisableIRQ(TIM3_IRQn);
 	
 	// CS low
 	pin_config[sensor->source].port->ODR &= ~pin_config[sensor->source].pin;
@@ -74,7 +73,6 @@ void MCP320x_StartDMA(sensor_t * sensor, uint8_t channel)
 void MCP320x_StopDMA(sensor_t * sensor)
 {	
 	DMA_Cmd(DMA1_Channel2, DISABLE);
-
 	// CS high
 	pin_config[sensor->source].port->ODR |= pin_config[sensor->source].pin;
 	sensor->rx_complete = 1;
