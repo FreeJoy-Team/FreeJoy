@@ -39,6 +39,7 @@
 sensor_t sensors[MAX_AXIS_NUM];	
 uint16_t adc_data[MAX_AXIS_NUM];
 uint16_t tmp_adc_data[MAX_AXIS_NUM];
+uint8_t adc_conv_num[MAX_AXIS_NUM];
 
 analog_data_t scaled_axis_data[MAX_AXIS_NUM];
 analog_data_t raw_axis_data[MAX_AXIS_NUM];
@@ -372,6 +373,8 @@ analog_data_t ShapeFunc (axis_config_t * p_axis_cfg,  analog_data_t value, uint8
 			p_axis_cfg->curve_shape[9] != 80 ||
 			p_axis_cfg->curve_shape[10] != 100)
 	{	
+		
+		
 		int32_t tmp = value - AXIS_MIN_VALUE;
 		int32_t fullscale = AXIS_MAX_VALUE - AXIS_MIN_VALUE;
 		
@@ -577,10 +580,11 @@ void AxesInit (dev_config_t * p_dev_config)
 	uint8_t tmp_rank = 1;
 	for (int i=0; i<MAX_AXIS_NUM; i++)
 	{ 
-		if (p_dev_config->pins[i] == AXIS_ANALOG)		// Configure ADC channels
+		//if (p_dev_config->pins[i] == AXIS_ANALOG)		// Configure ADC channels
+		if (p_dev_config->pins[p_dev_config->axis_config[i].source_main] == AXIS_ANALOG)		// Configure ADC channels
 		{
 			/* ADC1 regular channel configuration */ 
-			ADC_RegularChannelConfig(ADC1, channel_config[i].channel, tmp_rank++, ADC_SampleTime_239Cycles5);
+			ADC_RegularChannelConfig(ADC1, channel_config[p_dev_config->axis_config[i].source_main].channel, tmp_rank++, ADC_SampleTime_239Cycles5);
 			axis_num++;
 		}
 		
@@ -679,7 +683,7 @@ void AxesProcess (dev_config_t * p_dev_config)
 		if (source >= 0)		// source SPI sensors or internal ADC
 		{
 			if (p_dev_config->pins[source] == AXIS_ANALOG)					// source analog
-			{				
+			{	
 				if (p_dev_config->axis_config[i].offset_angle > 0)
 				{
 						tmp[i] = adc_data[adc_num++] - p_dev_config->axis_config[i].offset_angle * 170;
