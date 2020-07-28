@@ -1089,21 +1089,33 @@ void AxesProcess (dev_config_t * p_dev_config)
 			{
 				switch (p_dev_config->axis_config[i].function)
 				{
-					case FUNCTION_PLUS_ABS:
-						tmp[i] = tmp[i]/2 + tmp[p_dev_config->axis_config[i].source_secondary]/2;
+					case FUNCTION_PLUS:
+						if (p_dev_config->axis_config[i].is_centered)
+						{
+							tmp[i] = tmp[i] + tmp[p_dev_config->axis_config[i].source_secondary];
+						}
+						else
+						{
+							tmp[i] = tmp[i] + tmp[p_dev_config->axis_config[i].source_secondary] - AXIS_MIN_VALUE;
+						}
 						break;
-					case FUNCTION_PLUS_REL:
-						tmp[i] = tmp[i] + tmp[p_dev_config->axis_config[i].source_secondary] - AXIS_MIN_VALUE;
+
+					case FUNCTION_MINUS:
+						if (p_dev_config->axis_config[i].is_centered)
+						{
+							tmp[i] = tmp[i]/2 - tmp[p_dev_config->axis_config[i].source_secondary]/2;
+						}
+						else
+						{
+							tmp[i] = tmp[i] - tmp[p_dev_config->axis_config[i].source_secondary] + AXIS_MIN_VALUE;
+						}
+						
 						break;
-					case FUNCTION_MINUS_ABS:
-						tmp[i] = tmp[i]/2 - tmp[p_dev_config->axis_config[i].source_secondary]/2;
-						break;
-					case FUNCTION_MINUS_REL:
-						tmp[i] = tmp[i] - tmp[p_dev_config->axis_config[i].source_secondary] + AXIS_MIN_VALUE;
-						break;
+
 					case FUNCTION_EQUAL:
 						tmp[i] = tmp[p_dev_config->axis_config[i].source_secondary];
 						break;
+					
 					default:
 						break;
 				}

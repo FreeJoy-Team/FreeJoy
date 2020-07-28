@@ -32,10 +32,8 @@ typedef int16_t analog_data_t;
 enum
 {
 	NO_FUNCTION = 0,
-	FUNCTION_PLUS_ABS,
-	FUNCTION_PLUS_REL,
-	FUNCTION_MINUS_ABS,
-	FUNCTION_MINUS_REL,
+	FUNCTION_PLUS,
+	FUNCTION_MINUS,
 	FUNCTION_EQUAL,
 };
 
@@ -54,10 +52,11 @@ typedef struct
 	analog_data_t 	calib_min;
 	analog_data_t		calib_center;
 	analog_data_t 	calib_max;
-	uint8_t					out_enabled: 1;
-	uint8_t					inverted: 1;
-	uint8_t					function: 3;
-	uint8_t 				filter: 3;
+	uint8_t					out_enabled: 	1;
+	uint8_t					inverted: 		1;
+	uint8_t					is_centered: 	1;
+	uint8_t					function: 		2;
+	uint8_t 				filter: 			3;
 	
 	int8_t				 	curve_shape[11];
 	uint8_t					resolution : 4;
