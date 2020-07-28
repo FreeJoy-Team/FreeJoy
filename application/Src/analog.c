@@ -913,14 +913,24 @@ void AxesProcess (dev_config_t * p_dev_config)
 		}
 		
 		// Prescaling
-		if (p_dev_config->axis_config[i].prescaler != 100 &&  
-			 ((axes_buttons[i][0].current_state && p_dev_config->axis_config[i].button1_type == AXIS_BUTTON_PRESCALER_EN) ||
-			 (axes_buttons[i][1].current_state && p_dev_config->axis_config[i].button2_type == AXIS_BUTTON_PRESCALER_EN) ||
-		   (axes_buttons[i][2].current_state && p_dev_config->axis_config[i].button3_type == AXIS_BUTTON_PRESCALER_EN)) )
+		if (p_dev_config->axis_config[i].prescaler != 100)
 		{
-			tmp[i] = tmp[i]  * p_dev_config->axis_config[i].prescaler / 100;
+			if ( 	// no prescaler button defined
+					 ((p_dev_config->axis_config[i].button1 < 0 || p_dev_config->axis_config[i].button1_type != AXIS_BUTTON_PRESCALER_EN) &&			
+						(p_dev_config->axis_config[i].button2 < 0 || p_dev_config->axis_config[i].button2_type != AXIS_BUTTON_PRESCALER_EN) &&
+						(p_dev_config->axis_config[i].button3 < 0 || p_dev_config->axis_config[i].button3_type != AXIS_BUTTON_PRESCALER_EN)) ||
+						// or defined and pressed
+						((p_dev_config->axis_config[i].button1 >=0 && axes_buttons[i][0].current_state && 
+							p_dev_config->axis_config[i].button1_type == AXIS_BUTTON_PRESCALER_EN) ||
+						 (p_dev_config->axis_config[i].button2 >=0 && axes_buttons[i][1].current_state && 
+							p_dev_config->axis_config[i].button2_type == AXIS_BUTTON_PRESCALER_EN) ||
+						 (p_dev_config->axis_config[i].button3 >=0 && axes_buttons[i][2].current_state && 
+							p_dev_config->axis_config[i].button3_type == AXIS_BUTTON_PRESCALER_EN))
+				 )
+			{
+				tmp[i] = tmp[i]  * p_dev_config->axis_config[i].prescaler / 100;
+			}
 		}
-		
 		// Buttons section
     {
 			int64_t millis = GetTick();
@@ -1035,7 +1045,7 @@ void AxesProcess (dev_config_t * p_dev_config)
 				}	
 			}
 
-			// Helicopter-type trimming (centering)
+			// Centering
 			if (cent_button_num > 0)
 			{
 				if ((cent_button_num & 0x01) && axes_buttons[i][0].current_state)
