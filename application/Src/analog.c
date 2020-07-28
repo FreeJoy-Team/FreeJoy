@@ -994,44 +994,44 @@ void AxesProcess (dev_config_t * p_dev_config)
 				if ((inc_button_num & 0x01) && axes_buttons[i][0].current_state > axes_buttons[i][0].prev_physical_state)
 				{
 					axes_buttons[i][0].time_last = millis + 500;
-					axes_trim_value[i] +=  (AXIS_FULLSCALE>>1)/p_dev_config->axis_config[i].divider;
+					axes_trim_value[i] +=  (AXIS_FULLSCALE)/p_dev_config->axis_config[i].divider;
 				}
 				else if ((inc_button_num & 0x01) && axes_buttons[i][0].prev_physical_state && millis - axes_buttons[i][0].time_last > 50)
 				{
 					axes_buttons[i][0].time_last = millis;
-					axes_trim_value[i] += (AXIS_FULLSCALE>>1)/p_dev_config->axis_config[i].divider;
+					axes_trim_value[i] += (AXIS_FULLSCALE)/p_dev_config->axis_config[i].divider;
 				}
 				else if ((inc_button_num & 0x04) && axes_buttons[i][2].current_state > axes_buttons[i][2].prev_physical_state)
 				{
 					axes_buttons[i][2].time_last = millis + 500;
-					axes_trim_value[i] +=  (AXIS_FULLSCALE>>1)/p_dev_config->axis_config[i].divider;
+					axes_trim_value[i] +=  (AXIS_FULLSCALE)/p_dev_config->axis_config[i].divider;
 				}
 				else if ((inc_button_num & 0x04) && axes_buttons[i][2].prev_physical_state && millis - axes_buttons[i][2].time_last > 50)
 				{
 					axes_buttons[i][2].time_last = millis;
-					axes_trim_value[i] += (AXIS_FULLSCALE>>1)/p_dev_config->axis_config[i].divider;
+					axes_trim_value[i] += (AXIS_FULLSCALE)/p_dev_config->axis_config[i].divider;
 				}
 						
 				// decrement
 				if ((dec_button_num & 0x01) && axes_buttons[i][0].current_state > axes_buttons[i][0].prev_physical_state)
 				{
 					axes_buttons[i][0].time_last = millis + 500;
-					axes_trim_value[i] -=  (AXIS_FULLSCALE>>1)/p_dev_config->axis_config[i].divider;
+					axes_trim_value[i] -=  (AXIS_FULLSCALE)/p_dev_config->axis_config[i].divider;
 				}
 				else if ((dec_button_num & 0x01) && axes_buttons[i][0].prev_physical_state && millis - axes_buttons[i][0].time_last > 50)
 				{
 					axes_buttons[i][0].time_last = millis;
-					axes_trim_value[i] -= (AXIS_FULLSCALE>>1)/p_dev_config->axis_config[i].divider;
+					axes_trim_value[i] -= (AXIS_FULLSCALE)/p_dev_config->axis_config[i].divider;
 				}
 				else if ((dec_button_num & 0x04) && axes_buttons[i][2].current_state > axes_buttons[i][2].prev_physical_state)
 				{
 					axes_buttons[i][2].time_last = millis + 500;
-					axes_trim_value[i] -=  (AXIS_FULLSCALE>>1)/p_dev_config->axis_config[i].divider;
+					axes_trim_value[i] -=  (AXIS_FULLSCALE)/p_dev_config->axis_config[i].divider;
 				}
 				else if ((dec_button_num & 0x04) && axes_buttons[i][2].prev_physical_state && millis - axes_buttons[i][2].time_last > 50)
 				{
 					axes_buttons[i][2].time_last = millis;
-					axes_trim_value[i] -= (AXIS_FULLSCALE>>1)/p_dev_config->axis_config[i].divider;
+					axes_trim_value[i] -= (AXIS_FULLSCALE)/p_dev_config->axis_config[i].divider;
 				}
 				
 				// reset
@@ -1066,13 +1066,13 @@ void AxesProcess (dev_config_t * p_dev_config)
 				}
 			}
 			
-			if (axes_trim_value[i] > AXIS_MAX_VALUE) axes_trim_value[i] = AXIS_MAX_VALUE;
-			if (axes_trim_value[i] < AXIS_MIN_VALUE) axes_trim_value[i] = AXIS_MIN_VALUE;
-			
+			if (axes_trim_value[i] > AXIS_FULLSCALE) axes_trim_value[i] = AXIS_FULLSCALE;
+			if (axes_trim_value[i] < -AXIS_FULLSCALE) axes_trim_value[i] = -AXIS_FULLSCALE;
+						
 			tmp[i] += axes_trim_value[i];
 			
 			if (tmp[i] > AXIS_MAX_VALUE) tmp[i] = AXIS_MAX_VALUE;
-			if (tmp[i] < AXIS_MIN_VALUE) tmp[i] = AXIS_MIN_VALUE;
+			if (tmp[i] < AXIS_MIN_VALUE) tmp[i] = AXIS_MIN_VALUE;		
     }
 		
 	} 
