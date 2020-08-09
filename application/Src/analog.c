@@ -632,6 +632,12 @@ void ADC_Conversion (void)
 	
 	if (adc_cnt > 0)
 	{
+		// clear buffer from old values
+		for (uint8_t j=0; j<MAX_AXIS_NUM; j++)
+		{
+			adc_data[j] = 0;								
+		}
+		// perform multiple conversions	
 		for (uint8_t i=0; i<ADC_CONV_NUM; i++)	
 		{
 			DMA1_Channel1->CMAR = (uint32_t) &tmp_adc_data[0];
@@ -652,6 +658,7 @@ void ADC_Conversion (void)
 				adc_data[j] += tmp_adc_data[j];								
 			}
 		}
+		// get mean value
 		for (uint8_t j=0; j<MAX_AXIS_NUM; j++)
 		{
 			adc_data[j] /= ADC_CONV_NUM;								
