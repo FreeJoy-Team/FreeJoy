@@ -411,7 +411,7 @@ void AxesInit (dev_config_t * p_dev_config)
 
 	 /* DMA and ADC controller clock enable */
   RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1 | RCC_APB2Periph_GPIOC, ENABLE);
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1 | RCC_APB2Periph_GPIOA, ENABLE);
 	
 	for (int i = 0; i<MAX_AXIS_NUM; i++)
 	{

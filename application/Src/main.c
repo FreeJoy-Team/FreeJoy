@@ -57,6 +57,9 @@ int main(void)
 	
 	SysTick_Init();
 	
+	// force enumerating USB 
+	USB_HW_DeInit();
+	
 	// Configure and initialize SystemView
 	SEGGER_SYSVIEW_Conf(); 
 	
@@ -71,8 +74,6 @@ int main(void)
 	}
 	AppConfigInit(&dev_config);
 	
-	Delay_ms(50);
-	
 	USB_HW_Init();
 	IO_Init(&dev_config);
 	AxesInit(&dev_config); 
@@ -82,7 +83,9 @@ int main(void)
 	SequentialButtons_Init(&dev_config);
 	
 	Timers_Init(&dev_config);
-
+		
+	
+	
   while (1)
   {
 		ButtonsReadLogical(&dev_config);

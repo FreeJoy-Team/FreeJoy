@@ -320,7 +320,8 @@ void USB_HW_DeInit(void)
 
 	// Disable USB Clocks
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USB, DISABLE);
-
+	
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
 	
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11 | GPIO_Pin_12;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
