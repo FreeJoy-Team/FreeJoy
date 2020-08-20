@@ -939,7 +939,8 @@ void AxesProcess (dev_config_t * p_dev_config)
 							p_dev_config->axis_config[i].button3_type == AXIS_BUTTON_PRESCALER_EN))
 				 )
 			{
-				tmp[i] = tmp[i]  * p_dev_config->axis_config[i].prescaler / 100;
+				if (p_dev_config->axis_config[i].is_centered)	tmp[i] = tmp[i]*p_dev_config->axis_config[i].prescaler / 100;
+				else	tmp[i] = (tmp[i] - AXIS_MIN_VALUE)*p_dev_config->axis_config[i].prescaler / 100 + AXIS_MIN_VALUE;
 			}
 		}
 		// Buttons section
