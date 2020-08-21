@@ -99,11 +99,15 @@ void SysTick_Init(void)
   */
 void Timers_Init(dev_config_t * p_dev_config)
 {
+	
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure;	
 	TIM_OCInitTypeDef  				TIM_OCInitStructure;
 	RCC_ClocksTypeDef RCC_Clocks;
 	
 	RCC_GetClocksFreq(&RCC_Clocks);	
+	
+	// Reset tick counter
+	Ticks = 0;
 	
 	// Encoders, Axes and HID timer
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
@@ -146,7 +150,9 @@ void Timers_Init(dev_config_t * p_dev_config)
   TIM_OC4Init(TIM3, &TIM_OCInitStructure);
   TIM_OC4PreloadConfig(TIM3, TIM_OCPreload_Enable);
 	
-	TIM_Cmd(TIM3, ENABLE);	
+	TIM_Cmd(TIM3, ENABLE);
+
+	
 }
 
 

@@ -52,7 +52,11 @@
 
 /* Private variables ---------------------------------------------------------*/
 
-volatile int32_t millis =0, joy_millis=0, encoder_millis = 0, adc_millis=100, sensors_millis=101;
+volatile int32_t millis = 0;
+volatile int32_t joy_millis = 0; 
+volatile int32_t encoder_millis = 0;
+volatile int32_t adc_millis = 100;
+volatile int32_t sensors_millis = 101;
 volatile int status = 0;
 extern dev_config_t dev_config;
 

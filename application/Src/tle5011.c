@@ -126,7 +126,7 @@ void TLE501x_StopDMA(sensor_t * sensor)
 	sensor->tx_complete = 1;
 	
 	SPI_BiDirectionalLineConfig(SPI1, SPI_Direction_Tx);	
-	Delay_us(1);			// a small delay for CS level setting		
+//	Delay_us(1);			// a small delay for CS level setting		
 }
 
 
