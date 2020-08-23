@@ -501,7 +501,7 @@ void AxesInit (dev_config_t * p_dev_config)
 					sensors[sensors_cnt].type = MLX90393_SPI;
 					sensors[sensors_cnt].source = i;
 					
-					MLX90393_Start(&sensors[sensors_cnt]);
+					MLX90393_Start(MLX_SPI, &sensors[sensors_cnt]);
 					sensors_cnt++;
 					break;
 				}

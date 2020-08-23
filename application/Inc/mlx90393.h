@@ -14,6 +14,9 @@
 
 #define MLX90393_SPI_MODE							3
 
+#define MLX_SPI												0
+#define MLX_I2C												1
+
 // Commands
 #define	MLX_START_BURST 							0x10
 #define	MLX_START_WAKE_ON_CHANGE 			0x20
@@ -54,9 +57,11 @@
 #define DIG_FILT(val) 								((val << 2) & 0x1C)
 #define OSR(val)   										((val) & 0x03)
 
-void MLX90393_Start(sensor_t * sensor);
-void MLX90393_StartDMA(sensor_t * sensor);
+void MLX90393_Start(uint8_t mode, sensor_t * sensor);
+
 int MLX90393_GetData(uint16_t * data, sensor_t * sensor, uint8_t channel);
+
+void MLX90393_StartDMA(uint8_t mode, sensor_t * sensor);
 void MLX90393_StopDMA(sensor_t * sensor);
 
 #endif 	/* __MLX90393_H__ */

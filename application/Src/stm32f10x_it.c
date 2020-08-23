@@ -272,7 +272,7 @@ void TIM2_IRQHandler(void)
 					}
 					else if (sensors[i].type == MLX90393_SPI)
 					{
-						MLX90393_StartDMA(&sensors[i]);
+						MLX90393_StartDMA(MLX_SPI, &sensors[i]);
 						break;
 					}
 				}
@@ -285,15 +285,11 @@ void TIM2_IRQHandler(void)
 					if (sensors[i].type == AS5600)
 					{
 						status = AS5600_StartDMA(&sensors[i]);
-//						status = AS5600_ReadBlocking(&sensors[i]);
 						break;
 					}
 					else if (sensors[i].type == ADS1115)
 					{
 						status = ADS1115_StartDMA(&sensors[i], sensors[i].curr_channel);	
-//						status = ADS1115_ReadBlocking(&sensors[i], sensors[i].curr_channel);					
-//						uint8_t channel = (sensors[i].curr_channel < 3) ? (sensors[i].curr_channel + 1) : 0;
-//						status = ADS1115_SetMuxBlocking(&sensors[i], channel);
 						break;
 					}
 				}
@@ -401,7 +397,7 @@ void DMA1_Channel2_IRQHandler(void)
 				}
 				else if (sensors[i].type == MLX90393_SPI)
 				{
-					MLX90393_StartDMA(&sensors[i]);
+					MLX90393_StartDMA(MLX_SPI, &sensors[i]);
 					SEGGER_SYSVIEW_RecordEndCall(34);
 					return;
 				}
