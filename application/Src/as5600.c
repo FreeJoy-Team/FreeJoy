@@ -92,3 +92,25 @@ int AS5600_ReadBlocking(sensor_t * sensor)
 	return ret;
 }
 
+/**
+  * @brief AS5600 start processing data in DMA mode
+  * @param sensor: Sensor struct
+  * @retval status
+  */
+int AS5600_StartDMA(sensor_t * sensor)
+{
+	int ret;	
+	
+	sensor->rx_complete = 0;	
+	ret = I2C_ReadNonBlocking(sensor->address, 0x0C, &sensor->data[0], 4, 1);
+	
+	if (ret != 0 )
+	{
+		sensor->err_cnt++;
+		sensor->rx_complete = 1;
+	}
+	
+	return ret;
+}
+
+

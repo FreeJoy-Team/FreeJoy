@@ -18,6 +18,7 @@ void AS5600_Init(sensor_t * sensor, uint16_t min, uint16_t max);
 int16_t AS5600_GetRawData(sensor_t * sensor);
 int16_t AS5600_GetScaledData(sensor_t * sensor);
 int AS5600_ReadBlocking(sensor_t * sensor);
+int AS5600_StartDMA(sensor_t * sensor);
 
 #endif 	/* __AS5600_H__ */
 

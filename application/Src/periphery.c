@@ -261,7 +261,6 @@ void IO_Init (dev_config_t * p_dev_config)
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
 	GPIO_PinRemapConfig(GPIO_Remap_SWJ_NoJTRST, ENABLE);
 	GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE);
-	GPIO_PinRemapConfig(GPIO_Remap_I2C1, ENABLE);
 	GPIO_PinRemapConfig(GPIO_PartialRemap_TIM3, ENABLE);
 	
 	
@@ -355,14 +354,14 @@ void IO_Init (dev_config_t * p_dev_config)
 
 			SPI_Start();
 		}
-		else if (p_dev_config->pins[i] == I2C_SCL && i == 19)			// PB8
+		else if (p_dev_config->pins[i] == I2C_SCL && i == 21)			// PB10
 		{		
 			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 			GPIO_InitStructure.GPIO_Pin = pin_config[i].pin;
 			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;
 			GPIO_Init (GPIOB,&GPIO_InitStructure);
 		}
-		else if (p_dev_config->pins[i] == I2C_SDA && i == 20)			// PB9
+		else if (p_dev_config->pins[i] == I2C_SDA && i == 22)			// PB11
 		{		
 			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 			GPIO_InitStructure.GPIO_Pin = pin_config[i].pin;

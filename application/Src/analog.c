@@ -507,48 +507,48 @@ void AxesInit (dev_config_t * p_dev_config)
 				}
 			}
 		}
-		else if (p_dev_config->pins[19] == I2C_SCL && p_dev_config->pins[20] == I2C_SDA)			// PB8 and PB9
+	}
+	if (p_dev_config->pins[21] == I2C_SCL && p_dev_config->pins[22] == I2C_SDA)			// PB8 and PB9
+	{
+		// look for ADS1115 sensors with different addresses
+		for (uint8_t addr = ADS1115_I2C_ADDR_MIN; addr <= ADS1115_I2C_ADDR_MAX; addr ++)
 		{
-			// look for ADS1115 sensors with different addresses
-			for (uint8_t addr = ADS1115_I2C_ADDR_MIN; addr <= ADS1115_I2C_ADDR_MAX; addr ++)
+			for (uint8_t k=0; k<MAX_AXIS_NUM; k++)
 			{
-				for (uint8_t k=0; k<MAX_AXIS_NUM; k++)
+				if (p_dev_config->axis_config[k].source_main == (pin_t) SOURCE_I2C)
 				{
-					if (p_dev_config->axis_config[k].source_main == (pin_t) SOURCE_I2C)
+					if ((p_dev_config->axis_config[k].i2c_address) == addr)
 					{
-						if ((p_dev_config->axis_config[k].i2c_address) == addr)
-						{
-							sensors[sensors_cnt].address = p_dev_config->axis_config[k].i2c_address;
-							sensors[sensors_cnt].type = ADS1115;
-							sensors[sensors_cnt].source = (pin_t) SOURCE_I2C;
-							
-							ADS1115_Init(&sensors[sensors_cnt]);
-							sensors_cnt++;
-							break;
-						}
+						sensors[sensors_cnt].address = p_dev_config->axis_config[k].i2c_address;
+						sensors[sensors_cnt].type = ADS1115;
+						sensors[sensors_cnt].source = (pin_t) SOURCE_I2C;
+						
+						ADS1115_Init(&sensors[sensors_cnt]);
+						sensors_cnt++;
+						break;
 					}
 				}
 			}
-			// look for AS5600
-			for (uint8_t k=0; k<MAX_AXIS_NUM; k++)
+		}
+		// look for AS5600
+		for (uint8_t k=0; k<MAX_AXIS_NUM; k++)
+		{
+			if (p_dev_config->axis_config[k].source_main == (pin_t) SOURCE_I2C)
+			{
+				if ((p_dev_config->axis_config[k].i2c_address) == AS5600_I2C_ADDR)
 				{
-					if (p_dev_config->axis_config[k].source_main == (pin_t) SOURCE_I2C)
-					{
-						if ((p_dev_config->axis_config[k].i2c_address) == AS5600_I2C_ADDR)
-						{
-							sensors[sensors_cnt].address = p_dev_config->axis_config[k].i2c_address;
-							sensors[sensors_cnt].type = AS5600;
-							sensors[sensors_cnt].source = (pin_t) SOURCE_I2C;
-							
-							uint16_t calib_min = map2(p_dev_config->axis_config[k].calib_min, AXIS_MIN_VALUE, AXIS_MAX_VALUE, 0, 4095);
-							uint16_t calib_max = map2(p_dev_config->axis_config[k].calib_max, AXIS_MIN_VALUE, AXIS_MAX_VALUE, 0, 4095);
-							
-							AS5600_Init(&sensors[sensors_cnt], calib_min, calib_max);						
-							sensors_cnt++;						
-							break;
-						}
-					}
+					sensors[sensors_cnt].address = p_dev_config->axis_config[k].i2c_address;
+					sensors[sensors_cnt].type = AS5600;
+					sensors[sensors_cnt].source = (pin_t) SOURCE_I2C;
+					
+					uint16_t calib_min = map2(p_dev_config->axis_config[k].calib_min, AXIS_MIN_VALUE, AXIS_MAX_VALUE, 0, 4095);
+					uint16_t calib_max = map2(p_dev_config->axis_config[k].calib_max, AXIS_MIN_VALUE, AXIS_MAX_VALUE, 0, 4095);
+					
+					AS5600_Init(&sensors[sensors_cnt], calib_min, calib_max);						
+					sensors_cnt++;						
+					break;
 				}
+			}
 		}
 	}
 	
