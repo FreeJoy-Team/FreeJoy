@@ -290,7 +290,6 @@ typedef struct
 {
 	uint8_t points[13];
 	uint8_t buttons_cnt;									// :4
-	uint8_t is_enabled;										// :1
 
 } axis_to_buttons_t;
 
@@ -340,8 +339,10 @@ enum
 
 typedef struct
 {
-	uint8_t				duty_cycle[3];	
-	uint8_t				reserved[7];
+	uint8_t				duty_cycle;	
+	uint8_t				axis_num : 3;
+	uint8_t				is_axis : 1;
+	uint8_t 			:0;
 	
 } led_pwm_config_t;
 
@@ -387,7 +388,7 @@ typedef struct
 	uint8_t							is_dynamic_config;
 	
 	// config 15;
-	led_pwm_config_t		led_pwm_config;
+	led_pwm_config_t		led_pwm_config[4];
 	led_config_t				leds[MAX_LEDS_NUM];
 	
 	// config 16;

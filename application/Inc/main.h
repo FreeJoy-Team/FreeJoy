@@ -18,7 +18,7 @@
 
 static const dev_config_t init_config =
 {
-	.firmware_version = 0x1623,		// do not change
+	.firmware_version = 0x1630,		// do not change
 	
 	/* 
 		Name of device in devices dispatcher
@@ -36,7 +36,7 @@ static const dev_config_t init_config =
 	.device_name[10] = '.',
 	.device_name[11] = '6',
 	.device_name[12] = '.',
-	.device_name[13] = '2',
+	.device_name[13] = '3',
 	.device_name[14] = 0,
 	.device_name[15] = 0,
 	.device_name[16] = 0,
@@ -665,52 +665,36 @@ static const dev_config_t init_config =
 		AxesToButtons configuration
 	*/
 	.axes_to_buttons[0].points[0] = 0,
-	.axes_to_buttons[0].points[1] = 127,
-	.axes_to_buttons[0].points[2] = 255,
-	.axes_to_buttons[0].buttons_cnt = 2,
-	.axes_to_buttons[0].is_enabled = 0,
+	.axes_to_buttons[0].points[1] = 255,
+	.axes_to_buttons[0].buttons_cnt = 0,
 	
 	.axes_to_buttons[1].points[0] = 0,
-	.axes_to_buttons[1].points[1] = 127,
-	.axes_to_buttons[1].points[2] = 255,
-	.axes_to_buttons[1].buttons_cnt = 2,
-	.axes_to_buttons[1].is_enabled = 0,
+	.axes_to_buttons[1].points[1] = 255,
+	.axes_to_buttons[1].buttons_cnt = 0,
 	
 	.axes_to_buttons[2].points[0] = 0,
-	.axes_to_buttons[2].points[1] = 127,
-	.axes_to_buttons[2].points[2] = 255,
-	.axes_to_buttons[2].buttons_cnt = 2,
-	.axes_to_buttons[2].is_enabled = 0,
+	.axes_to_buttons[2].points[1] = 255,
+	.axes_to_buttons[2].buttons_cnt = 0,
 	
 	.axes_to_buttons[3].points[0] = 0,
-	.axes_to_buttons[3].points[1] = 127,
-	.axes_to_buttons[3].points[2] = 255,
-	.axes_to_buttons[3].buttons_cnt = 2,
-	.axes_to_buttons[3].is_enabled = 0,
+	.axes_to_buttons[3].points[1] = 255,
+	.axes_to_buttons[3].buttons_cnt = 0,
 	
 	.axes_to_buttons[4].points[0] = 0,
-	.axes_to_buttons[4].points[1] = 127,
-	.axes_to_buttons[4].points[2] = 255,
-	.axes_to_buttons[4].buttons_cnt = 2,
-	.axes_to_buttons[4].is_enabled = 0,
+	.axes_to_buttons[4].points[1] = 255,
+	.axes_to_buttons[4].buttons_cnt = 0,
 	
 	.axes_to_buttons[5].points[0] = 0,
-	.axes_to_buttons[5].points[1] = 127,
-	.axes_to_buttons[5].points[2] = 255,
-	.axes_to_buttons[5].buttons_cnt = 2,
-	.axes_to_buttons[5].is_enabled = 0,
+	.axes_to_buttons[5].points[1] = 255,
+	.axes_to_buttons[5].buttons_cnt = 0,
 	
 	.axes_to_buttons[6].points[0] = 0,
-	.axes_to_buttons[6].points[1] = 127,
-	.axes_to_buttons[6].points[2] = 255,
-	.axes_to_buttons[6].buttons_cnt = 2,
-	.axes_to_buttons[6].is_enabled = 0,
+	.axes_to_buttons[6].points[1] = 255,
+	.axes_to_buttons[6].buttons_cnt = 0,
 	
 	.axes_to_buttons[7].points[0] = 0,
-	.axes_to_buttons[7].points[1] = 127,
-	.axes_to_buttons[7].points[2] = 255,
-	.axes_to_buttons[7].buttons_cnt = 2,
-	.axes_to_buttons[7].is_enabled = 0,
+	.axes_to_buttons[7].points[1] = 255,
+	.axes_to_buttons[7].buttons_cnt = 0,
 	
 	
 	.shift_config[0].button = -1,
@@ -736,9 +720,18 @@ static const dev_config_t init_config =
 	.encoders[14] = ENCODER_CONF_2x,
 	.encoders[15] = ENCODER_CONF_2x,
 	
-	.led_pwm_config.duty_cycle[0] = 50,
-	.led_pwm_config.duty_cycle[1] = 50,
-	.led_pwm_config.duty_cycle[2] = 50,
+	.led_pwm_config[0].duty_cycle = 50,
+	.led_pwm_config[0].is_axis = 0,
+	.led_pwm_config[0].axis_num = 0,
+	.led_pwm_config[1].duty_cycle = 50,
+	.led_pwm_config[1].is_axis = 0,
+	.led_pwm_config[1].axis_num = 0,
+	.led_pwm_config[2].duty_cycle = 50,
+	.led_pwm_config[2].is_axis = 0,
+	.led_pwm_config[2].axis_num = 0,
+	.led_pwm_config[3].duty_cycle = 50,
+	.led_pwm_config[3].is_axis = 0,
+	.led_pwm_config[3].axis_num = 0,	
 	
 	.leds[0].input_num = -1,
 	.leds[0].type = LED_NORMAL,

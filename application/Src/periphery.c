@@ -113,9 +113,12 @@ void Timers_Init(dev_config_t * p_dev_config)
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 		
 	TIM_TimeBaseStructInit(&TIM_TimeBaseInitStructure);	
-	TIM_TimeBaseInitStructure.TIM_Prescaler = RCC_Clocks.PCLK1_Frequency/5000 - 1;
-	TIM_TimeBaseInitStructure.TIM_Period = 10 - 1;			// 1ms
+	TIM_TimeBaseInitStructure.TIM_Prescaler = RCC_Clocks.PCLK1_Frequency/100000 - 1;
+	TIM_TimeBaseInitStructure.TIM_Period = 200 - 1;			// 1ms, 1000Hz
+	TIM_TimeBaseInitStructure.TIM_ClockDivision = 0;
+	TIM_TimeBaseInitStructure.TIM_CounterMode = TIM_CounterMode_Up;
 	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseInitStructure);
+	TIM_ARRPreloadConfig(TIM2, ENABLE);
 	
 	TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);	
 	NVIC_SetPriority(TIM2_IRQn, 3);
@@ -124,6 +127,10 @@ void Timers_Init(dev_config_t * p_dev_config)
 	TIM_Cmd(TIM2, ENABLE);	
 	
 	// LED PWM timer
+	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
+  TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
+  TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
+	
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);		
 	TIM_TimeBaseStructInit(&TIM_TimeBaseInitStructure);	
 	TIM_TimeBaseInitStructure.TIM_Prescaler = RCC_Clocks.PCLK1_Frequency/100000 - 1;
@@ -132,27 +139,99 @@ void Timers_Init(dev_config_t * p_dev_config)
 	TIM_TimeBaseInitStructure.TIM_CounterMode = TIM_CounterMode_Up;
 	TIM_TimeBaseInit(TIM3, &TIM_TimeBaseInitStructure);
 	TIM_ARRPreloadConfig(TIM3, ENABLE);
+	TIM_Cmd(TIM3, ENABLE);
 	
-	/* PWM1 Mode configuration: Channel1 */
-  TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
-  TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
-  TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
+	/* PWM TIM3 config */
 	// Channel 1
-	TIM_OCInitStructure.TIM_Pulse = p_dev_config->led_pwm_config.duty_cycle[2] * (TIM_TimeBaseInitStructure.TIM_Period + 1) / 100;
+	TIM_OCInitStructure.TIM_Pulse = p_dev_config->led_pwm_config[3].duty_cycle * (TIM_TimeBaseInitStructure.TIM_Period + 1) / 100;
   TIM_OC1Init(TIM3, &TIM_OCInitStructure);
   TIM_OC1PreloadConfig(TIM3, TIM_OCPreload_Enable);
 	// Channel 3
-	TIM_OCInitStructure.TIM_Pulse = p_dev_config->led_pwm_config.duty_cycle[0] * (TIM_TimeBaseInitStructure.TIM_Period + 1) / 100;
+	TIM_OCInitStructure.TIM_Pulse = p_dev_config->led_pwm_config[1].duty_cycle * (TIM_TimeBaseInitStructure.TIM_Period + 1) / 100;
   TIM_OC3Init(TIM3, &TIM_OCInitStructure);
   TIM_OC3PreloadConfig(TIM3, TIM_OCPreload_Enable);
 	// Channel 4
-	TIM_OCInitStructure.TIM_Pulse = p_dev_config->led_pwm_config.duty_cycle[1] * (TIM_TimeBaseInitStructure.TIM_Period + 1) / 100;
+	TIM_OCInitStructure.TIM_Pulse = p_dev_config->led_pwm_config[2].duty_cycle * (TIM_TimeBaseInitStructure.TIM_Period + 1) / 100;
   TIM_OC4Init(TIM3, &TIM_OCInitStructure);
-  TIM_OC4PreloadConfig(TIM3, TIM_OCPreload_Enable);
+  TIM_OC4PreloadConfig(TIM3, TIM_OCPreload_Enable);	
 	
-	TIM_Cmd(TIM3, ENABLE);
 
+	/* PWM TIM1 config */
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);		
+	TIM_TimeBaseStructInit(&TIM_TimeBaseInitStructure);	
+	TIM_TimeBaseInitStructure.TIM_Prescaler = RCC_Clocks.PCLK2_Frequency/100000 - 1;
+	TIM_TimeBaseInitStructure.TIM_Period = 200 - 1;			// 1ms, 1000Hz
+	TIM_TimeBaseInitStructure.TIM_ClockDivision = 0;
+	TIM_TimeBaseInitStructure.TIM_CounterMode = TIM_CounterMode_Up;
+	TIM_TimeBaseInit(TIM1, &TIM_TimeBaseInitStructure);
+	TIM_ARRPreloadConfig(TIM1, ENABLE);
+	TIM_CtrlPWMOutputs(TIM1, ENABLE);
+	TIM_Cmd(TIM1, ENABLE);
+
+	// Channel 3
 	
+	TIM_OCInitStructure.TIM_Pulse = p_dev_config->led_pwm_config[0].duty_cycle * (TIM_TimeBaseInitStructure.TIM_Period + 1) / 100;
+  TIM_OC3Init(TIM1, &TIM_OCInitStructure);
+  TIM_OC3PreloadConfig(TIM1, TIM_OCPreload_Enable);
+	TIM_OC3PolarityConfig(TIM1, TIM_OCPolarity_High);
+}
+
+/**
+  * @brief Update PWM values
+	* @param p_dev_config: Pointer to device config
+	* @param axes_data: Pointer to axes values
+  * @retval None
+  */
+void PWM_SetFromAxes(dev_config_t * p_dev_config, analog_data_t * axes_data)
+{
+	int32_t	tmp32;
+	
+	/* PWM TIM3 config */
+	// Channel 1
+	if (p_dev_config->led_pwm_config[3].is_axis)
+	{
+		tmp32 = (axes_data[p_dev_config->led_pwm_config[3].axis_num] + 32767)/655;
+		TIM_SetCompare1(TIM3, tmp32 * p_dev_config->led_pwm_config[3].duty_cycle * (TIM3->ARR + 1) / 10000);
+  }
+	else
+	{
+		TIM_SetCompare1(TIM3, p_dev_config->led_pwm_config[3].duty_cycle * (TIM3->ARR + 1) / 100);
+	}
+	
+	// Channel 3
+	if (p_dev_config->led_pwm_config[1].is_axis)
+	{
+		tmp32 = (axes_data[p_dev_config->led_pwm_config[1].axis_num] + 32767)/655;
+		TIM_SetCompare3(TIM3, tmp32 * p_dev_config->led_pwm_config[1].duty_cycle * (TIM3->ARR + 1) / 10000);
+  }
+	else
+	{
+		TIM_SetCompare3(TIM3, p_dev_config->led_pwm_config[1].duty_cycle * (TIM3->ARR + 1) / 100);
+	}
+	
+	// Channel 4
+	if (p_dev_config->led_pwm_config[2].is_axis)
+	{
+		tmp32 = (axes_data[p_dev_config->led_pwm_config[2].axis_num] + 32767)/655;
+		TIM_SetCompare4(TIM3, tmp32 * p_dev_config->led_pwm_config[2].duty_cycle * (TIM3->ARR + 1) / 10000);
+  }
+	else
+	{
+		TIM_SetCompare4(TIM3, p_dev_config->led_pwm_config[2].duty_cycle * (TIM3->ARR + 1) / 100);
+	}	
+	
+
+	/* PWM TIM1 config */
+	// Channel 3
+	if (p_dev_config->led_pwm_config[0].is_axis)
+	{
+		tmp32 = (axes_data[p_dev_config->led_pwm_config[0].axis_num] + 32767)/655;
+		TIM_SetCompare3(TIM1, tmp32 * p_dev_config->led_pwm_config[0].duty_cycle * (TIM1->ARR + 1) / 10000);
+  }
+	else
+	{
+		TIM_SetCompare1(TIM1, p_dev_config->led_pwm_config[0].duty_cycle * (TIM1->ARR + 1) / 100);
+	}
 }
 
 
@@ -254,15 +333,15 @@ void IO_Init (dev_config_t * p_dev_config)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
 
-  /* GPIO Ports Clock Enable */
-  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA,ENABLE);
-  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB,ENABLE);
-  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC,ENABLE);
+	// Remapping
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
-	GPIO_PinRemapConfig(GPIO_Remap_SWJ_NoJTRST, ENABLE);
 	GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE);
 	GPIO_PinRemapConfig(GPIO_PartialRemap_TIM3, ENABLE);
 	
+  // GPIO Ports Clock Enable
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA,ENABLE);
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB,ENABLE);
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC,ENABLE);
 	
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;

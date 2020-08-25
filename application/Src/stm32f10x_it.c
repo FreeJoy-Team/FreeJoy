@@ -234,16 +234,16 @@ void TIM2_IRQHandler(void)
 			
 			// Disable periphery before ADC conversion
 			RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1,DISABLE);	
-			RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C2|RCC_APB1Periph_TIM3|RCC_APB1Periph_TIM4, DISABLE);
-			RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB|RCC_APB2Periph_GPIOC,DISABLE);			
+			RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C2|RCC_APB1Periph_TIM4, DISABLE);
+			RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC,DISABLE);			
 				
 			// ADC measurement
 			ADC_Conversion();
 			
 			// Enable periphery after ADC conversion
 			RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1,ENABLE);	
-			RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C2|RCC_APB1Periph_TIM3|RCC_APB1Periph_TIM4, ENABLE);
-			RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB|RCC_APB2Periph_GPIOC,ENABLE);
+			RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C2|RCC_APB1Periph_TIM4, ENABLE);
+			RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC,ENABLE);
 			// Enable TLE clock after ADC conversion
 			Generator_Start();
 		}

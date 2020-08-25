@@ -130,7 +130,7 @@ void AxesToButtonsGet (uint8_t * raw_button_data_buf, dev_config_t * p_dev_confi
 	
 	for (uint8_t i=0; i<MAX_AXIS_NUM; i++)
 	{
-		if (p_dev_config->axes_to_buttons[i].is_enabled)
+		if (p_dev_config->axes_to_buttons[i].buttons_cnt > 0)
 		{
 			for (uint8_t j=0; j<p_dev_config->axes_to_buttons[i].buttons_cnt; j++)
 			{

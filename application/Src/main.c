@@ -91,6 +91,10 @@ int main(void)
 		ButtonsReadLogical(&dev_config);
 		LEDs_PhysicalProcess(&dev_config);
 		
+		analog_data_t tmp[8];
+		AnalogGet(NULL, tmp, NULL);
+		PWM_SetFromAxes(&dev_config, tmp);
+		
 		// Enter flasher command received
 		if (bootloader > 0)
 		{
