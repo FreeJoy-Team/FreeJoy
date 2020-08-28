@@ -49,7 +49,7 @@ int8_t enc_array_4 [16] =
 0, -1,  1,  0
 };
 
-uint8_t	raw_buttons[MAX_BUTTONS_NUM];
+//uint8_t	raw_buttons[MAX_BUTTONS_NUM];
 encode_stater_t encoders_state[MAX_ENCODERS_NUM];
 
 static void EncoderFastInit(dev_config_t * p_dev_config)
@@ -107,7 +107,7 @@ void EncoderProcess (logical_buttons_state_t * button_state_buf, dev_config_t * 
 	}
 	if (!encoders_present) return;		// dont waste time if no encoders connected
 	
-	ButtonsReadPhysical(p_dev_config, raw_buttons);		// read raw buttons state
+	//ButtonsReadPhysical(p_dev_config, raw_buttons);		// read raw buttons state
 	
 	for (int i=1; i<MAX_ENCODERS_NUM; i++)
 	{
@@ -117,8 +117,8 @@ void EncoderProcess (logical_buttons_state_t * button_state_buf, dev_config_t * 
 			int8_t stt;
 			encoders_state[i].state <<= 2;			// shift prev state to clear space for new data
 			
-			if (raw_buttons[p_dev_config->buttons[encoders_state[i].pin_a].physical_num])	encoders_state[i].state |= 0x01;		// Pin A high
-			if (raw_buttons[p_dev_config->buttons[encoders_state[i].pin_b].physical_num])	encoders_state[i].state |= 0x02;		// Pin B high
+			if (raw_buttons_data[p_dev_config->buttons[encoders_state[i].pin_a].physical_num])	encoders_state[i].state |= 0x01;		// Pin A high
+			if (raw_buttons_data[p_dev_config->buttons[encoders_state[i].pin_b].physical_num])	encoders_state[i].state |= 0x02;		// Pin B high
 			
 			if ((encoders_state[i].state & 0x03) != ((encoders_state[i].state >> 2) & 0x03))							// Current state != Prev state
 			{

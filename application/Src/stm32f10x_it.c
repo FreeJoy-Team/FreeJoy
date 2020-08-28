@@ -218,6 +218,9 @@ void TIM2_IRQHandler(void)
 			USB_CUSTOM_HID_SendReport((uint8_t *)&joy_report.id, sizeof(joy_report) - sizeof(joy_report.dummy));
 		}
 		
+		ButtonsReadPhysical(&dev_config, raw_buttons_data);
+		ButtonsDebouceProcess(&dev_config);
+		
 		// encoders polling
 		if (millis - encoder_millis >= ENCODER_PERIOD_MS)
 		{
@@ -435,8 +438,7 @@ void DMA1_Channel3_IRQHandler(void)
 				{
 					SPI_HalfDuplex_Receive(&sensors[i].data[1], 5, TLE5011_SPI_MODE);					
 				}
-				SEGGER_SYSVIEW_RecordEndCall(35);
-				return;
+				break;
 			}
 		}
 	}

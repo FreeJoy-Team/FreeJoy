@@ -25,30 +25,30 @@ BUILD_DIR = build
 ######################################
 # C sources
 C_SOURCES =  \
-../Src/analog.c \
-../Src/axis_to_buttons.c \
-../Src/buttons.c \
-../Src/crc16.c \
-../Src/encoders.c \
-../Src/config.c \
-../Src/leds.c \
-../Src/main.c \
-../Src/periphery.c \
-../Src/tle5011.c \
-../Src/as5600.c \
-../Src/ads1115.c \
-../Src/mlx90393.c \
-../Src/mcp320x.c \
-../Src/shift_registers.c \
-../Src/spi.c \
-../Src/i2c.c \
-../Src/stm32f10x_it.c \
-../Src/usb_desc.c \
-../Src/usb_endp.c \
-../Src/usb_hw.c \
-../Src/usb_istr.c \
-../Src/usb_prop.c \
-../Src/usb_pwr.c \
+../application/Src/analog.c \
+../application/Src/axis_to_buttons.c \
+../application/Src/buttons.c \
+../utils/crc16.c \
+../application/Src/encoders.c \
+../application/Src/config.c \
+../application/Src/leds.c \
+../application/Src/main.c \
+../application/Src/periphery.c \
+../application/Src/tle5011.c \
+../application/Src/as5600.c \
+../application/Src/ads1115.c \
+../application/Src/mlx90393.c \
+../application/Src/mcp320x.c \
+../application/Src/shift_registers.c \
+../application/Src/spi.c \
+../application/Src/i2c.c \
+../application/Src/stm32f10x_it.c \
+../application/Src/usb_desc.c \
+../application/Src/usb_endp.c \
+../application/Src/usb_hw.c \
+../application/Src/usb_istr.c \
+../application/Src/usb_prop.c \
+../application/Src/usb_pwr.c \
 ../Drivers/CMSIS/CM3/DeviceSupport/ST/STM32F10x/system_stm32f10x.c \
 ../Drivers/STM32F10x_StdPeriph_Driver/src/misc.c \
 ../Drivers/STM32F10x_StdPeriph_Driver/src/stm32f10x_adc.c \
@@ -65,6 +65,10 @@ C_SOURCES =  \
 ../Drivers/STM32_USB-FS-Device_Driver/src/usb_mem.c \
 ../Drivers/STM32_USB-FS-Device_Driver/src/usb_regs.c \
 ../Drivers/STM32_USB-FS-Device_Driver/src/usb_sil.c \
+../SEGGER/SEGGER/SEGGER_SYSVIEW.c \
+../SEGGER/SEGGER/SEGGER_RTT.c \
+../SEGGER/SEGGER/SEGGER_RTT_printf.c \
+../SEGGER/Sample/NoOS/Config/Cortex-M/SEGGER_SYSVIEW_Config_NoOS.c 
 
 # ASM sources
 ASM_SOURCES =  \
@@ -121,12 +125,14 @@ AS_INCLUDES =
 
 # C includes
 C_INCLUDES =  \
--I../Inc \
 -I../Drivers/CMSIS/CM3/CoreSupport \
 -I../Drivers/CMSIS/CM3/DeviceSupport/ST/STM32F10x \
 -I../Drivers/STM32F10x_StdPeriph_Driver/inc \
--I../Drivers/STM32_USB-FS-Device_Driver/inc 
-
+-I../Drivers/STM32_USB-FS-Device_Driver/inc \
+-I../application/Inc \
+-I../utils \
+-I../SEGGER/SEGGER \
+-I../SEGGER/Config 
 
 # compile gcc flags
 ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections

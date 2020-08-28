@@ -213,12 +213,7 @@
         <Ww>
           <count>11</count>
           <WinNumber>1</WinNumber>
-          <ItemText>tmp_adc_data,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>12</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>\\FreeJoy\../application/Src/main.c\dev_config.led_pwm_config</ItemText>
+          <ItemText>spi_busy</ItemText>
         </Ww>
       </WatchWindow1>
       <WatchWindow2>
@@ -1279,7 +1274,7 @@
 
   <Group>
     <GroupName>SEGGER</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>

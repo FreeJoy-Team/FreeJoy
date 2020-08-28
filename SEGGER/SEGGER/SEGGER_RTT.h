@@ -84,7 +84,7 @@ Revision: $Rev: 17697 $
     #define _CC_HAS_RTT_ASM_SUPPORT 0
   #endif
   #if (defined __ARM_ARCH_7M__)                 // Cortex-M3/4
-    #define _CORE_HAS_RTT_ASM_SUPPORT 1
+    #define _CORE_HAS_RTT_ASM_SUPPORT 0
   #elif (defined __ARM_ARCH_7EM__)              // Cortex-M7
     #define _CORE_HAS_RTT_ASM_SUPPORT 1
   #elif (defined __ARM_ARCH_8M_MAIN__)          // Cortex-M33

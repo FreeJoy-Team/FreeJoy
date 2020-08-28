@@ -155,25 +155,26 @@ void Timers_Init(dev_config_t * p_dev_config)
   TIM_OC4Init(TIM3, &TIM_OCInitStructure);
   TIM_OC4PreloadConfig(TIM3, TIM_OCPreload_Enable);	
 	
+	if (p_dev_config->pins[8] == LED_PWM)				// prevent conflict with encoder timer
+	{
+		/* PWM TIM1 config */
+		RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);		
+		TIM_TimeBaseStructInit(&TIM_TimeBaseInitStructure);	
+		TIM_TimeBaseInitStructure.TIM_Prescaler = RCC_Clocks.PCLK2_Frequency/100000 - 1;
+		TIM_TimeBaseInitStructure.TIM_Period = 200 - 1;			// 1ms, 1000Hz
+		TIM_TimeBaseInitStructure.TIM_ClockDivision = 0;
+		TIM_TimeBaseInitStructure.TIM_CounterMode = TIM_CounterMode_Up;
+		TIM_TimeBaseInit(TIM1, &TIM_TimeBaseInitStructure);
+		TIM_ARRPreloadConfig(TIM1, ENABLE);
+		TIM_CtrlPWMOutputs(TIM1, ENABLE);
+		TIM_Cmd(TIM1, ENABLE);
 
-	/* PWM TIM1 config */
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);		
-	TIM_TimeBaseStructInit(&TIM_TimeBaseInitStructure);	
-	TIM_TimeBaseInitStructure.TIM_Prescaler = RCC_Clocks.PCLK2_Frequency/100000 - 1;
-	TIM_TimeBaseInitStructure.TIM_Period = 200 - 1;			// 1ms, 1000Hz
-	TIM_TimeBaseInitStructure.TIM_ClockDivision = 0;
-	TIM_TimeBaseInitStructure.TIM_CounterMode = TIM_CounterMode_Up;
-	TIM_TimeBaseInit(TIM1, &TIM_TimeBaseInitStructure);
-	TIM_ARRPreloadConfig(TIM1, ENABLE);
-	TIM_CtrlPWMOutputs(TIM1, ENABLE);
-	TIM_Cmd(TIM1, ENABLE);
-
-	// Channel 3
-	
-	TIM_OCInitStructure.TIM_Pulse = p_dev_config->led_pwm_config[0].duty_cycle * (TIM_TimeBaseInitStructure.TIM_Period + 1) / 100;
-  TIM_OC3Init(TIM1, &TIM_OCInitStructure);
-  TIM_OC3PreloadConfig(TIM1, TIM_OCPreload_Enable);
-	TIM_OC3PolarityConfig(TIM1, TIM_OCPolarity_High);
+		// Channel 1		
+		TIM_OCInitStructure.TIM_Pulse = p_dev_config->led_pwm_config[0].duty_cycle * (TIM_TimeBaseInitStructure.TIM_Period + 1) / 100;
+		TIM_OC1Init(TIM1, &TIM_OCInitStructure);
+		TIM_OC1PreloadConfig(TIM1, TIM_OCPreload_Enable);
+		TIM_OC1PolarityConfig(TIM1, TIM_OCPolarity_High);
+	}
 }
 
 /**
@@ -223,12 +224,12 @@ void PWM_SetFromAxes(dev_config_t * p_dev_config, analog_data_t * axes_data)
 
 	/* PWM TIM1 config */
 	// Channel 3
-	if (p_dev_config->led_pwm_config[0].is_axis)
+	if (p_dev_config->led_pwm_config[0].is_axis && p_dev_config->pins[8] == LED_PWM)		// prevent conflicts with encoder timer
 	{
 		tmp32 = (axes_data[p_dev_config->led_pwm_config[0].axis_num] + 32767)/655;
-		TIM_SetCompare3(TIM1, tmp32 * p_dev_config->led_pwm_config[0].duty_cycle * (TIM1->ARR + 1) / 10000);
+		TIM_SetCompare1(TIM1, tmp32 * p_dev_config->led_pwm_config[0].duty_cycle * (TIM1->ARR + 1) / 10000);
   }
-	else
+	else if (p_dev_config->pins[8] == LED_PWM)																					// prevent conflicts with encoder timer
 	{
 		TIM_SetCompare1(TIM1, p_dev_config->led_pwm_config[0].duty_cycle * (TIM1->ARR + 1) / 100);
 	}

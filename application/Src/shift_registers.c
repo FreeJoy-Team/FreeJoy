@@ -24,6 +24,7 @@
 
 #include "shift_registers.h"
 #include "buttons.h"
+#include "spi.h"
 
 shift_reg_t shift_registers[4];
 
@@ -169,9 +170,8 @@ void ShiftRegistersGet (uint8_t * raw_button_data_buf, dev_config_t * p_dev_conf
 	{
 		if (shift_registers[i].pin_latch >=0 && shift_registers[i].pin_data >=0)
 		{
-			NVIC_DisableIRQ(TIM2_IRQn);
 			ShiftRegisterRead(&shift_registers[i], input_data);
-			NVIC_EnableIRQ(TIM2_IRQn);
+			
 			for (uint8_t j=0; j<shift_registers[i].button_cnt; j++)
 			{
 				if ((*pos) <128)

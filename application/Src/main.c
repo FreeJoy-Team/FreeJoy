@@ -59,7 +59,7 @@ int main(void)
 	
 	// force enumerating USB 
 	USB_HW_DeInit();
-	Delay_us(100000);				// TODO: fix strange bug if Delay_ms() used
+	Delay_us(100000);				// TODO: fix strange bug if Delay_ms() used				
 	
 	// Configure and initialize SystemView
 	SEGGER_SYSVIEW_Conf(); 
@@ -75,14 +75,14 @@ int main(void)
 	}
 	AppConfigInit(&dev_config);
 	
-	USB_HW_Init();
-	
 	IO_Init(&dev_config);
 	AxesInit(&dev_config); 
 	EncodersInit(&dev_config);	
 	ShiftRegistersInit(&dev_config);
 	RadioButtons_Init(&dev_config);
 	SequentialButtons_Init(&dev_config);
+	
+	USB_HW_Init();
 	
 	Timers_Init(&dev_config);		
 	

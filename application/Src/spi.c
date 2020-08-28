@@ -94,7 +94,7 @@ void SPI_HalfDuplex_Transmit(uint8_t * data, uint16_t length, uint8_t spi_mode)
 	
 	SPI_I2S_ReceiveData(SPI1);
 	SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_OVR);
-	
+
 	DMA_Cmd(DMA1_Channel3, ENABLE);
 }
 
@@ -133,7 +133,7 @@ void SPI_HalfDuplex_Receive(uint8_t * data, uint16_t length, uint8_t spi_mode)
 	
 	SPI_I2S_ReceiveData(SPI1);
 	SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_OVR);
-	
+
 	DMA_Cmd(DMA1_Channel2, ENABLE);
 }
 
@@ -191,7 +191,7 @@ void SPI_FullDuplex_TransmitReceive(uint8_t * tx_data, uint8_t * rx_data, uint16
 	// Set full-duplex
 	SPI1->CR1 &= ~(SPI_CR1_BIDIMODE|SPI_CR1_BIDIOE|SPI_CR1_RXONLY|SPI_CR1_CPOL|SPI_CR1_CPHA);
 	SPI1->CR1 |= spi_mode & 0x03;
-	
+
 	DMA_Cmd(DMA1_Channel2, ENABLE);
 	DMA_Cmd(DMA1_Channel3, ENABLE);
 }
