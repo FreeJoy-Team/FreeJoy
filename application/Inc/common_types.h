@@ -91,7 +91,8 @@ typedef int8_t axis_source_t;
 
 enum
 {
-	TLE5011 = 1,
+	ANALOG = 0,
+	TLE5011,
 	MCP3201,
 	MCP3202,
 	MCP3204,
