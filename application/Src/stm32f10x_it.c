@@ -446,8 +446,8 @@ void DMA1_Channel4_IRQHandler(void)
 		DMA_Cmd(DMA1_Channel4,DISABLE);
 		
 		// EV8_2: Wait until BTF is set before programming the STOP
-    while ((I2C2->SR1 & 0x00004) != 0x000004 && --ticks);
-		if (ticks == 0)	
+    while (((I2C2->SR1 & 0x00004) != 0x000004) && --ticks) {;}
+		if(ticks == 0)	
 		{
 			sensors[i].tx_complete = 1;
 			sensors[i].rx_complete = 1;
