@@ -25,8 +25,6 @@
 #include "buttons.h"
 #include "string.h"
 
-#include "SEGGER_SYSVIEW.h"
-
 uint8_t												raw_buttons_data[MAX_BUTTONS_NUM];
 physical_buttons_state_t 			physical_buttons_state[MAX_BUTTONS_NUM];
 logical_buttons_state_t 			logical_buttons_state[MAX_BUTTONS_NUM];
@@ -167,7 +165,6 @@ static void LogicalButtonProcessTimer (logical_buttons_state_t * p_button_state,
   */
 void LogicalButtonProcessState (logical_buttons_state_t * p_button_state, uint8_t * pov_buf, dev_config_t * p_dev_config, uint8_t num)
 {	
-	SEGGER_SYSVIEW_RecordVoid(49);
 	
 	uint32_t millis;
 	uint8_t pov_group = 0;
@@ -566,7 +563,6 @@ void LogicalButtonProcessState (logical_buttons_state_t * p_button_state, uint8_
 			default:
 				break;
 		}		
-		SEGGER_SYSVIEW_RecordEndCall(49);
 }
 
 /**
@@ -726,9 +722,6 @@ void SingleButtonsGet (uint8_t * raw_button_data_buf, dev_config_t * p_dev_confi
   */
 uint8_t ButtonsReadPhysical(dev_config_t * p_dev_config, uint8_t * p_buf)
 {
-	SEGGER_SYSVIEW_RecordVoid(47);
-
-	
 	uint8_t pos = 0;
 
 	// Getting physical buttons states
@@ -738,8 +731,6 @@ uint8_t ButtonsReadPhysical(dev_config_t * p_dev_config, uint8_t * p_buf)
 	AxesToButtonsGet(p_buf, p_dev_config, &pos);
 	a2b_last = pos;
 	SingleButtonsGet(p_buf, p_dev_config, &pos);
-	
-	SEGGER_SYSVIEW_RecordEndCall(47);
 	
 	return pos;
 }
@@ -751,8 +742,6 @@ uint8_t ButtonsReadPhysical(dev_config_t * p_dev_config, uint8_t * p_buf)
   */
 void ButtonsReadLogical (dev_config_t * p_dev_config)
 {
-	SEGGER_SYSVIEW_RecordVoid(48);
-
 	// Process regular buttons
 	for (uint8_t i=0; i<MAX_BUTTONS_NUM; i++)
 	{
@@ -973,8 +962,6 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 				break;
 		}
 	}
-	
-	SEGGER_SYSVIEW_RecordEndCall(48);
 }
 
 /**

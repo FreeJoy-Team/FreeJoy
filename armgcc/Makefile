@@ -65,10 +65,10 @@ C_SOURCES =  \
 ../Drivers/STM32_USB-FS-Device_Driver/src/usb_mem.c \
 ../Drivers/STM32_USB-FS-Device_Driver/src/usb_regs.c \
 ../Drivers/STM32_USB-FS-Device_Driver/src/usb_sil.c \
-../SEGGER/SEGGER/SEGGER_SYSVIEW.c \
-../SEGGER/SEGGER/SEGGER_RTT.c \
-../SEGGER/SEGGER/SEGGER_RTT_printf.c \
-../SEGGER/Sample/NoOS/Config/Cortex-M/SEGGER_SYSVIEW_Config_NoOS.c 
+#../SEGGER/SEGGER/SEGGER_SYSVIEW.c \
+#../SEGGER/SEGGER/SEGGER_RTT.c \
+#../SEGGER/SEGGER/SEGGER_RTT_printf.c \
+#../SEGGER/Sample/NoOS/Config/Cortex-M/SEGGER_SYSVIEW_Config_NoOS.c 
 
 # ASM sources
 ASM_SOURCES =  \
@@ -131,8 +131,8 @@ C_INCLUDES =  \
 -I../Drivers/STM32_USB-FS-Device_Driver/inc \
 -I../application/Inc \
 -I../utils \
--I../SEGGER/SEGGER \
--I../SEGGER/Config 
+#-I../SEGGER/SEGGER \
+#-I../SEGGER/Config 
 
 # compile gcc flags
 ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections

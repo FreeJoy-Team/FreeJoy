@@ -25,7 +25,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
-#include "SEGGER_SYSVIEW.h"
+//#include "SEGGER_SYSVIEW.h"
 
 #include "periphery.h"
 #include "config.h"
@@ -61,8 +61,8 @@ int main(void)
 	USB_HW_DeInit();
 	Delay_us(100000);				// TODO: fix strange bug if Delay_ms() used				
 	
-	// Configure and initialize SystemView
-	SEGGER_SYSVIEW_Conf(); 
+//	// Configure and initialize SystemView
+//	SEGGER_SYSVIEW_Conf(); 
 	
 	// getting configuration from flash memory
 	DevConfigGet(&dev_config);
