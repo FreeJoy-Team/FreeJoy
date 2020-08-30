@@ -470,8 +470,16 @@ void EP1_OUT_Callback(void)
 			}
 			else // last packet received
 			{
+				// Check if config version matches
 				if ((tmp_dev_config.firmware_version &0xFFF0) != (FIRMWARE_VERSION & 0xFFF0))
 				{
+					// Report error
+					uint8_t tmp_buf[2];
+					tmp_buf[0] = REPORT_ID_CONFIG_OUT;
+					tmp_buf[1] = 0xFE;
+					USB_CUSTOM_HID_SendReport(tmp_buf,2);
+					
+					// blink LED if firmware version doesnt match
 					GPIO_InitTypeDef GPIO_InitStructure;
 					GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 					GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
@@ -483,7 +491,7 @@ void EP1_OUT_Callback(void)
 					
 					for (uint8_t i=0; i<6; i++) 
 					{
-						// blink LED if firmware version doesnt match
+						
 						GPIOB->ODR ^= GPIO_Pin_12;
 						GPIOC->ODR ^=	GPIO_Pin_13;
 						Delay_us(200000);
@@ -493,9 +501,9 @@ void EP1_OUT_Callback(void)
 				{
 					tmp_dev_config.firmware_version = FIRMWARE_VERSION;
 					DevConfigSet(&tmp_dev_config);
-				}
+					NVIC_SystemReset();
+				}		
 				
-				NVIC_SystemReset();
 			}
 		}
 		break;

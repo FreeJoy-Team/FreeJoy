@@ -163,7 +163,7 @@
         <Ww>
           <count>1</count>
           <WinNumber>1</WinNumber>
-          <ItemText>app_config</ItemText>
+          <ItemText>app_config,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>2</count>
@@ -215,17 +215,17 @@
           <WinNumber>1</WinNumber>
           <ItemText>spi_busy</ItemText>
         </Ww>
+        <Ww>
+          <count>12</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>buttons_data</ItemText>
+        </Ww>
       </WatchWindow1>
       <WatchWindow2>
         <Ww>
           <count>0</count>
           <WinNumber>2</WinNumber>
-          <ItemText>hid_buf</ItemText>
-        </Ww>
-        <Ww>
-          <count>1</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>tmp_buf</ItemText>
+          <ItemText>CustomHID_ReportDescriptor</ItemText>
         </Ww>
       </WatchWindow2>
       <MemoryWindow1>

@@ -600,8 +600,15 @@ void AxesInit (dev_config_t * p_dev_config)
 			
 			if (p_dev_config->pins[i] == AXIS_ANALOG)		
 			{
-				/* ADC1 regular channel configuration */ 
-				ADC_RegularChannelConfig(ADC1, channel_config[i].channel, tmp_rank++, ADC_SampleTime_239Cycles5);
+				for (uint8_t k=0; k<MAX_AXIS_NUM; k++)
+				{
+					if (p_dev_config->axis_config[k].source_main == i)
+					{
+						/* ADC1 regular channel configuration */ 
+						ADC_RegularChannelConfig(ADC1, channel_config[i].channel, tmp_rank++, ADC_SampleTime_239Cycles5);
+						break;
+					}
+				}
 			}
 		}
 

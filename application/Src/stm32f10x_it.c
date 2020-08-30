@@ -24,8 +24,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
 
-//#include "SEGGER_SYSVIEW.h"
-
 #include "usb_istr.h"
 #include "usb_lib.h"
 #include "periphery.h"
@@ -162,15 +160,12 @@ void PendSV_Handler(void)
   */
 void SysTick_Handler(void)
 {
-	//SEGGER_SYSVIEW_RecordEnterISR();
-	
 	Ticks++;
 		
 	if (TimingDelay != 0x00)										
   {
     TimingDelay--;
   }
-	//SEGGER_SYSVIEW_RecordExitISR();
 }
 
 /******************************************************************************/

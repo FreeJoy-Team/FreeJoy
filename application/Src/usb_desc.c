@@ -208,7 +208,7 @@ uint8_t CustomHID_ReportDescriptor[CUSTOMHID_SIZ_REPORT_DESC] =
     0x25, 0x01,                    //   LOGICAL_MAXIMUM (1)
     0x75, 0x01,                    //   REPORT_SIZE (1)
     0x95, MAX_BUTTONS_NUM,         //   REPORT_COUNT (MAX_BUTTONS_NUM)
-    0x81, 0x02,                    //   INPUT (Data,Var,Abs)
+    0x81, 0x00,                    //   INPUT (Data,Ary,Abs)
 		
 		
 		
