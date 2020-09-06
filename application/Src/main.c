@@ -71,7 +71,7 @@ int main(void)
 	}
 	AppConfigInit(&dev_config);
 	
-	Delay_ms(50);
+	Delay_us(50000);
 	
 	USB_HW_Init();
 	IO_Init(&dev_config);

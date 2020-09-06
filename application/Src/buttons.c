@@ -42,7 +42,7 @@ uint8_t												a2b_last;
 	* @param  p_dev_config: Pointer to device configuration
   * @retval None
   */
-static void ButtonsDebouceProcess (dev_config_t * p_dev_config)
+void ButtonsDebouceProcess (dev_config_t * p_dev_config)
 {
 	uint32_t 	millis;
 	uint16_t	debounce;
@@ -723,13 +723,8 @@ uint8_t ButtonsReadPhysical(dev_config_t * p_dev_config, uint8_t * p_buf)
 {
 	SEGGER_SYSVIEW_RecordVoid(47);
 	
-	static uint8_t mutex = 0;
-	
-	if (mutex) return 0;
-	
 	uint8_t pos = 0;
 	
-	mutex = 1;
 	// Getting physical buttons states
 	MaxtrixButtonsGet(p_buf, p_dev_config, &pos);
 	ShiftRegistersGet(p_buf, p_dev_config, &pos);
@@ -737,7 +732,6 @@ uint8_t ButtonsReadPhysical(dev_config_t * p_dev_config, uint8_t * p_buf)
 	AxesToButtonsGet(p_buf, p_dev_config, &pos);
 	a2b_last = pos;
 	SingleButtonsGet(p_buf, p_dev_config, &pos);
-	mutex = 0;
 	
 	SEGGER_SYSVIEW_RecordEndCall(47);
 	
@@ -752,16 +746,9 @@ uint8_t ButtonsReadPhysical(dev_config_t * p_dev_config, uint8_t * p_buf)
 void ButtonsReadLogical (dev_config_t * p_dev_config)
 {
 	SEGGER_SYSVIEW_RecordVoid(48);
-	
-	uint8_t pos = 0;
-	
-	pos = ButtonsReadPhysical(p_dev_config, raw_buttons_data);
-	if (pos == 0) return;
-	
-	ButtonsDebouceProcess(p_dev_config);
 
 	// Process regular buttons
-	for (uint8_t i=0; i<pos; i++)
+	for (uint8_t i=0; i<MAX_BUTTONS_NUM; i++)
 	{
 		uint8_t shift_num = 0;
 		
