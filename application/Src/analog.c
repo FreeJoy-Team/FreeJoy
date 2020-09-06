@@ -425,7 +425,17 @@ void AxesInit (dev_config_t * p_dev_config)
 	{
 		if (p_dev_config->pins[i] == AXIS_ANALOG)
 		{
-			adc_cnt++;
+			for (uint8_t k=0; k<MAX_AXIS_NUM; k++)
+			{
+				if (p_dev_config->axis_config[k].source_main == i && sensors_cnt < MAX_AXIS_NUM)
+				{
+					sensors[sensors_cnt].type = ANALOG;			
+					sensors[sensors_cnt].source = i;
+					sensors_cnt++;
+					adc_cnt++;
+					break;
+				}
+			}
 		}
 		else if (p_dev_config->pins[i] == TLE5011_CS)
 		{
@@ -555,6 +565,22 @@ void AxesInit (dev_config_t * p_dev_config)
 	// Init ADC
 	if (adc_cnt > 0)
 	{
+		// Ranking ADC sensors
+		uint8_t rank = 0;	
+		for (uint8_t adc=0; adc<MAX_AXIS_NUM; adc++)
+		{
+			uint8_t is_present = 0;
+			for (int i=0; i<sensors_cnt; i++)
+			{ 
+				if (sensors[i].type == ANALOG && sensors[i].source == adc)
+				{
+					sensors[i].curr_channel = rank;
+					is_present = 1;
+				}			
+			}
+			if (is_present) rank++;
+		}
+		
 		/* ADC1 configuration ------------------------------------------------------*/
 		ADC_InitStructure.ADC_Mode = ADC_Mode_Independent;
 		ADC_InitStructure.ADC_ScanConvMode = ENABLE;
@@ -566,32 +592,25 @@ void AxesInit (dev_config_t * p_dev_config)
 
 		/* Enable ADC1 DMA */
 		ADC_DMACmd(ADC1, ENABLE);
-	}
 	
-	uint8_t axis_num = 0;
-	for (int i=0; i<USED_PINS_NUM; i++)
-	{
-		// Configure Sensors channels		
-		if (p_dev_config->pins[i] == TLE5011_CS)
-		{
-			axis_num++;
-		}
-	}
-	uint8_t tmp_rank = 1;
-	for (int i=0; i<MAX_AXIS_NUM; i++)
-	{ 
-		//if (p_dev_config->pins[i] == AXIS_ANALOG)		// Configure ADC channels
-		if (p_dev_config->pins[p_dev_config->axis_config[i].source_main] == AXIS_ANALOG)		// Configure ADC channels
-		{
-			/* ADC1 regular channel configuration */ 
-			ADC_RegularChannelConfig(ADC1, channel_config[p_dev_config->axis_config[i].source_main].channel, tmp_rank++, ADC_SampleTime_239Cycles5);
-			axis_num++;
+		// Configure ADC channels
+		uint8_t tmp_rank = 1;
+		for (int i=0; i<MAX_AXIS_NUM; i++)
+		{ 
+			if (p_dev_config->pins[i] == AXIS_ANALOG)		
+			{
+				for (uint8_t k=0; k<MAX_AXIS_NUM; k++)
+				{
+					if (p_dev_config->axis_config[k].source_main == i)
+					{
+						/* ADC1 regular channel configuration */ 
+						ADC_RegularChannelConfig(ADC1, channel_config[i].channel, tmp_rank++, ADC_SampleTime_239Cycles5);
+						break;
+					}
+				}
+			}
 		}
 		
-	}
-
-	if (adc_cnt > 0)
-	{
 		/* DMA1 channel1 configuration ----------------------------------------------*/
 		DMA_DeInit(DMA1_Channel1);
 		DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&ADC1->DR;
@@ -678,7 +697,6 @@ void AxesProcess (dev_config_t * p_dev_config)
 	
 	int32_t tmp[MAX_AXIS_NUM];
 	float tmpf;
-	uint8_t adc_num = 0;
 	
 	for (uint8_t i=0; i<MAX_AXIS_NUM; i++)
 	{
@@ -691,15 +709,22 @@ void AxesProcess (dev_config_t * p_dev_config)
 		{
 			if (p_dev_config->pins[source] == AXIS_ANALOG)					// source analog
 			{	
+				uint8_t k=0;
+				// search for needed sensor
+				for (k=0; k<MAX_AXIS_NUM; k++)
+				{
+					if (sensors[k].source == source) break;
+				}
+				
 				if (p_dev_config->axis_config[i].offset_angle > 0)
 				{
-						tmp[i] = adc_data[adc_num++] - p_dev_config->axis_config[i].offset_angle * 170;
+						tmp[i] = adc_data[sensors[k].curr_channel] - p_dev_config->axis_config[i].offset_angle * 170;
 						if (tmp[i] < 0) tmp[i] += 4095;
 						else if (tmp[i] > 4095) tmp[i] -= 4095;
 				}
 				else
 				{
-					tmp[i] = adc_data[adc_num++];
+					tmp[i] = adc_data[sensors[k].curr_channel];
 				}
 				
 				raw_axis_data[i] = map2(tmp[i], 0, 4095, AXIS_MIN_VALUE, AXIS_MAX_VALUE);

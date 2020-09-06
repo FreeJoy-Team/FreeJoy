@@ -925,7 +925,7 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 	uint8_t k = 0;
 	for (int i=0;i<MAX_BUTTONS_NUM;i++)
 	{
-			if (!p_dev_config->buttons[i].is_disabled)
+			if (!p_dev_config->buttons[i].is_disabled && p_dev_config->buttons[i].physical_num >= 0)
 			{
 				// prevent not atomic read
 				NVIC_DisableIRQ(TIM2_IRQn);
@@ -939,11 +939,11 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 				{
 					buttons_data[(k & 0xF8)>>3] |= (!logical_buttons_state[i].current_state << (k & 0x07));
 				}
-				
+				k++;
 				// resume IRQ
 				NVIC_EnableIRQ(TIM2_IRQn);
 			}
-			k++;
+			
 	}
 	
 	// convert POV data to report format
