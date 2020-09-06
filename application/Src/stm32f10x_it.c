@@ -468,20 +468,28 @@ void DMA1_Channel4_IRQHandler(void)
 			if ((sensors[i].type == AS5600 || sensors[i].type == ADS1115) 
 					&& !sensors[i].tx_complete)
 			{			
-				sensors[i].tx_complete = 1;
+				sensors[i++].tx_complete = 1;
 				break;							
 			}
 		}
 		
 //		// start processing for next I2C sensor 
-//		for (uint8_t k = i+1; k < MAX_AXIS_NUM; k++)
+//		for (; i<MAX_AXIS_NUM; i++)
 //		{
-//			if (sensors[k].source == (pin_t)SOURCE_I2C && !sensors[k].rx_complete)
-//			{
-//				status += ADS1115_StartDMA(&sensors[i], 0);
-//				return;
+//				if (sensors[i].source == (pin_t)SOURCE_I2C && sensors[i].rx_complete && sensors[i].tx_complete)
+//				{		
+//					if (sensors[i].type == AS5600)
+//					{
+//						status = AS5600_StartDMA(&sensors[i]);
+//						break;
+//					}
+//					else if (sensors[i].type == ADS1115)
+//					{
+//						status = ADS1115_StartDMA(&sensors[i], sensors[i].curr_channel);	
+//						break;
+//					}
+//				}
 //			}
-//		}
 	}
 }
 

@@ -925,7 +925,6 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 				// resume IRQ
 				NVIC_EnableIRQ(TIM2_IRQn);
 			}
-			
 	}
 	
 	// convert POV data to report format
