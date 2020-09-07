@@ -46,15 +46,16 @@
 
 #define ADC_PERIOD_MS										2
 #define SENSORS_PERIOD_MS								2
-#define ENCODER_PERIOD_MS								1
+#define BUTTONS_PERIOD_MS								1
 
 /* Private variables ---------------------------------------------------------*/
 
 volatile int32_t millis = 0;
-volatile int32_t joy_millis = 0; 
-volatile int32_t encoder_millis = 0;
-volatile int32_t adc_millis = 100;
-volatile int32_t sensors_millis = 101;
+volatile int32_t joy_millis = 500; 
+volatile int32_t encoder_millis = 500;
+volatile int32_t adc_millis = 500;
+volatile int32_t sensors_millis = 501;
+volatile int32_t buttons_millis = 501;
 volatile int status = 0;
 extern dev_config_t dev_config;
 
@@ -211,12 +212,12 @@ void TIM2_IRQHandler(void)
 			USB_CUSTOM_HID_SendReport((uint8_t *)&joy_report.id, sizeof(joy_report) - sizeof(joy_report.dummy));
 		}
 		
-		ButtonsReadPhysical(&dev_config, raw_buttons_data);
-		ButtonsDebouceProcess(&dev_config);
-		
-		// encoders polling
-		if (millis - encoder_millis >= ENCODER_PERIOD_MS)
+		// reading buttons
+		if (millis - buttons_millis > BUTTONS_PERIOD_MS)
 		{
+			ButtonsReadPhysical(&dev_config, raw_buttons_data);
+			ButtonsDebouceProcess(&dev_config);
+
 			encoder_millis = millis;
 			EncoderProcess(logical_buttons_state, &dev_config);
 		}
