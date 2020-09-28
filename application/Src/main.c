@@ -71,15 +71,17 @@ int main(void)
 	}
 	AppConfigInit(&dev_config);
 	
-	Delay_us(50000);
 	
-	USB_HW_Init();
 	IO_Init(&dev_config);
-	AxesInit(&dev_config); 
+	 
 	EncodersInit(&dev_config);	
 	ShiftRegistersInit(&dev_config);
 	RadioButtons_Init(&dev_config);
 	SequentialButtons_Init(&dev_config);
+	AxesInit(&dev_config);
+	
+	Delay_ms(50);	
+	USB_HW_Init();
 	
 	Timers_Init(&dev_config);
 

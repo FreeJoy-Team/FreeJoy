@@ -51,7 +51,7 @@
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 volatile extern uint8_t bootloader;
-volatile extern int32_t joy_millis;
+volatile extern int32_t joy_ticks;
 
 __IO uint8_t PrevXferComplete = 1;
 
@@ -77,7 +77,7 @@ void EP1_OUT_Callback(void)
 	uint8_t repotId;
 
 	// 2 second delay for joy report
-	joy_millis = GetTick() + 2000;
+	joy_ticks = GetTick() + 2000;
 	
 	/* Read received data (2 bytes) */  
   USB_SIL_Read(EP1_OUT, hid_buf);
