@@ -33,9 +33,9 @@ logical_buttons_state_t 			logical_buttons_state[MAX_BUTTONS_NUM];
 button_data_t 								buttons_data[MAX_BUTTONS_NUM/8];
 pov_data_t 										pov_data[MAX_POVS_NUM];
 uint8_t												pov_pos[MAX_POVS_NUM];
-uint8_t												shifts_state;
-uint8_t												a2b_first;
-uint8_t												a2b_last;
+uint8_t												shifts_state = 0;
+uint8_t												a2b_first = 0;
+uint8_t												a2b_last = 0;
 
 /**
   * @brief  Processing debounce for raw buttons input
@@ -897,14 +897,8 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 	for (uint8_t i=0; i<5; i++)
 	{
 		if (p_dev_config->shift_config[i].button >= 0)
-		{
-			for (uint8_t j=0; j<MAX_BUTTONS_NUM; j++)
-			{		
-				if (j == p_dev_config->shift_config[i].button)
-				{									
-					shifts_state |= (logical_buttons_state[j].current_state << i);
-				}
-			}
+		{				
+			shifts_state |= (logical_buttons_state[p_dev_config->shift_config[i].button].current_state << i);
 		}
 	}
 	

@@ -386,8 +386,7 @@ void DMA1_Channel2_IRQHandler(void)
 				MLX90393_StopDMA(&sensors[i++]);
 			}
 		}
-		// Enable other peripery IRQs
-		NVIC_EnableIRQ(TIM2_IRQn);
+		
 		
 		// Process next sensor
 		for ( ;i<MAX_AXIS_NUM;i++)
