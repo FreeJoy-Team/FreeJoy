@@ -24,8 +24,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
 
-#include "SEGGER_SYSVIEW.h"
-
 #include "usb_istr.h"
 #include "usb_lib.h"
 #include "periphery.h"
@@ -163,13 +161,10 @@ void PendSV_Handler(void)
   */
 void SysTick_Handler(void)
 {
-	SEGGER_SYSVIEW_RecordEnterISR();
-
 	if (TimingDelay != 0x00)										
   {
     TimingDelay--;
   }
-	SEGGER_SYSVIEW_RecordExitISR();
 }
 
 /******************************************************************************/
@@ -182,8 +177,6 @@ void SysTick_Handler(void)
 
 void TIM2_IRQHandler(void)
 {
-	SEGGER_SYSVIEW_RecordVoid(33);
-	
 	static uint8_t btn_num = 0;
 	uint8_t	physical_buttons_data[MAX_BUTTONS_NUM];
 	joy_report_t joy_report;
@@ -289,7 +282,6 @@ void TIM2_IRQHandler(void)
 					if (sensors[i].type == TLE5011)
 					{
 						TLE501x_StartDMA(&sensors[i]);
-						SEGGER_SYSVIEW_RecordEndCall(33);
 						return;
 					}
 					else if (sensors[i].type == MCP3201 ||
@@ -303,7 +295,6 @@ void TIM2_IRQHandler(void)
 					else if (sensors[i].type == MLX90393_SPI)
 					{
 						MLX90393_StartDMA(&sensors[i]);
-						SEGGER_SYSVIEW_RecordEndCall(33);
 						return;
 					}
 				}
@@ -311,13 +302,11 @@ void TIM2_IRQHandler(void)
 		}
 		
 	}
-	SEGGER_SYSVIEW_RecordEndCall(33);
 }
 
 // SPI Rx Complete
 void DMA1_Channel2_IRQHandler(void)
 {
-	SEGGER_SYSVIEW_RecordVoid(34);
 	
 	uint8_t i=0;
 	
@@ -352,7 +341,6 @@ void DMA1_Channel2_IRQHandler(void)
 				if (sensors[i].curr_channel < 1)	
 				{
 					MCP320x_StartDMA(&sensors[i], sensors[i].curr_channel + 1);
-					SEGGER_SYSVIEW_RecordEndCall(34);
 					return;
 				}
 				i++;
@@ -364,7 +352,6 @@ void DMA1_Channel2_IRQHandler(void)
 				if (sensors[i].curr_channel < 3)	
 				{
 					MCP320x_StartDMA(&sensors[i], sensors[i].curr_channel + 1);
-					SEGGER_SYSVIEW_RecordEndCall(34);
 					return;
 				}
 				i++;
@@ -376,7 +363,6 @@ void DMA1_Channel2_IRQHandler(void)
 				if (sensors[i].curr_channel < 7)	
 				{
 					MCP320x_StartDMA(&sensors[i], sensors[i].curr_channel + 1);
-					SEGGER_SYSVIEW_RecordEndCall(34);
 					return;
 				}
 				i++;
@@ -396,7 +382,6 @@ void DMA1_Channel2_IRQHandler(void)
 				if (sensors[i].type == TLE5011)
 				{
 					TLE501x_StartDMA(&sensors[i]);
-					SEGGER_SYSVIEW_RecordEndCall(34);
 					return;
 				}
 				else if (sensors[i].type == MCP3201 ||
@@ -405,26 +390,21 @@ void DMA1_Channel2_IRQHandler(void)
 								 sensors[i].type == MCP3208)
 				{
 					MCP320x_StartDMA(&sensors[i], 0);
-					SEGGER_SYSVIEW_RecordEndCall(34);
 					return;
 				}
 				else if (sensors[i].type == MLX90393_SPI)
 				{
 					MLX90393_StartDMA(&sensors[i]);
-					SEGGER_SYSVIEW_RecordEndCall(34);
 					return;
 				}
 			}
 		}
 	}
-	SEGGER_SYSVIEW_RecordEndCall(34);
 }
 
 // SPI Tx Complete
 void DMA1_Channel3_IRQHandler(void)
 {
-	SEGGER_SYSVIEW_RecordVoid(35);
-	
 	uint8_t i=0;
 	
 	if (DMA_GetITStatus(DMA1_IT_TC3))
@@ -447,19 +427,15 @@ void DMA1_Channel3_IRQHandler(void)
 				{
 					SPI_HalfDuplex_Receive(&sensors[i].data[1], 5, TLE5011_SPI_MODE);					
 				}
-				SEGGER_SYSVIEW_RecordEndCall(35);
 				return;
 			}
 		}
 	}
-	SEGGER_SYSVIEW_RecordEndCall(35);
 }
 
 // I2C error
 void I2C1_ER_IRQHandler(void)
 {
-	SEGGER_SYSVIEW_RecordVoid(36);
-	
 	__IO uint32_t SR1Register =0;
 
 	/* Read the I2C1 status register */
@@ -494,8 +470,6 @@ void I2C1_ER_IRQHandler(void)
 	I2C1->CR1 |= I2C_CR1_SWRST;
 	I2C1->CR1 &= ~I2C_CR1_SWRST;
 	I2C_Start();
-	
-	SEGGER_SYSVIEW_RecordEndCall(36);
 }
 
 
@@ -504,12 +478,8 @@ void I2C1_ER_IRQHandler(void)
 * @brief This function handles USB low priority or CAN RX0 interrupts.
 */
 void USB_LP_CAN1_RX0_IRQHandler(void)
-{
-	SEGGER_SYSVIEW_RecordVoid(37);
-	
+{	
 	USB_Istr();
-	
-	SEGGER_SYSVIEW_RecordEndCall(37);
 }
 
 /**
