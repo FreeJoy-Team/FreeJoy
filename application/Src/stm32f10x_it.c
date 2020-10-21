@@ -301,7 +301,6 @@ void TIM2_IRQHandler(void)
 					else if (sensors[i].type == AS5048A_SPI)
 					{
 						AS5048A_StartDMA(&sensors[i]);
-						SEGGER_SYSVIEW_RecordEndCall(33);
 						return;
 					}
 				}
@@ -411,7 +410,6 @@ void DMA1_Channel2_IRQHandler(void)
 				else if (sensors[i].type == AS5048A_SPI)
 				{
 					AS5048A_StartDMA(&sensors[i]);
-					SEGGER_SYSVIEW_RecordEndCall(34);
 					return;
 				}
 			}

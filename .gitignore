@@ -60,3 +60,4 @@ DebugConfig
 # project
 *.uvgui.*
 *.uvguix.*
+MDK-ARM/FreeJoy.bin
