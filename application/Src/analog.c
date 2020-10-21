@@ -24,8 +24,6 @@
 
 #include "analog.h"
 
-#include "SEGGER_SYSVIEW.h"
-
 #include <string.h>
 #include <math.h>
 #include "tle5011.h"
@@ -647,7 +645,6 @@ void AxesInit (dev_config_t * p_dev_config)
   */
 void ADC_Conversion (void)
 {
-	SEGGER_SYSVIEW_RecordVoid(45);
 	
 	if (adc_cnt > 0)
 	{
@@ -683,7 +680,6 @@ void ADC_Conversion (void)
 			adc_data[j] /= ADC_CONV_NUM;								
 		}
 	}
-	SEGGER_SYSVIEW_RecordEndCall(45);
 }
 
 /**
@@ -693,7 +689,6 @@ void ADC_Conversion (void)
   */
 void AxesProcess (dev_config_t * p_dev_config)
 {
-	SEGGER_SYSVIEW_RecordVoid(46);
 	
 	int32_t tmp[MAX_AXIS_NUM];
 	float tmpf;
@@ -1173,7 +1168,6 @@ void AxesProcess (dev_config_t * p_dev_config)
 		NVIC_EnableIRQ(TIM2_IRQn);
 	}
 	
-	SEGGER_SYSVIEW_RecordEndCall(46);
 }
 
 /**
