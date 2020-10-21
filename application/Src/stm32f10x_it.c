@@ -32,6 +32,7 @@
 #include "tle5011.h"
 #include "mcp320x.h"
 #include "mlx90393.h"
+#include "as5048a.h"
 #include "ads1115.h"
 #include "as5600.h"
 #include "config.h"
@@ -297,6 +298,12 @@ void TIM2_IRQHandler(void)
 						MLX90393_StartDMA(&sensors[i]);
 						return;
 					}
+					else if (sensors[i].type == AS5048A_SPI)
+					{
+						AS5048A_StartDMA(&sensors[i]);
+						SEGGER_SYSVIEW_RecordEndCall(33);
+						return;
+					}
 				}
 			}
 		}
@@ -371,6 +378,10 @@ void DMA1_Channel2_IRQHandler(void)
 			{
 				MLX90393_StopDMA(&sensors[i++]);
 			}
+			else if (sensors[i].type == AS5048A_SPI)
+			{
+				AS5048A_StopDMA(&sensors[i++]);
+			}
 		}
 		
 		
@@ -395,6 +406,12 @@ void DMA1_Channel2_IRQHandler(void)
 				else if (sensors[i].type == MLX90393_SPI)
 				{
 					MLX90393_StartDMA(&sensors[i]);
+					return;
+				}
+				else if (sensors[i].type == AS5048A_SPI)
+				{
+					AS5048A_StartDMA(&sensors[i]);
+					SEGGER_SYSVIEW_RecordEndCall(34);
 					return;
 				}
 			}

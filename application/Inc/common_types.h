@@ -101,6 +101,7 @@ enum
 	MLX90393_I2C,
 	ADS1115,
 	AS5600,
+	AS5048A_SPI,
 	
 };
 
@@ -157,6 +158,8 @@ enum
 	
 	I2C_SCL,
 	I2C_SDA,
+	
+	AS5048A_CS,
 	
 };
 typedef int8_t pin_t;

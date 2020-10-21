@@ -29,6 +29,7 @@
 #include "tle5011.h"
 #include "mcp320x.h"
 #include "mlx90393.h"
+#include "as5048a.h"
 #include "ads1115.h"
 #include "as5600.h"
 #include "buttons.h"
@@ -515,6 +516,21 @@ void AxesInit (dev_config_t * p_dev_config)
 				}
 			}
 		}
+		else if (p_dev_config->pins[i] == AS5048A_CS)
+		{
+			for (uint8_t k=0; k<MAX_AXIS_NUM; k++)
+			{
+				if (p_dev_config->axis_config[k].source_main == i && sensors_cnt < MAX_AXIS_NUM)
+				{
+					sensors[sensors_cnt].type = AS5048A_SPI;
+					sensors[sensors_cnt].source = i;
+					
+					AS5048A_Start(&sensors[sensors_cnt]);
+					sensors_cnt++;
+					break;
+				}
+			}
+		}
 		else if (p_dev_config->pins[19] == I2C_SCL && p_dev_config->pins[20] == I2C_SDA)			// PB8 and PB9
 		{
 			// look for ADS1115 sensors with different addresses
@@ -807,6 +823,35 @@ void AxesProcess (dev_config_t * p_dev_config)
 					if (sensors[k].source == source) break;
 				}
 				if (MLX90393_GetData(&tmp16, &sensors[k], channel) == 0)
+				{
+					sensors[k].ok_cnt++;
+					
+					if (p_dev_config->axis_config[i].offset_angle > 0)	// offset enabled
+					{
+						raw_axis_data[i] = tmp16 - p_dev_config->axis_config[i].offset_angle * 2730;
+						if (raw_axis_data[i] < AXIS_MIN_VALUE) raw_axis_data[i] += AXIS_FULLSCALE;
+						else if (raw_axis_data[i] > AXIS_MAX_VALUE) raw_axis_data[i] -= AXIS_FULLSCALE;		// always false
+					}
+					else
+					{
+						raw_axis_data[i] = tmp16;
+					}
+				}
+				else
+				{
+					sensors[k].err_cnt++;
+				}
+			}	
+			else if (p_dev_config->pins[source] == AS5048A_CS)				// source AS5048A
+			{
+				uint8_t k = 0;
+				uint16_t tmp16 = 0;
+				// search for needed sensor
+				for (k=0; k<MAX_AXIS_NUM; k++)
+				{
+					if (sensors[k].source == source) break;
+				}
+				if (AS5048A_GetData(&tmp16, &sensors[k], channel) == 0)
 				{
 					sensors[k].ok_cnt++;
 					
