@@ -35,7 +35,7 @@
 int AS5048A_GetData(uint16_t * data, sensor_t * sensor, uint8_t channel)
 {
 	int ret = 0;
-
+	Delay_us(1);
 	uint16_t tmp;
 	tmp = sensor->data[0];
 	tmp = (tmp << 8) | sensor->data[1];

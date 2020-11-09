@@ -61,3 +61,5 @@ DebugConfig
 *.uvgui.*
 *.uvguix.*
 MDK-ARM/FreeJoy.bin
+*.uvoptx
+*.uvprojx
