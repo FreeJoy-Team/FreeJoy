@@ -525,7 +525,6 @@ void AxesInit (dev_config_t * p_dev_config)
 					sensors[sensors_cnt].type = AS5048A_SPI;
 					sensors[sensors_cnt].source = i;
 					
-					AS5048A_Start(&sensors[sensors_cnt]);
 					sensors_cnt++;
 					break;
 				}

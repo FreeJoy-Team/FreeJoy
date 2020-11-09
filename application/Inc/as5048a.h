@@ -14,7 +14,6 @@
 
 #define AS5048A_SPI_MODE							1
 
-void AS5048A_Start(sensor_t * sensor);
 void AS5048A_StartDMA(sensor_t * sensor);
 int AS5048A_GetData(uint16_t * data, sensor_t * sensor, uint8_t channel);
 void AS5048A_StopDMA(sensor_t * sensor);
