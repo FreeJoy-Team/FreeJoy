@@ -77,8 +77,6 @@ int main(void)
 	Delay_ms(50);	
 	USB_HW_Init();
 	
-	USB_HW_Init();
-	
 	Timers_Init(&dev_config);		
 	
   while (1)

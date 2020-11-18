@@ -196,7 +196,14 @@ int I2C_WriteNonBlocking(uint8_t dev_addr, uint8_t * data, uint16_t length)
 	
 	// wait a bit if I2C is busy
 	while(I2C_GetFlagStatus(I2C2, I2C_FLAG_BUSY) && --ticks);
-	if (ticks == 0) return -1;
+	if (ticks == 0) 
+	{
+		I2C2->CR1 |= I2C_CR1_SWRST;
+		I2C2->CR1 &= ~I2C_CR1_SWRST;
+		I2C_Start();
+		//return -1;
+	}
+	ticks = I2C_TIMEOUT;
 	
 	// Start DMA
 	DMA_Cmd(DMA1_Channel4, ENABLE);
@@ -257,7 +264,14 @@ int I2C_ReadNonBlocking(uint8_t dev_addr, uint8_t reg_addr, uint8_t * data, uint
 	
 	// wait a bit if I2C is busy
 	while(I2C_GetFlagStatus(I2C2, I2C_FLAG_BUSY) && --ticks);
-	if (ticks == 0) return -1;
+	if (ticks == 0) 
+	{
+		I2C2->CR1 |= I2C_CR1_SWRST;
+		I2C2->CR1 &= ~I2C_CR1_SWRST;
+		I2C_Start();
+		//return -1;
+	}
+	ticks = I2C_TIMEOUT;
 
   // Enable DMA NACK automatic generation
 	if (nack)	I2C_DMALastTransferCmd(I2C2, ENABLE);

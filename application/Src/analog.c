@@ -516,7 +516,7 @@ void AxesInit (dev_config_t * p_dev_config)
 			}
 		}
 	}
-	if (p_dev_config->pins[21] == I2C_SCL && p_dev_config->pins[22] == I2C_SDA)			// PB9 and PB10
+	if (p_dev_config->pins[21] == I2C_SCL && p_dev_config->pins[22] == I2C_SDA)			// PB10 and PB11
 	{
 		// look for ADS1115 sensors with different addresses
 		for (uint8_t addr = ADS1115_I2C_ADDR_MIN; addr <= ADS1115_I2C_ADDR_MAX; addr ++)

@@ -422,7 +422,7 @@ void DMA1_Channel3_IRQHandler(void)
 	}
 }
 
-// I2C Tx Complete
+// I2C Tx Complete (used for ADS1115 mux setting operation) 
 void DMA1_Channel4_IRQHandler(void)
 {
 	uint8_t i=0;
@@ -461,31 +461,30 @@ void DMA1_Channel4_IRQHandler(void)
 		for (i = 0; i < MAX_AXIS_NUM; i++)
 		{
 			// searching for active sensor
-			if ((sensors[i].type == AS5600 || sensors[i].type == ADS1115) 
-					&& !sensors[i].tx_complete)
+			if (sensors[i].source == (pin_t)SOURCE_I2C && !sensors[i].tx_complete)
 			{			
-				sensors[i++].tx_complete = 1;
-				break;							
+				sensors[i++].tx_complete = 1;			// TODO: check sensor disconnection				
+				break;	
 			}
 		}
 		
-//		// start processing for next I2C sensor 
-//		for (; i<MAX_AXIS_NUM; i++)
-//		{
-//				if (sensors[i].source == (pin_t)SOURCE_I2C && sensors[i].rx_complete && sensors[i].tx_complete)
-//				{		
-//					if (sensors[i].type == AS5600)
-//					{
-//						status = AS5600_StartDMA(&sensors[i]);
-//						break;
-//					}
-//					else if (sensors[i].type == ADS1115)
-//					{
-//						status = ADS1115_StartDMA(&sensors[i], sensors[i].curr_channel);	
-//						break;
-//					}
-//				}
-//			}
+		// start processing for next I2C sensor 
+		for (; i<MAX_AXIS_NUM; i++)
+		{
+				if (sensors[i].source == (pin_t)SOURCE_I2C && sensors[i].rx_complete && sensors[i].tx_complete)
+				{		
+					if (sensors[i].type == AS5600)
+					{
+						status = AS5600_StartDMA(&sensors[i]);
+						break;
+					}
+					else if (sensors[i].type == ADS1115)
+					{
+						status = ADS1115_StartDMA(&sensors[i], sensors[i].curr_channel);	
+						break;
+					}
+				}
+			}
 	}
 }
 
@@ -517,7 +516,7 @@ void DMA1_Channel5_IRQHandler(void)
 		for (i = 0; i < MAX_AXIS_NUM; i++)
 		{
 			// searching for active sensor
-			if (sensors[i].source == (pin_t)SOURCE_I2C && !sensors[i].rx_complete)		// data is read
+			if (sensors[i].source == (pin_t)SOURCE_I2C && !sensors[i].rx_complete)
 			{
 				sensors[i].ok_cnt++;
 				sensors[i].rx_complete = 1;		
