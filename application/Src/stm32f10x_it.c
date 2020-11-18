@@ -44,18 +44,18 @@
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 
-#define ADC_PERIOD_MS										2
-#define SENSORS_PERIOD_MS								2
-#define BUTTONS_PERIOD_MS								1
+#define ADC_PERIOD_TICKS										2					// 1 tick = 1ms
+#define SENSORS_PERIOD_TICKS								2
+#define BUTTONS_PERIOD_TICKS								1
 
 /* Private variables ---------------------------------------------------------*/
 
-volatile int32_t millis = 0;
-volatile int32_t joy_millis = 500; 
-volatile int32_t encoder_millis = 500;
-volatile int32_t adc_millis = 500;
-volatile int32_t sensors_millis = 501;
-volatile int32_t buttons_millis = 501;
+volatile int32_t ticks = 0;
+volatile int32_t joy_ticks = 0; 
+volatile int32_t encoder_ticks = 0;
+volatile int32_t adc_ticks = 0;
+volatile int32_t sensors_ticks = 1;
+volatile int32_t buttons_ticks = 0;
 volatile int status = 0;
 extern dev_config_t dev_config;
 
@@ -161,8 +161,6 @@ void PendSV_Handler(void)
   */
 void SysTick_Handler(void)
 {
-	Ticks++;
-		
 	if (TimingDelay != 0x00)										
   {
     TimingDelay--;
@@ -186,12 +184,14 @@ void TIM2_IRQHandler(void)
 	if (TIM_GetITStatus(TIM2, TIM_IT_Update))
 	{
 		TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
+		
+		Ticks++;
 
-		millis = GetTick();
+		ticks = GetTick();
 		// check if it is time to send joystick data
-		if (millis - joy_millis >= dev_config.exchange_period_ms )
+		if (ticks - joy_ticks >= dev_config.exchange_period_ms )
 		{
-			joy_millis = millis;
+			joy_ticks = ticks;
 				
 			// getting fresh data to joystick report buffer
 			ButtonsGet(physical_buttons_data, joy_report.button_data, &joy_report.shift_button_data);
@@ -211,43 +211,41 @@ void TIM2_IRQHandler(void)
 							
 			USB_CUSTOM_HID_SendReport((uint8_t *)&joy_report.id, sizeof(joy_report) - sizeof(joy_report.dummy));
 		}
-		
-		// reading buttons
-		if (millis - buttons_millis > BUTTONS_PERIOD_MS)
+
+		// digital inputs polling
+		if (ticks - encoder_ticks >= BUTTONS_PERIOD_TICKS)
 		{
 			ButtonsReadPhysical(&dev_config, raw_buttons_data);
 			ButtonsDebouceProcess(&dev_config);
-
-			encoder_millis = millis;
+			
+			encoder_ticks = ticks;
 			EncoderProcess(logical_buttons_state, &dev_config);
 		}
 		
 		// Internal ADC conversion
-		if (millis - adc_millis >= ADC_PERIOD_MS)
-		{
-			adc_millis = millis;
-						
-			AxesProcess(&dev_config);
+		if (ticks - adc_ticks >= ADC_PERIOD_TICKS)
+		{		
+			adc_ticks = ticks;	
+
+			AxesProcess(&dev_config);					// process axes only once for one data reading
 			
 			// Disable periphery before ADC conversion
 			RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1,DISABLE);	
-			RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C2|RCC_APB1Periph_TIM4, DISABLE);
-			RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC,DISABLE);			
+			RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C2|RCC_APB1Periph_TIM3|RCC_APB1Periph_TIM4, DISABLE);
+			RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB|RCC_APB2Periph_GPIOC|RCC_APB2Periph_TIM1,DISABLE);			
 				
 			// ADC measurement
 			ADC_Conversion();
 			
 			// Enable periphery after ADC conversion
 			RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1,ENABLE);	
-			RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C2|RCC_APB1Periph_TIM4, ENABLE);
-			RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC,ENABLE);
-			// Enable TLE clock after ADC conversion
-			Generator_Start();
+			RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C2|RCC_APB1Periph_TIM3|RCC_APB1Periph_TIM4, ENABLE);
+			RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB|RCC_APB2Periph_GPIOC|RCC_APB2Periph_TIM1,ENABLE);
 		}
 		// External sensors data receiption
-		if (millis - sensors_millis >= SENSORS_PERIOD_MS)
-		{
-			sensors_millis = millis;
+		if (ticks - sensors_ticks >= SENSORS_PERIOD_TICKS && ticks != adc_ticks)		// prevent ADC and sensors reading during same period
+		{																																						
+			sensors_ticks = ticks;
 
 			// start SPI sensors 
 			for (uint8_t i=0; i<MAX_AXIS_NUM; i++)
@@ -363,8 +361,7 @@ void DMA1_Channel2_IRQHandler(void)
 				MLX90393_StopDMA(&sensors[i++]);
 			}
 		}
-		// Enable other peripery IRQs
-		NVIC_EnableIRQ(TIM2_IRQn);
+		
 		
 		// Process next sensor
 		for ( ;i<MAX_AXIS_NUM;i++)
@@ -391,15 +388,12 @@ void DMA1_Channel2_IRQHandler(void)
 				}
 			}
 		}
-		// Disable TLE clock after communication frame
-		Generator_Stop();
 	}
 }
 
 // SPI Tx Complete
 void DMA1_Channel3_IRQHandler(void)
 {
-	
 	uint8_t i=0;
 	
 	if (DMA_GetITStatus(DMA1_IT_TC3))
@@ -408,6 +402,7 @@ void DMA1_Channel3_IRQHandler(void)
 		DMA_Cmd(DMA1_Channel3, DISABLE);
 		
 		// wait SPI transfer to end
+		while(!SPI1->SR & SPI_SR_TXE);
 		while(SPI1->SR & SPI_SR_BSY);
 		
 		// searching for active sensor
@@ -575,7 +570,6 @@ void I2C2_ER_IRQHandler(void)
 	I2C2->CR1 |= I2C_CR1_SWRST;
 	I2C2->CR1 &= ~I2C_CR1_SWRST;
 	I2C_Start();
-	
 }
 
 
@@ -584,10 +578,8 @@ void I2C2_ER_IRQHandler(void)
 * @brief This function handles USB low priority or CAN RX0 interrupts.
 */
 void USB_LP_CAN1_RX0_IRQHandler(void)
-{
-	
+{	
 	USB_Istr();
-	
 }
 
 /**

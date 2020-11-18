@@ -16,6 +16,7 @@
 
 extern logical_buttons_state_t 	logical_buttons_state[MAX_BUTTONS_NUM];
 extern uint8_t									raw_buttons_data[MAX_BUTTONS_NUM];
+extern uint8_t									shifts_state;
 
 typedef uint8_t button_data_t;
 typedef uint8_t pov_data_t;

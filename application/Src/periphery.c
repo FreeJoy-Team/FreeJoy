@@ -307,26 +307,8 @@ void Generator_Init(void)
   GPIO_InitStructureure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_Init(GPIOB, &GPIO_InitStructureure);
 
-  
-}
-/**
-  * @brief Generator Start Function
-  * @param None
-  * @retval None
-  */
-void Generator_Start(void)
-{
-	/* TIM4 enable counter */
+  /* TIM4 enable counter */
   TIM_Cmd(TIM4, ENABLE);
-}
-/**
-  * @brief Generator Stop Function
-  * @param None
-  * @retval None
-  */
-void Generator_Stop (void)
-{
-	TIM_Cmd(TIM4, DISABLE);
 }
 
 /* IO init function */
@@ -336,7 +318,9 @@ void IO_Init (dev_config_t * p_dev_config)
 
 	// Remapping
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
+	GPIO_PinRemapConfig(GPIO_Remap_SWJ_NoJTRST, ENABLE);
 	GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE);
+	GPIO_PinRemapConfig(GPIO_Remap_I2C1, ENABLE);
 	GPIO_PinRemapConfig(GPIO_PartialRemap_TIM3, ENABLE);
 	
   // GPIO Ports Clock Enable
@@ -466,7 +450,6 @@ void IO_Init (dev_config_t * p_dev_config)
 		else if (p_dev_config->pins[i] == TLE5011_GEN  && i == 17)
 		{
 			Generator_Init();	// 4MHz output at PB6 pin
-			Generator_Start();
 		}
 		else if (p_dev_config->pins[i] == SHIFT_REG_LATCH)
 		{

@@ -49,7 +49,6 @@ int8_t enc_array_4 [16] =
 0, -1,  1,  0
 };
 
-//uint8_t	raw_buttons[MAX_BUTTONS_NUM];
 encode_stater_t encoders_state[MAX_ENCODERS_NUM];
 
 static void EncoderFastInit(dev_config_t * p_dev_config)
@@ -107,8 +106,6 @@ void EncoderProcess (logical_buttons_state_t * button_state_buf, dev_config_t * 
 	}
 	if (!encoders_present) return;		// dont waste time if no encoders connected
 	
-	//ButtonsReadPhysical(p_dev_config, raw_buttons);		// read raw buttons state
-	
 	for (int i=1; i<MAX_ENCODERS_NUM; i++)
 	{
 		uint32_t millis = GetTick();
@@ -145,12 +142,22 @@ void EncoderProcess (logical_buttons_state_t * button_state_buf, dev_config_t * 
 						{
 							if (stt > 0)	
 							{
-								button_state_buf[encoders_state[i].pin_a].current_state = 1;			// CW
+								if ((p_dev_config->buttons[encoders_state[i].pin_a].shift_modificator == 0) ||
+										(p_dev_config->buttons[encoders_state[i].pin_a].shift_modificator > 0 && 
+										 shifts_state & 1<<(p_dev_config->buttons[encoders_state[i].pin_a].shift_modificator-1))) 
+								{
+									button_state_buf[encoders_state[i].pin_a].current_state = 1;			// CW
+								}
 								encoders_state[i].last_dir = 1;
 							}
 							else
 							{
-								button_state_buf[encoders_state[i].pin_b].current_state = 1;			// CCW
+								if ((p_dev_config->buttons[encoders_state[i].pin_b].shift_modificator == 0) ||
+										(p_dev_config->buttons[encoders_state[i].pin_b].shift_modificator > 0 && 
+										 shifts_state & 1<<(p_dev_config->buttons[encoders_state[i].pin_b].shift_modificator-1))) 
+								{
+									button_state_buf[encoders_state[i].pin_b].current_state = 1;			// CCW
+								}
 								encoders_state[i].last_dir = -1;
 							}						
 							encoders_state[i].time_last = millis;
@@ -167,11 +174,21 @@ void EncoderProcess (logical_buttons_state_t * button_state_buf, dev_config_t * 
 							encoders_state[i].state <<= 2;
 							if (encoders_state[i].last_dir > 0)	
 							{
-								button_state_buf[encoders_state[i].pin_a].current_state = 1;
+								if ((p_dev_config->buttons[encoders_state[i].pin_a].shift_modificator == 0) ||
+										(p_dev_config->buttons[encoders_state[i].pin_a].shift_modificator > 0 && 
+										 shifts_state & 1<<(p_dev_config->buttons[encoders_state[i].pin_a].shift_modificator-1))) 
+								{
+									button_state_buf[encoders_state[i].pin_a].current_state = 1;			// CW
+								}
 							}
 							else 
 							{
-								button_state_buf[encoders_state[i].pin_b].current_state = 1;
+								if ((p_dev_config->buttons[encoders_state[i].pin_b].shift_modificator == 0) ||
+										(p_dev_config->buttons[encoders_state[i].pin_b].shift_modificator > 0 && 
+										 shifts_state & 1<<(p_dev_config->buttons[encoders_state[i].pin_b].shift_modificator-1))) 
+								{
+									button_state_buf[encoders_state[i].pin_b].current_state = 1;			// CCW
+								}
 							}
 						}
 				}
@@ -182,11 +199,53 @@ void EncoderProcess (logical_buttons_state_t * button_state_buf, dev_config_t * 
 			}
 		}
 		// unpress encoder button
-		if (encoders_state[i].pin_a >=0 && encoders_state[i].pin_b >=0 &&
-			millis - encoders_state[i].time_last > p_dev_config->encoder_press_time_ms)
-		{	
-			button_state_buf[encoders_state[i].pin_a].current_state = 0;
-			button_state_buf[encoders_state[i].pin_b].current_state = 0;
+		if (encoders_state[i].pin_a >=0 && encoders_state[i].pin_b >=0)
+		{		
+			uint16_t a_press_time;
+			uint16_t b_press_time;
+
+			// check if press time is redefined
+			switch (p_dev_config->buttons[encoders_state[i].pin_a].press_timer)
+			{	
+					case BUTTON_TIMER_1:
+						a_press_time = p_dev_config->button_timer1_ms;
+						break;
+					case BUTTON_TIMER_2:
+						a_press_time = p_dev_config->button_timer2_ms;
+						break;
+					case BUTTON_TIMER_3:
+						a_press_time = p_dev_config->button_timer3_ms;
+						break;
+					default:
+						a_press_time = p_dev_config->encoder_press_time_ms = 100;
+						break;
+			};
+			
+			switch (p_dev_config->buttons[encoders_state[i].pin_b].press_timer)
+			{	
+					case BUTTON_TIMER_1:
+						b_press_time = p_dev_config->button_timer1_ms;
+						break;
+					case BUTTON_TIMER_2:
+						b_press_time = p_dev_config->button_timer2_ms;
+						break;
+					case BUTTON_TIMER_3:
+						b_press_time = p_dev_config->button_timer3_ms;
+						break;
+					default:
+						b_press_time = p_dev_config->encoder_press_time_ms = 100;
+						break;
+			};
+					
+		
+			if (millis - encoders_state[i].time_last > a_press_time)
+			{	
+				button_state_buf[encoders_state[i].pin_a].current_state = 0;
+			}
+			if (millis - encoders_state[i].time_last > b_press_time)
+			{	
+				button_state_buf[encoders_state[i].pin_b].current_state = 0;
+			}
 		}
 	}
 }

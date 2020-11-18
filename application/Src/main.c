@@ -55,10 +55,6 @@ int main(void)
 	
 	SysTick_Init();
 	
-	// force enumerating USB 
-	USB_HW_DeInit();
-	Delay_us(100000);				// TODO: fix strange bug if Delay_ms() used				
-	
 	// getting configuration from flash memory
 	DevConfigGet(&dev_config);
 	
@@ -71,11 +67,15 @@ int main(void)
 	AppConfigInit(&dev_config);
 	
 	IO_Init(&dev_config);
-	AxesInit(&dev_config); 
+	 
 	EncodersInit(&dev_config);	
 	ShiftRegistersInit(&dev_config);
 	RadioButtons_Init(&dev_config);
 	SequentialButtons_Init(&dev_config);
+	AxesInit(&dev_config);
+	
+	Delay_ms(50);	
+	USB_HW_Init();
 	
 	USB_HW_Init();
 	

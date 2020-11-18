@@ -516,7 +516,7 @@ void AxesInit (dev_config_t * p_dev_config)
 			}
 		}
 	}
-	if (p_dev_config->pins[21] == I2C_SCL && p_dev_config->pins[22] == I2C_SDA)			// PB8 and PB9
+	if (p_dev_config->pins[21] == I2C_SCL && p_dev_config->pins[22] == I2C_SDA)			// PB9 and PB10
 	{
 		// look for ADS1115 sensors with different addresses
 		for (uint8_t addr = ADS1115_I2C_ADDR_MIN; addr <= ADS1115_I2C_ADDR_MAX; addr ++)
@@ -564,7 +564,6 @@ void AxesInit (dev_config_t * p_dev_config)
 	if (adc_cnt > 0)
 	{
 		// Ranking ADC sensors
-		
 		uint8_t rank = 0;	
 		for (uint8_t adc=0; adc<MAX_AXIS_NUM; adc++)
 		{
@@ -579,7 +578,6 @@ void AxesInit (dev_config_t * p_dev_config)
 			}
 			if (is_present) rank++;
 		}
-		
 		
 		/* ADC1 configuration ------------------------------------------------------*/
 		ADC_InitStructure.ADC_Mode = ADC_Mode_Independent;
@@ -597,7 +595,6 @@ void AxesInit (dev_config_t * p_dev_config)
 		uint8_t tmp_rank = 1;
 		for (int i=0; i<MAX_AXIS_NUM; i++)
 		{ 
-			
 			if (p_dev_config->pins[i] == AXIS_ANALOG)		
 			{
 				for (uint8_t k=0; k<MAX_AXIS_NUM; k++)
@@ -611,7 +608,7 @@ void AxesInit (dev_config_t * p_dev_config)
 				}
 			}
 		}
-
+		
 		/* DMA1 channel1 configuration ----------------------------------------------*/
 		DMA_DeInit(DMA1_Channel1);
 		DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&ADC1->DR;
@@ -692,6 +689,7 @@ void ADC_Conversion (void)
   */
 void AxesProcess (dev_config_t * p_dev_config)
 {
+	
 	int32_t tmp[MAX_AXIS_NUM];
 	float tmpf;
 	
@@ -705,7 +703,7 @@ void AxesProcess (dev_config_t * p_dev_config)
 		if (source >= 0)		// source SPI sensors or internal ADC
 		{			
 			if (p_dev_config->pins[source] == AXIS_ANALOG)					// source analog
-			{
+			{	
 				uint8_t k=0;
 				// search for needed sensor
 				for (k=0; k<MAX_AXIS_NUM; k++)
@@ -1170,6 +1168,7 @@ void AxesProcess (dev_config_t * p_dev_config)
 		// restore IRQ
 		NVIC_EnableIRQ(TIM2_IRQn);
 	}
+	
 }
 
 /**

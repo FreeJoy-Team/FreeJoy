@@ -39,8 +39,6 @@ void SysTick_Init(void);
 void Timers_Init(dev_config_t * p_dev_config);
 void PWM_SetFromAxes(dev_config_t * p_dev_config, analog_data_t * axes_data);
 
-void Generator_Start(void);
-void Generator_Stop(void);
 uint64_t GetTick(void);
 
 void Delay_ms(__IO uint32_t nTime);
