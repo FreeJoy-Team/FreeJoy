@@ -23,8 +23,6 @@
   */
 
 #include "as5048a.h"
-#include <math.h>
-
 
 /**
   * @brief AS5048A get measured data
@@ -46,11 +44,10 @@ int AS5048A_GetData(uint16_t * data, sensor_t * sensor, uint8_t channel)
 	if(*data==0) ret = -1;
 	// check parity
 	tmp ^= tmp >> 8;
-  tmp ^= tmp >> 4;
-  tmp ^= tmp >> 2;
-  tmp ^= tmp >> 1;
-  if(tmp==1) ret = -1;
-
+	tmp ^= tmp >> 4;
+	tmp ^= tmp >> 2;
+	tmp ^= tmp >> 1;
+	if(tmp==1) ret = -1;
 	return ret;
 }
 
