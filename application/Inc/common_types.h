@@ -148,6 +148,8 @@ enum
 
   MLX90393_CS,
 
+	AS5048A_CS,
+	
   SHIFT_REG_LATCH,
   SHIFT_REG_DATA,
 	
@@ -158,8 +160,6 @@ enum
 	
 	I2C_SCL,
 	I2C_SDA,
-	
-	AS5048A_CS,
 	
 };
 typedef int8_t pin_t;

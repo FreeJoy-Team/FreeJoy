@@ -439,6 +439,11 @@
               <FilePath>..\application\Src\axis_to_buttons.c</FilePath>
             </File>
             <File>
+              <FileName>usb_hw.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\application\Src\usb_hw.c</FilePath>
+            </File>
+            <File>
               <FileName>leds.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\application\Src\leds.c</FilePath>
@@ -449,6 +454,11 @@
               <FilePath>..\application\Src\ads1115.c</FilePath>
             </File>
             <File>
+              <FileName>tle5011.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\application\Src\tle5011.c</FilePath>
+            </File>
+            <File>
               <FileName>as5600.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\application\Src\as5600.c</FilePath>
@@ -457,11 +467,6 @@
               <FileName>mcp320x.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\application\Src\mcp320x.c</FilePath>
-            </File>
-            <File>
-              <FileName>tle5011.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\application\Src\tle5011.c</FilePath>
             </File>
             <File>
               <FileName>mlx90393.c</FileName>
@@ -477,11 +482,6 @@
               <FileName>usb_desc.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\application\Src\usb_desc.c</FilePath>
-            </File>
-            <File>
-              <FileName>usb_hw.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\application\Src\usb_hw.c</FilePath>
             </File>
             <File>
               <FileName>usb_istr.c</FileName>
@@ -1268,6 +1268,11 @@
               <FilePath>..\application\Src\axis_to_buttons.c</FilePath>
             </File>
             <File>
+              <FileName>usb_hw.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\application\Src\usb_hw.c</FilePath>
+            </File>
+            <File>
               <FileName>leds.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\application\Src\leds.c</FilePath>
@@ -1278,6 +1283,11 @@
               <FilePath>..\application\Src\ads1115.c</FilePath>
             </File>
             <File>
+              <FileName>tle5011.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\application\Src\tle5011.c</FilePath>
+            </File>
+            <File>
               <FileName>as5600.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\application\Src\as5600.c</FilePath>
@@ -1286,11 +1296,6 @@
               <FileName>mcp320x.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\application\Src\mcp320x.c</FilePath>
-            </File>
-            <File>
-              <FileName>tle5011.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\application\Src\tle5011.c</FilePath>
             </File>
             <File>
               <FileName>mlx90393.c</FileName>
@@ -1306,11 +1311,6 @@
               <FileName>usb_desc.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\application\Src\usb_desc.c</FilePath>
-            </File>
-            <File>
-              <FileName>usb_hw.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\application\Src\usb_hw.c</FilePath>
             </File>
             <File>
               <FileName>usb_istr.c</FileName>

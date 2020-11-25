@@ -271,6 +271,11 @@ void TIM2_IRQHandler(void)
 						MLX90393_StartDMA(MLX_SPI, &sensors[i]);
 						break;
 					}
+					else if (sensors[i].type == AS5048A_SPI)
+					{
+						AS5048A_StartDMA(&sensors[i]);
+						break;
+					}
 				}
 			}
 			// start I2C sensors 
@@ -287,11 +292,6 @@ void TIM2_IRQHandler(void)
 					{
 						status = ADS1115_StartDMA(&sensors[i], sensors[i].curr_channel);	
 						break;
-					}
-					else if (sensors[i].type == AS5048A_SPI)
-					{
-						AS5048A_StartDMA(&sensors[i]);
-						return;
 					}
 				}
 			}
