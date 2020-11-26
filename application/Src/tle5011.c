@@ -117,8 +117,8 @@ void TLE501x_StopDMA(sensor_t * sensor)
 	DMA_Cmd(DMA1_Channel2, DISABLE);
 	
 	Delay_us(5);											// waiting SPI clock to stop
-	SPI1->CR1 &= ~SPI_CR1_SPE;
-	while (!SPI1->SR & SPI_SR_RXNE);
+//	SPI1->CR1 &= ~SPI_CR1_SPE;
+//	while (!SPI1->SR & SPI_SR_RXNE);
 	
 	// CS high	
 	pin_config[sensor->source].port->ODR |= pin_config[sensor->source].pin;
