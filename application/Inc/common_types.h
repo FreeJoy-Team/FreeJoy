@@ -32,10 +32,8 @@ typedef int16_t analog_data_t;
 enum
 {
 	NO_FUNCTION = 0,
-	FUNCTION_PLUS_ABS,
-	FUNCTION_PLUS_REL,
-	FUNCTION_MINUS_ABS,
-	FUNCTION_MINUS_REL,
+	FUNCTION_PLUS,
+	FUNCTION_MINUS,
 	FUNCTION_EQUAL,
 };
 
@@ -54,10 +52,11 @@ typedef struct
 	analog_data_t 	calib_min;
 	analog_data_t		calib_center;
 	analog_data_t 	calib_max;
-	uint8_t					out_enabled: 1;
-	uint8_t					inverted: 1;
-	uint8_t					function: 3;
-	uint8_t 				filter: 3;
+	uint8_t					out_enabled: 	1;
+	uint8_t					inverted: 		1;
+	uint8_t					is_centered: 	1;
+	uint8_t					function: 		2;
+	uint8_t 				filter: 			3;
 	
 	int8_t				 	curve_shape[11];
 	uint8_t					resolution : 4;
@@ -92,7 +91,8 @@ typedef int8_t axis_source_t;
 
 enum
 {
-	TLE5011 = 1,
+	ANALOG = 0,
+	TLE5011,
 	MCP3201,
 	MCP3202,
 	MCP3204,
@@ -106,6 +106,9 @@ enum
 
 typedef struct
 {
+	uint32_t	ok_cnt;
+	uint32_t 	err_cnt;
+	
 	int8_t 		source;
 	uint8_t		type;
 	uint8_t		address;
@@ -113,10 +116,7 @@ typedef struct
 	
 	uint8_t 	rx_complete;
 	uint8_t 	tx_complete;
-	uint8_t		curr_channel;
-	
-	uint32_t	ok_cnt;
-	uint32_t 	err_cnt;
+	uint8_t		curr_channel;	
 } sensor_t;
 
 
@@ -175,14 +175,19 @@ enum
 	POV1_RIGHT,
 	POV1_DOWN,
 	POV1_LEFT,
+	POV1_CENTER,
+	
 	POV2_UP,
 	POV2_RIGHT,
 	POV2_DOWN,
 	POV2_LEFT,
+	POV2_CENTER,
+	
 	POV3_UP,
 	POV3_RIGHT,
 	POV3_DOWN,
 	POV3_LEFT,
+	
 	POV4_UP,
 	POV4_RIGHT,
 	POV4_DOWN,

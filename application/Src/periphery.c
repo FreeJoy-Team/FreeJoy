@@ -105,13 +105,16 @@ void Timers_Init(dev_config_t * p_dev_config)
 	
 	RCC_GetClocksFreq(&RCC_Clocks);	
 	
+	Ticks = 0;
+	
 	// Encoders, Axes and HID timer
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 		
 	TIM_TimeBaseStructInit(&TIM_TimeBaseInitStructure);	
 	TIM_TimeBaseInitStructure.TIM_Prescaler = RCC_Clocks.PCLK1_Frequency/5000 - 1;
-	TIM_TimeBaseInitStructure.TIM_Period = 10 - 1;			// 1ms
+	TIM_TimeBaseInitStructure.TIM_Period = 10 - 1;			// 1ms, 1kHz
 	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseInitStructure);
+	TIM_ARRPreloadConfig(TIM2, ENABLE);
 	
 	TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);	
 	NVIC_SetPriority(TIM2_IRQn, 3);
@@ -221,26 +224,8 @@ void Generator_Init(void)
   GPIO_InitStructureure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_Init(GPIOB, &GPIO_InitStructureure);
 
-  
-}
-/**
-  * @brief Generator Start Function
-  * @param None
-  * @retval None
-  */
-void Generator_Start(void)
-{
-	/* TIM4 enable counter */
+  /* TIM4 enable counter */
   TIM_Cmd(TIM4, ENABLE);
-}
-/**
-  * @brief Generator Stop Function
-  * @param None
-  * @retval None
-  */
-void Generator_Stop (void)
-{
-	TIM_Cmd(TIM4, DISABLE);
 }
 
 /* IO init function */
@@ -381,7 +366,6 @@ void IO_Init (dev_config_t * p_dev_config)
 		else if (p_dev_config->pins[i] == TLE5011_GEN  && i == 17)
 		{
 			Generator_Init();	// 4MHz output at PB6 pin
-			Generator_Start();
 		}
 		else if (p_dev_config->pins[i] == SHIFT_REG_LATCH)
 		{

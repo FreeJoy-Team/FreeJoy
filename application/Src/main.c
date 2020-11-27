@@ -25,8 +25,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
-#include "SEGGER_SYSVIEW.h"
-
 #include "periphery.h"
 #include "config.h"
 #include "analog.h"
@@ -57,9 +55,6 @@ int main(void)
 	
 	SysTick_Init();
 	
-	// Configure and initialize SystemView
-	SEGGER_SYSVIEW_Conf(); 
-	
 	// getting configuration from flash memory
 	DevConfigGet(&dev_config);
 	
@@ -71,15 +66,17 @@ int main(void)
 	}
 	AppConfigInit(&dev_config);
 	
-	Delay_ms(50);
 	
-	USB_HW_Init();
 	IO_Init(&dev_config);
-	AxesInit(&dev_config); 
+	 
 	EncodersInit(&dev_config);	
 	ShiftRegistersInit(&dev_config);
 	RadioButtons_Init(&dev_config);
 	SequentialButtons_Init(&dev_config);
+	AxesInit(&dev_config);
+	
+	Delay_ms(50);	
+	USB_HW_Init();
 	
 	Timers_Init(&dev_config);
 

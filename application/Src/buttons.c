@@ -25,24 +25,22 @@
 #include "buttons.h"
 #include "string.h"
 
-#include "SEGGER_SYSVIEW.h"
-
 uint8_t												raw_buttons_data[MAX_BUTTONS_NUM];
 physical_buttons_state_t 			physical_buttons_state[MAX_BUTTONS_NUM];
 logical_buttons_state_t 			logical_buttons_state[MAX_BUTTONS_NUM];
 button_data_t 								buttons_data[MAX_BUTTONS_NUM/8];
 pov_data_t 										pov_data[MAX_POVS_NUM];
 uint8_t												pov_pos[MAX_POVS_NUM];
-uint8_t												shifts_state;
-uint8_t												a2b_first;
-uint8_t												a2b_last;
+uint8_t												shifts_state = 0;
+uint8_t												a2b_first = 0;
+uint8_t												a2b_last = 0;
 
 /**
   * @brief  Processing debounce for raw buttons input
 	* @param  p_dev_config: Pointer to device configuration
   * @retval None
   */
-static void ButtonsDebouceProcess (dev_config_t * p_dev_config)
+void ButtonsDebouceProcess (dev_config_t * p_dev_config)
 {
 	uint32_t 	millis;
 	uint16_t	debounce;
@@ -94,8 +92,8 @@ static void LogicalButtonProcessTimer (logical_buttons_state_t * p_button_state,
 	uint16_t tmp_delay_time;
 	
 	// get toggle press timer	
-		switch (p_dev_config->buttons[num].press_timer)
-		{	
+	switch (p_dev_config->buttons[num].press_timer)
+	{	
 			case BUTTON_TIMER_1:
 				tmp_press_time = p_dev_config->button_timer1_ms;
 				break;
@@ -106,30 +104,30 @@ static void LogicalButtonProcessTimer (logical_buttons_state_t * p_button_state,
 				tmp_press_time = p_dev_config->button_timer3_ms;
 				break;
 			default:
-				tmp_press_time = 100;
+					tmp_press_time = 100;
 				break;
-		}
+	}
 	
 	// get delay 	
-		if(tmp_press_time <= 0)
-		{
-			tmp_press_time = 100;
-		}
-		switch (p_dev_config->buttons[num].delay_timer)
-		{	
-			case BUTTON_TIMER_1:
+	if(tmp_press_time <= 0)
+	{
+		tmp_press_time = 100;
+	}
+	switch (p_dev_config->buttons[num].delay_timer)
+	{	
+		case BUTTON_TIMER_1:
 				tmp_delay_time = p_dev_config->button_timer1_ms;
 				break;
-			case BUTTON_TIMER_2:
+		case BUTTON_TIMER_2:
 				tmp_delay_time = p_dev_config->button_timer2_ms;
 				break;
-			case BUTTON_TIMER_3:
+		case BUTTON_TIMER_3:
 				tmp_delay_time = p_dev_config->button_timer3_ms;
 				break;
-			default:
+		default:
 				tmp_delay_time = 0;
 				break;
-		}
+	}
 		
 	// set max delay timer for sequential and radio buttons // heroviy kostil`, need if for check all seq buttons for types of timings
 //	if (p_dev_config->buttons[num].delay_timer && 
@@ -167,7 +165,6 @@ static void LogicalButtonProcessTimer (logical_buttons_state_t * p_button_state,
   */
 void LogicalButtonProcessState (logical_buttons_state_t * p_button_state, uint8_t * pov_buf, dev_config_t * p_dev_config, uint8_t num)
 {	
-	SEGGER_SYSVIEW_RecordVoid(49);
 	
 	uint32_t millis;
 	uint8_t pov_group = 0;
@@ -178,6 +175,8 @@ void LogicalButtonProcessState (logical_buttons_state_t * p_button_state, uint8_
 		switch (p_dev_config->buttons[num].type)
 		{				
 			case BUTTON_NORMAL:
+			case POV1_CENTER:
+			case POV2_CENTER:
 				if (p_button_state->delay_act == BUTTON_ACTION_DELAY)
 				{
 					// nop
@@ -356,6 +355,42 @@ void LogicalButtonProcessState (logical_buttons_state_t * p_button_state, uint8_
 					pov_buf[pov_group] &= ~(1 << 0);
 					pov_buf[pov_group] |= (p_button_state->current_state << 0);
 				}
+				
+				// turn off POV center button if one of directions is pressed
+				if (pov_buf[pov_group] != 0)
+				{
+					if (pov_group == 0)
+					{
+						for (uint8_t i=0; i<MAX_BUTTONS_NUM; i++)	
+						{
+							if (p_dev_config->buttons[i].type == POV1_CENTER)	
+							{
+								logical_buttons_state[i].delay_act = BUTTON_ACTION_IDLE;
+								logical_buttons_state[i].on_state = 0;
+								logical_buttons_state[i].off_state = 0;
+								logical_buttons_state[i].current_state = 0;
+								logical_buttons_state[i].curr_physical_state = 0;
+								logical_buttons_state[i].time_last = 0;		 
+							}
+						}
+					}
+					else if (pov_group == 1)
+					{
+						for (uint8_t i=0; i<MAX_BUTTONS_NUM; i++)	
+						{
+							if (p_dev_config->buttons[i].type == POV2_CENTER)	
+							{
+								logical_buttons_state[i].delay_act = BUTTON_ACTION_IDLE;
+								logical_buttons_state[i].on_state = 0;
+								logical_buttons_state[i].off_state = 0;
+								logical_buttons_state[i].current_state = 0;
+								logical_buttons_state[i].curr_physical_state = 0;
+								logical_buttons_state[i].time_last = 0;		 
+							}
+						}
+					}
+				}
+				
 				break;
 							
 			case RADIO_BUTTON1:
@@ -528,7 +563,6 @@ void LogicalButtonProcessState (logical_buttons_state_t * p_button_state, uint8_
 			default:
 				break;
 		}		
-		SEGGER_SYSVIEW_RecordEndCall(49);
 }
 
 /**
@@ -683,9 +717,8 @@ void SingleButtonsGet (uint8_t * raw_button_data_buf, dev_config_t * p_dev_confi
 
 uint8_t ButtonsReadPhysical(dev_config_t * p_dev_config, uint8_t * p_buf)
 {
-	SEGGER_SYSVIEW_RecordVoid(47);
-	
 	uint8_t pos = 0;
+	
 	// Getting physical buttons states
 	MaxtrixButtonsGet(p_buf, p_dev_config, &pos);
 	ShiftRegistersGet(p_buf, p_dev_config, &pos);
@@ -693,8 +726,6 @@ uint8_t ButtonsReadPhysical(dev_config_t * p_dev_config, uint8_t * p_buf)
 	AxesToButtonsGet(p_buf, p_dev_config, &pos);
 	a2b_last = pos;
 	SingleButtonsGet(p_buf, p_dev_config, &pos);
-	
-	SEGGER_SYSVIEW_RecordEndCall(47);
 	
 	return pos;
 }
@@ -706,15 +737,8 @@ uint8_t ButtonsReadPhysical(dev_config_t * p_dev_config, uint8_t * p_buf)
   */
 void ButtonsReadLogical (dev_config_t * p_dev_config)
 {
-	SEGGER_SYSVIEW_RecordVoid(48);
-	
-	uint8_t pos = 0;
-	
-	pos = ButtonsReadPhysical(p_dev_config, raw_buttons_data);
-	ButtonsDebouceProcess(p_dev_config);
-
 	// Process regular buttons
-	for (uint8_t i=0; i<pos; i++)
+	for (uint8_t i=0; i<MAX_BUTTONS_NUM; i++)
 	{
 		uint8_t shift_num = 0;
 		
@@ -729,7 +753,7 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 			{
 				int8_t btn = p_dev_config->buttons[j].physical_num;
 				
-				if (btn == i && (p_dev_config->buttons[j].shift_modificator))				// we found button this shift modificator 
+				if (btn == i && (p_dev_config->buttons[j].shift_modificator))				// we found button with shift modificator 
 				{
 					shift_num = p_dev_config->buttons[j].shift_modificator;
 					if (shifts_state & 1<<(shift_num-1))											// shift pressed for this button
@@ -863,26 +887,21 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 	for (uint8_t i=0; i<5; i++)
 	{
 		if (p_dev_config->shift_config[i].button >= 0)
-		{
-			for (uint8_t j=0; j<MAX_BUTTONS_NUM; j++)
-			{		
-				if (j == p_dev_config->shift_config[i].button)
-				{									
-					shifts_state |= (logical_buttons_state[j].current_state << i);
-				}
-			}
+		{				
+			shifts_state |= (logical_buttons_state[p_dev_config->shift_config[i].button].current_state << i);
 		}
 	}
 	
 	// convert data to report format	
 	uint8_t k = 0;
+		
+	NVIC_DisableIRQ(TIM2_IRQn);			// prevent not atomic read
 	for (int i=0;i<MAX_BUTTONS_NUM;i++)
 	{
-			if (!p_dev_config->buttons[i].is_disabled)
+			uint8_t is_enabled = !p_dev_config->buttons[i].is_disabled && (p_dev_config->buttons[i].physical_num >= 0);
+		
+			if (is_enabled)
 			{
-				// prevent not atomic read
-				NVIC_DisableIRQ(TIM2_IRQn);
-				
 				buttons_data[(k & 0xF8)>>3] &= ~(1 << (k & 0x07));
 				if (!p_dev_config->buttons[i].is_inverted)
 				{					
@@ -891,13 +910,13 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 				else
 				{
 					buttons_data[(k & 0xF8)>>3] |= (!logical_buttons_state[i].current_state << (k & 0x07));
-				}
+				}			
+			}		
+			if (!p_dev_config->is_dynamic_config || is_enabled)	k++;		// increment only if non dynamic or dynamic and enabled
 				
-				// resume IRQ
-				NVIC_EnableIRQ(TIM2_IRQn);
-			}
-			k++;
 	}
+	// resume IRQ
+	NVIC_EnableIRQ(TIM2_IRQn);
 	
 	// convert POV data to report format
 	for (int i=0; i<MAX_POVS_NUM; i++)
@@ -933,8 +952,6 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 				break;
 		}
 	}
-	
-	SEGGER_SYSVIEW_RecordEndCall(48);
 }
 
 /**

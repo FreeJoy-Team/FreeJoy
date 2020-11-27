@@ -24,8 +24,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
 
-#include "SEGGER_SYSVIEW.h"
-
 #include "usb_istr.h"
 #include "usb_lib.h"
 #include "periphery.h"
@@ -46,13 +44,18 @@
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 
-#define ADC_PERIOD_MS										2
-#define SENSORS_PERIOD_MS								2
-#define ENCODER_PERIOD_MS								1
+#define ADC_PERIOD_TICKS										2					// 1 tick = 1ms
+#define SENSORS_PERIOD_TICKS								2
+#define BUTTONS_PERIOD_TICKS								1
 
 /* Private variables ---------------------------------------------------------*/
 
-volatile int32_t millis =0, joy_millis=0, encoder_millis = 0, adc_millis=100, sensors_millis=101;
+volatile int32_t ticks = 0;
+volatile int32_t joy_ticks = 0; 
+volatile int32_t encoder_ticks = 0;
+volatile int32_t adc_ticks = 0;
+volatile int32_t sensors_ticks = 1;
+volatile int32_t buttons_ticks = 0;
 volatile int status = 0;
 extern dev_config_t dev_config;
 
@@ -158,15 +161,10 @@ void PendSV_Handler(void)
   */
 void SysTick_Handler(void)
 {
-	SEGGER_SYSVIEW_RecordEnterISR();
-	
-	Ticks++;
-		
 	if (TimingDelay != 0x00)										
   {
     TimingDelay--;
   }
-	SEGGER_SYSVIEW_RecordExitISR();
 }
 
 /******************************************************************************/
@@ -179,8 +177,6 @@ void SysTick_Handler(void)
 
 void TIM2_IRQHandler(void)
 {
-	SEGGER_SYSVIEW_RecordVoid(33);
-	
 	static uint8_t btn_num = 0;
 	uint8_t	physical_buttons_data[MAX_BUTTONS_NUM];
 	joy_report_t joy_report;
@@ -188,12 +184,14 @@ void TIM2_IRQHandler(void)
 	if (TIM_GetITStatus(TIM2, TIM_IT_Update))
 	{
 		TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
+		
+		Ticks++;
 
-		millis = GetTick();
+		ticks = GetTick();
 		// check if it is time to send joystick data
-		if (millis - joy_millis >= dev_config.exchange_period_ms )
+		if (ticks - joy_ticks >= dev_config.exchange_period_ms )
 		{
-			joy_millis = millis;
+			joy_ticks = ticks;
 				
 			// getting fresh data to joystick report buffer
 			ButtonsGet(physical_buttons_data, joy_report.button_data, &joy_report.shift_button_data);
@@ -213,12 +211,23 @@ void TIM2_IRQHandler(void)
 							
 			USB_CUSTOM_HID_SendReport((uint8_t *)&joy_report.id, sizeof(joy_report) - sizeof(joy_report.dummy));
 		}
-		// Internal ADC conversion
-		if (millis - adc_millis >= ADC_PERIOD_MS)
+
+		// digital inputs polling
+		if (ticks - encoder_ticks >= BUTTONS_PERIOD_TICKS)
 		{
-			adc_millis = millis;
-						
-			AxesProcess(&dev_config);
+			ButtonsReadPhysical(&dev_config, raw_buttons_data);
+			ButtonsDebouceProcess(&dev_config);
+			
+			encoder_ticks = ticks;
+			EncoderProcess(logical_buttons_state, &dev_config);
+		}
+		
+		// Internal ADC conversion
+		if (ticks - adc_ticks >= ADC_PERIOD_TICKS)
+		{		
+			adc_ticks = ticks;	
+
+			AxesProcess(&dev_config);					// process axes only once for one data reading
 			
 			// Disable periphery before ADC conversion
 			RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1,DISABLE);	
@@ -232,13 +241,11 @@ void TIM2_IRQHandler(void)
 			RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1,ENABLE);	
 			RCC_APB1PeriphClockCmd(RCC_APB2Periph_TIM1|RCC_APB1Periph_TIM3|RCC_APB1Periph_TIM4, ENABLE);
 			RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB|RCC_APB2Periph_GPIOC,ENABLE);
-			// Enable TLE clock after ADC conversion
-			Generator_Start();
 		}
 		// External sensors data receiption
-		if (millis - sensors_millis >= SENSORS_PERIOD_MS)
-		{
-			sensors_millis = millis;
+		if (ticks - sensors_ticks >= SENSORS_PERIOD_TICKS && ticks != adc_ticks)		// prevent ADC and sensors reading during same period
+		{																																						
+			sensors_ticks = ticks;
 
 			// start I2C sensors 
  			for (uint8_t i=0; i<MAX_AXIS_NUM; i++)
@@ -293,21 +300,13 @@ void TIM2_IRQHandler(void)
 				}
 			}
 		}
-		// encoders polling
-		if (millis - encoder_millis >= ENCODER_PERIOD_MS)
-		{
-			encoder_millis = millis;
-			EncoderProcess(logical_buttons_state, &dev_config);
-		}
 		
 	}
-	SEGGER_SYSVIEW_RecordEndCall(33);
 }
 
 // SPI Rx Complete
 void DMA1_Channel2_IRQHandler(void)
 {
-	SEGGER_SYSVIEW_RecordVoid(34);
 	
 	uint8_t i=0;
 	
@@ -317,7 +316,7 @@ void DMA1_Channel2_IRQHandler(void)
 		DMA_Cmd(DMA1_Channel2, DISABLE);
 		
 		// wait SPI transfer to end
-		while(SPI1->SR & SPI_SR_BSY);
+		while(SPI1->SR & SPI_SR_BSY);		
 		
 		// searching for active sensor
 		for (i=0; i<MAX_AXIS_NUM; i++)
@@ -373,14 +372,12 @@ void DMA1_Channel2_IRQHandler(void)
 				MLX90393_StopDMA(&sensors[i++]);
 			}
 		}
-		// Enable other peripery IRQs
-		NVIC_EnableIRQ(TIM2_IRQn);
-		NVIC_EnableIRQ(TIM3_IRQn);
+		
 		
 		// Process next sensor
 		for ( ;i<MAX_AXIS_NUM;i++)
 		{
-			if (sensors[i].source >= 0 && sensors[i].rx_complete)		// && sensors[i].tx_complete - ????
+			if (sensors[i].source >= 0 && sensors[i].rx_complete && sensors[i].tx_complete)
 			{
 				if (sensors[i].type == TLE5011)
 				{
@@ -402,17 +399,12 @@ void DMA1_Channel2_IRQHandler(void)
 				}
 			}
 		}
-		// Disable TLE clock after communication frame
-		Generator_Stop();
 	}
-	SEGGER_SYSVIEW_RecordEndCall(34);
 }
 
 // SPI Tx Complete
 void DMA1_Channel3_IRQHandler(void)
 {
-	SEGGER_SYSVIEW_RecordVoid(35);
-	
 	uint8_t i=0;
 	
 	if (DMA_GetITStatus(DMA1_IT_TC3))
@@ -421,6 +413,7 @@ void DMA1_Channel3_IRQHandler(void)
 		DMA_Cmd(DMA1_Channel3, DISABLE);
 		
 		// wait SPI transfer to end
+		while(!SPI1->SR & SPI_SR_TXE);
 		while(SPI1->SR & SPI_SR_BSY);
 		
 		// searching for active sensor
@@ -438,14 +431,11 @@ void DMA1_Channel3_IRQHandler(void)
 			}
 		}
 	}
-	SEGGER_SYSVIEW_RecordEndCall(35);
 }
 
 // I2C error
 void I2C1_ER_IRQHandler(void)
 {
-	SEGGER_SYSVIEW_RecordVoid(36);
-	
 	__IO uint32_t SR1Register =0;
 
 	/* Read the I2C1 status register */
@@ -480,8 +470,6 @@ void I2C1_ER_IRQHandler(void)
 	I2C1->CR1 |= I2C_CR1_SWRST;
 	I2C1->CR1 &= ~I2C_CR1_SWRST;
 	I2C_Start();
-	
-	SEGGER_SYSVIEW_RecordEndCall(36);
 }
 
 
@@ -490,12 +478,8 @@ void I2C1_ER_IRQHandler(void)
 * @brief This function handles USB low priority or CAN RX0 interrupts.
 */
 void USB_LP_CAN1_RX0_IRQHandler(void)
-{
-	SEGGER_SYSVIEW_RecordVoid(37);
-	
+{	
 	USB_Istr();
-	
-	SEGGER_SYSVIEW_RecordEndCall(37);
 }
 
 /**

@@ -235,10 +235,6 @@ void MLX90393_StartDMA(sensor_t * sensor)
 	tmp_buf[6] = 0x00;		// Z MSB
 	tmp_buf[7] = 0x00;		// Z LSB
 	
-	// Disable other interrupts
-	NVIC_DisableIRQ(TIM2_IRQn);
-	NVIC_DisableIRQ(TIM3_IRQn);
-	
 	// CS low
 	pin_config[sensor->source].port->ODR &= ~pin_config[sensor->source].pin;
 	SPI_FullDuplex_TransmitReceive(tmp_buf, sensor->data, 8, MLX90393_SPI_MODE);

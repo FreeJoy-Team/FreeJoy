@@ -18,7 +18,7 @@
 
 static const dev_config_t init_config =
 {
-	.firmware_version = 0x1605,		// do not change
+	.firmware_version = 0x1624,		// do not change
 	
 	/* 
 		Name of device in devices dispatcher
@@ -45,7 +45,6 @@ static const dev_config_t init_config =
 	.device_name[19] = 0,			
 	
 	.button_debounce_ms = 50,					// debounce time for all buttons
-	.a2b_debounce_ms = 50,						// debounce time for all axes to buttons
 	
 	.encoder_press_time_ms = 10,			// amount of milliseconds virtual button 
 																		// will be pressed at encoder increment/decrement
@@ -55,6 +54,7 @@ static const dev_config_t init_config =
 	.button_timer1_ms = 50,						// amount of milliseconds of delay1 for a virtual button
 	.button_timer2_ms = 200,					// amount of milliseconds of delay2 for a virtual button
 	.button_timer3_ms = 300,					// amount of milliseconds of delay3 for a virtual button
+	.a2b_debounce_ms = 50,
 	
 	/*
 		Device pins configuration. Available values:
@@ -126,7 +126,7 @@ static const dev_config_t init_config =
 	.axis_config[0].button1 = -1,
 	.axis_config[0].button2 = -1,
 	.axis_config[0].button3 = -1,
-	.axis_config[0].divider = 255,
+	.axis_config[0].divider = 50,
 	.axis_config[0].button1_type = AXIS_BUTTON_DOWN,
 	.axis_config[0].button2_type = AXIS_BUTTON_RESET,
 	.axis_config[0].button3_type = AXIS_BUTTON_UP,
@@ -160,7 +160,7 @@ static const dev_config_t init_config =
 	.axis_config[1].button1 = -1,
 	.axis_config[1].button2 = -1,
 	.axis_config[1].button3 = -1,
-	.axis_config[1].divider = 255,
+	.axis_config[1].divider = 50,
 	.axis_config[1].button1_type = AXIS_BUTTON_DOWN,
 	.axis_config[1].button2_type = AXIS_BUTTON_RESET,
 	.axis_config[1].button3_type = AXIS_BUTTON_UP,
@@ -194,7 +194,7 @@ static const dev_config_t init_config =
 	.axis_config[2].button1 = -1,
 	.axis_config[2].button2 = -1,
 	.axis_config[2].button3 = -1,
-	.axis_config[2].divider = 255,
+	.axis_config[2].divider = 50,
 	.axis_config[2].button1_type = AXIS_BUTTON_DOWN,
 	.axis_config[2].button2_type = AXIS_BUTTON_RESET,
 	.axis_config[2].button3_type = AXIS_BUTTON_UP,
@@ -228,7 +228,7 @@ static const dev_config_t init_config =
 	.axis_config[3].button1 = -1,
 	.axis_config[3].button2 = -1,
 	.axis_config[3].button3 = -1,
-	.axis_config[3].divider = 255,
+	.axis_config[3].divider = 50,
 	.axis_config[3].button1_type = AXIS_BUTTON_DOWN,
 	.axis_config[3].button2_type = AXIS_BUTTON_RESET,
 	.axis_config[3].button3_type = AXIS_BUTTON_UP,
@@ -262,7 +262,7 @@ static const dev_config_t init_config =
 	.axis_config[4].button1 = -1,
 	.axis_config[4].button2 = -1,
 	.axis_config[4].button3 = -1,
-	.axis_config[4].divider = 255,
+	.axis_config[4].divider = 50,
 	.axis_config[4].button1_type = AXIS_BUTTON_DOWN,
 	.axis_config[4].button2_type = AXIS_BUTTON_RESET,
 	.axis_config[4].button3_type = AXIS_BUTTON_UP,
@@ -296,7 +296,7 @@ static const dev_config_t init_config =
 	.axis_config[5].button1 = -1,
 	.axis_config[5].button2 = -1,
 	.axis_config[5].button3 = -1,
-	.axis_config[5].divider = 255,
+	.axis_config[5].divider = 50,
 	.axis_config[5].button1_type = AXIS_BUTTON_DOWN,
 	.axis_config[5].button2_type = AXIS_BUTTON_RESET,
 	.axis_config[5].button3_type = AXIS_BUTTON_UP,
@@ -330,7 +330,7 @@ static const dev_config_t init_config =
 	.axis_config[6].button1 = -1,
 	.axis_config[6].button2 = -1,
 	.axis_config[6].button3 = -1,
-	.axis_config[6].divider = 255,
+	.axis_config[6].divider = 50,
 	.axis_config[6].button1_type = AXIS_BUTTON_DOWN,
 	.axis_config[6].button2_type = AXIS_BUTTON_RESET,
 	.axis_config[6].button3_type = AXIS_BUTTON_UP,
@@ -364,7 +364,7 @@ static const dev_config_t init_config =
 	.axis_config[7].button1 = -1,
 	.axis_config[7].button2 = -1,
 	.axis_config[7].button3 = -1,
-	.axis_config[7].divider = 255,
+	.axis_config[7].divider = 50,
 	.axis_config[7].button1_type = AXIS_BUTTON_DOWN,
 	.axis_config[7].button2_type = AXIS_BUTTON_RESET,
 	.axis_config[7].button3_type = AXIS_BUTTON_UP,
@@ -735,6 +735,10 @@ static const dev_config_t init_config =
 	.vid = 0x0483,
 	.pid = 0x5750,
 	.is_dynamic_config = 0,
+	
+	.led_pwm_config.duty_cycle[0] = 50,
+	.led_pwm_config.duty_cycle[1] = 50,
+	.led_pwm_config.duty_cycle[2] = 50,
 	
 	.leds[0].input_num = -1,
 	.leds[0].type = LED_NORMAL,
