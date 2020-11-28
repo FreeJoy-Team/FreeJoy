@@ -181,7 +181,7 @@ void EncoderProcess (logical_buttons_state_t * button_state_buf, dev_config_t * 
 								{
 									uint8_t tmp_ignore = 0;
 									// check button in ignore list
-									for (int k = 0; k < sizeof(ignore_a); k++)	// if ignore_a[k] == 0 break; ?
+									for (int k = 0; k < MAX_ENCODERS_NUM; k++)	// if ignore_a[k] == 0 break; ?
 									{
 										if (p_dev_config->buttons[encoders_state[i].pin_a].physical_num == ignore_a[k])
 										{
@@ -210,7 +210,7 @@ void EncoderProcess (logical_buttons_state_t * button_state_buf, dev_config_t * 
 								{
 									uint8_t tmp_ignore = 0;
 									// check button in ignore list
-									for (int k = 0; k < sizeof(ignore_b); k++)	// if ignore_b[k] == 0 break; ?
+									for (int k = 0; k < MAX_ENCODERS_NUM; k++)	// if ignore_b[k] == 0 break; ?
 									{
 										if (p_dev_config->buttons[encoders_state[i].pin_b].physical_num == ignore_b[k])
 										{
@@ -251,7 +251,7 @@ void EncoderProcess (logical_buttons_state_t * button_state_buf, dev_config_t * 
 								{
 									uint8_t tmp_ignore = 0;
 									// check button in ignore list
-									for (int a = 0; a < sizeof(ignore_a); a++)
+									for (int a = 0; a < MAX_ENCODERS_NUM; a++)
 									{
 										if (p_dev_config->buttons[encoders_state[i].pin_a].physical_num == ignore_a[a])
 										{
@@ -279,7 +279,7 @@ void EncoderProcess (logical_buttons_state_t * button_state_buf, dev_config_t * 
 								{
 									uint8_t tmp_ignore = 0;
 									// check button in ignore list
-									for (int k = 0; k < sizeof(ignore_b); k++)	// if ignore_b[k] == 0 break; ?
+									for (int k = 0; k < MAX_ENCODERS_NUM; k++)	// if ignore_b[k] == 0 break; ?
 									{
 										if (p_dev_config->buttons[encoders_state[i].pin_b].physical_num == ignore_b[k])
 										{
