@@ -33,7 +33,7 @@
 int AS5048A_GetData(uint16_t * data, sensor_t * sensor, uint8_t channel)
 {
 	int ret = 0;
-	Delay_us(10);
+	Delay_us(1);
 	uint16_t tmp;
 	tmp = sensor->data[0];
 	tmp = (tmp << 8) | sensor->data[1];
@@ -65,10 +65,14 @@ void AS5048A_StartDMA(sensor_t * sensor)
 
 	tmp_buf[0] = 0x3F;		// Read Meas. command: 0x3FFF
 	tmp_buf[1] = 0xFF;		// 
-
+	
+	SPI1->CR1 &= ~SPI_CR1_SPE;
+	while (!SPI1->SR & SPI_SR_RXNE);
+	while (!SPI1->SR & SPI_SR_TXE);
+	
 	// CS low
-	Delay_us(1);
 	pin_config[sensor->source].port->ODR &= ~pin_config[sensor->source].pin;
+	Delay_us(1);
 	SPI_FullDuplex_TransmitReceive(tmp_buf, sensor->data, 2, AS5048A_SPI_MODE);
 }
 
