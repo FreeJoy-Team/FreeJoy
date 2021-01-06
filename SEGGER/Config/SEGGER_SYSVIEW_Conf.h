@@ -62,7 +62,7 @@ Revision: $Rev: 17066 $
 **********************************************************************
 */
 
-#define SYSVIEW_ENABLED
+//#define SYSVIEW_ENABLED
 
 //
 // Constants for known core configuration

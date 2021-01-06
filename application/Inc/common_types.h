@@ -101,6 +101,7 @@ enum
 	MLX90393_I2C,
 	ADS1115,
 	AS5600,
+	AS5048A_SPI,
 	
 };
 
@@ -147,6 +148,8 @@ enum
 
   MLX90393_CS,
 
+	AS5048A_CS,
+	
   SHIFT_REG_LATCH,
   SHIFT_REG_DATA,
 	
