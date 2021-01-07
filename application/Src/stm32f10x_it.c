@@ -255,7 +255,7 @@ void TIM2_IRQHandler(void)
 				{
 					if (sensors[i].type == TLE5011)
 					{
-						TLE501x_StartDMA(&sensors[i]);
+						TLE5011_StartDMA(&sensors[i]);
 						break;
 					}
 					else if (sensors[i].type == MCP3201 ||
@@ -323,7 +323,7 @@ void DMA1_Channel2_IRQHandler(void)
 		{
 			if (sensors[i].type == TLE5011)
 			{
-				TLE501x_StopDMA(&sensors[i++]);
+				TLE5011_StopDMA(&sensors[i++]);
 			}
 			else if (sensors[i].type == MCP3201)
 			{
@@ -380,7 +380,7 @@ void DMA1_Channel2_IRQHandler(void)
 			{
 				if (sensors[i].type == TLE5011)
 				{
-					TLE501x_StartDMA(&sensors[i]);
+					TLE5011_StartDMA(&sensors[i]);
 					return;
 				}
 				else if (sensors[i].type == MCP3201 ||
@@ -429,7 +429,7 @@ void DMA1_Channel3_IRQHandler(void)
 				sensors[i].rx_complete = 0;
 				if (sensors[i].type == TLE5011)
 				{
-					SPI_HalfDuplex_Receive(&sensors[i].data[1], 5, TLE5011_SPI_MODE);					
+					SPI_HalfDuplex_Receive(&sensors[i].data[1], 6, TLE5011_SPI_MODE);					
 				}
 				break;
 			}

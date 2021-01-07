@@ -18,9 +18,9 @@
 
 #define TLE5011_SPI_MODE			0
 
-void TLE501x_StartDMA(sensor_t * sensor);
-void TLE501x_StopDMA(sensor_t * sensor);
-int TLE501x_GetAngle(sensor_t * sensor, float * angle);
+void TLE5011_StartDMA(sensor_t * sensor);
+void TLE5011_StopDMA(sensor_t * sensor);
+int TLE5011_GetAngle(sensor_t * sensor, float * angle);
 
 #endif 	/* __TLE5011_H__ */
 

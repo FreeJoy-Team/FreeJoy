@@ -750,7 +750,7 @@ void AxesProcess (dev_config_t * p_dev_config)
 					if (sensors[k].source == source) break;
 				}
 				// get angle data
-				if (TLE501x_GetAngle(&sensors[k], &tmpf) == 0)
+				if (TLE5011_GetAngle(&sensors[k], &tmpf) == 0)
 				{
 					sensors[k].ok_cnt++;
 					if (p_dev_config->axis_config[i].offset_angle > 0)

@@ -25,7 +25,7 @@
 #include "tle5011.h"
 #include <math.h>
 
-uint8_t MathCRC8(uint8_t crc, uint8_t data)
+static uint8_t MathCRC8(uint8_t crc, uint8_t data)
 {
 	crc ^= data;
 	for (uint8_t bit=0 ; bit<8 ; bit++ ) 
@@ -42,7 +42,7 @@ uint8_t MathCRC8(uint8_t crc, uint8_t data)
 	return(crc);
 };
 
-uint8_t CheckCrc(uint8_t * data, uint8_t crc, uint8_t initial, uint8_t length) 
+static uint8_t CheckCrc(uint8_t * data, uint8_t crc, uint8_t initial, uint8_t length) 
 {
   uint8_t ret = initial;
 	uint8_t index = 0;
@@ -56,7 +56,7 @@ uint8_t CheckCrc(uint8_t * data, uint8_t crc, uint8_t initial, uint8_t length)
   return (ret == crc);
 }
 
-void TLE501x_Read(uint8_t * data, uint8_t addr, uint8_t length)
+void TLE5011_Read(uint8_t * data, uint8_t addr, uint8_t length)
 {
 	uint8_t cmd = 0x80 | (addr & 0x0F)<<3 | (length & 0x07);
 	
@@ -68,7 +68,7 @@ void TLE501x_Read(uint8_t * data, uint8_t addr, uint8_t length)
 
 }
 
-void TLE501x_Write(uint8_t * data, uint8_t addr, uint8_t length)
+void TLE5011_Write(uint8_t * data, uint8_t addr, uint8_t length)
 {
 	uint8_t cmd = addr<<3 | (addr & 0x0F)<<3 | (length & 0x07);
 	SPI_HalfDuplex_Transmit(&cmd, 1, TLE5011_SPI_MODE);
@@ -78,7 +78,7 @@ void TLE501x_Write(uint8_t * data, uint8_t addr, uint8_t length)
 	}
 }
 
-int TLE501x_GetAngle(sensor_t * sensor, float * angle)
+int TLE5011_GetAngle(sensor_t * sensor, float * angle)
 {
 	int16_t x_value, y_value;
 	float out = 0;
@@ -100,7 +100,7 @@ int TLE501x_GetAngle(sensor_t * sensor, float * angle)
 	return ret;
 }
 
-void TLE501x_StartDMA(sensor_t * sensor)
+void TLE5011_StartDMA(sensor_t * sensor)
 {	
 	sensor->rx_complete = 1;
 	sensor->tx_complete = 0;
@@ -112,13 +112,9 @@ void TLE501x_StartDMA(sensor_t * sensor)
 	SPI_HalfDuplex_Transmit(&sensor->data[0], 2, TLE5011_SPI_MODE);
 }
 
-void TLE501x_StopDMA(sensor_t * sensor)
+void TLE5011_StopDMA(sensor_t * sensor)
 {	
 	DMA_Cmd(DMA1_Channel2, DISABLE);
-	
-	Delay_us(5);											// waiting SPI clock to stop
-	SPI1->CR1 &= ~SPI_CR1_SPE;
-	while (!SPI1->SR & SPI_SR_RXNE);
 	
 	// CS high	
 	pin_config[sensor->source].port->ODR |= pin_config[sensor->source].pin;
