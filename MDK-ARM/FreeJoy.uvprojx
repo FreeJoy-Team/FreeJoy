@@ -53,7 +53,7 @@
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
           <CreateHexFile>1</CreateHexFile>
-          <DebugInformation>0</DebugInformation>
+          <DebugInformation>1</DebugInformation>
           <BrowseInformation>1</BrowseInformation>
           <ListingPath></ListingPath>
           <HexFormatSelection>1</HexFormatSelection>
@@ -312,7 +312,7 @@
           </ArmAdsMisc>
           <Cads>
             <interw>1</interw>
-            <Optim>4</Optim>
+            <Optim>1</Optim>
             <oTime>0</oTime>
             <SplitLS>0</SplitLS>
             <OneElfS>1</OneElfS>
@@ -463,6 +463,11 @@
               <FilePath>..\application\Src\as5600.c</FilePath>
             </File>
             <File>
+              <FileName>as5048a.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\application\Src\as5048a.c</FilePath>
+            </File>
+            <File>
               <FileName>mcp320x.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\application\Src\mcp320x.c</FilePath>
@@ -521,11 +526,6 @@
               <FileName>main.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\application\Inc\main.h</FilePath>
-            </File>
-            <File>
-              <FileName>as5048a.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\application\Src\as5048a.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1291,6 +1291,11 @@
               <FilePath>..\application\Src\as5600.c</FilePath>
             </File>
             <File>
+              <FileName>as5048a.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\application\Src\as5048a.c</FilePath>
+            </File>
+            <File>
               <FileName>mcp320x.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\application\Src\mcp320x.c</FilePath>
@@ -1349,11 +1354,6 @@
               <FileName>main.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\application\Inc\main.h</FilePath>
-            </File>
-            <File>
-              <FileName>as5048a.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\application\Src\as5048a.c</FilePath>
             </File>
           </Files>
         </Group>

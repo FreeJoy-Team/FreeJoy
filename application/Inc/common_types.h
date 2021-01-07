@@ -110,14 +110,17 @@ typedef struct
 	uint32_t	ok_cnt;
 	uint32_t 	err_cnt;
 	
-	int8_t 		source;
-	uint8_t		type;
-	uint8_t		address;
-	uint8_t 	data[24];
-	
 	uint8_t 	rx_complete;
 	uint8_t 	tx_complete;
 	uint8_t		curr_channel;	
+	
+	int8_t 		source;
+	uint8_t		type;
+	uint8_t		address;
+	
+	uint8_t 	data[24];
+	
+	
 } sensor_t;
 
 

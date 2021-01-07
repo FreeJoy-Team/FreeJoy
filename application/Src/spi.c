@@ -195,11 +195,13 @@ void SPI_FullDuplex_TransmitReceive(uint8_t * tx_data, uint8_t * rx_data, uint16
 	NVIC_EnableIRQ(DMA1_Channel3_IRQn);
 	
 	// Set full-duplex
+	SPI1->DR;
 	uint16_t cr1temp = SPI1->CR1;
 	cr1temp |= SPI_CR1_SPE;	
 	cr1temp &= ~(SPI_CR1_BIDIMODE|SPI_CR1_BIDIOE|SPI_CR1_RXONLY|SPI_CR1_CPOL|SPI_CR1_CPHA);
 	cr1temp |= spi_mode & 0x03;
 	SPI1->CR1 = cr1temp;
+	
 	DMA_Cmd(DMA1_Channel2, ENABLE);
 	DMA_Cmd(DMA1_Channel3, ENABLE);
 }
