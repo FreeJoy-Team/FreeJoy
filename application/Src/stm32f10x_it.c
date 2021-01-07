@@ -30,6 +30,7 @@
 #include "analog.h"
 #include "encoders.h"
 #include "tle5011.h"
+#include "tle5012.h"
 #include "mcp320x.h"
 #include "mlx90393.h"
 #include "as5048a.h"
@@ -258,6 +259,11 @@ void TIM2_IRQHandler(void)
 						TLE5011_StartDMA(&sensors[i]);
 						break;
 					}
+					else if (sensors[i].type == TLE5012)
+					{
+						TLE5012_StartDMA(&sensors[i]);
+						break;
+					}
 					else if (sensors[i].type == MCP3201 ||
 									 sensors[i].type == MCP3202 ||
 									 sensors[i].type == MCP3204 ||
@@ -325,6 +331,10 @@ void DMA1_Channel2_IRQHandler(void)
 			{
 				TLE5011_StopDMA(&sensors[i++]);
 			}
+			else if (sensors[i].type == TLE5012)
+			{
+				TLE5012_StopDMA(&sensors[i++]);
+			}
 			else if (sensors[i].type == MCP3201)
 			{
 				MCP320x_StopDMA(&sensors[i++]);
@@ -383,6 +393,11 @@ void DMA1_Channel2_IRQHandler(void)
 					TLE5011_StartDMA(&sensors[i]);
 					return;
 				}
+				else if (sensors[i].type == TLE5012)
+				{
+					TLE5012_StartDMA(&sensors[i]);
+					return;
+				}
 				else if (sensors[i].type == MCP3201 ||
 								 sensors[i].type == MCP3202 ||
 								 sensors[i].type == MCP3204 ||
@@ -430,6 +445,10 @@ void DMA1_Channel3_IRQHandler(void)
 				if (sensors[i].type == TLE5011)
 				{
 					SPI_HalfDuplex_Receive(&sensors[i].data[1], 6, TLE5011_SPI_MODE);					
+				}
+				if (sensors[i].type == TLE5012)
+				{
+					SPI_HalfDuplex_Receive(&sensors[i].data[1], 2, TLE5012_SPI_MODE);					
 				}
 				break;
 			}

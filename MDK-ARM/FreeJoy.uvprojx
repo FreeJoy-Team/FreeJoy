@@ -458,6 +458,11 @@
               <FilePath>..\application\Src\tle5011.c</FilePath>
             </File>
             <File>
+              <FileName>tle5012.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\application\Src\tle5012.c</FilePath>
+            </File>
+            <File>
               <FileName>as5600.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\application\Src\as5600.c</FilePath>
@@ -1284,6 +1289,11 @@
               <FileName>tle5011.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\application\Src\tle5011.c</FilePath>
+            </File>
+            <File>
+              <FileName>tle5012.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\application\Src\tle5012.c</FilePath>
             </File>
             <File>
               <FileName>as5600.c</FileName>
