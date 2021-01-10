@@ -71,12 +71,15 @@ int main(void)
 	EncodersInit(&dev_config);	
 	ShiftRegistersInit(&dev_config);
 	RadioButtons_Init(&dev_config);
-	SequentialButtons_Init(&dev_config);
-	AxesInit(&dev_config);
+	SequentialButtons_Init(&dev_config);	
 	
-	Delay_ms(50);	
 	USB_HW_Init();
+	// wait for USB initialization
+	Delay_ms(1000);	
 	
+	// init sensors
+	AxesInit(&dev_config);
+	// start sequential periphery reading
 	Timers_Init(&dev_config);		
 	
   while (1)
