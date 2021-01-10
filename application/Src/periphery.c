@@ -434,6 +434,7 @@ void IO_Init (dev_config_t * p_dev_config)
 			GPIO_Init (GPIOB,&GPIO_InitStructure);
 		}
 		else if (p_dev_config->pins[i] == TLE5011_CS || 
+						 p_dev_config->pins[i] == TLE5012_CS ||
 						 p_dev_config->pins[i] == MCP3201_CS ||
 						 p_dev_config->pins[i] == MCP3202_CS ||
 						 p_dev_config->pins[i] == MCP3204_CS ||

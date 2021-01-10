@@ -80,16 +80,16 @@ void TLE5012_Write(uint8_t * data, uint8_t addr, uint8_t length)
 
 int TLE5012_GetAngle(sensor_t * sensor, float * angle)
 {
-	int16_t x_value, y_value;
+	int16_t reg_data;
 	float out = 0;
 	int ret = 0;
 	
-	if (CheckCrc(&sensor->data[1], sensor->data[5], 0xFB, 4))
+	if (CheckCrc(&sensor->data[0], sensor->data[5], 0xFF, 4))
 	{
-		x_value = sensor->data[2]<<8 | sensor->data[1];
-		y_value = sensor->data[4]<<8 | sensor->data[3];
+		reg_data = (sensor->data[2] & 0x3F)<<8 | sensor->data[3];
+		if (sensor->data[2] & 0x40)  reg_data -= 16384;
 				
-		out = atan2f((float)y_value, (float)x_value)/ M_PI * (float)180.0;			
+		out = reg_data * 360.0f / 32768.0f;			
 		*angle = out;
 		ret = 0;
 	}
@@ -116,16 +116,23 @@ void TLE5012_StopDMA(sensor_t * sensor)
 {	
 	DMA_Cmd(DMA1_Channel2, DISABLE);
 	
-	Delay_us(5);											// waiting SPI clock to stop
-	SPI1->CR1 &= ~SPI_CR1_SPE;
-	while (!SPI1->SR & SPI_SR_RXNE);
+	
 	
 	// CS high	
 	pin_config[sensor->source].port->ODR |= pin_config[sensor->source].pin;
 	sensor->rx_complete = 1;
 	sensor->tx_complete = 1;
 	
-	SPI_BiDirectionalLineConfig(SPI1, SPI_Direction_Tx);	
+	SPI_BiDirectionalLineConfig(SPI1, SPI_Direction_Tx);
+	
+	Delay_us(5);	// wait SPI clocks to stop
+	
+	// switch MOSI back to push-pull
+	GPIO_InitTypeDef GPIO_InitStructure;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;						
+	GPIO_Init (GPIOB,&GPIO_InitStructure);	
 }
 
 

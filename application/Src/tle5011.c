@@ -84,10 +84,10 @@ int TLE5011_GetAngle(sensor_t * sensor, float * angle)
 	float out = 0;
 	int ret = 0;
 	
-	if (CheckCrc(&sensor->data[1], sensor->data[5], 0xFB, 4))
+	if (CheckCrc(&sensor->data[2], sensor->data[6], 0xFB, 4))
 	{
-		x_value = sensor->data[2]<<8 | sensor->data[1];
-		y_value = sensor->data[4]<<8 | sensor->data[3];
+		x_value = sensor->data[3]<<8 | sensor->data[2];
+		y_value = sensor->data[5]<<8 | sensor->data[4];
 				
 		out = atan2f((float)y_value, (float)x_value)/ M_PI * (float)180.0;			
 		*angle = out;
@@ -104,6 +104,14 @@ void TLE5011_StartDMA(sensor_t * sensor)
 {	
 	sensor->rx_complete = 1;
 	sensor->tx_complete = 0;
+	
+	// switch MOSI to open-drain
+	GPIO_InitTypeDef GPIO_InitStructure;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;						
+	GPIO_Init (GPIOB,&GPIO_InitStructure);
+	
 	// CS low
 	pin_config[sensor->source].port->ODR &= ~pin_config[sensor->source].pin;
 	sensor->data[0] = 0x00;
@@ -122,6 +130,15 @@ void TLE5011_StopDMA(sensor_t * sensor)
 	sensor->tx_complete = 1;
 	
 	SPI_BiDirectionalLineConfig(SPI1, SPI_Direction_Tx);	
+	
+	Delay_us(5);	// wait SPI clocks to stop
+	
+	// switch MOSI back to push-pull
+	GPIO_InitTypeDef GPIO_InitStructure;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;						
+	GPIO_Init (GPIOB,&GPIO_InitStructure);
 }
 
 

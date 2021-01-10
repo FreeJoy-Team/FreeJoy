@@ -16,7 +16,7 @@
 	#define M_PI							3.1415926535897932384626433832795
 #endif
 
-#define TLE5012_SPI_MODE			0
+#define TLE5012_SPI_MODE			1
 
 void TLE5012_StartDMA(sensor_t * sensor);
 void TLE5012_StopDMA(sensor_t * sensor);

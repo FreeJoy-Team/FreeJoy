@@ -27,6 +27,7 @@
 #include <string.h>
 #include <math.h>
 #include "tle5011.h"
+#include "tle5012.h"
 #include "mcp320x.h"
 #include "mlx90393.h"
 #include "as5048a.h"
@@ -790,7 +791,7 @@ void AxesProcess (dev_config_t * p_dev_config)
 					if (sensors[k].source == source) break;
 				}
 				// get angle data
-				if (TLE5011_GetAngle(&sensors[k], &tmpf) == 0)
+				if (TLE5012_GetAngle(&sensors[k], &tmpf) == 0)
 				{
 					sensors[k].ok_cnt++;
 					if (p_dev_config->axis_config[i].offset_angle > 0)
@@ -799,7 +800,8 @@ void AxesProcess (dev_config_t * p_dev_config)
 						if (tmpf < -180) tmpf += 360;
 						else if (tmpf > 180) tmpf -= 360;
 					}
-					raw_axis_data[i] = tmpf;
+					tmpf *= 1000;
+					raw_axis_data[i] = map_tle(tmpf);
 				}
 				else
 				{
