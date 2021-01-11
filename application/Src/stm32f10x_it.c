@@ -30,6 +30,7 @@
 #include "analog.h"
 #include "encoders.h"
 #include "tle5011.h"
+#include "tle5012.h"
 #include "mcp320x.h"
 #include "mlx90393.h"
 #include "as5048a.h"
@@ -255,7 +256,12 @@ void TIM2_IRQHandler(void)
 				{
 					if (sensors[i].type == TLE5011)
 					{
-						TLE501x_StartDMA(&sensors[i]);
+						TLE5011_StartDMA(&sensors[i]);
+						break;
+					}
+					else if (sensors[i].type == TLE5012)
+					{
+						TLE5012_StartDMA(&sensors[i]);
 						break;
 					}
 					else if (sensors[i].type == MCP3201 ||
@@ -323,7 +329,11 @@ void DMA1_Channel2_IRQHandler(void)
 		{
 			if (sensors[i].type == TLE5011)
 			{
-				TLE501x_StopDMA(&sensors[i++]);
+				TLE5011_StopDMA(&sensors[i++]);
+			}
+			else if (sensors[i].type == TLE5012)
+			{
+				TLE5012_StopDMA(&sensors[i++]);
 			}
 			else if (sensors[i].type == MCP3201)
 			{
@@ -380,7 +390,12 @@ void DMA1_Channel2_IRQHandler(void)
 			{
 				if (sensors[i].type == TLE5011)
 				{
-					TLE501x_StartDMA(&sensors[i]);
+					TLE5011_StartDMA(&sensors[i]);
+					return;
+				}
+				else if (sensors[i].type == TLE5012)
+				{
+					TLE5012_StartDMA(&sensors[i]);
 					return;
 				}
 				else if (sensors[i].type == MCP3201 ||
@@ -429,7 +444,18 @@ void DMA1_Channel3_IRQHandler(void)
 				sensors[i].rx_complete = 0;
 				if (sensors[i].type == TLE5011)
 				{
-					SPI_HalfDuplex_Receive(&sensors[i].data[1], 5, TLE5011_SPI_MODE);					
+					SPI_HalfDuplex_Receive(&sensors[i].data[2], 6, TLE5011_SPI_MODE);					
+				}
+				if (sensors[i].type == TLE5012)
+				{
+					// switch MOSI back to open-drain
+					GPIO_InitTypeDef GPIO_InitStructure;
+					GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+					GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
+					GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;						
+					GPIO_Init (GPIOB,&GPIO_InitStructure);
+					
+					SPI_HalfDuplex_Receive(&sensors[i].data[2], 4, TLE5012_SPI_MODE);					
 				}
 				break;
 			}

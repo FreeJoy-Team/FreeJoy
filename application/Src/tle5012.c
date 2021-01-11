@@ -22,7 +22,7 @@
   ******************************************************************************
   */
 
-#include "tle5011.h"
+#include "tle5012.h"
 #include <math.h>
 
 static uint8_t MathCRC8(uint8_t crc, uint8_t data)
@@ -56,40 +56,40 @@ static uint8_t CheckCrc(uint8_t * data, uint8_t crc, uint8_t initial, uint8_t le
   return (ret == crc);
 }
 
-void TLE5011_Read(uint8_t * data, uint8_t addr, uint8_t length)
+void TLE5012_Read(uint8_t * data, uint8_t addr, uint8_t length)
 {
 	uint8_t cmd = 0x80 | (addr & 0x0F)<<3 | (length & 0x07);
 	
-	SPI_HalfDuplex_Transmit(&cmd, 1, TLE5011_SPI_MODE);
+	SPI_HalfDuplex_Transmit(&cmd, 1, TLE5012_SPI_MODE);
 	if (length > 0)
 	{
-		SPI_HalfDuplex_Receive(data, length+1, TLE5011_SPI_MODE);
+		SPI_HalfDuplex_Receive(data, length+1, TLE5012_SPI_MODE);
 	}
 
 }
 
-void TLE5011_Write(uint8_t * data, uint8_t addr, uint8_t length)
+void TLE5012_Write(uint8_t * data, uint8_t addr, uint8_t length)
 {
 	uint8_t cmd = addr<<3 | (addr & 0x0F)<<3 | (length & 0x07);
-	SPI_HalfDuplex_Transmit(&cmd, 1, TLE5011_SPI_MODE);
+	SPI_HalfDuplex_Transmit(&cmd, 1, TLE5012_SPI_MODE);
 	if (length > 0)
 	{
-		SPI_HalfDuplex_Transmit(data, length, TLE5011_SPI_MODE);
+		SPI_HalfDuplex_Transmit(data, length, TLE5012_SPI_MODE);
 	}
 }
 
-int TLE5011_GetAngle(sensor_t * sensor, float * angle)
+int TLE5012_GetAngle(sensor_t * sensor, float * angle)
 {
-	int16_t x_value, y_value;
+	int16_t reg_data;
 	float out = 0;
 	int ret = 0;
 	
-	if (CheckCrc(&sensor->data[2], sensor->data[6], 0xFB, 4))
+	if (CheckCrc(&sensor->data[0], sensor->data[5], 0xFF, 4))
 	{
-		x_value = sensor->data[3]<<8 | sensor->data[2];
-		y_value = sensor->data[5]<<8 | sensor->data[4];
+		reg_data = (sensor->data[2] & 0x3F)<<8 | sensor->data[3];
+		if (sensor->data[2] & 0x40)  reg_data -= 16384;
 				
-		out = atan2f((float)y_value, (float)x_value)/ M_PI * (float)180.0;			
+		out = reg_data * 360.0f / 32768.0f;			
 		*angle = out;
 		ret = 0;
 	}
@@ -100,36 +100,30 @@ int TLE5011_GetAngle(sensor_t * sensor, float * angle)
 	return ret;
 }
 
-void TLE5011_StartDMA(sensor_t * sensor)
+void TLE5012_StartDMA(sensor_t * sensor)
 {	
 	sensor->rx_complete = 1;
 	sensor->tx_complete = 0;
-	
-	// switch MOSI to open-drain
-	GPIO_InitTypeDef GPIO_InitStructure;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;						
-	GPIO_Init (GPIOB,&GPIO_InitStructure);
-	
 	// CS low
 	pin_config[sensor->source].port->ODR &= ~pin_config[sensor->source].pin;
-	sensor->data[0] = 0x00;
-	sensor->data[1] = 0x8C;
+	sensor->data[0] = 0x80;
+	sensor->data[1] = 0x21;
 	
-	SPI_HalfDuplex_Transmit(&sensor->data[0], 2, TLE5011_SPI_MODE);
+	SPI_HalfDuplex_Transmit(&sensor->data[0], 2, TLE5012_SPI_MODE);
 }
 
-void TLE5011_StopDMA(sensor_t * sensor)
+void TLE5012_StopDMA(sensor_t * sensor)
 {	
 	DMA_Cmd(DMA1_Channel2, DISABLE);
+	
+	
 	
 	// CS high	
 	pin_config[sensor->source].port->ODR |= pin_config[sensor->source].pin;
 	sensor->rx_complete = 1;
 	sensor->tx_complete = 1;
 	
-	SPI_BiDirectionalLineConfig(SPI1, SPI_Direction_Tx);	
+	SPI_BiDirectionalLineConfig(SPI1, SPI_Direction_Tx);
 	
 	Delay_us(5);	// wait SPI clocks to stop
 	
@@ -138,7 +132,7 @@ void TLE5011_StopDMA(sensor_t * sensor)
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;						
-	GPIO_Init (GPIOB,&GPIO_InitStructure);
+	GPIO_Init (GPIOB,&GPIO_InitStructure);	
 }
 
 

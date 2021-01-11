@@ -106,6 +106,34 @@ void EncoderProcess (logical_buttons_state_t * button_state_buf, dev_config_t * 
 	}
 	if (!encoders_present) return;		// dont waste time if no encoders connected
 	
+	
+	int8_t ignore_a[MAX_ENCODERS_NUM]={};
+	int8_t ignore_b[MAX_ENCODERS_NUM]={};
+	// because physical_num = -1 - no button
+	for (int k=0; k<MAX_ENCODERS_NUM; k++)
+	{
+		ignore_a[k] = -1;
+		ignore_b[k] = -1;
+	}	
+	// search encoder phys number with shift mod enabled
+	uint8_t tmp_a = 0;
+	uint8_t tmp_b = 0;
+	for (int k = 0; k < MAX_ENCODERS_NUM; k++)
+	{
+		// Pin A
+		if (p_dev_config->buttons[encoders_state[k].pin_a].shift_modificator > 0 && 
+		 shifts_state & 1<<(p_dev_config->buttons[encoders_state[k].pin_a].shift_modificator-1))
+		{
+			ignore_a[tmp_a++] = p_dev_config->buttons[encoders_state[k].pin_a].physical_num;
+		}
+		// Pin B
+		if (p_dev_config->buttons[encoders_state[k].pin_b].shift_modificator > 0 && 
+		 shifts_state & 1<<(p_dev_config->buttons[encoders_state[k].pin_b].shift_modificator-1))
+		{
+			ignore_b[tmp_b++] = p_dev_config->buttons[encoders_state[k].pin_b].physical_num;
+		}
+	}
+	
 	for (int i=1; i<MAX_ENCODERS_NUM; i++)
 	{
 		uint32_t millis = GetTick();
@@ -142,24 +170,62 @@ void EncoderProcess (logical_buttons_state_t * button_state_buf, dev_config_t * 
 						{
 							if (stt > 0)	
 							{
-								if ((p_dev_config->buttons[encoders_state[i].pin_a].shift_modificator == 0) ||
-										(p_dev_config->buttons[encoders_state[i].pin_a].shift_modificator > 0 && 
-										 shifts_state & 1<<(p_dev_config->buttons[encoders_state[i].pin_a].shift_modificator-1))) 
+								// activate encoder with enable shift mod
+								if ((p_dev_config->buttons[encoders_state[i].pin_a].shift_modificator > 0 && 
+										 shifts_state & 1<<(p_dev_config->buttons[encoders_state[i].pin_a].shift_modificator-1)))
 								{
 									button_state_buf[encoders_state[i].pin_a].current_state = 1;			// CW
+								}
+								// if shift mod disabled
+								else if (p_dev_config->buttons[encoders_state[i].pin_a].shift_modificator == 0) 
+								{
+									uint8_t tmp_ignore = 0;
+									// check button in ignore list
+									for (int k = 0; k < MAX_ENCODERS_NUM; k++)	// if ignore_a[k] == 0 break; ?
+									{
+										if (p_dev_config->buttons[encoders_state[i].pin_a].physical_num == ignore_a[k])
+										{
+											tmp_ignore = 1;
+											break;
+										}
+									}
+									// activate if not found in ignore list
+									if (tmp_ignore == 0)
+									{
+										button_state_buf[encoders_state[i].pin_a].current_state = 1;			// CW
+									}
 								}
 								encoders_state[i].last_dir = 1;
 							}
 							else
 							{
-								if ((p_dev_config->buttons[encoders_state[i].pin_b].shift_modificator == 0) ||
-										(p_dev_config->buttons[encoders_state[i].pin_b].shift_modificator > 0 && 
-										 shifts_state & 1<<(p_dev_config->buttons[encoders_state[i].pin_b].shift_modificator-1))) 
+								// activate encoder with enable shift mod
+								if ((p_dev_config->buttons[encoders_state[i].pin_b].shift_modificator > 0 && 
+										 shifts_state & 1<<(p_dev_config->buttons[encoders_state[i].pin_b].shift_modificator-1)))
 								{
 									button_state_buf[encoders_state[i].pin_b].current_state = 1;			// CCW
 								}
+								// if shift mod disabled
+								else if (p_dev_config->buttons[encoders_state[i].pin_b].shift_modificator == 0) 
+								{
+									uint8_t tmp_ignore = 0;
+									// check button in ignore list
+									for (int k = 0; k < MAX_ENCODERS_NUM; k++)	// if ignore_b[k] == 0 break; ?
+									{
+										if (p_dev_config->buttons[encoders_state[i].pin_b].physical_num == ignore_b[k])
+										{
+											tmp_ignore = 1;
+											break;
+										}
+									}
+									// activate if not found in ignore list
+									if (tmp_ignore == 0)
+									{
+										button_state_buf[encoders_state[i].pin_b].current_state = 1;			// CCW
+									}
+								}
 								encoders_state[i].last_dir = -1;
-							}						
+							}			
 							encoders_state[i].time_last = millis;
 							encoders_state[i].cnt += stt;
 							
@@ -174,20 +240,58 @@ void EncoderProcess (logical_buttons_state_t * button_state_buf, dev_config_t * 
 							encoders_state[i].state <<= 2;
 							if (encoders_state[i].last_dir > 0)	
 							{
-								if ((p_dev_config->buttons[encoders_state[i].pin_a].shift_modificator == 0) ||
-										(p_dev_config->buttons[encoders_state[i].pin_a].shift_modificator > 0 && 
-										 shifts_state & 1<<(p_dev_config->buttons[encoders_state[i].pin_a].shift_modificator-1))) 
+								// activate encoder with enable shift mod
+								if ((p_dev_config->buttons[encoders_state[i].pin_a].shift_modificator > 0 && 
+										 shifts_state & 1<<(p_dev_config->buttons[encoders_state[i].pin_a].shift_modificator-1)))
 								{
 									button_state_buf[encoders_state[i].pin_a].current_state = 1;			// CW
+								}
+								// if shift mod disabled
+								else if (p_dev_config->buttons[encoders_state[i].pin_a].shift_modificator == 0) 
+								{
+									uint8_t tmp_ignore = 0;
+									// check button in ignore list
+									for (int a = 0; a < MAX_ENCODERS_NUM; a++)
+									{
+										if (p_dev_config->buttons[encoders_state[i].pin_a].physical_num == ignore_a[a])
+										{
+											tmp_ignore = 1;
+											break;
+										}
+									}
+									// activate if not found in ignore list
+									if (tmp_ignore == 0)
+									{
+										button_state_buf[encoders_state[i].pin_a].current_state = 1;			// CW
+									}
 								}
 							}
 							else 
 							{
-								if ((p_dev_config->buttons[encoders_state[i].pin_b].shift_modificator == 0) ||
-										(p_dev_config->buttons[encoders_state[i].pin_b].shift_modificator > 0 && 
-										 shifts_state & 1<<(p_dev_config->buttons[encoders_state[i].pin_b].shift_modificator-1))) 
+								// activate encoder with enable shift mod
+								if ((p_dev_config->buttons[encoders_state[i].pin_b].shift_modificator > 0 && 
+										 shifts_state & 1<<(p_dev_config->buttons[encoders_state[i].pin_b].shift_modificator-1)))
 								{
 									button_state_buf[encoders_state[i].pin_b].current_state = 1;			// CCW
+								}
+								// if shift mod disabled
+								else if (p_dev_config->buttons[encoders_state[i].pin_b].shift_modificator == 0) 
+								{
+									uint8_t tmp_ignore = 0;
+									// check button in ignore list
+									for (int k = 0; k < MAX_ENCODERS_NUM; k++)	// if ignore_b[k] == 0 break; ?
+									{
+										if (p_dev_config->buttons[encoders_state[i].pin_b].physical_num == ignore_b[k])
+										{
+											tmp_ignore = 1;
+											break;
+										}
+									}
+									// activate if not found in ignore list
+									if (tmp_ignore == 0)
+									{
+										button_state_buf[encoders_state[i].pin_b].current_state = 1;			// CCW
+									}
 								}
 							}
 						}
@@ -217,7 +321,7 @@ void EncoderProcess (logical_buttons_state_t * button_state_buf, dev_config_t * 
 						a_press_time = p_dev_config->button_timer3_ms;
 						break;
 					default:
-						a_press_time = p_dev_config->encoder_press_time_ms = 100;
+						a_press_time = p_dev_config->encoder_press_time_ms;
 						break;
 			};
 			
@@ -233,7 +337,7 @@ void EncoderProcess (logical_buttons_state_t * button_state_buf, dev_config_t * 
 						b_press_time = p_dev_config->button_timer3_ms;
 						break;
 					default:
-						b_press_time = p_dev_config->encoder_press_time_ms = 100;
+						b_press_time = p_dev_config->encoder_press_time_ms;
 						break;
 			};
 					

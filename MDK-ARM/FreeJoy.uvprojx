@@ -10,7 +10,7 @@
       <TargetName>Application</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pCCUsed>5060960::V5.06 update 7 (build 960)::.\ARMCC</pCCUsed>
+      <pCCUsed>5060750::V5.06 update 6 (build 750)::ARMCC</pCCUsed>
       <uAC6>0</uAC6>
       <TargetOption>
         <TargetCommonOption>
@@ -53,7 +53,7 @@
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
           <CreateHexFile>1</CreateHexFile>
-          <DebugInformation>0</DebugInformation>
+          <DebugInformation>1</DebugInformation>
           <BrowseInformation>1</BrowseInformation>
           <ListingPath></ListingPath>
           <HexFormatSelection>1</HexFormatSelection>
@@ -185,7 +185,6 @@
             <uocXRam>0</uocXRam>
             <RvdsVP>0</RvdsVP>
             <RvdsMve>0</RvdsMve>
-            <RvdsCdeCp>0</RvdsCdeCp>
             <hadIRAM2>0</hadIRAM2>
             <hadIROM2>0</hadIROM2>
             <StupSel>8</StupSel>
@@ -313,7 +312,7 @@
           </ArmAdsMisc>
           <Cads>
             <interw>1</interw>
-            <Optim>4</Optim>
+            <Optim>1</Optim>
             <oTime>0</oTime>
             <SplitLS>0</SplitLS>
             <OneElfS>1</OneElfS>
@@ -352,7 +351,7 @@
             <NoWarn>0</NoWarn>
             <uSurpInc>0</uSurpInc>
             <useXO>0</useXO>
-            <ClangAsOpt>4</ClangAsOpt>
+            <uClangAs>0</uClangAs>
             <VariousControls>
               <MiscControls></MiscControls>
               <Define></Define>
@@ -459,9 +458,19 @@
               <FilePath>..\application\Src\tle5011.c</FilePath>
             </File>
             <File>
+              <FileName>tle5012.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\application\Src\tle5012.c</FilePath>
+            </File>
+            <File>
               <FileName>as5600.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\application\Src\as5600.c</FilePath>
+            </File>
+            <File>
+              <FileName>as5048a.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\application\Src\as5048a.c</FilePath>
             </File>
             <File>
               <FileName>mcp320x.c</FileName>
@@ -522,11 +531,6 @@
               <FileName>main.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\application\Inc\main.h</FilePath>
-            </File>
-            <File>
-              <FileName>as5048a.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\application\Src\as5048a.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -591,7 +595,7 @@
                 <NoWarn>2</NoWarn>
                 <uSurpInc>2</uSurpInc>
                 <useXO>2</useXO>
-                <ClangAsOpt>0</ClangAsOpt>
+                <uClangAs>2</uClangAs>
                 <VariousControls>
                   <MiscControls></MiscControls>
                   <Define></Define>
@@ -945,7 +949,6 @@
             <uocXRam>0</uocXRam>
             <RvdsVP>0</RvdsVP>
             <RvdsMve>0</RvdsMve>
-            <RvdsCdeCp>0</RvdsCdeCp>
             <hadIRAM2>0</hadIRAM2>
             <hadIROM2>0</hadIROM2>
             <StupSel>8</StupSel>
@@ -1112,7 +1115,7 @@
             <NoWarn>0</NoWarn>
             <uSurpInc>0</uSurpInc>
             <useXO>0</useXO>
-            <ClangAsOpt>4</ClangAsOpt>
+            <uClangAs>0</uClangAs>
             <VariousControls>
               <MiscControls></MiscControls>
               <Define></Define>
@@ -1211,7 +1214,7 @@
                 <NoWarn>2</NoWarn>
                 <uSurpInc>2</uSurpInc>
                 <useXO>2</useXO>
-                <ClangAsOpt>0</ClangAsOpt>
+                <uClangAs>2</uClangAs>
                 <VariousControls>
                   <MiscControls></MiscControls>
                   <Define></Define>
@@ -1288,9 +1291,19 @@
               <FilePath>..\application\Src\tle5011.c</FilePath>
             </File>
             <File>
+              <FileName>tle5012.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\application\Src\tle5012.c</FilePath>
+            </File>
+            <File>
               <FileName>as5600.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\application\Src\as5600.c</FilePath>
+            </File>
+            <File>
+              <FileName>as5048a.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\application\Src\as5048a.c</FilePath>
             </File>
             <File>
               <FileName>mcp320x.c</FileName>
@@ -1351,11 +1364,6 @@
               <FileName>main.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\application\Inc\main.h</FilePath>
-            </File>
-            <File>
-              <FileName>as5048a.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\application\Src\as5048a.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1992,14 +2000,5 @@
     <components/>
     <files/>
   </RTE>
-
-  <LayerInfo>
-    <Layers>
-      <Layer>
-        <LayName>FreeJoy</LayName>
-        <LayPrjMark>1</LayPrjMark>
-      </Layer>
-    </Layers>
-  </LayerInfo>
 
 </Project>

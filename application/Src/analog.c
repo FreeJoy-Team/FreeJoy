@@ -27,6 +27,7 @@
 #include <string.h>
 #include <math.h>
 #include "tle5011.h"
+#include "tle5012.h"
 #include "mcp320x.h"
 #include "mlx90393.h"
 #include "as5048a.h"
@@ -449,6 +450,19 @@ void AxesInit (dev_config_t * p_dev_config)
 				}
 			}
 		}
+		else if (p_dev_config->pins[i] == TLE5012_CS)
+		{
+			for (uint8_t k=0; k<MAX_AXIS_NUM; k++)
+			{
+				if (p_dev_config->axis_config[k].source_main == i && sensors_cnt < MAX_AXIS_NUM)
+				{
+					sensors[sensors_cnt].type = TLE5012;			
+					sensors[sensors_cnt].source = i;
+					sensors_cnt++;
+					break;
+				}
+			}
+		}
 		else if (p_dev_config->pins[i] == MCP3201_CS)
 		{
 			for (uint8_t k=0; k<MAX_AXIS_NUM; k++)
@@ -750,7 +764,34 @@ void AxesProcess (dev_config_t * p_dev_config)
 					if (sensors[k].source == source) break;
 				}
 				// get angle data
-				if (TLE501x_GetAngle(&sensors[k], &tmpf) == 0)
+				if (TLE5011_GetAngle(&sensors[k], &tmpf) == 0)
+				{
+					sensors[k].ok_cnt++;
+					if (p_dev_config->axis_config[i].offset_angle > 0)
+					{
+						tmpf -= p_dev_config->axis_config[i].offset_angle * 15;
+						if (tmpf < -180) tmpf += 360;
+						else if (tmpf > 180) tmpf -= 360;
+					}
+					tmpf *= 1000;
+					raw_axis_data[i] = map_tle(tmpf);
+				}
+				else
+				{
+					sensors[k].err_cnt++;
+				}
+			}
+			else if (p_dev_config->pins[source] == TLE5012_CS)			// source TLE5012
+			{
+				tmpf = 0;
+				uint8_t k=0;
+				// search for needed sensor
+				for (k=0; k<MAX_AXIS_NUM; k++)
+				{
+					if (sensors[k].source == source) break;
+				}
+				// get angle data
+				if (TLE5012_GetAngle(&sensors[k], &tmpf) == 0)
 				{
 					sensors[k].ok_cnt++;
 					if (p_dev_config->axis_config[i].offset_angle > 0)

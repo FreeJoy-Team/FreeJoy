@@ -35,7 +35,9 @@ C_SOURCES =  \
 ../application/Src/main.c \
 ../application/Src/periphery.c \
 ../application/Src/tle5011.c \
+../application/Src/tle5012.c \
 ../application/Src/as5600.c \
+../application/Src/as5048a.c \
 ../application/Src/ads1115.c \
 ../application/Src/mlx90393.c \
 ../application/Src/mcp320x.c \

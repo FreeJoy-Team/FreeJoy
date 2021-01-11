@@ -93,6 +93,7 @@ void SPI_HalfDuplex_Transmit(uint8_t * data, uint16_t length, uint8_t spi_mode)
 	cr1temp &= ~(SPI_CR1_CPOL|SPI_CR1_CPHA);
 	cr1temp |= SPI_CR1_BIDIMODE | (spi_mode & 0x03);
 	SPI1->CR1 = cr1temp;
+	SPI1->DR;							// clear RXNE 
 	SPI_BiDirectionalLineConfig(SPI1, SPI_Direction_Tx);
 	
 	SPI_I2S_ReceiveData(SPI1);
@@ -200,6 +201,8 @@ void SPI_FullDuplex_TransmitReceive(uint8_t * tx_data, uint8_t * rx_data, uint16
 	cr1temp &= ~(SPI_CR1_BIDIMODE|SPI_CR1_BIDIOE|SPI_CR1_RXONLY|SPI_CR1_CPOL|SPI_CR1_CPHA);
 	cr1temp |= spi_mode & 0x03;
 	SPI1->CR1 = cr1temp;
+	SPI1->DR;							// clear RXNE 
+	
 	DMA_Cmd(DMA1_Channel2, ENABLE);
 	DMA_Cmd(DMA1_Channel3, ENABLE);
 }
