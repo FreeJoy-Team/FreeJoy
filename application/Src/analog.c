@@ -808,31 +808,10 @@ void AxesProcess (dev_config_t * p_dev_config)
 					sensors[k].err_cnt++;
 				}
 			}
-			else if (p_dev_config->pins[source] == MCP3201_CS)				// source MCP3201
-			{
-				uint8_t k=0;
-				// search for needed sensor
-				for (k=0; k<MAX_AXIS_NUM; k++)
-				{
-					if (sensors[k].source == source) break;
-				}
-				// get data
-				if (p_dev_config->axis_config[i].offset_angle > 0)	// offset enabled
-				{
-					tmp[i] = MCP320x_GetData(&sensors[k], 0) - p_dev_config->axis_config[i].offset_angle * 170;
-					if (tmp[i] < 0) tmp[i] += 4095;
-					else if (tmp[i] > 4095) tmp[i] -= 4095;
-				}
-				else		// offset disabled
-				{
-					tmp[i] = MCP320x_GetData(&sensors[k], 0);
-				}
-				
-				raw_axis_data[i] = map2(tmp[i], 0, 4095, AXIS_MIN_VALUE, AXIS_MAX_VALUE);
-			}	
-			else if (p_dev_config->pins[source] == MCP3202_CS ||
+			else if (p_dev_config->pins[source] == MCP3201_CS ||
+							 p_dev_config->pins[source] == MCP3202_CS ||
 							 p_dev_config->pins[source] == MCP3204_CS ||
-							 p_dev_config->pins[source] == MCP3208_CS)				// source MCP3202/4/8
+							 p_dev_config->pins[source] == MCP3208_CS)				// source MCP320x
 			{
 				uint8_t k=0;
 				// search for needed sensor
