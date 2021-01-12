@@ -154,6 +154,13 @@ void MLX90393_Start(uint8_t mode, sensor_t * sensor)
 	uint8_t rx_buf[5];
 	uint16_t tmp_data;
 	
+	// Configure MOSI as open drain
+	GPIO_InitTypeDef GPIO_InitStructure;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;
+	GPIO_Init (GPIOB,&GPIO_InitStructure);
+	
 	// Exit
 	pin_config[sensor->source].port->ODR &= ~pin_config[sensor->source].pin;
 	MLX90393_WriteCommand(mode, MLX_EXIT, rx_buf);							
@@ -229,6 +236,12 @@ void MLX90393_Start(uint8_t mode, sensor_t * sensor)
 	Delay_us(50);
 	pin_config[sensor->source].port->ODR |= pin_config[sensor->source].pin;
 	Delay_ms(20);
+	
+	// Set MOSI back to push-pull
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+	GPIO_Init (GPIOB,&GPIO_InitStructure);
 }
 
 /**
@@ -275,6 +288,12 @@ void MLX90393_StartDMA(uint8_t mode, sensor_t * sensor)
 	
 	if (mode == MLX_SPI)
 	{
+		// Configure MOSI as open drain
+		GPIO_InitTypeDef GPIO_InitStructure;
+		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
+		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;
+		GPIO_Init (GPIOB,&GPIO_InitStructure);
 		// CS low
 		pin_config[sensor->source].port->ODR &= ~pin_config[sensor->source].pin;
 		SPI_FullDuplex_TransmitReceive(tmp_buf, sensor->data, 8, MLX90393_SPI_MODE);
@@ -292,6 +311,13 @@ void MLX90393_StopDMA(sensor_t * sensor)
 	pin_config[sensor->source].port->ODR |= pin_config[sensor->source].pin;
 	sensor->rx_complete = 1;
 	sensor->tx_complete = 1;
+	
+	// Set MOSI back to push-pull
+	GPIO_InitTypeDef GPIO_InitStructure;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+	GPIO_Init (GPIOB,&GPIO_InitStructure);
 }
 
 

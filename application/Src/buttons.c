@@ -970,7 +970,7 @@ void ButtonsGet (uint8_t * raw_data, button_data_t * data, uint8_t * shift_data)
 	{
 		memcpy(data, buttons_data, sizeof(buttons_data));
 	}
-	if (data != NULL)
+	if (shift_data != NULL)
 	{
 		memcpy(shift_data, &shifts_state, sizeof(shifts_state));
 	}
