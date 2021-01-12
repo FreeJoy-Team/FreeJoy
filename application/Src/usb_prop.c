@@ -94,34 +94,40 @@ USER_STANDARD_REQUESTS User_Standard_Requests =
 
 ONE_DESCRIPTOR Device_Descriptor =
   {
-    (uint8_t*)CustomHID_DeviceDescriptor,
-    CUSTOMHID_SIZ_DEVICE_DESC
+    (uint8_t*)Composite_DeviceDescriptor,
+    Composite_SIZ_DEVICE_DESC
   };
 
 ONE_DESCRIPTOR Config_Descriptor =
   {
-    (uint8_t*)CustomHID_ConfigDescriptor,
-    CUSTOMHID_SIZ_CONFIG_DESC
+    (uint8_t*)Composite_ConfigDescriptor,
+    Composite_SIZ_CONFIG_DESC
   };
 
+ONE_DESCRIPTOR JoystickHID_Report_Descriptor =
+  {
+    (uint8_t *)JoystickHID_ReportDescriptor,
+    JoystickHID_SIZ_REPORT_DESC
+  };
+	
 ONE_DESCRIPTOR CustomHID_Report_Descriptor =
   {
     (uint8_t *)CustomHID_ReportDescriptor,
-    CUSTOMHID_SIZ_REPORT_DESC
+    CustomHID_SIZ_REPORT_DESC
   };
 
 ONE_DESCRIPTOR CustomHID_Hid_Descriptor =
   {
-    (uint8_t*)CustomHID_ConfigDescriptor + CUSTOMHID_OFF_HID_DESC,
+    (uint8_t*)Composite_ConfigDescriptor + CUSTOMHID_OFF_HID_DESC,
     CUSTOMHID_SIZ_HID_DESC
   };
 
 ONE_DESCRIPTOR String_Descriptor[4] =
   {
-    {(uint8_t*)CustomHID_StringLangID, CUSTOMHID_SIZ_STRING_LANGID},
-    {(uint8_t*)CustomHID_StringVendor, CUSTOMHID_SIZ_STRING_VENDOR},
-    {(uint8_t*)CustomHID_StringProduct, CUSTOMHID_SIZ_STRING_PRODUCT},
-    {(uint8_t*)CustomHID_StringSerial, CUSTOMHID_SIZ_STRING_SERIAL}
+    {(uint8_t*)Composite_StringLangID, Composite_SIZ_STRING_LANGID},
+    {(uint8_t*)Composite_StringVendor, Composite_SIZ_STRING_VENDOR},
+    {(uint8_t*)Composite_StringProduct, Composite_SIZ_STRING_PRODUCT},
+    {(uint8_t*)Composite_StringSerial, Composite_SIZ_STRING_SERIAL}
   };
 
 /* Extern variables ----------------------------------------------------------*/
@@ -173,7 +179,7 @@ void CustomHID_Reset(void)
   pInformation->Current_Interface = 0;/*the default Interface*/
   
   /* Current Feature initialization */
-  pInformation->Current_Feature = CustomHID_ConfigDescriptor[7];
+  pInformation->Current_Feature = Composite_ConfigDescriptor[7];
  
   SetBTABLE(BTABLE_ADDRESS);
 
@@ -194,12 +200,22 @@ void CustomHID_Reset(void)
   SetEPRxCount(ENDP1, 64);
   SetEPRxStatus(ENDP1, EP_RX_VALID);
   SetEPTxStatus(ENDP1, EP_TX_NAK);
+	
+	/* Initialize Endpoint 2 */
+  SetEPType(ENDP2, EP_INTERRUPT);
+  SetEPTxAddr(ENDP2, ENDP2_TXADDR);
+  SetEPRxAddr(ENDP2, ENDP2_RXADDR);
+  SetEPTxCount(ENDP2, 0);
+  SetEPRxCount(ENDP2, 64);
+  SetEPRxStatus(ENDP2, EP_RX_VALID);
+  SetEPTxStatus(ENDP2, EP_TX_NAK);
 
   /* Set this device to response on default address */
   SetDeviceAddress(0);
   bDeviceState = ATTACHED;
 	
-	PrevXferComplete = 1;
+	EP1_PrevXferComplete = 1;
+	EP2_PrevXferComplete = 1;
 }
 /*******************************************************************************
 * Function Name  : CustomHID_SetConfiguration.

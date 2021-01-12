@@ -195,8 +195,8 @@ void Get_SerialNum(void)
   
   if (Device_Serial0 != 0)
   {
-    IntToUnicode (Device_Serial0, &CustomHID_StringSerial[2] , 8);
-    IntToUnicode (Device_Serial1, &CustomHID_StringSerial[18], 4);
+    IntToUnicode (Device_Serial0, &Composite_StringSerial[2] , 8);
+    IntToUnicode (Device_Serial1, &Composite_StringSerial[18], 4);
   }
 }
 
@@ -213,7 +213,7 @@ void Get_ProductStr(void)
 	
 	DevConfigGet(&tmp);
 	
-  AsciiToUnicode((uint8_t *) &tmp.device_name[0], &CustomHID_StringProduct[2], sizeof(tmp.device_name));
+  AsciiToUnicode((uint8_t *) &tmp.device_name[0], &Composite_StringProduct[2], sizeof(tmp.device_name));
 }
 
 /*******************************************************************************
@@ -275,10 +275,10 @@ void Get_VidPid(void)
 	
 	DevConfigGet(&tmp);
 	
-  CustomHID_DeviceDescriptor[8] = LOBYTE(tmp.vid);
-	CustomHID_DeviceDescriptor[9] = HIBYTE(tmp.vid);
-	CustomHID_DeviceDescriptor[10] = LOBYTE(tmp.pid);
-	CustomHID_DeviceDescriptor[11] = HIBYTE(tmp.pid);
+  Composite_DeviceDescriptor[8] = LOBYTE(tmp.vid);
+	Composite_DeviceDescriptor[9] = HIBYTE(tmp.vid);
+	Composite_DeviceDescriptor[10] = LOBYTE(tmp.pid);
+	Composite_DeviceDescriptor[11] = HIBYTE(tmp.pid);
 }
 
 /*******************************************************************************
@@ -294,22 +294,22 @@ void Get_ReportDesc(void)
 	
 	AppConfigGet(&tmp_app_config);
 
-	CustomHID_ReportDescriptor[104] = tmp_app_config.buttons_cnt ? tmp_app_config.buttons_cnt : 1;
-	CustomHID_ReportDescriptor[112] = tmp_app_config.buttons_cnt ? ((tmp_app_config.buttons_cnt - 1)/8 + 1) * 8 : 0;
-	
-	CustomHID_ReportDescriptor[41] = (tmp_app_config.axes & 0x01) ? 0x30 : 0x04;
-	CustomHID_ReportDescriptor[43] = (tmp_app_config.axes & 0x02) ? 0x31 : 0x04;
-	CustomHID_ReportDescriptor[45] = (tmp_app_config.axes & 0x04) ? 0x32 : 0x04;
-	CustomHID_ReportDescriptor[47] = (tmp_app_config.axes & 0x08) ? 0x33 : 0x04;
-	CustomHID_ReportDescriptor[49] = (tmp_app_config.axes & 0x10) ? 0x34 : 0x04;
-	CustomHID_ReportDescriptor[51] = (tmp_app_config.axes & 0x20) ? 0x35 : 0x04;
-	CustomHID_ReportDescriptor[53] = (tmp_app_config.axes & 0x40) ? 0x36 : 0x04;
-	CustomHID_ReportDescriptor[55] = (tmp_app_config.axes & 0x80) ? 0x36 : 0x04;
-	
-	CustomHID_ReportDescriptor[69] = (tmp_app_config.povs & 0x01) ? 0x39 : 0x00;
-	CustomHID_ReportDescriptor[88] = (tmp_app_config.povs & 0x02) ? 0x39 : 0x00;
-	CustomHID_ReportDescriptor[92] = (tmp_app_config.povs & 0x04) ? 0x39 : 0x00;
-	CustomHID_ReportDescriptor[96] = (tmp_app_config.povs & 0x08) ? 0x39 : 0x00;
+//	CustomHID_ReportDescriptor[104] = tmp_app_config.buttons_cnt ? tmp_app_config.buttons_cnt : 1;
+//	CustomHID_ReportDescriptor[112] = tmp_app_config.buttons_cnt ? ((tmp_app_config.buttons_cnt - 1)/8 + 1) * 8 : 0;
+//	
+//	CustomHID_ReportDescriptor[41] = (tmp_app_config.axes & 0x01) ? 0x30 : 0x04;
+//	CustomHID_ReportDescriptor[43] = (tmp_app_config.axes & 0x02) ? 0x31 : 0x04;
+//	CustomHID_ReportDescriptor[45] = (tmp_app_config.axes & 0x04) ? 0x32 : 0x04;
+//	CustomHID_ReportDescriptor[47] = (tmp_app_config.axes & 0x08) ? 0x33 : 0x04;
+//	CustomHID_ReportDescriptor[49] = (tmp_app_config.axes & 0x10) ? 0x34 : 0x04;
+//	CustomHID_ReportDescriptor[51] = (tmp_app_config.axes & 0x20) ? 0x35 : 0x04;
+//	CustomHID_ReportDescriptor[53] = (tmp_app_config.axes & 0x40) ? 0x36 : 0x04;
+//	CustomHID_ReportDescriptor[55] = (tmp_app_config.axes & 0x80) ? 0x36 : 0x04;
+//	
+//	CustomHID_ReportDescriptor[69] = (tmp_app_config.povs & 0x01) ? 0x39 : 0x00;
+//	CustomHID_ReportDescriptor[88] = (tmp_app_config.povs & 0x02) ? 0x39 : 0x00;
+//	CustomHID_ReportDescriptor[92] = (tmp_app_config.povs & 0x04) ? 0x39 : 0x00;
+//	CustomHID_ReportDescriptor[96] = (tmp_app_config.povs & 0x08) ? 0x39 : 0x00;
 }
 
 void USB_HW_Init(void)

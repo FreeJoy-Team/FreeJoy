@@ -211,7 +211,7 @@ void TIM2_IRQHandler(void)
 			
 			joy_report.id = REPORT_ID_JOY;	
 							
-			USB_CUSTOM_HID_SendReport((uint8_t *)&joy_report.id, sizeof(joy_report) - sizeof(joy_report.dummy));
+			//USB_CUSTOM_HID_SendReport((uint8_t *)&joy_report.id, sizeof(joy_report) - sizeof(joy_report.dummy));
 		}
 
 		// digital inputs polling

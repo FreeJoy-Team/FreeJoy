@@ -56,7 +56,8 @@
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
 /* External variables --------------------------------------------------------*/
-extern __IO uint8_t PrevXferComplete;
+extern __IO uint8_t EP1_PrevXferComplete;
+extern __IO uint8_t EP2_PrevXferComplete;
 
 void USB_CUSTOM_HID_SendReport(uint8_t * data, uint8_t length);
 

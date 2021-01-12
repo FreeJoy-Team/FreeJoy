@@ -53,7 +53,8 @@
 volatile extern uint8_t bootloader;
 volatile extern int32_t joy_ticks;
 
-__IO uint8_t PrevXferComplete = 1;
+__IO uint8_t EP1_PrevXferComplete = 1;
+__IO uint8_t EP2_PrevXferComplete = 1;
 
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
@@ -528,6 +529,18 @@ void EP1_OUT_Callback(void)
 }
 
 /*******************************************************************************
+* Function Name  : EP2_OUT_Callback.
+* Description    : EP2 OUT Callback Routine.
+* Input          : None.
+* Output         : None.
+* Return         : None.
+*******************************************************************************/
+void EP2_OUT_Callback(void)
+{
+	SetEPRxStatus(ENDP2, EP_RX_VALID);
+}
+
+/*******************************************************************************
 * Function Name  : EP1_IN_Callback.
 * Description    : EP1 IN Callback Routine.
 * Input          : None.
@@ -536,16 +549,28 @@ void EP1_OUT_Callback(void)
 *******************************************************************************/
 void EP1_IN_Callback(void)
 {
-  PrevXferComplete = 1;
+  EP1_PrevXferComplete = 1;
+}
+
+/*******************************************************************************
+* Function Name  : EP2_IN_Callback.
+* Description    : EP2 IN Callback Routine.
+* Input          : None.
+* Output         : None.
+* Return         : None.
+*******************************************************************************/
+void EP2_IN_Callback(void)
+{
+  EP2_PrevXferComplete = 1;
 }
 
 void USB_CUSTOM_HID_SendReport(uint8_t * data, uint8_t length)
 {
-	if ((PrevXferComplete) && (bDeviceState == CONFIGURED))
+	if ((EP2_PrevXferComplete) && (bDeviceState == CONFIGURED))
 	{
-			USB_SIL_Write(EP1_IN, data, length);
-			SetEPTxValid(ENDP1);
-			PrevXferComplete = 0;
+			USB_SIL_Write(EP2_IN, data, length);
+			SetEPTxValid(ENDP2);
+			EP2_PrevXferComplete = 0;
 	}
 }
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

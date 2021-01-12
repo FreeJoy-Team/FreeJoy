@@ -230,17 +230,17 @@
         <Ww>
           <count>0</count>
           <WinNumber>2</WinNumber>
-          <ItemText>CustomHID_ReportDescriptor</ItemText>
+          <ItemText>Composite_StringSerial</ItemText>
         </Ww>
         <Ww>
           <count>1</count>
           <WinNumber>2</WinNumber>
-          <ItemText>reg_data,0x0A</ItemText>
+          <ItemText>Composite_StringProduct</ItemText>
         </Ww>
         <Ww>
           <count>2</count>
           <WinNumber>2</WinNumber>
-          <ItemText>out</ItemText>
+          <ItemText>Composite_DeviceDescriptor</ItemText>
         </Ww>
       </WatchWindow2>
       <MemoryWindow1>
