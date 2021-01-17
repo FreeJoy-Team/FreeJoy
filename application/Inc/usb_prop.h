@@ -71,7 +71,9 @@ uint8_t *CustomHID_GetStringDescriptor(uint16_t);
 RESULT CustomHID_SetProtocol(void);
 uint8_t *CustomHID_GetProtocolValue(uint16_t Length);
 RESULT CustomHID_SetProtocol(void);
+uint8_t *JoystickHID_GetReportDescriptor(uint16_t Length);
 uint8_t *CustomHID_GetReportDescriptor(uint16_t Length);
+uint8_t *JoystickHID_GetHIDDescriptor(uint16_t Length);
 uint8_t *CustomHID_GetHIDDescriptor(uint16_t Length);
 
 

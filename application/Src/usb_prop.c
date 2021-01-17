@@ -116,10 +116,16 @@ ONE_DESCRIPTOR CustomHID_Report_Descriptor =
     CustomHID_SIZ_REPORT_DESC
   };
 
+ONE_DESCRIPTOR JoystickHID_Hid_Descriptor =
+  {
+    (uint8_t*)Composite_ConfigDescriptor + JoystickHID_OFF_HID_DESC,
+    JoystickHID_SIZ_HID_DESC
+  };
+	
 ONE_DESCRIPTOR CustomHID_Hid_Descriptor =
   {
-    (uint8_t*)Composite_ConfigDescriptor + CUSTOMHID_OFF_HID_DESC,
-    CUSTOMHID_SIZ_HID_DESC
+    (uint8_t*)Composite_ConfigDescriptor + CustomHID_OFF_HID_DESC,
+    CustomHID_SIZ_HID_DESC
   };
 
 ONE_DESCRIPTOR String_Descriptor[4] =
@@ -291,11 +297,17 @@ RESULT CustomHID_Data_Setup(uint8_t RequestNo)
     
     if (pInformation->USBwValue1 == REPORT_DESCRIPTOR)
     {
-      CopyRoutine = CustomHID_GetReportDescriptor;
+			if (pInformation->USBwValue0	== 0)
+				CopyRoutine = JoystickHID_GetReportDescriptor;
+			else if (pInformation->USBwValue0	== 1)
+				CopyRoutine = CustomHID_GetReportDescriptor;
     }
     else if (pInformation->USBwValue1 == HID_DESCRIPTOR_TYPE)
     {
-      CopyRoutine = CustomHID_GetHIDDescriptor;
+			if (pInformation->USBwValue0	== 0)
+				CopyRoutine = JoystickHID_GetHIDDescriptor;
+			else if (pInformation->USBwValue0	== 1)
+				CopyRoutine = CustomHID_GetHIDDescriptor;
     }
     
   } /* End of GET_DESCRIPTOR */
@@ -316,6 +328,10 @@ RESULT CustomHID_Data_Setup(uint8_t RequestNo)
       break;
     }
   }
+	else if ( (Type_Recipient == (CLASS_REQUEST | ENDPOINT_RECIPIENT)) )
+	{
+		__nop();
+	}
   
   if (CopyRoutine == NULL)
   {
@@ -414,6 +430,18 @@ uint8_t *CustomHID_GetStringDescriptor(uint16_t Length)
 }
 
 /*******************************************************************************
+* Function Name  : JoystickHID_GetReportDescriptor.
+* Description    : Gets the HID report descriptor.
+* Input          : Length
+* Output         : None.
+* Return         : The address of the configuration descriptor.
+*******************************************************************************/
+uint8_t *JoystickHID_GetReportDescriptor(uint16_t Length)
+{
+  return Standard_GetDescriptorData(Length, &JoystickHID_Report_Descriptor);
+}
+
+/*******************************************************************************
 * Function Name  : CustomHID_GetReportDescriptor.
 * Description    : Gets the HID report descriptor.
 * Input          : Length
@@ -423,6 +451,18 @@ uint8_t *CustomHID_GetStringDescriptor(uint16_t Length)
 uint8_t *CustomHID_GetReportDescriptor(uint16_t Length)
 {
   return Standard_GetDescriptorData(Length, &CustomHID_Report_Descriptor);
+}
+
+/*******************************************************************************
+* Function Name  : JoystickHID_GetHIDDescriptor.
+* Description    : Gets the HID descriptor.
+* Input          : Length
+* Output         : None.
+* Return         : The address of the configuration descriptor.
+*******************************************************************************/
+uint8_t *JoystickHID_GetHIDDescriptor(uint16_t Length)
+{
+  return Standard_GetDescriptorData(Length, &JoystickHID_Hid_Descriptor);
 }
 
 /*******************************************************************************

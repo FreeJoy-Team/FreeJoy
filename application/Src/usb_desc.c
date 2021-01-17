@@ -142,7 +142,6 @@ uint8_t Composite_ConfigDescriptor[Composite_SIZ_CONFIG_DESC] =
     /* 41 */
 		
     /************** Descriptor of Custom HID interface ****************/
-    /* 09 */
     0x09,         /* bLength: Interface Descriptor size */
     USB_INTERFACE_DESCRIPTOR_TYPE,/* bDescriptorType: Interface descriptor type */
     0x01,         /* bInterfaceNumber: Number of Interface */
@@ -151,9 +150,9 @@ uint8_t Composite_ConfigDescriptor[Composite_SIZ_CONFIG_DESC] =
     0x03,         /* bInterfaceClass: HID */
     0x00,         /* bInterfaceSubClass : 1=BOOT, 0=no boot */
     0x00,         /* nInterfaceProtocol : 0=none, 1=keyboard, 2=mouse */
-    0,            /* iInterface: Index of string descriptor */
+    1,            /* iInterface: Index of string descriptor */
     /******************** Descriptor of Custom HID HID ********************/
-    /* 18 */
+    /* 50 */
     0x09,         /* bLength: HID Descriptor size */
     HID_DESCRIPTOR_TYPE, /* bDescriptorType: HID */
     0x10,         /* bcdHID: HID Class Spec release number */
@@ -164,7 +163,7 @@ uint8_t Composite_ConfigDescriptor[Composite_SIZ_CONFIG_DESC] =
     LOBYTE(CustomHID_SIZ_REPORT_DESC),/* wItemLength: Total length of Report descriptor */
     HIBYTE(CustomHID_SIZ_REPORT_DESC),
     /******************** Descriptor of Custom HID endpoints ******************/
-    /* 27 */
+    /* 59 */
     0x07,          /* bLength: Custom HID Endpoint Descriptor size */
     USB_ENDPOINT_DESCRIPTOR_TYPE, /* bDescriptorType: */
 
@@ -173,7 +172,7 @@ uint8_t Composite_ConfigDescriptor[Composite_SIZ_CONFIG_DESC] =
     0x40,          /* wMaxPacketSize: 64 Bytes max */
     0x00,
     0x01,          /* bInterval: Polling Interval (1 ms) */
-    /* 34 */
+    /* 66 */
     	
     0x07,	/* bLength: Endpoint Descriptor size */
     USB_ENDPOINT_DESCRIPTOR_TYPE,	/* bDescriptorType: */
@@ -184,7 +183,7 @@ uint8_t Composite_ConfigDescriptor[Composite_SIZ_CONFIG_DESC] =
     0x40,	/* wMaxPacketSize: 64 Bytes max  */
     0x00,
     0x10,	/* bInterval: Polling Interval (16 ms) */
-		/* 41 */
+		/* 73 */
   }
   ; /* JoystickHID_ConfigDescriptor */
 uint8_t JoystickHID_ReportDescriptor[JoystickHID_SIZ_REPORT_DESC] =

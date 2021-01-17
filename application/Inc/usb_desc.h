@@ -52,8 +52,10 @@
 #define USB_ENDPOINT_DESCRIPTOR_TYPE            0x05
 
 #define HID_DESCRIPTOR_TYPE                     0x21
-#define CUSTOMHID_SIZ_HID_DESC                  0x09
-#define CUSTOMHID_OFF_HID_DESC                  0x12
+#define CustomHID_SIZ_HID_DESC                  0x09
+#define CustomHID_OFF_HID_DESC                  0x12
+#define JoystickHID_SIZ_HID_DESC                0x09
+#define JoystickHID_OFF_HID_DESC                0x32
 
 #define Composite_SIZ_DEVICE_DESC               18
 #define Composite_SIZ_CONFIG_DESC               73

@@ -712,7 +712,7 @@ exit_NoData_Setup0:
   * Output         : None.
   * Return         : None.
   */
-void Data_Setup0(void)
+void Data_Setup0()
 {
   uint8_t *(*CopyRoutine)(uint16_t);
   RESULT Result;
@@ -839,6 +839,7 @@ void Data_Setup0(void)
       pInformation->ControlState = PAUSE;
       return;
     }
+
   }
 
   if (pInformation->Ctrl_Info.Usb_wLength == 0xFFFF)
