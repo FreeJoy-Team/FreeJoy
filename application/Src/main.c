@@ -75,7 +75,7 @@ int main(void)
 	
 	USB_HW_Init();
 	// wait for USB initialization
-	Delay_ms(1000);	
+	Delay_ms(500);	
 	
 	// init sensors
 	AxesInit(&dev_config);

@@ -88,7 +88,7 @@ uint8_t *CustomHID_GetHIDDescriptor(uint16_t Length);
 #define CustomHID_SetDeviceFeature          NOP_Process
 //#define CustomHID_SetDeviceAddress          NOP_Process
 
-#define REPORT_DESCRIPTOR                  0x22
+
 
 #endif /* __USB_PROP_H */
 

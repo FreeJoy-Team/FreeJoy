@@ -285,8 +285,8 @@ RESULT CustomHID_Data_Setup(uint8_t RequestNo)
 {
   uint8_t *(*CopyRoutine)(uint16_t);
   
-  if (pInformation->USBwIndex != 0) 
-    return USB_UNSUPPORT;    
+//  if (pInformation->USBwIndex != 0) 				// I had to exclude this code to allow 
+//    return USB_UNSUPPORT;    								// programm setup Interface #1
   
   CopyRoutine = NULL;
   
@@ -297,17 +297,25 @@ RESULT CustomHID_Data_Setup(uint8_t RequestNo)
     
     if (pInformation->USBwValue1 == REPORT_DESCRIPTOR)
     {
-			if (pInformation->USBwValue0	== 0)
+			if (pInformation->USBwIndex0	== 0)				// Interface #0
+			{
 				CopyRoutine = JoystickHID_GetReportDescriptor;
-			else if (pInformation->USBwValue0	== 1)
+			}
+			else if (pInformation->USBwIndex0 == 1)	// Interface #1
+			{
 				CopyRoutine = CustomHID_GetReportDescriptor;
+			}
     }
     else if (pInformation->USBwValue1 == HID_DESCRIPTOR_TYPE)
     {
-			if (pInformation->USBwValue0	== 0)
+			if (pInformation->USBwIndex0	== 0)				// Interface #0
+			{
 				CopyRoutine = JoystickHID_GetHIDDescriptor;
-			else if (pInformation->USBwValue0	== 1)
+			}
+			else if (pInformation->USBwIndex0	== 1)	// Interface #1
+			{
 				CopyRoutine = CustomHID_GetHIDDescriptor;
+			}
     }
     
   } /* End of GET_DESCRIPTOR */
@@ -328,10 +336,6 @@ RESULT CustomHID_Data_Setup(uint8_t RequestNo)
       break;
     }
   }
-	else if ( (Type_Recipient == (CLASS_REQUEST | ENDPOINT_RECIPIENT)) )
-	{
-		__nop();
-	}
   
   if (CopyRoutine == NULL)
   {
