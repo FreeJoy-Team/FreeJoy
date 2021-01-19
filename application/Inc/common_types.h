@@ -421,17 +421,24 @@ typedef struct
 /******************** HID REPORT CONFIGURATION **********************/
 typedef struct
 {
-	uint8_t							dummy;		// alighning
+	uint8_t 						dummy;		// data alining
 	uint8_t 						id;
-	analog_data_t				raw_axis_data[MAX_AXIS_NUM];
-	uint8_t							raw_button_data[9];
-	uint8_t							shift_button_data;	
 	analog_data_t			 	axis_data[MAX_AXIS_NUM];
 	uint8_t 						pov_data[MAX_POVS_NUM];
 	uint8_t 						button_data[MAX_BUTTONS_NUM/8];
 	
 } joy_report_t;
 
+typedef struct
+{
+	uint8_t 						dummy;		// data alining
+	uint8_t 						id;
+	analog_data_t				raw_axis_data[MAX_AXIS_NUM];
+	uint8_t							phy_button_data[MAX_BUTTONS_NUM/8];
+	uint8_t							log_button_data[MAX_BUTTONS_NUM/8];
+	uint8_t							shift_button_data;
+	
+} params_report_t;
 
 
 

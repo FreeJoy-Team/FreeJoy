@@ -179,9 +179,10 @@ void SysTick_Handler(void)
 
 void TIM2_IRQHandler(void)
 {
-	static uint8_t btn_num = 0;
-	uint8_t	physical_buttons_data[MAX_BUTTONS_NUM];
-	joy_report_t joy_report;
+	static uint8_t 		btn_num = 0;
+	uint8_t						physical_buttons_data[MAX_BUTTONS_NUM];
+	joy_report_t 			joy_report;
+	params_report_t 	params_report;
 	
 	if (TIM_GetITStatus(TIM2, TIM_IT_Update))
 	{
@@ -196,22 +197,15 @@ void TIM2_IRQHandler(void)
 			joy_ticks = ticks;
 				
 			// getting fresh data to joystick report buffer
-			ButtonsGet(physical_buttons_data, joy_report.button_data, &joy_report.shift_button_data);
-			AnalogGet(joy_report.axis_data, NULL, joy_report.raw_axis_data);	
+			ButtonsGet(physical_buttons_data, joy_report.button_data, &params_report.shift_button_data);
+			AnalogGet(joy_report.axis_data, NULL, params_report.raw_axis_data);	
 			POVsGet(joy_report.pov_data);
-			
-			joy_report.raw_button_data[0] = btn_num;
-			for (uint8_t i=0; i<64; i++)	
-			{
-				joy_report.raw_button_data[1 + ((i & 0xF8)>>3)] &= ~(1 << (i & 0x07));
-				joy_report.raw_button_data[1 + ((i & 0xF8)>>3)] |= physical_buttons_data[btn_num+i] << (i & 0x07);
-			}
+
 			btn_num += 64;
-			btn_num = btn_num & 0x7F;
-			
-			joy_report.id = REPORT_ID_JOY;	
+			btn_num = btn_num & 0x7F;	
 							
-			//USB_CUSTOM_HID_SendReport((uint8_t *)&joy_report.id, sizeof(joy_report) - sizeof(joy_report.dummy));
+			joy_report.id = REPORT_ID_JOY;
+			USB_CUSTOM_HID_SendReport(1, (uint8_t *)&joy_report.id, sizeof(joy_report)-1);
 		}
 
 		// digital inputs polling
