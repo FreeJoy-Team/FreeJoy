@@ -910,10 +910,9 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 				else
 				{
 					buttons_data[(k & 0xF8)>>3] |= (!logical_buttons_state[i].current_state << (k & 0x07));
-				}			
+				}
+				k++;				
 			}		
-			if (!p_dev_config->is_dynamic_config || is_enabled)	k++;		// increment only if non dynamic or dynamic and enabled
-				
 	}
 	// resume IRQ
 	NVIC_EnableIRQ(TIM2_IRQn);

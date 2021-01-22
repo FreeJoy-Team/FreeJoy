@@ -18,7 +18,7 @@
 
 static const dev_config_t init_config =
 {
-	.firmware_version = 0x1630,		// do not change
+	.firmware_version = 0x1700,		// do not change
 	
 	/* 
 		Name of device in devices dispatcher
@@ -46,7 +46,6 @@ static const dev_config_t init_config =
 	
 	.vid = 0x0483,										// ST
 	.pid = 0x5757,										
-	.is_dynamic_config = 0,	
 
 	.button_debounce_ms = 50,					// debounce time for all buttons
 	

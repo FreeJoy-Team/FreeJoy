@@ -52,9 +52,9 @@
 #define BURST_DR(val)									((val) & 0x3F)
 
 // Reg2 bits
-#define OSR2(val)											((val << 11) & 0x1800)
-#define RES(z,y,x)  									((z << 9 | y << 7 | x << 5) & 0x7E0)
-#define DIG_FILT(val) 								((val << 2) & 0x1C)
+#define OSR2(val)											(((val_ << 11) & 0x1800)
+#define RES(z,y,x)  									(((z) << 9 | (y) << 7 | (x) << 5) & 0x7E0)
+#define DIG_FILT(val) 								(((val) << 2) & 0x1C)
 #define OSR(val)   										((val) & 0x03)
 
 void MLX90393_Start(uint8_t mode, sensor_t * sensor);

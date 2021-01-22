@@ -39,7 +39,7 @@ int AS5048A_GetData(uint16_t * data, sensor_t * sensor, uint8_t channel)
 	tmp = (tmp << 8) | sensor->data[1];
 	*data = tmp & 0x3FFF;
 	// check error bit
-	if((sensor->data[0]&0x40)==1) ret = -1;
+	if(sensor->data[0] & 0x40) ret = -1;
 	// test sometimes error reading
 	if(*data==0) ret = -1;
 	// check parity
@@ -67,8 +67,8 @@ void AS5048A_StartDMA(sensor_t * sensor)
 	tmp_buf[1] = 0xFF;		// 
 	
 	SPI1->CR1 &= ~SPI_CR1_SPE;
-	while (!SPI1->SR & SPI_SR_RXNE);
-	while (!SPI1->SR & SPI_SR_TXE);
+	while (!(SPI1->SR & SPI_SR_RXNE));
+	while (!(SPI1->SR & SPI_SR_TXE));
 	
 	// CS low
 	pin_config[sensor->source].port->ODR &= ~pin_config[sensor->source].pin;

@@ -53,7 +53,7 @@
 void Get_SerialNum(void);
 void Get_ProductStr(void);
 void Get_VidPid(void);
-void Get_ReportDesc(void);
+uint8_t Get_ReportDesc(void);
 void USB_HW_Init(void);
 void USB_HW_DeInit(void);
 

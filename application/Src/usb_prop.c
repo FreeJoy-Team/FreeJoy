@@ -155,11 +155,11 @@ uint8_t *CustomHID_SetReport_Feature(uint16_t Length);
 void CustomHID_init(void)
 {
   /* Update the serial number string descriptor with the data from the unique 
-  ID*/
+  ID*/	
   Get_SerialNum();
 	Get_ProductStr();
 	Get_VidPid();
-	Get_ReportDesc();
+	JoystickHID_Report_Descriptor.Descriptor_Size = Get_ReportDesc();
     
   pInformation->Current_Configuration = 0;
   /* Connect the device */

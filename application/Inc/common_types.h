@@ -395,7 +395,6 @@ typedef struct
 	shift_modificator_t	shift_config[5];
 	uint16_t						vid;
 	uint16_t						pid;
-	uint8_t							is_dynamic_config;
 	
 	// config 15;
 	led_pwm_config_t		led_pwm_config[4];
@@ -411,9 +410,11 @@ typedef struct
 /******************** APPLICATION CONFIGURATION **********************/
 typedef struct
 {
-	uint8_t							axes;
+	uint8_t							axis;
+	uint8_t 						axis_cnt;
 	uint8_t							buttons_cnt;
-	uint8_t							povs;
+	uint8_t							pov;
+	uint8_t							pov_cnt;
 	
 } app_config_t;
 
@@ -421,8 +422,6 @@ typedef struct
 /******************** HID REPORT CONFIGURATION **********************/
 typedef struct
 {
-	uint8_t 						dummy;		// data alining
-	uint8_t 						id;
 	analog_data_t			 	axis_data[MAX_AXIS_NUM];
 	uint8_t 						pov_data[MAX_POVS_NUM];
 	uint8_t 						button_data[MAX_BUTTONS_NUM/8];
@@ -431,8 +430,6 @@ typedef struct
 
 typedef struct
 {
-	uint8_t 						dummy;		// data alining
-	uint8_t 						id;
 	analog_data_t				raw_axis_data[MAX_AXIS_NUM];
 	uint8_t							phy_button_data[MAX_BUTTONS_NUM/8];
 	uint8_t							log_button_data[MAX_BUTTONS_NUM/8];

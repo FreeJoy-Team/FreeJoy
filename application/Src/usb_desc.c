@@ -116,8 +116,8 @@ uint8_t Composite_ConfigDescriptor[Composite_SIZ_CONFIG_DESC] =
     0x00,         /* bCountryCode: Hardware target country */
     0x01,         /* bNumDescriptors: Number of HID class descriptors to follow */
     0x22,         /* bDescriptorType */
-    LOBYTE(JoystickHID_SIZ_REPORT_DESC),/* wItemLength: Total length of Report descriptor */
-    HIBYTE(JoystickHID_SIZ_REPORT_DESC),
+    LOBYTE(0),		/* wItemLength: Total length of Report descriptor */
+    HIBYTE(0),
     /******************** Descriptor of Joystick HID endpoints ******************/
     /* 27 */
     0x07,          /* bLength: Joystick HID Endpoint Descriptor size */
@@ -183,7 +183,17 @@ uint8_t JoystickHID_ReportDescriptor[JoystickHID_SIZ_REPORT_DESC] =
 
 		0x85, REPORT_ID_JOY,				 	 //		REPORT_ID	(JOY_REPORT_ID)	
 
-		// axes data
+		// buttons data
+		0x05, 0x09,                    //   USAGE_PAGE (Button)		
+    0x19, 0x01,                    //   USAGE_MINIMUM (Button 1)
+    0x29, MAX_BUTTONS_NUM,         //   USAGE_MAXIMUM (Button MAX_BUTTONS_NUM)
+    0x15, 0x00,                    //   LOGICAL_MINIMUM (0)
+    0x25, 0x01,                    //   LOGICAL_MAXIMUM (1)
+    0x75, 0x01,                    //   REPORT_SIZE (1)
+    0x95, MAX_BUTTONS_NUM,         //   REPORT_COUNT (MAX_BUTTONS_NUM)
+    0x81, 0x00,                    //   INPUT (Data,Ary,Abs)
+		
+		// axis data
 		0x05, 0x01,                    // 	USAGE_PAGE (Generic Desktop)
 		0x09, 0x30,                    //   USAGE (X)
     0x09, 0x31,                    //   USAGE (Y)
@@ -215,16 +225,6 @@ uint8_t JoystickHID_ReportDescriptor[JoystickHID_SIZ_REPORT_DESC] =
 		0x81, 0x02, 									 //   INPUT (Data,Var,Abs)
 		0x09, 0x39, 									 //   USAGE (Hat switch)
 		0x81, 0x02, 									 //   INPUT (Data,Var,Abs)
-		
-		// buttons data
-		0x05, 0x09,                    //   USAGE_PAGE (Button)		
-    0x19, 0x01,                    //   USAGE_MINIMUM (Button 1)
-    0x29, MAX_BUTTONS_NUM,         //   USAGE_MAXIMUM (Button MAX_BUTTONS_NUM)
-    0x15, 0x00,                    //   LOGICAL_MINIMUM (0)
-    0x25, 0x01,                    //   LOGICAL_MAXIMUM (1)
-    0x75, 0x01,                    //   REPORT_SIZE (1)
-    0x95, MAX_BUTTONS_NUM,         //   REPORT_COUNT (MAX_BUTTONS_NUM)
-    0x81, 0x00,                    //   INPUT (Data,Ary,Abs)
 
 		0xc0,                           // END_COLLECTION
   }; /* CustomHID_ReportDescriptor */

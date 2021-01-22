@@ -179,10 +179,12 @@ void SysTick_Handler(void)
 
 void TIM2_IRQHandler(void)
 {
-	static uint8_t 		btn_num = 0;
 	uint8_t						physical_buttons_data[MAX_BUTTONS_NUM];
 	joy_report_t 			joy_report;
 	params_report_t 	params_report;
+	uint8_t						report_buf[64];
+	uint8_t						pos = 0;
+	app_config_t			tmp_app_config;
 	
 	if (TIM_GetITStatus(TIM2, TIM_IT_Update))
 	{
@@ -195,17 +197,37 @@ void TIM2_IRQHandler(void)
 		if (ticks - joy_ticks >= dev_config.exchange_period_ms )
 		{
 			joy_ticks = ticks;
+			
+			AppConfigGet(&tmp_app_config);
 				
 			// getting fresh data to joystick report buffer
-			ButtonsGet(physical_buttons_data, joy_report.button_data, &params_report.shift_button_data);
+			ButtonsGet(physical_buttons_data, joy_report.button_data, &params_report.shift_button_data);			
 			AnalogGet(joy_report.axis_data, NULL, params_report.raw_axis_data);	
 			POVsGet(joy_report.pov_data);
-
-			btn_num += 64;
-			btn_num = btn_num & 0x7F;	
-							
-			joy_report.id = REPORT_ID_JOY;
-			USB_CUSTOM_HID_SendReport(1, (uint8_t *)&joy_report.id, sizeof(joy_report)-1);
+			
+			report_buf[pos++] = REPORT_ID_JOY;
+			
+			if (tmp_app_config.buttons_cnt > 0)
+			{
+				memcpy(&report_buf[pos], joy_report.button_data, MAX_BUTTONS_NUM/8);
+				pos += (tmp_app_config.buttons_cnt - 1)/8 + 1;
+			}
+			for (uint8_t i=0; i<MAX_AXIS_NUM; i++)
+			{
+					if (tmp_app_config.axis & (1<<i))
+					{
+						report_buf[pos++] = (uint8_t) (joy_report.axis_data[i] & 0xFF);
+						report_buf[pos++] = (uint8_t) (joy_report.axis_data[i] >> 8);							
+					}
+			}
+			for (uint8_t i=0; i<MAX_POVS_NUM; i++)
+			{
+					if (tmp_app_config.pov & (1<<i))
+					{
+						report_buf[pos++] = joy_report.pov_data[i];
+					}
+			}
+			USB_CUSTOM_HID_SendReport(1, report_buf, pos);
 		}
 
 		// digital inputs polling
