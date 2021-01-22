@@ -30,7 +30,7 @@ uint16_t MCP320x_GetData(sensor_t * sensor, uint8_t channel)
 	
 	if (sensor->type == MCP3201)
 	{
-		ret = (sensor->data[1 + 3*channel] & 0x1F)<<7 | sensor->data[2 + 3*channel]>>1;
+		ret = ((sensor->data[1] & 0x1F)<<7) | (sensor->data[2]>>1);
 	}
 	else
 	{
