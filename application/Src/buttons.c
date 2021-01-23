@@ -28,7 +28,9 @@
 uint8_t												raw_buttons_data[MAX_BUTTONS_NUM];
 physical_buttons_state_t 			physical_buttons_state[MAX_BUTTONS_NUM];
 logical_buttons_state_t 			logical_buttons_state[MAX_BUTTONS_NUM];
-button_data_t 								buttons_data[MAX_BUTTONS_NUM/8];
+uint8_t												phy_buttons_data[MAX_BUTTONS_NUM/8];
+uint8_t												log_buttons_data[MAX_BUTTONS_NUM/8];
+button_data_t 								out_buttons_data[MAX_BUTTONS_NUM/8];
 pov_data_t 										pov_data[MAX_POVS_NUM];
 uint8_t												pov_pos[MAX_POVS_NUM];
 uint8_t												shifts_state = 0;
@@ -723,7 +725,7 @@ uint8_t ButtonsReadPhysical(dev_config_t * p_dev_config, uint8_t * p_buf)
 	MaxtrixButtonsGet(p_buf, p_dev_config, &pos);
 	ShiftRegistersGet(p_buf, p_dev_config, &pos);
 	a2b_first = pos;
-	AxesToButtonsGet(p_buf, p_dev_config, &pos);
+	AxisToButtonsGet(p_buf, p_dev_config, &pos);
 	a2b_last = pos;
 	SingleButtonsGet(p_buf, p_dev_config, &pos);
 	
@@ -902,17 +904,20 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 		
 			if (is_enabled)
 			{
-				buttons_data[(k & 0xF8)>>3] &= ~(1 << (k & 0x07));
+				out_buttons_data[(k & 0xF8)>>3] &= ~(1 << (k & 0x07));
 				if (!p_dev_config->buttons[i].is_inverted)
 				{					
-					buttons_data[(k & 0xF8)>>3] |= (logical_buttons_state[i].current_state << (k & 0x07));
+					out_buttons_data[(k & 0xF8)>>3] |= (logical_buttons_state[i].current_state << (k & 0x07));
 				}
 				else
 				{
-					buttons_data[(k & 0xF8)>>3] |= (!logical_buttons_state[i].current_state << (k & 0x07));
+					out_buttons_data[(k & 0xF8)>>3] |= (!logical_buttons_state[i].current_state << (k & 0x07));
 				}
 				k++;				
-			}		
+			}
+				
+			log_buttons_data[(i & 0xF8)>>3] |= (logical_buttons_state[i].current_state << (i & 0x07));
+			phy_buttons_data[(i & 0xF8)>>3] |= (physical_buttons_state[i].current_state << (i & 0x07));			
 	}
 	// resume IRQ
 	NVIC_EnableIRQ(TIM2_IRQn);
@@ -959,15 +964,19 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 	* @param  data: Pointer to target buffer of logical buttons
   * @retval None
   */
-void ButtonsGet (uint8_t * raw_data, button_data_t * data, uint8_t * shift_data)
+void ButtonsGet (uint8_t * out_data, uint8_t * log_data, uint8_t * phy_data, uint8_t * shift_data)
 {
-	if (raw_data != NULL)
+	if (out_data != NULL)
 	{
-		memcpy(raw_data, raw_buttons_data, sizeof(raw_buttons_data));
+		memcpy(out_data, out_buttons_data, sizeof(out_buttons_data));
 	}
-	if (data != NULL)
+	if (log_data != NULL)
 	{
-		memcpy(data, buttons_data, sizeof(buttons_data));
+		memcpy(log_data, log_buttons_data, sizeof(log_buttons_data));
+	}
+	if (phy_data != NULL)
+	{
+		memcpy(phy_data, &phy_buttons_data, sizeof(phy_buttons_data));
 	}
 	if (shift_data != NULL)
 	{

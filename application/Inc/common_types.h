@@ -13,7 +13,7 @@
 #include "common_defines.h"
 
 
-/******************** AXES **********************/
+/******************** AXIS **********************/
 enum
 {
 	FILTER_NO = 0,
@@ -295,7 +295,7 @@ typedef struct
 } encode_stater_t;
 
 
-/******************** AXES TO BUTTONS **********************/
+/******************** AXIS TO BUTTONS **********************/
 typedef struct
 {
 	uint8_t points[13];
@@ -388,7 +388,7 @@ typedef struct
 	uint16_t 						a2b_debounce_ms;					// config packet 9
 	
 	// config 12-13-14
-	axis_to_buttons_t		axes_to_buttons[MAX_AXIS_NUM];
+	axis_to_buttons_t		axis_to_buttons[MAX_AXIS_NUM];
 	
 	// config 14	
 	shift_reg_config_t	shift_registers[4];

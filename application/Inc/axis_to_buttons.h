@@ -14,7 +14,7 @@
 #include "analog.h"
 
 
-void AxesToButtonsGet (uint8_t * raw_button_data_buf, dev_config_t * p_dev_config, uint8_t * pos);
+void AxisToButtonsGet (uint8_t * raw_button_data_buf, dev_config_t * p_dev_config, uint8_t * pos);
 
 #endif 	/* __AXIS_TO_BUTTONS_H__ */
 

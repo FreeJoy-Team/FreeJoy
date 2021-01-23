@@ -78,7 +78,7 @@ int main(void)
 	Delay_ms(500);	
 	
 	// init sensors
-	AxesInit(&dev_config);
+	AxisInit(&dev_config);
 	// start sequential periphery reading
 	Timers_Init(&dev_config);		
 	
@@ -89,7 +89,7 @@ int main(void)
 		
 		analog_data_t tmp[8];
 		AnalogGet(NULL, tmp, NULL);
-		PWM_SetFromAxes(&dev_config, tmp);
+		PWM_SetFromAxis(&dev_config, tmp);
 		
 		// Enter flasher command received
 		if (bootloader > 0)

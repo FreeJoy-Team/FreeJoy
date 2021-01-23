@@ -179,7 +179,6 @@ void SysTick_Handler(void)
 
 void TIM2_IRQHandler(void)
 {
-	uint8_t						physical_buttons_data[MAX_BUTTONS_NUM];
 	joy_report_t 			joy_report;
 	params_report_t 	params_report;
 	uint8_t						report_buf[64];
@@ -201,12 +200,15 @@ void TIM2_IRQHandler(void)
 			AppConfigGet(&tmp_app_config);
 				
 			// getting fresh data to joystick report buffer
-			ButtonsGet(physical_buttons_data, joy_report.button_data, &params_report.shift_button_data);			
+			ButtonsGet(joy_report.button_data, 
+								 params_report.log_button_data, 
+								 params_report.phy_button_data, 
+								 &params_report.shift_button_data);			
 			AnalogGet(joy_report.axis_data, NULL, params_report.raw_axis_data);	
 			POVsGet(joy_report.pov_data);
 			
-			report_buf[pos++] = REPORT_ID_JOY;
-			
+			// fill joystick report buffer
+			report_buf[pos++] = REPORT_ID_JOY;			
 			if (tmp_app_config.buttons_cnt > 0)
 			{
 				memcpy(&report_buf[pos], joy_report.button_data, MAX_BUTTONS_NUM/8);
@@ -227,7 +229,25 @@ void TIM2_IRQHandler(void)
 						report_buf[pos++] = joy_report.pov_data[i];
 					}
 			}
+			// send joystick report
 			USB_CUSTOM_HID_SendReport(1, report_buf, pos);
+			
+			// fill params report buffer
+			pos = 0;
+			report_buf[pos++] = REPORT_ID_PARAM;	
+			for (uint8_t i=0; i<MAX_AXIS_NUM; i++)
+			{
+				report_buf[pos++] = (uint8_t) (params_report.raw_axis_data[i] & 0xFF);
+				report_buf[pos++] = (uint8_t) (params_report.raw_axis_data[i] >> 8);							
+			}
+			memcpy(&report_buf[pos], params_report.phy_button_data, MAX_BUTTONS_NUM/8);
+			pos += MAX_BUTTONS_NUM/8;
+			memcpy(&report_buf[pos], params_report.log_button_data, MAX_BUTTONS_NUM/8);
+			pos += MAX_BUTTONS_NUM/8;
+			report_buf[pos++] = params_report.shift_button_data;
+			
+			// send params report
+			USB_CUSTOM_HID_SendReport(2, report_buf, pos);
 		}
 
 		// digital inputs polling
@@ -245,7 +265,7 @@ void TIM2_IRQHandler(void)
 		{		
 			adc_ticks = ticks;	
 
-			AxesProcess(&dev_config);					// process axes only once for one data reading
+			AxisProcess(&dev_config);					// process axis only once for one data reading
 			
 			// Disable periphery before ADC conversion
 			RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1,DISABLE);	

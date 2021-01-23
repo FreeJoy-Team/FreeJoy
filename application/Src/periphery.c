@@ -109,7 +109,7 @@ void Timers_Init(dev_config_t * p_dev_config)
 	// Reset tick counter
 	Ticks = 0;
 	
-	// Encoders, Axes and HID timer
+	// Encoders, Axis and HID timer
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 		
 	TIM_TimeBaseStructInit(&TIM_TimeBaseInitStructure);	
@@ -180,10 +180,10 @@ void Timers_Init(dev_config_t * p_dev_config)
 /**
   * @brief Update PWM values
 	* @param p_dev_config: Pointer to device config
-	* @param axes_data: Pointer to axes values
+	* @param axis_data: Pointer to axis values
   * @retval None
   */
-void PWM_SetFromAxes(dev_config_t * p_dev_config, analog_data_t * axes_data)
+void PWM_SetFromAxis(dev_config_t * p_dev_config, analog_data_t * axis_data)
 {
 	int32_t	tmp32;
 	
@@ -191,7 +191,7 @@ void PWM_SetFromAxes(dev_config_t * p_dev_config, analog_data_t * axes_data)
 	// Channel 1
 	if (p_dev_config->led_pwm_config[3].is_axis)
 	{
-		tmp32 = (axes_data[p_dev_config->led_pwm_config[3].axis_num] + 32767)/655;
+		tmp32 = (axis_data[p_dev_config->led_pwm_config[3].axis_num] + 32767)/655;
 		TIM_SetCompare1(TIM3, tmp32 * p_dev_config->led_pwm_config[3].duty_cycle * (TIM3->ARR + 1) / 10000);
   }
 	else
@@ -202,7 +202,7 @@ void PWM_SetFromAxes(dev_config_t * p_dev_config, analog_data_t * axes_data)
 	// Channel 3
 	if (p_dev_config->led_pwm_config[1].is_axis)
 	{
-		tmp32 = (axes_data[p_dev_config->led_pwm_config[1].axis_num] + 32767)/655;
+		tmp32 = (axis_data[p_dev_config->led_pwm_config[1].axis_num] + 32767)/655;
 		TIM_SetCompare3(TIM3, tmp32 * p_dev_config->led_pwm_config[1].duty_cycle * (TIM3->ARR + 1) / 10000);
   }
 	else
@@ -213,7 +213,7 @@ void PWM_SetFromAxes(dev_config_t * p_dev_config, analog_data_t * axes_data)
 	// Channel 4
 	if (p_dev_config->led_pwm_config[2].is_axis)
 	{
-		tmp32 = (axes_data[p_dev_config->led_pwm_config[2].axis_num] + 32767)/655;
+		tmp32 = (axis_data[p_dev_config->led_pwm_config[2].axis_num] + 32767)/655;
 		TIM_SetCompare4(TIM3, tmp32 * p_dev_config->led_pwm_config[2].duty_cycle * (TIM3->ARR + 1) / 10000);
   }
 	else
@@ -226,7 +226,7 @@ void PWM_SetFromAxes(dev_config_t * p_dev_config, analog_data_t * axes_data)
 	// Channel 3
 	if (p_dev_config->led_pwm_config[0].is_axis && p_dev_config->pins[8] == LED_PWM)		// prevent conflicts with encoder timer
 	{
-		tmp32 = (axes_data[p_dev_config->led_pwm_config[0].axis_num] + 32767)/655;
+		tmp32 = (axis_data[p_dev_config->led_pwm_config[0].axis_num] + 32767)/655;
 		TIM_SetCompare1(TIM1, tmp32 * p_dev_config->led_pwm_config[0].duty_cycle * (TIM1->ARR + 1) / 10000);
   }
 	else if (p_dev_config->pins[8] == LED_PWM)																					// prevent conflicts with encoder timer

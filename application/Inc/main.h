@@ -99,7 +99,7 @@ static const dev_config_t init_config =
 	.pins[29] = NOT_USED,							// PC15
 	
 	/*
-		Configuration of analog axes
+		Configuration of analog axis
 	*/
 	.axis_config[0].calib_min = AXIS_MIN_VALUE,
 	.axis_config[0].calib_center = AXIS_CENTER_VALUE,
@@ -661,39 +661,39 @@ static const dev_config_t init_config =
 	.buttons[127].type = BUTTON_NORMAL,
 
 	/*
-		AxesToButtons configuration
+		AxisToButtons configuration
 	*/
-	.axes_to_buttons[0].points[0] = 0,
-	.axes_to_buttons[0].points[1] = 255,
-	.axes_to_buttons[0].buttons_cnt = 0,
+	.axis_to_buttons[0].points[0] = 0,
+	.axis_to_buttons[0].points[1] = 255,
+	.axis_to_buttons[0].buttons_cnt = 0,
 	
-	.axes_to_buttons[1].points[0] = 0,
-	.axes_to_buttons[1].points[1] = 255,
-	.axes_to_buttons[1].buttons_cnt = 0,
+	.axis_to_buttons[1].points[0] = 0,
+	.axis_to_buttons[1].points[1] = 255,
+	.axis_to_buttons[1].buttons_cnt = 0,
 	
-	.axes_to_buttons[2].points[0] = 0,
-	.axes_to_buttons[2].points[1] = 255,
-	.axes_to_buttons[2].buttons_cnt = 0,
+	.axis_to_buttons[2].points[0] = 0,
+	.axis_to_buttons[2].points[1] = 255,
+	.axis_to_buttons[2].buttons_cnt = 0,
 	
-	.axes_to_buttons[3].points[0] = 0,
-	.axes_to_buttons[3].points[1] = 255,
-	.axes_to_buttons[3].buttons_cnt = 0,
+	.axis_to_buttons[3].points[0] = 0,
+	.axis_to_buttons[3].points[1] = 255,
+	.axis_to_buttons[3].buttons_cnt = 0,
 	
-	.axes_to_buttons[4].points[0] = 0,
-	.axes_to_buttons[4].points[1] = 255,
-	.axes_to_buttons[4].buttons_cnt = 0,
+	.axis_to_buttons[4].points[0] = 0,
+	.axis_to_buttons[4].points[1] = 255,
+	.axis_to_buttons[4].buttons_cnt = 0,
 	
-	.axes_to_buttons[5].points[0] = 0,
-	.axes_to_buttons[5].points[1] = 255,
-	.axes_to_buttons[5].buttons_cnt = 0,
+	.axis_to_buttons[5].points[0] = 0,
+	.axis_to_buttons[5].points[1] = 255,
+	.axis_to_buttons[5].buttons_cnt = 0,
 	
-	.axes_to_buttons[6].points[0] = 0,
-	.axes_to_buttons[6].points[1] = 255,
-	.axes_to_buttons[6].buttons_cnt = 0,
+	.axis_to_buttons[6].points[0] = 0,
+	.axis_to_buttons[6].points[1] = 255,
+	.axis_to_buttons[6].buttons_cnt = 0,
 	
-	.axes_to_buttons[7].points[0] = 0,
-	.axes_to_buttons[7].points[1] = 255,
-	.axes_to_buttons[7].buttons_cnt = 0,
+	.axis_to_buttons[7].points[0] = 0,
+	.axis_to_buttons[7].points[1] = 255,
+	.axis_to_buttons[7].buttons_cnt = 0,
 	
 	
 	.shift_config[0].button = -1,

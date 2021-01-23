@@ -115,29 +115,29 @@ uint8_t GetPressedFromAxis (analog_data_t axis_data, uint8_t btn_num, axis_to_bu
 }
 
 /**
-  * @brief  Getting buttons states from axes to buttons
+  * @brief  Getting buttons states from axis to buttons
 	* @param  raw_button_data_buf: Pointer to raw buttons data buffer
 	* @param  p_dev_config: Pointer to device configuration
 	* @param  pos: Pointer to button position counter
   * @retval None
   */
-void AxesToButtonsGet (uint8_t * raw_button_data_buf, dev_config_t * p_dev_config, uint8_t * pos)
+void AxisToButtonsGet (uint8_t * raw_button_data_buf, dev_config_t * p_dev_config, uint8_t * pos)
 {
-	analog_data_t 		scaled_axes_data[MAX_AXIS_NUM];
+	analog_data_t 		scaled_axis_data[MAX_AXIS_NUM];
 	
-	// get axes data
-	AnalogGet(NULL, scaled_axes_data, NULL);
+	// get axis data
+	AnalogGet(NULL, scaled_axis_data, NULL);
 	
 	for (uint8_t i=0; i<MAX_AXIS_NUM; i++)
 	{
-		if (p_dev_config->axes_to_buttons[i].buttons_cnt > 0)
+		if (p_dev_config->axis_to_buttons[i].buttons_cnt > 0)
 		{
-			for (uint8_t j=0; j<p_dev_config->axes_to_buttons[i].buttons_cnt; j++)
+			for (uint8_t j=0; j<p_dev_config->axis_to_buttons[i].buttons_cnt; j++)
 			{
 				if ((*pos) < MAX_BUTTONS_NUM)
 				{
 					// get raw button state from axis
-					raw_button_data_buf[*pos] = GetPressedFromAxis(scaled_axes_data[i], j, &p_dev_config->axes_to_buttons[i]);
+					raw_button_data_buf[*pos] = GetPressedFromAxis(scaled_axis_data[i], j, &p_dev_config->axis_to_buttons[i]);
 
 					(*pos)++;
 				}
