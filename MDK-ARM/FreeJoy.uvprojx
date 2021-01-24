@@ -438,11 +438,6 @@
               <FilePath>..\application\Src\axis_to_buttons.c</FilePath>
             </File>
             <File>
-              <FileName>usb_hw.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\application\Src\usb_hw.c</FilePath>
-            </File>
-            <File>
               <FileName>leds.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\application\Src\leds.c</FilePath>
@@ -481,6 +476,11 @@
               <FileName>mlx90393.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\application\Src\mlx90393.c</FilePath>
+            </File>
+            <File>
+              <FileName>usb_hw.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\application\Src\usb_hw.c</FilePath>
             </File>
             <File>
               <FileName>usb_endp.c</FileName>
@@ -1271,11 +1271,6 @@
               <FilePath>..\application\Src\axis_to_buttons.c</FilePath>
             </File>
             <File>
-              <FileName>usb_hw.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\application\Src\usb_hw.c</FilePath>
-            </File>
-            <File>
               <FileName>leds.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\application\Src\leds.c</FilePath>
@@ -1314,6 +1309,11 @@
               <FileName>mlx90393.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\application\Src\mlx90393.c</FilePath>
+            </File>
+            <File>
+              <FileName>usb_hw.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\application\Src\usb_hw.c</FilePath>
             </File>
             <File>
               <FileName>usb_endp.c</FileName>

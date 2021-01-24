@@ -94,7 +94,7 @@ void EP2_OUT_Callback(void)
 	joy_ticks = GetTick() + 2000;
 	
 	/* Read received data (2 bytes) */  
-  USB_SIL_Read(EP1_OUT, hid_buf);
+  USB_SIL_Read(EP2_OUT, hid_buf);
 	
 	repotId = hid_buf[0];
 	
