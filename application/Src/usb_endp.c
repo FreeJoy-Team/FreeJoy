@@ -532,7 +532,7 @@ void EP2_OUT_Callback(void)
 	}
 
 	memset(hid_buf, 0 ,64);
-  SetEPRxStatus(ENDP1, EP_RX_VALID);
+  SetEPRxStatus(ENDP2, EP_RX_VALID);
  
 }
 

@@ -229,7 +229,7 @@ uint8_t JoystickHID_ReportDescriptor[JoystickHID_SIZ_REPORT_DESC] =
 		0xc0,                           // END_COLLECTION
   }; /* CustomHID_ReportDescriptor */
 	
-	  ; /* JoystickHID_ConfigDescriptor */
+	  ; /* CustomHID_ConfigDescriptor */
 uint8_t CustomHID_ReportDescriptor[CustomHID_SIZ_REPORT_DESC] =
   {                    
     0x06, 0x00, 0xFF,              // USAGE_PAGE (Vendor Defined 1)

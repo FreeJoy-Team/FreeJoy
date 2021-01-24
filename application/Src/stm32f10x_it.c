@@ -247,7 +247,7 @@ void TIM2_IRQHandler(void)
 			report_buf[pos++] = params_report.shift_button_data;
 			
 			// send params report
-			USB_CUSTOM_HID_SendReport(2, report_buf, pos);
+			USB_CUSTOM_HID_SendReport(2, report_buf, 64);
 		}
 
 		// digital inputs polling
