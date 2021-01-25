@@ -205,6 +205,7 @@ void TIM2_IRQHandler(void)
 								 params_report.phy_button_data, 
 								 &params_report.shift_button_data);			
 			AnalogGet(joy_report.axis_data, NULL, params_report.raw_axis_data);	
+			memcpy(params_report.axis_data, joy_report.axis_data, sizeof(params_report.axis_data));
 			POVsGet(joy_report.pov_data);
 			
 			// fill joystick report buffer
@@ -233,18 +234,20 @@ void TIM2_IRQHandler(void)
 			USB_CUSTOM_HID_SendReport(1, report_buf, pos);
 			
 			// fill params report buffer
-			pos = 0;
-			report_buf[pos++] = REPORT_ID_PARAM;	
-			for (uint8_t i=0; i<MAX_AXIS_NUM; i++)
+			static uint8_t test = 0;
+			report_buf[0] = REPORT_ID_PARAM;
+			if (test == 0)
 			{
-				report_buf[pos++] = (uint8_t) (params_report.raw_axis_data[i] & 0xFF);
-				report_buf[pos++] = (uint8_t) (params_report.raw_axis_data[i] >> 8);							
+				report_buf[1] = 0;
+				test = 1;
+				memcpy(&report_buf[2], (uint8_t *)&(params_report), 62);
 			}
-			memcpy(&report_buf[pos], params_report.phy_button_data, MAX_BUTTONS_NUM/8);
-			pos += MAX_BUTTONS_NUM/8;
-			memcpy(&report_buf[pos], params_report.log_button_data, MAX_BUTTONS_NUM/8);
-			pos += MAX_BUTTONS_NUM/8;
-			report_buf[pos++] = params_report.shift_button_data;
+			else
+			{
+				report_buf[1] = 1;
+				test = 0;
+				memcpy(&report_buf[2], (uint8_t *)&(params_report) + 62, sizeof(params_report_t) - 62);
+			}
 			
 			// send params report
 			USB_CUSTOM_HID_SendReport(2, report_buf, 64);
