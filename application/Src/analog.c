@@ -1222,17 +1222,12 @@ void AxisProcess (dev_config_t * p_dev_config)
 			else if (tmp[i] < AXIS_MIN_VALUE) tmp[i] = AXIS_MIN_VALUE;
 		}
 		
-		// disable data updating from IRQ
-		NVIC_DisableIRQ(TIM2_IRQn);
-		
     // setting technical axis data
     scaled_axis_data[i] = tmp[i];
     // setting output axis data
     if (p_dev_config->axis_config[i].out_enabled)  out_axis_data[i] = scaled_axis_data[i];
     else  out_axis_data[i] = 0;
 		
-		// restore IRQ
-		NVIC_EnableIRQ(TIM2_IRQn);
 	}
 	
 }

@@ -102,7 +102,6 @@ void AppConfigInit (dev_config_t * p_dev_config)
 					p_dev_config->buttons[i].type == POV1_RIGHT)
 		{
 			app_config.pov |= 0x01;
-			app_config.pov_cnt++;
 		}
 		else if (p_dev_config->buttons[i].type == POV2_DOWN ||
 					p_dev_config->buttons[i].type == POV2_UP ||
@@ -110,7 +109,6 @@ void AppConfigInit (dev_config_t * p_dev_config)
 					p_dev_config->buttons[i].type == POV2_RIGHT)
 		{
 			app_config.pov |= 0x02;
-			app_config.pov_cnt++;
 		}
 		else if (p_dev_config->buttons[i].type == POV3_DOWN ||
 					p_dev_config->buttons[i].type == POV3_UP ||
@@ -118,7 +116,6 @@ void AppConfigInit (dev_config_t * p_dev_config)
 					p_dev_config->buttons[i].type == POV3_RIGHT)
 		{
 			app_config.pov |= 0x04;
-			app_config.pov_cnt++;
 		}
 		else if (p_dev_config->buttons[i].type == POV4_DOWN ||
 					p_dev_config->buttons[i].type == POV4_UP ||
@@ -126,10 +123,20 @@ void AppConfigInit (dev_config_t * p_dev_config)
 					p_dev_config->buttons[i].type == POV4_RIGHT)
 		{
 			app_config.pov |= 0x08;
-			app_config.pov_cnt++;
 		}
 		
-		if (!p_dev_config->buttons[i].is_disabled && p_dev_config->buttons[i].physical_num >=0)
+		app_config.pov_cnt = ((app_config.pov & 0x08)>>3) + ((app_config.pov & 0x04)>>2) + 
+												 ((app_config.pov & 0x02)>>1) + (app_config.pov & 0x01);
+		
+		if (!p_dev_config->buttons[i].is_disabled && p_dev_config->buttons[i].physical_num >=0 &&
+				p_dev_config->buttons[i].type != POV1_DOWN && p_dev_config->buttons[i].type != POV1_UP &&
+				p_dev_config->buttons[i].type != POV1_RIGHT && p_dev_config->buttons[i].type != POV1_LEFT &&
+				p_dev_config->buttons[i].type != POV2_DOWN && p_dev_config->buttons[i].type != POV2_UP &&
+				p_dev_config->buttons[i].type != POV2_RIGHT && p_dev_config->buttons[i].type != POV2_LEFT && 
+				p_dev_config->buttons[i].type != POV3_DOWN && p_dev_config->buttons[i].type != POV3_UP &&
+				p_dev_config->buttons[i].type != POV3_RIGHT && p_dev_config->buttons[i].type != POV3_LEFT && 
+				p_dev_config->buttons[i].type != POV4_DOWN && p_dev_config->buttons[i].type != POV4_UP &&
+				p_dev_config->buttons[i].type != POV4_RIGHT && p_dev_config->buttons[i].type != POV4_LEFT)
 		{
 			app_config.buttons_cnt++;
 		}

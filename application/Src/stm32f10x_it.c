@@ -233,7 +233,7 @@ void TIM2_IRQHandler(void)
 			}
 			// send joystick report
 			USB_CUSTOM_HID_SendReport(1, report_buf, pos);
-			
+		
 			// fill params report buffer
 			static uint8_t test = 0;
 			report_buf[0] = REPORT_ID_PARAM;

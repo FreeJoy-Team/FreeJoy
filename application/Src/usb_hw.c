@@ -375,14 +375,23 @@ uint8_t Get_ReportDesc(void)
 		JoystickHID_ReportDescriptor[i++] = 0x00;												// (0)
 		JoystickHID_ReportDescriptor[i++] = 0x46;												// Physical Maximum
 		JoystickHID_ReportDescriptor[i++] = 0x3B;												// (315)
+		JoystickHID_ReportDescriptor[i++] = 0x01;												// (0)
 		JoystickHID_ReportDescriptor[i++] = 0x65;												// Unit
 		JoystickHID_ReportDescriptor[i++] = 0x12;												// (SI Rot:Angular Pos)
 		JoystickHID_ReportDescriptor[i++] = 0x75;												// Report Size
 		JoystickHID_ReportDescriptor[i++] = 0x08;												// (8)
 		JoystickHID_ReportDescriptor[i++] = 0x95;												// Report Count
-		JoystickHID_ReportDescriptor[i++] = tmp_app_config.pov_cnt;			
+		JoystickHID_ReportDescriptor[i++] = 0x01;												// (1)			
 		JoystickHID_ReportDescriptor[i++] = 0x81;												// Input
-		JoystickHID_ReportDescriptor[i++] = 0x02;												// (Data, Var, Abs)	
+		JoystickHID_ReportDescriptor[i++] = 0x02;												// (Data, Var, Abs)
+		
+		for (uint8_t j=1; j<tmp_app_config.pov_cnt;	 j++)
+		{
+			JoystickHID_ReportDescriptor[i++] = 0x09;												// Usage
+			JoystickHID_ReportDescriptor[i++] = 0x39;												// (Hat switch)
+			JoystickHID_ReportDescriptor[i++] = 0x81;												// Input
+			JoystickHID_ReportDescriptor[i++] = 0x02;												// (Data, Var, Abs)
+		}
 	}
 	
 	JoystickHID_ReportDescriptor[i++] = 0xc0;													// End Collection

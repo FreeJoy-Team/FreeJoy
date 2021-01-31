@@ -283,9 +283,6 @@ void MLX90393_StartDMA(uint8_t mode, sensor_t * sensor)
 	tmp_buf[6] = 0x00;		// Z MSB
 	tmp_buf[7] = 0x00;		// Z LSB
 	
-	// Disable other interrupts
-	NVIC_DisableIRQ(TIM2_IRQn);
-	
 	if (mode == MLX_SPI)
 	{
 		// Configure MOSI as open drain

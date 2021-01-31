@@ -205,7 +205,7 @@ void CustomHID_Reset(void)
   SetDeviceAddress(0);
   bDeviceState = ATTACHED;
 	
-	PrevXferComplete = 1;
+	EP1_PrevXferComplete = 1;
 }
 /*******************************************************************************
 * Function Name  : CustomHID_SetConfiguration.
