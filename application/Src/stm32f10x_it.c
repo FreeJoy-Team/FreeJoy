@@ -49,6 +49,7 @@
 #define ADC_PERIOD_TICKS										2					// 1 tick = 1ms
 #define SENSORS_PERIOD_TICKS								2
 #define BUTTONS_PERIOD_TICKS								1
+#define ENCODERS_PERIOD_TICKS								1
 
 /* Private variables ---------------------------------------------------------*/
 
@@ -254,13 +255,17 @@ void TIM2_IRQHandler(void)
 		}
 
 		// digital inputs polling
-		if (ticks - encoder_ticks >= BUTTONS_PERIOD_TICKS)
+		if (ticks - buttons_ticks >= BUTTONS_PERIOD_TICKS)
 		{
+			buttons_ticks = ticks;
 			ButtonsReadPhysical(&dev_config, raw_buttons_data);
 			ButtonsDebouceProcess(&dev_config);
 			
-			encoder_ticks = ticks;
-			EncoderProcess(logical_buttons_state, &dev_config);
+			if (ticks - encoder_ticks >= ENCODERS_PERIOD_TICKS)
+			{
+				encoder_ticks = ticks;
+				EncoderProcess(logical_buttons_state, &dev_config);
+			}
 		}
 		
 		// Internal ADC conversion
@@ -272,8 +277,17 @@ void TIM2_IRQHandler(void)
 			
 			// Disable periphery before ADC conversion
 			RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1,DISABLE);	
-			RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C2|RCC_APB1Periph_TIM3|RCC_APB1Periph_TIM4, DISABLE);
-			RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB|RCC_APB2Periph_GPIOC|RCC_APB2Periph_TIM1,DISABLE);			
+			RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C2|RCC_APB1Periph_TIM4, DISABLE);
+			RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB|RCC_APB2Periph_GPIOC,DISABLE);
+			
+			if (tmp_app_config.fast_encoder_cnt == 0)
+			{
+				RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1,DISABLE);
+			}
+			if (tmp_app_config.pwm_cnt == 0)
+			{
+				RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3,DISABLE);
+			}
 				
 			// ADC measurement
 			ADC_Conversion();

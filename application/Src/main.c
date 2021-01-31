@@ -66,16 +66,16 @@ int main(void)
 	}
 	AppConfigInit(&dev_config);
 	
+	USB_HW_Init();
+	// wait for USB initialization
+	Delay_ms(1000);	
+	
 	IO_Init(&dev_config);
 	 
 	EncodersInit(&dev_config);	
 	ShiftRegistersInit(&dev_config);
 	RadioButtons_Init(&dev_config);
-	SequentialButtons_Init(&dev_config);	
-	
-	USB_HW_Init();
-	// wait for USB initialization
-	Delay_ms(500);	
+	SequentialButtons_Init(&dev_config);		
 	
 	// init sensors
 	AxisInit(&dev_config);

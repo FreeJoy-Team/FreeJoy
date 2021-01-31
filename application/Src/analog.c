@@ -955,79 +955,6 @@ void AxisProcess (dev_config_t * p_dev_config)
 		// Filtering
 		tmp[i] = Filter(raw_axis_data[i], filter_buffer[i], p_dev_config->axis_config[i].filter);
 			
-		// Deadband processing and scaling		
-		if (!p_dev_config->axis_config[i].is_dynamic_deadband)
-		{
-			// Scale output data
-			tmp[i] = map3( tmp[i], 
-									 p_dev_config->axis_config[i].calib_min,
-									 p_dev_config->axis_config[i].calib_center,    
-									 p_dev_config->axis_config[i].calib_max, 
-									 AXIS_MIN_VALUE,
-									 AXIS_CENTER_VALUE,
-									 AXIS_MAX_VALUE,
-									 p_dev_config->axis_config[i].deadband_size); 
-
-			// Shaping
-			tmp[i] = ShapeFunc(&p_dev_config->axis_config[i], tmp[i], 11);
-			// Lowing resolution if needed
-			tmp[i] = SetResolutioin(tmp[i], p_dev_config->axis_config[i].resolution + 1);
-			
-			// Invertion
-			if (p_dev_config->axis_config[i].inverted > 0)
-			{
-				tmp[i] = 0 - tmp[i];
-			}			
-		}
-		else if (p_dev_config->axis_config[i].is_dynamic_deadband && 
-						 iabs(tmp[i] - raw_axis_data[i]) < 3*3*p_dev_config->axis_config[i].deadband_size &&			// 3*3*deadband_size = 3 sigma
-						  IsDynamicDeadbandHolding(tmp[i], deadband_buffer[i], p_dev_config->axis_config[i].deadband_size))
-		{
-			tmp[i] = scaled_axis_data[i];
-		}	
-		else
-		{
-			// Scale output data
-			tmp[i] = map3( tmp[i],
-									 p_dev_config->axis_config[i].calib_min,
-									 p_dev_config->axis_config[i].calib_center,    
-									 p_dev_config->axis_config[i].calib_max, 
-									 AXIS_MIN_VALUE,
-									 AXIS_CENTER_VALUE,
-									 AXIS_MAX_VALUE,
-									 0); 
-			// Shaping
-			tmp[i] = ShapeFunc(&p_dev_config->axis_config[i], tmp[i], 11);
-			// Lowing resolution if needed
-			tmp[i] = SetResolutioin(tmp[i], p_dev_config->axis_config[i].resolution + 1);
-			
-			// Invertion
-			if (p_dev_config->axis_config[i].inverted > 0)
-			{
-				tmp[i] = 0 - tmp[i];
-			}
-		}
-		
-		// Prescaling
-		if (p_dev_config->axis_config[i].prescaler != 100)
-		{
-			if ( 	// no prescaler button defined
-					 ((p_dev_config->axis_config[i].button1 < 0 || p_dev_config->axis_config[i].button1_type != AXIS_BUTTON_PRESCALER_EN) &&			
-						(p_dev_config->axis_config[i].button2 < 0 || p_dev_config->axis_config[i].button2_type != AXIS_BUTTON_PRESCALER_EN) &&
-						(p_dev_config->axis_config[i].button3 < 0 || p_dev_config->axis_config[i].button3_type != AXIS_BUTTON_PRESCALER_EN)) ||
-						// or defined and pressed
-						((p_dev_config->axis_config[i].button1 >=0 && axis_buttons[i][0].current_state && 
-							p_dev_config->axis_config[i].button1_type == AXIS_BUTTON_PRESCALER_EN) ||
-						 (p_dev_config->axis_config[i].button2 >=0 && axis_buttons[i][1].current_state && 
-							p_dev_config->axis_config[i].button2_type == AXIS_BUTTON_PRESCALER_EN) ||
-						 (p_dev_config->axis_config[i].button3 >=0 && axis_buttons[i][2].current_state && 
-							p_dev_config->axis_config[i].button3_type == AXIS_BUTTON_PRESCALER_EN))
-				 )
-			{
-				if (p_dev_config->axis_config[i].is_centered)	tmp[i] = tmp[i]*p_dev_config->axis_config[i].prescaler / 100;
-				else	tmp[i] = (tmp[i] - AXIS_MIN_VALUE)*p_dev_config->axis_config[i].prescaler / 100 + AXIS_MIN_VALUE;
-			}
-		}
 		// Buttons section
     {
 			int64_t millis = GetTick();
@@ -1165,8 +1092,82 @@ void AxisProcess (dev_config_t * p_dev_config)
 			tmp[i] += axis_trim_value[i];
 			
 			if (tmp[i] > AXIS_MAX_VALUE) tmp[i] = AXIS_MAX_VALUE;
-			if (tmp[i] < AXIS_MIN_VALUE) tmp[i] = AXIS_MIN_VALUE;		
-    }
+			if (tmp[i] < AXIS_MIN_VALUE) tmp[i] = AXIS_MIN_VALUE;
+    }		
+
+		// Deadband processing and scaling		
+		if (!p_dev_config->axis_config[i].is_dynamic_deadband)
+		{
+			// Scale output data
+			tmp[i] = map3( tmp[i], 
+									 p_dev_config->axis_config[i].calib_min,
+									 p_dev_config->axis_config[i].calib_center,    
+									 p_dev_config->axis_config[i].calib_max, 
+									 AXIS_MIN_VALUE,
+									 AXIS_CENTER_VALUE,
+									 AXIS_MAX_VALUE,
+									 p_dev_config->axis_config[i].deadband_size); 
+
+			// Shaping
+			tmp[i] = ShapeFunc(&p_dev_config->axis_config[i], tmp[i], 11);
+			// Lowing resolution if needed
+			tmp[i] = SetResolutioin(tmp[i], p_dev_config->axis_config[i].resolution + 1);
+			
+			// Invertion
+			if (p_dev_config->axis_config[i].inverted > 0)
+			{
+				tmp[i] = 0 - tmp[i];
+			}			
+		}
+		else if (p_dev_config->axis_config[i].is_dynamic_deadband && 
+						 iabs(tmp[i] - raw_axis_data[i]) < 3*3*p_dev_config->axis_config[i].deadband_size &&			// 3*3*deadband_size = 3 sigma
+						  IsDynamicDeadbandHolding(tmp[i], deadband_buffer[i], p_dev_config->axis_config[i].deadband_size))
+		{
+			tmp[i] = scaled_axis_data[i];
+		}	
+		else
+		{
+			// Scale output data
+			tmp[i] = map3( tmp[i],
+									 p_dev_config->axis_config[i].calib_min,
+									 p_dev_config->axis_config[i].calib_center,    
+									 p_dev_config->axis_config[i].calib_max, 
+									 AXIS_MIN_VALUE,
+									 AXIS_CENTER_VALUE,
+									 AXIS_MAX_VALUE,
+									 0); 
+			// Shaping
+			tmp[i] = ShapeFunc(&p_dev_config->axis_config[i], tmp[i], 11);
+			// Lowing resolution if needed
+			tmp[i] = SetResolutioin(tmp[i], p_dev_config->axis_config[i].resolution + 1);
+			
+			// Invertion
+			if (p_dev_config->axis_config[i].inverted > 0)
+			{
+				tmp[i] = 0 - tmp[i];
+			}
+		}
+		
+		// Prescaling
+		if (p_dev_config->axis_config[i].prescaler != 100)
+		{
+			if ( 	// no prescaler button defined
+					 ((p_dev_config->axis_config[i].button1 < 0 || p_dev_config->axis_config[i].button1_type != AXIS_BUTTON_PRESCALER_EN) &&			
+						(p_dev_config->axis_config[i].button2 < 0 || p_dev_config->axis_config[i].button2_type != AXIS_BUTTON_PRESCALER_EN) &&
+						(p_dev_config->axis_config[i].button3 < 0 || p_dev_config->axis_config[i].button3_type != AXIS_BUTTON_PRESCALER_EN)) ||
+						// or defined and pressed
+						((p_dev_config->axis_config[i].button1 >=0 && axis_buttons[i][0].current_state && 
+							p_dev_config->axis_config[i].button1_type == AXIS_BUTTON_PRESCALER_EN) ||
+						 (p_dev_config->axis_config[i].button2 >=0 && axis_buttons[i][1].current_state && 
+							p_dev_config->axis_config[i].button2_type == AXIS_BUTTON_PRESCALER_EN) ||
+						 (p_dev_config->axis_config[i].button3 >=0 && axis_buttons[i][2].current_state && 
+							p_dev_config->axis_config[i].button3_type == AXIS_BUTTON_PRESCALER_EN))
+				 )
+			{
+				if (p_dev_config->axis_config[i].is_centered)	tmp[i] = tmp[i]*p_dev_config->axis_config[i].prescaler / 100;
+				else	tmp[i] = (tmp[i] - AXIS_MIN_VALUE)*p_dev_config->axis_config[i].prescaler / 100 + AXIS_MIN_VALUE;
+			}
+		}
 		
 	} 
 	

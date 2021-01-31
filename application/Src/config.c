@@ -75,6 +75,9 @@ void DevConfigGet (dev_config_t * p_dev_config)
 
 void AppConfigInit (dev_config_t * p_dev_config)
 {
+	int8_t prev_a = -1;
+	int8_t prev_b = -1;
+	
 	app_config.axis = 0;
 	app_config.axis_cnt = 0;
 	app_config.buttons_cnt = 0;
@@ -130,6 +133,32 @@ void AppConfigInit (dev_config_t * p_dev_config)
 		{
 			app_config.buttons_cnt++;
 		}
+	}
+	
+	if (p_dev_config->pins[8] == FAST_ENCODER &&
+			p_dev_config->pins[9] == FAST_ENCODER)
+	{
+		app_config.fast_encoder_cnt++;
+	}
+	
+	for (int i=0; i<MAX_BUTTONS_NUM; i++)
+	{
+		if ((p_dev_config->buttons[i].type) == ENCODER_INPUT_A &&  i > prev_a)
+		{
+			for (int j=0; j<MAX_BUTTONS_NUM; j++)
+			{
+				if ((p_dev_config->buttons[j].type) == ENCODER_INPUT_B && j > prev_b && app_config.slow_encoder_cnt < MAX_ENCODERS_NUM - 1)
+				{
+					app_config.slow_encoder_cnt++;
+					break;
+				}
+			}
+		}	
+	}
+	
+	for (uint8_t i=0; i<USED_PINS_NUM; i++)
+	{
+		if (p_dev_config->pins[i] == LED_PWM)	app_config.pwm_cnt++;
 	}
 }
 
