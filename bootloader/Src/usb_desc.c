@@ -146,7 +146,7 @@ uint8_t CustomHID_ReportDescriptor[CUSTOMHID_SIZ_REPORT_DESC] =
     0x09, 0x04,                    // USAGE (Joystick)
     0xa1, 0x01,                    // COLLECTION (Application)
 		
-		0x85, 0x04,    	 							 //   REPORT_ID (4)	
+		0x85, 0x05,    	 							 //   REPORT_ID (5)	
     0x09, 0x06,                    //   USAGE (Vendor Usage 6)
     0x75, 0x08,                    //   REPORT_SIZE (8)
     0x95, 0x02,                    //   REPORT_COUNT (2)

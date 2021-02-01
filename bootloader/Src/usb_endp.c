@@ -51,7 +51,7 @@
 
 
 
-#define REPORT_ID_FIRMWARE				0x04
+#define REPORT_ID_FIRMWARE				0x05
 
 
 /* Private macro -------------------------------------------------------------*/
