@@ -27,29 +27,29 @@
 
 int8_t enc_array_1 [16] =
 {
-0,  0,  0,  0,
--1,  0,  0,  0,
-1,  0,  0,  0,
-0,  0,  0,  0
+	0,  0,  0,  0,
+	-1,  0,  0,  0,
+	1,  0,  0,  0,
+	0,  0,  0,  0
 };
 
 int8_t enc_array_2 [16] =
 {
-0,  0,  0,  0,
--1,  0,  0,  1,
-1,  0,  0, -1,
-0,  0,  0,  0
+	0,  0,  0,  0,
+	-1,  0,  0,  1,
+	1,  0,  0, -1,
+	0,  0,  0,  0
 };
 
 int8_t enc_array_4 [16] =
 {
-0,  1, -1,  0,
--1,  0,  0,  1,
-1,  0,  0, -1,
-0, -1,  1,  0
+	0,  1, -1,  0,
+	-1,  0,  0,  1,
+	1,  0,  0, -1,
+	0, -1,  1,  0
 };
 
-encode_stater_t encoders_state[MAX_ENCODERS_NUM];
+encoder_state_t encoders_state[MAX_ENCODERS_NUM];
 
 static void EncoderFastInit(dev_config_t * p_dev_config)
 {
@@ -118,6 +118,9 @@ void EncoderProcess (logical_buttons_state_t * button_state_buf, dev_config_t * 
 	// search encoder phys number with shift mod enabled
 	uint8_t tmp_a = 0;
 	uint8_t tmp_b = 0;
+	
+	uint32_t millis = GetTick();
+	
 	for (int k = 0; k < MAX_ENCODERS_NUM; k++)
 	{
 		// Pin A
@@ -136,7 +139,6 @@ void EncoderProcess (logical_buttons_state_t * button_state_buf, dev_config_t * 
 	
 	for (int i=1; i<MAX_ENCODERS_NUM; i++)
 	{
-		uint32_t millis = GetTick();
 		if (encoders_state[i].pin_a >=0 && encoders_state[i].pin_b >=0)
 		{
 			int8_t stt;
@@ -166,7 +168,7 @@ void EncoderProcess (logical_buttons_state_t * button_state_buf, dev_config_t * 
 				if (stt != 0)		// changed
 				{
 						encoders_state[i].dir = stt > 0 ? 1 : -1;
-						if (millis - encoders_state[i].time_last > 50 || encoders_state[i].dir == encoders_state[i].last_dir)	// if direction didnt change too fast
+						if ((millis - encoders_state[i].time_last > 50) || (encoders_state[i].dir == encoders_state[i].last_dir))	// if direction didnt change too fast
 						{
 							if (stt > 0)	
 							{
@@ -233,7 +235,7 @@ void EncoderProcess (logical_buttons_state_t * button_state_buf, dev_config_t * 
 							if (encoders_state[i].cnt < AXIS_MIN_VALUE) encoders_state[i].cnt = AXIS_MIN_VALUE;
 							
 						}
-						else if (millis - encoders_state[i].time_last <= 200 && encoders_state[i].dir != encoders_state[i].last_dir)
+						else if ((millis - encoders_state[i].time_last <= 200) && (encoders_state[i].dir != encoders_state[i].last_dir))
 						{
 							encoders_state[i].time_last = millis;
 							encoders_state[i].cnt += encoders_state[i].last_dir;
@@ -266,7 +268,7 @@ void EncoderProcess (logical_buttons_state_t * button_state_buf, dev_config_t * 
 									}
 								}
 							}
-							else 
+							else
 							{
 								// activate encoder with enable shift mod
 								if ((p_dev_config->buttons[encoders_state[i].pin_b].shift_modificator > 0 && 

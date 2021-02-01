@@ -57,7 +57,7 @@
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 
-__IO uint8_t PrevXferComplete = 1;
+__IO uint8_t EP1_PrevXferComplete = 1;
 static volatile uint16_t crc_in = 0;
 
 volatile bool flash_started = 0;
@@ -161,7 +161,7 @@ void EP1_OUT_Callback(void)
 				tmp_buf[1] = (firmware_in_cnt)>>8;
 				tmp_buf[2] = (firmware_in_cnt)&0xFF;
 				
-				USB_CUSTOM_HID_SendReport(tmp_buf,3);
+				USB_CUSTOM_HID_SendReport(1, tmp_buf, 3);
 
 			}
 			
@@ -185,16 +185,16 @@ void EP1_OUT_Callback(void)
 *******************************************************************************/
 void EP1_IN_Callback(void)
 {
-  PrevXferComplete = 1;
+  EP1_PrevXferComplete = 1;
 }
 
-void USB_CUSTOM_HID_SendReport(uint8_t * data, uint8_t length)
+void USB_CUSTOM_HID_SendReport(uint8_t EP_num, uint8_t * data, uint8_t length)
 {
-	if ((PrevXferComplete) && (bDeviceState == CONFIGURED))
+	if ((EP1_PrevXferComplete) && (bDeviceState == CONFIGURED))
 	{
 			USB_SIL_Write(EP1_IN, data, length);
 			SetEPTxValid(ENDP1);
-			PrevXferComplete = 0;
+			EP1_PrevXferComplete = 0;
 	}
 }
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

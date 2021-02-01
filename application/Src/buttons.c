@@ -898,13 +898,17 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 	uint8_t k = 0;
 		
 	NVIC_DisableIRQ(TIM2_IRQn);			// prevent not atomic read
+	
+	memset(out_buttons_data, 0, sizeof(out_buttons_data));
+	memset(log_buttons_data, 0, sizeof(log_buttons_data));
+	memset(phy_buttons_data, 0, sizeof(phy_buttons_data));
 	for (int i=0;i<MAX_BUTTONS_NUM;i++)
 	{
 			uint8_t is_enabled = !p_dev_config->buttons[i].is_disabled && (p_dev_config->buttons[i].physical_num >= 0);
 		
 			if (is_enabled)
 			{
-				out_buttons_data[(k & 0xF8)>>3] &= ~(1 << (k & 0x07));
+				//out_buttons_data[(k & 0xF8)>>3] &= ~(1 << (k & 0x07));
 				if (!p_dev_config->buttons[i].is_inverted)
 				{					
 					out_buttons_data[(k & 0xF8)>>3] |= (logical_buttons_state[i].current_state << (k & 0x07));

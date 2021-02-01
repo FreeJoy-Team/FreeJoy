@@ -292,7 +292,8 @@ typedef struct
 	int8_t					dir :4;					//:2?
 	int8_t					last_dir :4;		//:2?
 	
-} encode_stater_t;
+	
+} encoder_state_t;
 
 
 /******************** AXIS TO BUTTONS **********************/
@@ -415,6 +416,9 @@ typedef struct
 	uint8_t							buttons_cnt;
 	uint8_t							pov;
 	uint8_t							pov_cnt;
+	uint8_t							slow_encoder_cnt;
+	uint8_t							fast_encoder_cnt;
+	uint8_t							pwm_cnt;
 	
 } app_config_t;
 
