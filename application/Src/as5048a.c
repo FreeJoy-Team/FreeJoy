@@ -33,23 +33,30 @@
 int AS5048A_GetData(uint16_t * data, sensor_t * sensor, uint8_t channel)
 {
 	int ret = 0;
-	Delay_us(1);
+	uint8_t tmph,tmpl;
 	uint16_t tmp;
-	tmp = sensor->data[0];
-	tmp = (tmp << 8) | sensor->data[1];
+	// wait till the DMA channel has finished
+	do{
+		tmp = DMA_GetCurrDataCounter(DMA1_Channel2);
+	}  while(tmp!=0);
+	tmph = sensor->data[0];
+	tmpl = sensor->data[1];
+	tmp = (tmph << 8) | tmpl;
 	*data = tmp & 0x3FFF;
 	// check error bit
-	if((sensor->data[0]&0x40)==1) ret = -1;
-	// test sometimes error reading
-	if(*data==0) ret = -1;
+	if((tmph&0x40)!=0){
+		// need to do: reset err flag with 0x41 command
+//		return -1;
+	}
 	// check parity
 	tmp ^= tmp >> 8;
 	tmp ^= tmp >> 4;
 	tmp ^= tmp >> 2;
 	tmp ^= tmp >> 1;
-	if(tmp==1) ret = -1;
+	if((tmp & 1)==1) ret = -1;
 	return ret;
 }
+
 
 /**
   * @brief AS5048A start processing with DMA
@@ -66,25 +73,9 @@ void AS5048A_StartDMA(sensor_t * sensor)
 	tmp_buf[0] = 0x3F;		// Read Meas. command: 0x3FFF
 	tmp_buf[1] = 0xFF;		// 
 	
-	SPI1->CR1 &= ~SPI_CR1_SPE;
-	while (!SPI1->SR & SPI_SR_RXNE);
-	while (!SPI1->SR & SPI_SR_TXE);
-	
 	// CS low
 	pin_config[sensor->source].port->ODR &= ~pin_config[sensor->source].pin;
-	Delay_us(1);
 	SPI_FullDuplex_TransmitReceive(tmp_buf, sensor->data, 2, AS5048A_SPI_MODE);
-}
-
-// changing the SPI phase 0->1 causes a false bitcount
-void allign_SPI_bits(){
-	uint16_t cr1temp = SPI1->CR1;
-	for(int j=0;j<7;j++){
-		cr1temp &= ~0x01;
-		SPI1->CR1 = cr1temp;
-		cr1temp |= 0x01;
-		SPI1->CR1 = cr1temp;
-	}
 }
 
 void AS5048A_StopDMA(sensor_t * sensor)
@@ -95,8 +86,6 @@ void AS5048A_StopDMA(sensor_t * sensor)
 	sensor->rx_complete = 1;
 	sensor->tx_complete = 1;
 
-	allign_SPI_bits();
-	
 	SPI_BiDirectionalLineConfig(SPI1, SPI_Direction_Tx);	
 }
 
