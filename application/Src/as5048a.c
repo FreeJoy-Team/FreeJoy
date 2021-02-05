@@ -24,6 +24,25 @@
 
 #include "as5048a.h"
 
+uint8_t gtmp_buf[2];
+
+void reset_err_flag(sensor_t * sensor){
+	uint16_t tmp;
+	// CS low
+	pin_config[sensor->source].port->ODR &= ~pin_config[sensor->source].pin;
+	gtmp_buf[0] = 0x40;
+	gtmp_buf[1] = 0x01;
+	
+	SPI_HalfDuplex_Transmit(&gtmp_buf[0], 2, AS5048A_SPI_MODE);
+	
+	do{
+		tmp = DMA_GetCurrDataCounter(DMA1_Channel3);
+	}  while(tmp!=0);
+	
+	// CS high
+	pin_config[sensor->source].port->ODR |= pin_config[sensor->source].pin;
+	
+}
 /**
   * @brief AS5048A get measured data
   * @param data: variable for storing data
@@ -33,27 +52,26 @@
 int AS5048A_GetData(uint16_t * data, sensor_t * sensor, uint8_t channel)
 {
 	int ret = 0;
-	uint8_t tmph,tmpl;
 	uint16_t tmp;
 	// wait till the DMA channel has finished
 	do{
 		tmp = DMA_GetCurrDataCounter(DMA1_Channel2);
 	}  while(tmp!=0);
-	tmph = sensor->data[0];
-	tmpl = sensor->data[1];
-	tmp = (tmph << 8) | tmpl;
+	tmp = sensor->data[0];
+	tmp = (tmp << 8) | sensor->data[1];
 	*data = tmp & 0x3FFF;
 	// check error bit
-	if((tmph&0x40)!=0){
-		// need to do: reset err flag with 0x41 command
-//		return -1;
+	if((tmp&0x4000)!=0){
+		// reset err flag with 0x4001 command
+		reset_err_flag(sensor);
+		ret = -1;
 	}
 	// check parity
 	tmp ^= tmp >> 8;
 	tmp ^= tmp >> 4;
 	tmp ^= tmp >> 2;
 	tmp ^= tmp >> 1;
-	if((tmp & 1)==1) ret = -1;
+	if((tmp & 1)==1) ret = -2;
 	return ret;
 }
 
@@ -65,17 +83,16 @@ int AS5048A_GetData(uint16_t * data, sensor_t * sensor, uint8_t channel)
   */
 void AS5048A_StartDMA(sensor_t * sensor)
 {	
-	uint8_t tmp_buf[2];
 	
 	sensor->rx_complete = 0;
 	sensor->tx_complete = 1;
 
-	tmp_buf[0] = 0x3F;		// Read Meas. command: 0x3FFF
-	tmp_buf[1] = 0xFF;		// 
+	gtmp_buf[0] = 0x3F;		// Read Meas. command: 0x3FFF
+	gtmp_buf[1] = 0xFF;		// 
 	
 	// CS low
 	pin_config[sensor->source].port->ODR &= ~pin_config[sensor->source].pin;
-	SPI_FullDuplex_TransmitReceive(tmp_buf, sensor->data, 2, AS5048A_SPI_MODE);
+	SPI_FullDuplex_TransmitReceive(gtmp_buf, sensor->data, 2, AS5048A_SPI_MODE);
 }
 
 void AS5048A_StopDMA(sensor_t * sensor)
@@ -86,7 +103,6 @@ void AS5048A_StopDMA(sensor_t * sensor)
 	sensor->rx_complete = 1;
 	sensor->tx_complete = 1;
 
-	SPI_BiDirectionalLineConfig(SPI1, SPI_Direction_Tx);	
 }
 
 
