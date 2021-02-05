@@ -27,56 +27,42 @@
 
 /* define compiler specific symbols */
 #if defined ( __CC_ARM   )
-  #define __ASM            __asm                                      /*!< asm keyword for ARM Compiler          */
-  #define __INLINE         __inline                                   /*!< inline keyword for ARM Compiler       */
+#define __ASM            __asm                                      /*!< asm keyword for ARM Compiler          */
+#define __INLINE         __inline                                   /*!< inline keyword for ARM Compiler       */
 
 #elif defined ( __ICCARM__ )
-  #define __ASM           __asm                                       /*!< asm keyword for IAR Compiler          */
-  #define __INLINE        inline                                      /*!< inline keyword for IAR Compiler. Only avaiable in High optimization mode! */
+#define __ASM           __asm                                       /*!< asm keyword for IAR Compiler          */
+#define __INLINE        inline                                      /*!< inline keyword for IAR Compiler. Only avaiable in High optimization mode! */
 
 #elif defined   (  __GNUC__  )
-  #define __ASM            __asm                                      /*!< asm keyword for GNU Compiler          */
-  #define __INLINE         inline                                     /*!< inline keyword for GNU Compiler       */
+#define __ASM            __asm                                      /*!< asm keyword for GNU Compiler          */
+#define __INLINE         inline                                     /*!< inline keyword for GNU Compiler       */
 
 #elif defined   (  __TASKING__  )
-  #define __ASM            __asm                                      /*!< asm keyword for TASKING Compiler      */
-  #define __INLINE         inline                                     /*!< inline keyword for TASKING Compiler   */
+#define __ASM            __asm                                      /*!< asm keyword for TASKING Compiler      */
+#define __INLINE         inline                                     /*!< inline keyword for TASKING Compiler   */
 
 #endif
 
 
-/**
-  \brief   Set Main Stack Pointer
-  \details Assigns the given value to the Main Stack Pointer (MSP).
-  \param [in]    topOfMainStack  Main Stack Pointer value to set
- */
-__INLINE void __set_MSP(uint32_t topOfMainStack)
-{
-  __ASM volatile ("MSR msp, %0" : : "r" (topOfMainStack) : );
-}
-
-void Delay(uint32_t timeout)
-{
-	for (uint32_t i = 0; i < timeout; i++) 
-	{
-		__NOP();
-	}
+void Delay(uint32_t timeout) {
+    for (uint32_t i = 0; i < timeout; i++) {
+        __NOP();
+    }
 }
 
 /* IO init function */
-void IO_Init (void)
-{
-  /* GPIO Ports Clock Enable */
-	RCC->APB2ENR |= RCC_APB2ENR_IOPCEN | RCC_APB2ENR_IOPBEN;
-	
-	// BOOT pin
-	CLEAR_BIT(GPIOB->CRL, GPIO_CRL_CNF2_0);
-	SET_BIT(GPIOB->CRL, GPIO_CRL_CNF2_1);
-	CLEAR_BIT(GPIOB->ODR, GPIO_ODR_ODR2);
-	
-	// LED pin
-	SET_BIT(GPIOC->CRH, GPIO_CRH_MODE13);
-	SET_BIT(GPIOB->CRH, GPIO_CRH_MODE12);
+void IO_Init(void) {
+    /* GPIO Ports Clock Enable */
+    RCC->APB2ENR |= RCC_APB2ENR_IOPCEN | RCC_APB2ENR_IOPBEN;
+
+    // BOOT pin
+    SET_BIT(GPIOB->CRL, GPIO_CRL_CNF2_0);
+    CLEAR_BIT(GPIOB->CRL, GPIO_CRL_CNF2_1);
+//    CLEAR_BIT(GPIOB->ODR, GPIO_ODR_ODR2);
+
+    // LED pin
+    SET_BIT(GPIOC->CRH, GPIO_CRH_MODE13);
 }
 
 /**
@@ -88,12 +74,11 @@ void IO_Init (void)
   * @param  None
   * @retval None
   */
-void FLASH_Unlock(void)
-{
-  /* Authorize the FPEC of Bank1 Access */
-  FLASH->KEYR = FLASH_KEY1;
-  FLASH->KEYR = FLASH_KEY2;
-	while(FLASH->SR & FLASH_SR_BSY);
+void FLASH_Unlock(void) {
+    /* Authorize the FPEC of Bank1 Access */
+    FLASH->KEYR = FLASH_KEY1;
+    FLASH->KEYR = FLASH_KEY2;
+    while (FLASH->SR & FLASH_SR_BSY);
 }
 
 /**
@@ -105,10 +90,9 @@ void FLASH_Unlock(void)
   * @param  None
   * @retval None
   */
-void FLASH_Lock(void)
-{
-  /* Set the Lock Bit to lock the FPEC and the CR of  Bank1 */
-  FLASH->CR |= CR_LOCK_Set;
+void FLASH_Lock(void) {
+    /* Set the Lock Bit to lock the FPEC and the CR of  Bank1 */
+    FLASH->CR |= CR_LOCK_Set;
 }
 
 /**
@@ -118,27 +102,26 @@ void FLASH_Lock(void)
   * @retval FLASH Status: The returned value can be: FLASH_BUSY, FLASH_ERROR_PG,
   *         FLASH_ERROR_WRP, FLASH_COMPLETE or FLASH_TIMEOUT.
   */
-FLASH_Status FLASH_ErasePage(uint32_t Page_Address)
-{
-  /* Check the parameters */
-  assert_param(IS_FLASH_ADDRESS(Page_Address));
+FLASH_Status FLASH_ErasePage(uint32_t Page_Address) {
+    /* Check the parameters */
+    assert_param(IS_FLASH_ADDRESS(Page_Address));
 
-  /* Wait for last operation to be completed */
-  while(FLASH->SR & FLASH_SR_BSY);
-	FLASH->CR &= CR_PG_Reset; 
-  /* if the previous operation is completed, proceed to erase the page */
-  FLASH->CR|= CR_PER_Set;
-  FLASH->AR = Page_Address; 
-  FLASH->CR|= CR_STRT_Set;
-    
-  /* Wait for last operation to be completed */
-  while(FLASH->SR & FLASH_SR_BSY);
-    
-  /* Disable the PER Bit */
-  FLASH->CR &= CR_PER_Reset;
+    /* Wait for last operation to be completed */
+    while (FLASH->SR & FLASH_SR_BSY);
+    FLASH->CR &= CR_PG_Reset;
+    /* if the previous operation is completed, proceed to erase the page */
+    FLASH->CR |= CR_PER_Set;
+    FLASH->AR = Page_Address;
+    FLASH->CR |= CR_STRT_Set;
 
-  /* Return the Erase Status */
-  return FLASH_COMPLETE;
+    /* Wait for last operation to be completed */
+    while (FLASH->SR & FLASH_SR_BSY);
+
+    /* Disable the PER Bit */
+    FLASH->CR &= CR_PER_Reset;
+
+    /* Return the Erase Status */
+    return FLASH_COMPLETE;
 }
 
 /**
@@ -149,24 +132,23 @@ FLASH_Status FLASH_ErasePage(uint32_t Page_Address)
   * @retval FLASH Status: The returned value can be: FLASH_ERROR_PG,
   *         FLASH_ERROR_WRP, FLASH_COMPLETE or FLASH_TIMEOUT. 
   */
-FLASH_Status FLASH_ProgramHalfWord(uint32_t Address, uint16_t Data)
-{
-  /* Check the parameters */
-  assert_param(IS_FLASH_ADDRESS(Address));
+FLASH_Status FLASH_ProgramHalfWord(uint32_t Address, uint16_t Data) {
+    /* Check the parameters */
+    assert_param(IS_FLASH_ADDRESS(Address));
 
-  /* Wait for last operation to be completed */
-  while(FLASH->SR & FLASH_SR_BSY);
-  FLASH->CR &= CR_PER_Reset;
-	/* if the previous operation is completed, proceed to program the new data */
-	FLASH->CR |= CR_PG_Set;
+    /* Wait for last operation to be completed */
+    while (FLASH->SR & FLASH_SR_BSY);
+    FLASH->CR &= CR_PER_Reset;
+    /* if the previous operation is completed, proceed to program the new data */
+    FLASH->CR |= CR_PG_Set;
 
-	*(__IO uint16_t*)Address = Data;
-	/* Wait for last operation to be completed */
-	while(FLASH->SR & FLASH_SR_BSY);
-	
-	/* Disable the PG Bit */
-	FLASH->CR &= CR_PG_Reset;  
-  
-  /* Return the Program Status */
-  return FLASH_COMPLETE;
+    *(__IO uint16_t *) Address = Data;
+    /* Wait for last operation to be completed */
+    while (FLASH->SR & FLASH_SR_BSY);
+
+    /* Disable the PG Bit */
+    FLASH->CR &= CR_PG_Reset;
+
+    /* Return the Program Status */
+    return FLASH_COMPLETE;
 }

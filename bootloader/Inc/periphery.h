@@ -32,8 +32,6 @@
 
 #define LED1_OFF									WRITE_REG(GPIOC->BSRR, GPIO_BSRR_BS13)
 #define LED1_ON										WRITE_REG(GPIOC->BRR, GPIO_BRR_BR13)
-#define LED2_OFF									WRITE_REG(GPIOB->BSRR, GPIO_BSRR_BS12)
-#define LED2_ON										WRITE_REG(GPIOB->BRR, GPIO_BRR_BR12)
 
 /** 
   * @brief  FLASH Status  
