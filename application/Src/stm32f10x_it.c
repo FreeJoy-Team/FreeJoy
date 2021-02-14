@@ -345,12 +345,14 @@ void TIM2_IRQHandler(void)
 					if (sensors[i].type == AS5600)
 					{
 						status = AS5600_StartDMA(&sensors[i]);
-						break;
+						if (status != 0) continue;
+						else break;
 					}
 					else if (sensors[i].type == ADS1115)
 					{
 						status = ADS1115_StartDMA(&sensors[i], sensors[i].curr_channel);	
-						break;
+						if (status != 0) continue;
+						else break;
 					}
 				}
 			}
@@ -570,12 +572,14 @@ void DMA1_Channel4_IRQHandler(void)
 					if (sensors[i].type == AS5600)
 					{
 						status = AS5600_StartDMA(&sensors[i]);
-						break;
+						if (status != 0) continue;
+						else break;
 					}
 					else if (sensors[i].type == ADS1115)
 					{
-						status = ADS1115_StartDMA(&sensors[i], sensors[i].curr_channel);	
-						break;
+						status = ADS1115_StartDMA(&sensors[i], sensors[i].curr_channel);
+						if (status != 0) continue;
+						else break;
 					}
 				}
 			}

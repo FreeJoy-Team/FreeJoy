@@ -110,10 +110,11 @@ int ADS1115_StartDMA(sensor_t * sensor, uint8_t channel)
 	sensor->rx_complete = 0;	
 	ret = I2C_ReadNonBlocking(sensor->address, 0, &sensor->data[3 + 2*channel], 2, 1);
 	
-	if (ret != 0 ) 
+	if (ret != 0 )  	// communication error occured
 	{
 		sensor->err_cnt++;
-		sensor->rx_complete = 1;	
+		sensor->tx_complete = 1;
+		sensor->rx_complete = 1;
 	}
 	
 	return ret;
@@ -135,10 +136,12 @@ int ADS1115_SetMuxDMA(sensor_t * sensor, uint8_t channel)
 	sensor->tx_complete = 0;	
 	ret = I2C_WriteNonBlocking(sensor->address, &sensor->data[0], 3);
 	
-	if (ret != 0 ) 
+	
+	if (ret != 0 ) 	// communication error occured
 	{
 //		sensor->err_cnt++;
-		sensor->tx_complete = 1;	
+		sensor->tx_complete = 1;
+		sensor->rx_complete = 1;		
 	}
 	else sensor->curr_channel = channel;
 	
