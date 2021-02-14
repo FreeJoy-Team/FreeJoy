@@ -54,8 +54,8 @@ extern volatile bool flash_finished;
 /* Exported define -----------------------------------------------------------*/
 
 #define FIRMWARE_START_PAGE				8
-#define MAX_PAGE									64
-#define FLASH_PAGE_SIZE						1024
+#define MAX_PAGE						64
+#define FLASH_PAGE_SIZE					1024
 #define FIRMWARE_COPY_ADDR				(0x8000000 + (FLASH_PAGE_SIZE*FIRMWARE_START_PAGE))
 
 /* Exported functions ------------------------------------------------------- */

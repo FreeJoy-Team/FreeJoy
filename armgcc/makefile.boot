@@ -1,4 +1,3 @@
-
 ######################################
 # target
 ######################################
@@ -11,7 +10,7 @@ TARGET = Bootloader
 # debug build?
 DEBUG = 1
 # optimization
-OPT = -O3
+OPT = -Os
 
 
 #######################################
@@ -36,6 +35,7 @@ C_SOURCES =  \
 ../bootloader/Src/usb_prop.c \
 ../bootloader/Src/usb_pwr.c \
 ../Drivers/CMSIS/CM3/DeviceSupport/ST/STM32F10x/system_stm32f10x.c \
+../Drivers/CMSIS/CM3/CoreSupport/core_cm3.c \
 ../Drivers/STM32F10x_StdPeriph_Driver/src/misc.c \
 ../Drivers/STM32_USB-FS-Device_Driver/src/usb_core.c \
 ../Drivers/STM32_USB-FS-Device_Driver/src/usb_init.c \
@@ -43,6 +43,7 @@ C_SOURCES =  \
 ../Drivers/STM32_USB-FS-Device_Driver/src/usb_mem.c \
 ../Drivers/STM32_USB-FS-Device_Driver/src/usb_regs.c \
 ../Drivers/STM32_USB-FS-Device_Driver/src/usb_sil.c \
+
 
 # ASM sources
 ASM_SOURCES =  \
@@ -68,7 +69,7 @@ SZ = $(PREFIX)size
 endif
 HEX = $(CP) -O ihex
 BIN = $(CP) -O binary -S
- 
+
 #######################################
 # CFLAGS
 #######################################
@@ -86,7 +87,7 @@ MCU = $(CPU) -mthumb $(FPU) $(FLOAT-ABI)
 
 # macros for gcc
 # AS defines
-AS_DEFS = 
+AS_DEFS =
 
 # C defines
 C_DEFS =  \
@@ -95,7 +96,7 @@ C_DEFS =  \
 
 
 # AS includes
-AS_INCLUDES = 
+AS_INCLUDES =
 
 # C includes
 C_INCLUDES =  \
@@ -128,8 +129,8 @@ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 LDSCRIPT = linker_boot.ld
 
 # libraries
-LIBS = -lc -lm -lnosys 
-LIBDIR = 
+LIBS = -lc -lm -lnosys
+LIBDIR =
 LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
 
 # default action: build all

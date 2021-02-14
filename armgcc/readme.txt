@@ -36,16 +36,12 @@ After building binaries and hex files are place in build sub-directories:
 
 II. Flashing binaries to MCU
 
-Bootlooader and aplication have different base addresses in flash memory:
+Bootloader and application have different base addresses in flash memory:
 
 bootloader base address:	0x8000000
 bootloader flash size: 		0x2000
 
-aplication base address:	0x8002000
-aplication flash size:		0xC800
+application base address:	0x8002000
+application flash size:		0xC800
 
-So as you can see FreeJoy application have 0x2000 ofsset from the start of the flash memory (0x8000000). If you flashing .bin files the offset must be applied to the start address.
-
-
-
-
+So as you can see FreeJoy application have 0x2000 offset from the start of the flash memory (0x8000000). If you flashing .bin files the offset must be applied to the start address.
