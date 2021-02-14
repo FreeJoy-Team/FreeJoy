@@ -63,3 +63,4 @@ DebugConfig
 MDK-ARM/FreeJoy.bin
 *.uvoptx
 *.uvprojx
+MDK-ARM/latest.conf
