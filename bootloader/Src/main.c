@@ -41,7 +41,8 @@ static void EnterProgram(void);
   *
   * @retval None
   */
-int main(void) {
+int main(void) 
+{
     IO_Init();
     Delay(100);
 
@@ -49,22 +50,28 @@ int main(void) {
     uint16_t boot1 = READ_BIT(GPIOB->IDR, GPIO_IDR_IDR2);
     uint16_t checkUserCode = CheckUserCode(FIRMWARE_COPY_ADDR);
 
-    if ((magic_word == 0x424C) || boot1 || checkUserCode == 0) {
+    if ((magic_word == 0x424C) || boot1 || checkUserCode == 0) 
+		{
         USB_HW_Init();
-    } else {
+    } 
+		else 
+		{
         EnterProgram();
         // Never reached
         while (1);
     }
 
-    while (1) {
-        if (!flash_started) {
+    while (1) 
+		{
+        if (!flash_started) 
+				{
             LED1_ON;
             Delay(500000);
             LED1_OFF;
             Delay(10000000);
         }
-        if (flash_finished) {
+        if (flash_finished) 
+				{
             Delay(100000);
             USB_Shutdown();
             Delay(1000000);
@@ -73,7 +80,8 @@ int main(void) {
     }
 }
 
-static bool CheckUserCode(uint32_t user_address) {
+static bool CheckUserCode(uint32_t user_address) 
+{
     uint32_t sp = *(volatile uint32_t *) user_address;
 
     /* Check if the stack pointer in the vector table points
@@ -81,13 +89,15 @@ static bool CheckUserCode(uint32_t user_address) {
     return ((sp & 0x2FFE0000) == SRAM_BASE) ? 1 : 0;
 }
 
-static uint16_t GetMagicWord(void) {
+static uint16_t GetMagicWord(void) 
+{
     /* Enable the power and backup interface clocks by setting the
      * PWREN and BKPEN bits in the RCC_APB1ENR register
      */
     SET_BIT(RCC->APB1ENR, RCC_APB1ENR_BKPEN | RCC_APB1ENR_PWREN);
     uint16_t value = READ_REG(BKP->DR4);
-    if (value) {
+    if (value) 
+		{
 
         /* Enable write access to the backup registers and the
          * RTC.
@@ -106,19 +116,21 @@ static uint16_t GetMagicWord(void) {
   * @param  None
   * @retval None
   */
-static void EnterProgram(void) {
+static void EnterProgram(void) 
+{
     funct_ptr Program = (funct_ptr) *(volatile uint32_t *) (FIRMWARE_COPY_ADDR + 0x04);
 
     /* Setup the vector table to the final user-defined one in Flash
      * memory
      */
     WRITE_REG(SCB->VTOR, FIRMWARE_COPY_ADDR);
-
+	
     /*
      * Setup the stack pointer to the user-defined one
      */
-    __set_MSP((*(volatile uint32_t *) FIRMWARE_COPY_ADDR));
-
+		//__set_MSP((*(volatile uint32_t *) FIRMWARE_COPY_ADDR));
+		__ASM volatile ("MSR msp, %0" : : "r" ((*(volatile uint32_t *) FIRMWARE_COPY_ADDR)) : );
+	
     // Use asm so stack is not used for branch
     __ASM volatile("bx %0\n\t"
     :

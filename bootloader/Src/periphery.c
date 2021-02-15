@@ -44,7 +44,6 @@
 
 #endif
 
-
 void Delay(uint32_t timeout) {
     for (uint32_t i = 0; i < timeout; i++) {
         __NOP();
@@ -63,6 +62,7 @@ void IO_Init(void) {
 
     // LED pin
     SET_BIT(GPIOC->CRH, GPIO_CRH_MODE13);
+		SET_BIT(GPIOB->CRH, GPIO_CRH_MODE12);
 }
 
 /**
