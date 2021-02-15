@@ -52,27 +52,31 @@
 #define USB_ENDPOINT_DESCRIPTOR_TYPE            0x05
 
 #define HID_DESCRIPTOR_TYPE                     0x21
-#define CUSTOMHID_SIZ_HID_DESC                  0x09
-#define CUSTOMHID_OFF_HID_DESC                  0x12
+#define JoystickHID_SIZ_HID_DESC                0x09
+#define JoystickHID_OFF_HID_DESC                0x12
+#define CustomHID_SIZ_HID_DESC                  0x09
+#define CustomHID_OFF_HID_DESC                  0x2B
 
-#define CUSTOMHID_SIZ_DEVICE_DESC               18
-#define CUSTOMHID_SIZ_CONFIG_DESC               41
-#define CUSTOMHID_SIZ_REPORT_DESC               178
-#define CUSTOMHID_SIZ_STRING_LANGID             4
-#define CUSTOMHID_SIZ_STRING_VENDOR             38
-#define CUSTOMHID_SIZ_STRING_PRODUCT            52
-#define CUSTOMHID_SIZ_STRING_SERIAL             26
+#define Composite_SIZ_DEVICE_DESC               18
+#define Composite_SIZ_CONFIG_DESC               66
+#define JoystickHID_SIZ_REPORT_DESC             86
+#define CustomHID_SIZ_REPORT_DESC             	88
+#define Composite_SIZ_STRING_LANGID             4
+#define Composite_SIZ_STRING_VENDOR             38
+#define Composite_SIZ_STRING_PRODUCT            52
+#define Composite_SIZ_STRING_SERIAL             26
 
 #define STANDARD_ENDPOINT_DESC_SIZE             0x09
 
 /* Exported functions ------------------------------------------------------- */
-extern uint8_t CustomHID_DeviceDescriptor[CUSTOMHID_SIZ_DEVICE_DESC];
-extern uint8_t CustomHID_ConfigDescriptor[CUSTOMHID_SIZ_CONFIG_DESC];
-extern uint8_t CustomHID_ReportDescriptor[CUSTOMHID_SIZ_REPORT_DESC];
-extern uint8_t CustomHID_StringLangID[CUSTOMHID_SIZ_STRING_LANGID];
-extern uint8_t CustomHID_StringVendor[CUSTOMHID_SIZ_STRING_VENDOR];
-extern uint8_t CustomHID_StringProduct[CUSTOMHID_SIZ_STRING_PRODUCT];
-extern uint8_t CustomHID_StringSerial[CUSTOMHID_SIZ_STRING_SERIAL];
+extern uint8_t Composite_DeviceDescriptor[Composite_SIZ_DEVICE_DESC];
+extern uint8_t Composite_ConfigDescriptor[Composite_SIZ_CONFIG_DESC];
+extern uint8_t JoystickHID_ReportDescriptor[JoystickHID_SIZ_REPORT_DESC];
+extern uint8_t CustomHID_ReportDescriptor[CustomHID_SIZ_REPORT_DESC];
+extern uint8_t Composite_StringLangID[Composite_SIZ_STRING_LANGID];
+extern uint8_t Composite_StringVendor[Composite_SIZ_STRING_VENDOR];
+extern uint8_t Composite_StringProduct[Composite_SIZ_STRING_PRODUCT];
+extern uint8_t Composite_StringSerial[Composite_SIZ_STRING_SERIAL];
 
 #endif /* __USB_DESC_H */
 

@@ -13,7 +13,7 @@
 #include "common_defines.h"
 
 
-/******************** AXES **********************/
+/******************** AXIS **********************/
 enum
 {
 	FILTER_NO = 0,
@@ -101,6 +101,8 @@ enum
 	MLX90393_I2C,
 	ADS1115,
 	AS5600,
+	AS5048A_SPI,
+	TLE5012,
 	
 };
 
@@ -109,14 +111,17 @@ typedef struct
 	uint32_t	ok_cnt;
 	uint32_t 	err_cnt;
 	
-	int8_t 		source;
-	uint8_t		type;
-	uint8_t		address;
-	uint8_t 	data[24];
-	
 	uint8_t 	rx_complete;
 	uint8_t 	tx_complete;
 	uint8_t		curr_channel;	
+	
+	int8_t 		source;
+	uint8_t		type;
+	uint8_t		address;
+	
+	uint8_t 	data[24];
+	
+	
 } sensor_t;
 
 
@@ -137,8 +142,10 @@ enum
   SPI_MOSI,
   SPI_MISO,
 
+	TLE5011_GEN,
   TLE5011_CS,
-  TLE5011_GEN,
+	TLE5012_CS,
+  
 
   MCP3201_CS,
   MCP3202_CS,
@@ -147,6 +154,8 @@ enum
 
   MLX90393_CS,
 
+	AS5048A_CS,
+	
   SHIFT_REG_LATCH,
   SHIFT_REG_DATA,
 	
@@ -283,15 +292,15 @@ typedef struct
 	int8_t					dir :4;					//:2?
 	int8_t					last_dir :4;		//:2?
 	
-} encode_stater_t;
+	
+} encoder_state_t;
 
 
-/******************** AXES TO BUTTONS **********************/
+/******************** AXIS TO BUTTONS **********************/
 typedef struct
 {
 	uint8_t points[13];
 	uint8_t buttons_cnt;									// :4
-	uint8_t is_enabled;										// :1
 
 } axis_to_buttons_t;
 
@@ -341,8 +350,10 @@ enum
 
 typedef struct
 {
-	uint8_t				duty_cycle[3];	
-	uint8_t				reserved[7];
+	uint8_t				duty_cycle;	
+	uint8_t				axis_num : 3;
+	uint8_t				is_axis : 1;
+	uint8_t 			:0;
 	
 } led_pwm_config_t;
 
@@ -385,10 +396,9 @@ typedef struct
 	shift_modificator_t	shift_config[5];
 	uint16_t						vid;
 	uint16_t						pid;
-	uint8_t							is_dynamic_config;
 	
 	// config 15;
-	led_pwm_config_t		led_pwm_config;
+	led_pwm_config_t		led_pwm_config[4];
 	led_config_t				leds[MAX_LEDS_NUM];
 	
 	// config 16;
@@ -401,9 +411,14 @@ typedef struct
 /******************** APPLICATION CONFIGURATION **********************/
 typedef struct
 {
-	uint8_t							axes;
+	uint8_t							axis;
+	uint8_t 						axis_cnt;
 	uint8_t							buttons_cnt;
-	uint8_t							povs;
+	uint8_t							pov;
+	uint8_t							pov_cnt;
+	uint8_t							slow_encoder_cnt;
+	uint8_t							fast_encoder_cnt;
+	uint8_t							pwm_cnt;
 	
 } app_config_t;
 
@@ -411,17 +426,21 @@ typedef struct
 /******************** HID REPORT CONFIGURATION **********************/
 typedef struct
 {
-	uint8_t							dummy;		// alighning
-	uint8_t 						id;
-	analog_data_t				raw_axis_data[MAX_AXIS_NUM];
-	uint8_t							raw_button_data[9];
-	uint8_t							shift_button_data;	
 	analog_data_t			 	axis_data[MAX_AXIS_NUM];
 	uint8_t 						pov_data[MAX_POVS_NUM];
 	uint8_t 						button_data[MAX_BUTTONS_NUM/8];
 	
 } joy_report_t;
 
+typedef struct
+{
+	analog_data_t				raw_axis_data[MAX_AXIS_NUM];
+	analog_data_t			 	axis_data[MAX_AXIS_NUM];
+	uint8_t							phy_button_data[MAX_BUTTONS_NUM/8];
+	uint8_t							log_button_data[MAX_BUTTONS_NUM/8];
+	uint8_t							shift_button_data;
+	
+} params_report_t;
 
 
 

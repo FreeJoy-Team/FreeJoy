@@ -18,25 +18,25 @@
 
 static const dev_config_t init_config =
 {
-	.firmware_version = 0x1624,		// do not change
+	.firmware_version = 0x1700,		// do not change
 	
 	/* 
 		Name of device in devices dispatcher
 	*/
-	.device_name[0] = 'F',
-	.device_name[1] = 'r',
-	.device_name[2] = 'e',
-	.device_name[3] = 'e',
-	.device_name[4] = 'J',
-	.device_name[5] = 'o',
-	.device_name[6] = 'y',
-	.device_name[7] = 0,
-	.device_name[8] = 0,
-	.device_name[9] = 0,
-	.device_name[10] = 0,
-	.device_name[11] = 0,
-	.device_name[12] = 0,
-	.device_name[13] = 0,
+	.device_name[0] =  'F',
+	.device_name[1] =  'r',
+	.device_name[2] =  'e',
+	.device_name[3] =  'e',
+	.device_name[4] =  'J',
+	.device_name[5] =  'o',
+	.device_name[6] =  'y',
+	.device_name[7] =  ' ',
+	.device_name[8] =  'v',
+	.device_name[9] =  '1',
+	.device_name[10] = '.',
+	.device_name[11] = '7',
+	.device_name[12] = '.',
+	.device_name[13] = '0',
 	.device_name[14] = 0,
 	.device_name[15] = 0,
 	.device_name[16] = 0,
@@ -44,6 +44,9 @@ static const dev_config_t init_config =
 	.device_name[18] = 0,
 	.device_name[19] = 0,			
 	
+	.vid = 0x0483,										// ST
+	.pid = 0x5757,										
+
 	.button_debounce_ms = 50,					// debounce time for all buttons
 	
 	.encoder_press_time_ms = 10,			// amount of milliseconds virtual button 
@@ -96,7 +99,7 @@ static const dev_config_t init_config =
 	.pins[29] = NOT_USED,							// PC15
 	
 	/*
-		Configuration of analog axes
+		Configuration of analog axis
 	*/
 	.axis_config[0].calib_min = AXIS_MIN_VALUE,
 	.axis_config[0].calib_center = AXIS_CENTER_VALUE,
@@ -658,55 +661,39 @@ static const dev_config_t init_config =
 	.buttons[127].type = BUTTON_NORMAL,
 
 	/*
-		AxesToButtons configuration
+		AxisToButtons configuration
 	*/
 	.axes_to_buttons[0].points[0] = 0,
-	.axes_to_buttons[0].points[1] = 127,
-	.axes_to_buttons[0].points[2] = 255,
-	.axes_to_buttons[0].buttons_cnt = 2,
-	.axes_to_buttons[0].is_enabled = 0,
+	.axes_to_buttons[0].points[1] = 255,
+	.axes_to_buttons[0].buttons_cnt = 0,
 	
 	.axes_to_buttons[1].points[0] = 0,
-	.axes_to_buttons[1].points[1] = 127,
-	.axes_to_buttons[1].points[2] = 255,
-	.axes_to_buttons[1].buttons_cnt = 2,
-	.axes_to_buttons[1].is_enabled = 0,
+	.axes_to_buttons[1].points[1] = 255,
+	.axes_to_buttons[1].buttons_cnt = 0,
 	
 	.axes_to_buttons[2].points[0] = 0,
-	.axes_to_buttons[2].points[1] = 127,
-	.axes_to_buttons[2].points[2] = 255,
-	.axes_to_buttons[2].buttons_cnt = 2,
-	.axes_to_buttons[2].is_enabled = 0,
+	.axes_to_buttons[2].points[1] = 255,
+	.axes_to_buttons[2].buttons_cnt = 0,
 	
 	.axes_to_buttons[3].points[0] = 0,
-	.axes_to_buttons[3].points[1] = 127,
-	.axes_to_buttons[3].points[2] = 255,
-	.axes_to_buttons[3].buttons_cnt = 2,
-	.axes_to_buttons[3].is_enabled = 0,
+	.axes_to_buttons[3].points[1] = 255,
+	.axes_to_buttons[3].buttons_cnt = 0,
 	
 	.axes_to_buttons[4].points[0] = 0,
-	.axes_to_buttons[4].points[1] = 127,
-	.axes_to_buttons[4].points[2] = 255,
-	.axes_to_buttons[4].buttons_cnt = 2,
-	.axes_to_buttons[4].is_enabled = 0,
+	.axes_to_buttons[4].points[1] = 255,
+	.axes_to_buttons[4].buttons_cnt = 0,
 	
 	.axes_to_buttons[5].points[0] = 0,
-	.axes_to_buttons[5].points[1] = 127,
-	.axes_to_buttons[5].points[2] = 255,
-	.axes_to_buttons[5].buttons_cnt = 2,
-	.axes_to_buttons[5].is_enabled = 0,
+	.axes_to_buttons[5].points[1] = 255,
+	.axes_to_buttons[5].buttons_cnt = 0,
 	
 	.axes_to_buttons[6].points[0] = 0,
-	.axes_to_buttons[6].points[1] = 127,
-	.axes_to_buttons[6].points[2] = 255,
-	.axes_to_buttons[6].buttons_cnt = 2,
-	.axes_to_buttons[6].is_enabled = 0,
+	.axes_to_buttons[6].points[1] = 255,
+	.axes_to_buttons[6].buttons_cnt = 0,
 	
 	.axes_to_buttons[7].points[0] = 0,
-	.axes_to_buttons[7].points[1] = 127,
-	.axes_to_buttons[7].points[2] = 255,
-	.axes_to_buttons[7].buttons_cnt = 2,
-	.axes_to_buttons[7].is_enabled = 0,
+	.axes_to_buttons[7].points[1] = 255,
+	.axes_to_buttons[7].buttons_cnt = 0,
 	
 	
 	.shift_config[0].button = -1,
@@ -732,13 +719,18 @@ static const dev_config_t init_config =
 	.encoders[14] = ENCODER_CONF_2x,
 	.encoders[15] = ENCODER_CONF_2x,
 	
-	.vid = 0x0483,
-	.pid = 0x5750,
-	.is_dynamic_config = 0,
-	
-	.led_pwm_config.duty_cycle[0] = 50,
-	.led_pwm_config.duty_cycle[1] = 50,
-	.led_pwm_config.duty_cycle[2] = 50,
+	.led_pwm_config[0].duty_cycle = 50,
+	.led_pwm_config[0].is_axis = 0,
+	.led_pwm_config[0].axis_num = 0,
+	.led_pwm_config[1].duty_cycle = 50,
+	.led_pwm_config[1].is_axis = 0,
+	.led_pwm_config[1].axis_num = 0,
+	.led_pwm_config[2].duty_cycle = 50,
+	.led_pwm_config[2].is_axis = 0,
+	.led_pwm_config[2].axis_num = 0,
+	.led_pwm_config[3].duty_cycle = 50,
+	.led_pwm_config[3].is_axis = 0,
+	.led_pwm_config[3].axis_num = 0,	
 	
 	.leds[0].input_num = -1,
 	.leds[0].type = LED_NORMAL,

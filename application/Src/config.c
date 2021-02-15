@@ -75,62 +75,98 @@ void DevConfigGet (dev_config_t * p_dev_config)
 
 void AppConfigInit (dev_config_t * p_dev_config)
 {
-	app_config.axes = 0;
+	int8_t prev_a = -1;
+	int8_t prev_b = -1;
+	
+	app_config.axis = 0;
+	app_config.axis_cnt = 0;
 	app_config.buttons_cnt = 0;
-	app_config.povs = 0;
+	app_config.pov = 0;
+	app_config.pov_cnt = 0;
 	
-	if (p_dev_config->is_dynamic_config)
+	for (uint8_t i=0; i<MAX_AXIS_NUM; i++)
 	{
-		for (uint8_t i=0; i<MAX_AXIS_NUM; i++)
+		if (p_dev_config->axis_config[i].out_enabled)	
 		{
-			if (p_dev_config->axis_config[i].out_enabled)	app_config.axes |= (1<<i);
+			app_config.axis |= (1<<i);
+			app_config.axis_cnt++;
 		}
-
-		for (uint8_t i=0; i<MAX_BUTTONS_NUM; i++)
-		{
-		
-			if (p_dev_config->buttons[i].type == POV1_DOWN ||
-						p_dev_config->buttons[i].type == POV1_UP ||
-						p_dev_config->buttons[i].type == POV1_LEFT ||
-						p_dev_config->buttons[i].type == POV1_RIGHT)
-			{
-				app_config.povs |= 0x01;
-			}
-			else if (p_dev_config->buttons[i].type == POV2_DOWN ||
-						p_dev_config->buttons[i].type == POV2_UP ||
-						p_dev_config->buttons[i].type == POV2_LEFT ||
-						p_dev_config->buttons[i].type == POV2_RIGHT)
-			{
-				app_config.povs |= 0x02;
-			}
-			else if (p_dev_config->buttons[i].type == POV3_DOWN ||
-						p_dev_config->buttons[i].type == POV3_UP ||
-						p_dev_config->buttons[i].type == POV3_LEFT ||
-						p_dev_config->buttons[i].type == POV3_RIGHT)
-			{
-				app_config.povs |= 0x04;
-			}
-			else if (p_dev_config->buttons[i].type == POV4_DOWN ||
-						p_dev_config->buttons[i].type == POV4_UP ||
-						p_dev_config->buttons[i].type == POV4_LEFT ||
-						p_dev_config->buttons[i].type == POV4_RIGHT)
-			{
-				app_config.povs |= 0x08;
-			}
-			
-			if (!p_dev_config->buttons[i].is_disabled && p_dev_config->buttons[i].physical_num >=0)
-			{
-				app_config.buttons_cnt++;
-			}
-		}		
 	}
-	else
+
+	for (uint8_t i=0; i<MAX_BUTTONS_NUM; i++)
 	{
-		app_config.axes = 0xFF;
-		app_config.buttons_cnt = MAX_BUTTONS_NUM;
-		app_config.povs = 0x0F;
+	
+		if (p_dev_config->buttons[i].type == POV1_DOWN ||
+					p_dev_config->buttons[i].type == POV1_UP ||
+					p_dev_config->buttons[i].type == POV1_LEFT ||
+					p_dev_config->buttons[i].type == POV1_RIGHT)
+		{
+			app_config.pov |= 0x01;
+		}
+		else if (p_dev_config->buttons[i].type == POV2_DOWN ||
+					p_dev_config->buttons[i].type == POV2_UP ||
+					p_dev_config->buttons[i].type == POV2_LEFT ||
+					p_dev_config->buttons[i].type == POV2_RIGHT)
+		{
+			app_config.pov |= 0x02;
+		}
+		else if (p_dev_config->buttons[i].type == POV3_DOWN ||
+					p_dev_config->buttons[i].type == POV3_UP ||
+					p_dev_config->buttons[i].type == POV3_LEFT ||
+					p_dev_config->buttons[i].type == POV3_RIGHT)
+		{
+			app_config.pov |= 0x04;
+		}
+		else if (p_dev_config->buttons[i].type == POV4_DOWN ||
+					p_dev_config->buttons[i].type == POV4_UP ||
+					p_dev_config->buttons[i].type == POV4_LEFT ||
+					p_dev_config->buttons[i].type == POV4_RIGHT)
+		{
+			app_config.pov |= 0x08;
+		}
+		
+		app_config.pov_cnt = ((app_config.pov & 0x08)>>3) + ((app_config.pov & 0x04)>>2) + 
+												 ((app_config.pov & 0x02)>>1) + (app_config.pov & 0x01);
+		
+		if (!p_dev_config->buttons[i].is_disabled && p_dev_config->buttons[i].physical_num >=0 &&
+				p_dev_config->buttons[i].type != POV1_DOWN && p_dev_config->buttons[i].type != POV1_UP &&
+				p_dev_config->buttons[i].type != POV1_RIGHT && p_dev_config->buttons[i].type != POV1_LEFT &&
+				p_dev_config->buttons[i].type != POV2_DOWN && p_dev_config->buttons[i].type != POV2_UP &&
+				p_dev_config->buttons[i].type != POV2_RIGHT && p_dev_config->buttons[i].type != POV2_LEFT && 
+				p_dev_config->buttons[i].type != POV3_DOWN && p_dev_config->buttons[i].type != POV3_UP &&
+				p_dev_config->buttons[i].type != POV3_RIGHT && p_dev_config->buttons[i].type != POV3_LEFT && 
+				p_dev_config->buttons[i].type != POV4_DOWN && p_dev_config->buttons[i].type != POV4_UP &&
+				p_dev_config->buttons[i].type != POV4_RIGHT && p_dev_config->buttons[i].type != POV4_LEFT)
+		{
+			app_config.buttons_cnt++;
+		}
 	}
 	
+	if (p_dev_config->pins[8] == FAST_ENCODER &&
+			p_dev_config->pins[9] == FAST_ENCODER)
+	{
+		app_config.fast_encoder_cnt++;
+	}
+	
+	for (int i=0; i<MAX_BUTTONS_NUM; i++)
+	{
+		if ((p_dev_config->buttons[i].type) == ENCODER_INPUT_A &&  i > prev_a)
+		{
+			for (int j=0; j<MAX_BUTTONS_NUM; j++)
+			{
+				if ((p_dev_config->buttons[j].type) == ENCODER_INPUT_B && j > prev_b && app_config.slow_encoder_cnt < MAX_ENCODERS_NUM - 1)
+				{
+					app_config.slow_encoder_cnt++;
+					break;
+				}
+			}
+		}	
+	}
+	
+	for (uint8_t i=0; i<USED_PINS_NUM; i++)
+	{
+		if (p_dev_config->pins[i] == LED_PWM)	app_config.pwm_cnt++;
+	}
 }
 
 void AppConfigGet (app_config_t * p_app_config)

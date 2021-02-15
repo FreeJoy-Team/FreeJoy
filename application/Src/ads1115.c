@@ -53,7 +53,7 @@ void ADS1115_Init(sensor_t * sensor)
   */
 int16_t ADS1115_GetData(sensor_t * sensor, uint8_t channel)
 {
-	return sensor->data[2*channel]<<8|sensor->data[1 + 2*channel];
+	return sensor->data[3+2*channel]<<8|sensor->data[4 + 2*channel];
 }
 
 /**
@@ -70,7 +70,7 @@ int ADS1115_ReadBlocking(sensor_t * sensor, uint8_t channel)
 	
 	if (ret == 0 ) 
 	{
-		memcpy(&sensor->data[2*channel], tmp_buf, 2);
+		memcpy(&sensor->data[3 + 2*channel], tmp_buf, 2);
 		sensor->ok_cnt++;
 	}
 	else sensor->err_cnt++;
@@ -97,3 +97,54 @@ int ADS1115_SetMuxBlocking(sensor_t * sensor, uint8_t channel)
 	
 	return ret;
 }
+
+/**
+  * @brief ADS1115 start processing data in DMA mode
+  * @param sensor: Sensor struct
+  * @retval status
+  */
+int ADS1115_StartDMA(sensor_t * sensor, uint8_t channel)
+{
+	int ret;
+	
+	sensor->rx_complete = 0;	
+	ret = I2C_ReadNonBlocking(sensor->address, 0, &sensor->data[3 + 2*channel], 2, 1);
+	
+	if (ret != 0 )  	// communication error occured
+	{
+		sensor->err_cnt++;
+		sensor->tx_complete = 1;
+		sensor->rx_complete = 1;
+	}
+	
+	return ret;
+}
+
+/**
+  * @brief ADS1115 set mux in DMA mode
+  * @param sensor: Sensor struct
+  * @retval status
+  */
+int ADS1115_SetMuxDMA(sensor_t * sensor, uint8_t channel)
+{
+	int ret;
+	
+	sensor->data[0] = 0x01;															// config reg address
+	sensor->data[1] = 0xC3 | (channel << 4);							// config reg MSB
+	sensor->data[2] = 0xE3;															// config reg LSB
+	
+	sensor->tx_complete = 0;	
+	ret = I2C_WriteNonBlocking(sensor->address, &sensor->data[0], 3);
+	
+	
+	if (ret != 0 ) 	// communication error occured
+	{
+//		sensor->err_cnt++;
+		sensor->tx_complete = 1;
+		sensor->rx_complete = 1;		
+	}
+	else sensor->curr_channel = channel;
+	
+	return ret;
+}
+

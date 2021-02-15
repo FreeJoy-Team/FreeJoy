@@ -27,8 +27,10 @@
 #include <string.h>
 #include <math.h>
 #include "tle5011.h"
+#include "tle5012.h"
 #include "mcp320x.h"
 #include "mlx90393.h"
+#include "as5048a.h"
 #include "ads1115.h"
 #include "as5600.h"
 #include "buttons.h"
@@ -55,8 +57,8 @@ analog_data_t FILTER_LEVEL_7_COEF[FILTER_BUF_SIZE] = {8, 8, 7, 7, 7, 6, 6, 6, 6,
 analog_data_t filter_buffer[MAX_AXIS_NUM][FILTER_BUF_SIZE];
 analog_data_t deadband_buffer[MAX_AXIS_NUM][DEADBAND_BUF_SIZE];
 	
-logical_buttons_state_t axes_buttons[MAX_AXIS_NUM][3];
-int32_t	axes_trim_value[MAX_AXIS_NUM];
+logical_buttons_state_t axis_buttons[MAX_AXIS_NUM][3];
+int32_t	axis_trim_value[MAX_AXIS_NUM];
 
 uint8_t adc_cnt = 0;
 uint8_t sensors_cnt = 0;
@@ -409,7 +411,7 @@ void AxesInit (dev_config_t * p_dev_config)
 
 	 /* DMA and ADC controller clock enable */
   RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1 | RCC_APB2Periph_GPIOC, ENABLE);
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1 | RCC_APB2Periph_GPIOA, ENABLE);
 	
 	for (int i = 0; i<MAX_AXIS_NUM; i++)
 	{
@@ -442,6 +444,19 @@ void AxesInit (dev_config_t * p_dev_config)
 				if (p_dev_config->axis_config[k].source_main == i && sensors_cnt < MAX_AXIS_NUM)
 				{
 					sensors[sensors_cnt].type = TLE5011;			
+					sensors[sensors_cnt].source = i;
+					sensors_cnt++;
+					break;
+				}
+			}
+		}
+		else if (p_dev_config->pins[i] == TLE5012_CS)
+		{
+			for (uint8_t k=0; k<MAX_AXIS_NUM; k++)
+			{
+				if (p_dev_config->axis_config[k].source_main == i && sensors_cnt < MAX_AXIS_NUM)
+				{
+					sensors[sensors_cnt].type = TLE5012;			
 					sensors[sensors_cnt].source = i;
 					sensors_cnt++;
 					break;
@@ -509,54 +524,69 @@ void AxesInit (dev_config_t * p_dev_config)
 					sensors[sensors_cnt].type = MLX90393_SPI;
 					sensors[sensors_cnt].source = i;
 					
-					MLX90393_Start(&sensors[sensors_cnt]);
+					MLX90393_Start(MLX_SPI, &sensors[sensors_cnt]);
 					sensors_cnt++;
 					break;
 				}
 			}
 		}
-		else if (p_dev_config->pins[19] == I2C_SCL && p_dev_config->pins[20] == I2C_SDA)			// PB8 and PB9
+		else if (p_dev_config->pins[i] == AS5048A_CS)
 		{
-			// look for ADS1115 sensors with different addresses
-			for (uint8_t addr = ADS1115_I2C_ADDR_MIN; addr <= ADS1115_I2C_ADDR_MAX; addr ++)
+			for (uint8_t k=0; k<MAX_AXIS_NUM; k++)
 			{
-				for (uint8_t k=0; k<MAX_AXIS_NUM; k++)
+				if (p_dev_config->axis_config[k].source_main == i && sensors_cnt < MAX_AXIS_NUM)
 				{
-					if (p_dev_config->axis_config[k].source_main == (pin_t) SOURCE_I2C)
+					sensors[sensors_cnt].type = AS5048A_SPI;
+					sensors[sensors_cnt].source = i;
+					
+					sensors_cnt++;
+					break;
+				}
+			}
+		}
+	}
+
+	if (p_dev_config->pins[21] == I2C_SCL && p_dev_config->pins[22] == I2C_SDA)			// PB10 and PB11
+	{
+		// look for ADS1115 sensors with different addresses
+		for (uint8_t addr = ADS1115_I2C_ADDR_MIN; addr <= ADS1115_I2C_ADDR_MAX; addr ++)
+		{
+			for (uint8_t k=0; k<MAX_AXIS_NUM; k++)
+			{
+				if (p_dev_config->axis_config[k].source_main == (pin_t) SOURCE_I2C)
+				{
+					if ((p_dev_config->axis_config[k].i2c_address) == addr)
 					{
-						if ((p_dev_config->axis_config[k].i2c_address) == addr)
-						{
-							sensors[sensors_cnt].address = p_dev_config->axis_config[k].i2c_address;
-							sensors[sensors_cnt].type = ADS1115;
-							sensors[sensors_cnt].source = (pin_t) SOURCE_I2C;
-							
-							ADS1115_Init(&sensors[sensors_cnt]);
-							sensors_cnt++;
-							break;
-						}
+						sensors[sensors_cnt].address = p_dev_config->axis_config[k].i2c_address;
+						sensors[sensors_cnt].type = ADS1115;
+						sensors[sensors_cnt].source = (pin_t) SOURCE_I2C;
+						
+						ADS1115_Init(&sensors[sensors_cnt]);
+						sensors_cnt++;
+						break;
 					}
 				}
 			}
-			// look for AS5600
-			for (uint8_t k=0; k<MAX_AXIS_NUM; k++)
+		}
+		// look for AS5600
+		for (uint8_t k=0; k<MAX_AXIS_NUM; k++)
+		{
+			if (p_dev_config->axis_config[k].source_main == (pin_t) SOURCE_I2C)
+			{
+				if ((p_dev_config->axis_config[k].i2c_address) == AS5600_I2C_ADDR)
 				{
-					if (p_dev_config->axis_config[k].source_main == (pin_t) SOURCE_I2C)
-					{
-						if ((p_dev_config->axis_config[k].i2c_address) == AS5600_I2C_ADDR)
-						{
-							sensors[sensors_cnt].address = p_dev_config->axis_config[k].i2c_address;
-							sensors[sensors_cnt].type = AS5600;
-							sensors[sensors_cnt].source = (pin_t) SOURCE_I2C;
-							
-							uint16_t calib_min = map2(p_dev_config->axis_config[k].calib_min, AXIS_MIN_VALUE, AXIS_MAX_VALUE, 0, 4095);
-							uint16_t calib_max = map2(p_dev_config->axis_config[k].calib_max, AXIS_MIN_VALUE, AXIS_MAX_VALUE, 0, 4095);
-							
-							AS5600_Init(&sensors[sensors_cnt], calib_min, calib_max);						
-							sensors_cnt++;						
-							break;
-						}
-					}
+					sensors[sensors_cnt].address = p_dev_config->axis_config[k].i2c_address;
+					sensors[sensors_cnt].type = AS5600;
+					sensors[sensors_cnt].source = (pin_t) SOURCE_I2C;
+					
+					uint16_t calib_min = map2(p_dev_config->axis_config[k].calib_min, AXIS_MIN_VALUE, AXIS_MAX_VALUE, 0, 4095);
+					uint16_t calib_max = map2(p_dev_config->axis_config[k].calib_max, AXIS_MIN_VALUE, AXIS_MAX_VALUE, 0, 4095);
+					
+					AS5600_Init(&sensors[sensors_cnt], calib_min, calib_max);						
+					sensors_cnt++;						
+					break;
 				}
+			}
 		}
 	}
 	
@@ -701,7 +731,7 @@ void AxesProcess (dev_config_t * p_dev_config)
 		uint8_t address = p_dev_config->axis_config[i].i2c_address;
 		
 		if (source >= 0)		// source SPI sensors or internal ADC
-		{
+		{			
 			if (p_dev_config->pins[source] == AXIS_ANALOG)					// source analog
 			{	
 				uint8_t k=0;
@@ -734,7 +764,7 @@ void AxesProcess (dev_config_t * p_dev_config)
 					if (sensors[k].source == source) break;
 				}
 				// get angle data
-				if (TLE501x_GetAngle(&sensors[k], &tmpf) == 0)
+				if (TLE5011_GetAngle(&sensors[k], &tmpf) == 0)
 				{
 					sensors[k].ok_cnt++;
 					if (p_dev_config->axis_config[i].offset_angle > 0)
@@ -751,31 +781,37 @@ void AxesProcess (dev_config_t * p_dev_config)
 					sensors[k].err_cnt++;
 				}
 			}
-			else if (p_dev_config->pins[source] == MCP3201_CS)				// source MCP3201
+			else if (p_dev_config->pins[source] == TLE5012_CS)			// source TLE5012
 			{
+				tmpf = 0;
 				uint8_t k=0;
 				// search for needed sensor
 				for (k=0; k<MAX_AXIS_NUM; k++)
 				{
 					if (sensors[k].source == source) break;
 				}
-				// get data
-				if (p_dev_config->axis_config[i].offset_angle > 0)	// offset enabled
+				// get angle data
+				if (TLE5012_GetAngle(&sensors[k], &tmpf) == 0)
 				{
-					tmp[i] = MCP320x_GetData(&sensors[k], 0) - p_dev_config->axis_config[i].offset_angle * 170;
-					if (tmp[i] < 0) tmp[i] += 4095;
-					else if (tmp[i] > 4095) tmp[i] -= 4095;
+					sensors[k].ok_cnt++;
+					if (p_dev_config->axis_config[i].offset_angle > 0)
+					{
+						tmpf -= p_dev_config->axis_config[i].offset_angle * 15;
+						if (tmpf < -180) tmpf += 360;
+						else if (tmpf > 180) tmpf -= 360;
+					}
+					tmpf *= 1000;
+					raw_axis_data[i] = map_tle(tmpf);
 				}
-				else		// offset disabled
+				else
 				{
-					tmp[i] = MCP320x_GetData(&sensors[k], 0);
+					sensors[k].err_cnt++;
 				}
-				
-				raw_axis_data[i] = map2(tmp[i], 0, 4095, AXIS_MIN_VALUE, AXIS_MAX_VALUE);
-			}	
-			else if (p_dev_config->pins[source] == MCP3202_CS ||
+			}
+			else if (p_dev_config->pins[source] == MCP3201_CS ||
+							 p_dev_config->pins[source] == MCP3202_CS ||
 							 p_dev_config->pins[source] == MCP3204_CS ||
-							 p_dev_config->pins[source] == MCP3208_CS)				// source MCP3202/4/8
+							 p_dev_config->pins[source] == MCP3208_CS)				// source MCP320x
 			{
 				uint8_t k=0;
 				// search for needed sensor
@@ -807,6 +843,35 @@ void AxesProcess (dev_config_t * p_dev_config)
 					if (sensors[k].source == source) break;
 				}
 				if (MLX90393_GetData(&tmp16, &sensors[k], channel) == 0)
+				{
+					sensors[k].ok_cnt++;
+					
+					if (p_dev_config->axis_config[i].offset_angle > 0)	// offset enabled
+					{
+						raw_axis_data[i] = tmp16 - p_dev_config->axis_config[i].offset_angle * 2730;
+						if (raw_axis_data[i] < AXIS_MIN_VALUE) raw_axis_data[i] += AXIS_FULLSCALE;
+						else if (raw_axis_data[i] > AXIS_MAX_VALUE) raw_axis_data[i] -= AXIS_FULLSCALE;		// always false
+					}
+					else
+					{
+						raw_axis_data[i] = tmp16;
+					}
+				}
+				else
+				{
+					sensors[k].err_cnt++;
+				}
+			}	
+			else if (p_dev_config->pins[source] == AS5048A_CS)				// source AS5048A
+			{
+				uint8_t k = 0;
+				uint16_t tmp16 = 0;
+				// search for needed sensor
+				for (k=0; k<MAX_AXIS_NUM; k++)
+				{
+					if (sensors[k].source == source) break;
+				}
+				if (AS5048A_GetData(&tmp16, &sensors[k], channel) == 0)
 				{
 					sensors[k].ok_cnt++;
 					
@@ -890,6 +955,146 @@ void AxesProcess (dev_config_t * p_dev_config)
 		// Filtering
 		tmp[i] = Filter(raw_axis_data[i], filter_buffer[i], p_dev_config->axis_config[i].filter);
 			
+		// Buttons section
+    {
+			int64_t millis = GetTick();
+			
+			uint8_t inc_button_num = 0;
+			uint8_t rst_button_num = 0;
+			uint8_t dec_button_num = 0;
+			uint8_t cent_button_num = 0;
+			
+			// detect buttons
+			if (p_dev_config->axis_config[i].button1 >= 0 && 
+					p_dev_config->axis_config[i].button1_type == AXIS_BUTTON_UP)	inc_button_num |= 1<<0;
+			if (p_dev_config->axis_config[i].button3 >= 0 && 
+							 p_dev_config->axis_config[i].button3_type == AXIS_BUTTON_UP)	inc_button_num |= 1<<2;
+			
+			if (p_dev_config->axis_config[i].button1 >= 0 && 
+					p_dev_config->axis_config[i].button1_type == AXIS_BUTTON_RESET)	rst_button_num |= 1<<0;
+			if (p_dev_config->axis_config[i].button2 >= 0 && 
+							 p_dev_config->axis_config[i].button2_type == AXIS_BUTTON_RESET)	rst_button_num |= 1<<1;
+			if (p_dev_config->axis_config[i].button3 >= 0 && 
+							 p_dev_config->axis_config[i].button3_type == AXIS_BUTTON_RESET)	rst_button_num |= 1<<2;
+			
+			if (p_dev_config->axis_config[i].button1 >= 0 && 
+					p_dev_config->axis_config[i].button1_type == AXIS_BUTTON_DOWN)	dec_button_num |= 1<<0;
+			if (p_dev_config->axis_config[i].button3 >= 0 && 
+							 p_dev_config->axis_config[i].button3_type == AXIS_BUTTON_DOWN)	dec_button_num |= 1<<2;
+			
+			if (p_dev_config->axis_config[i].button1 >= 0 && 
+					p_dev_config->axis_config[i].button1_type == AXIS_BUTTON_CENTER)	cent_button_num |= 1<<0;
+			if (p_dev_config->axis_config[i].button2 >= 0 && 
+							 p_dev_config->axis_config[i].button2_type == AXIS_BUTTON_CENTER)	cent_button_num |= 1<<1;
+			if (p_dev_config->axis_config[i].button3 >= 0 && 
+							 p_dev_config->axis_config[i].button3_type == AXIS_BUTTON_CENTER)	cent_button_num |= 1<<2;
+			
+			axis_buttons[i][0].prev_physical_state = axis_buttons[i][0].current_state;
+			axis_buttons[i][1].prev_physical_state = axis_buttons[i][1].current_state;
+			axis_buttons[i][2].prev_physical_state = axis_buttons[i][2].current_state;
+
+			// get new button's states
+			if (p_dev_config->axis_config[i].button1 >= 0)
+			{
+				axis_buttons[i][0].current_state = logical_buttons_state[p_dev_config->axis_config[i].button1].current_state;
+			}
+			if (p_dev_config->axis_config[i].button2 >= 0)
+			{
+				axis_buttons[i][1].current_state = logical_buttons_state[p_dev_config->axis_config[i].button2].current_state;
+			}
+			if (p_dev_config->axis_config[i].button3 >= 0)
+			{
+				axis_buttons[i][2].current_state = logical_buttons_state[p_dev_config->axis_config[i].button3].current_state;
+			}	
+			
+			// Trimming by buttons
+			if (inc_button_num > 0 || rst_button_num > 0 || dec_button_num > 0)
+			{
+				// increment
+				if ((inc_button_num & 0x01) && axis_buttons[i][0].current_state > axis_buttons[i][0].prev_physical_state)
+				{
+					axis_buttons[i][0].time_last = millis + 500;
+					axis_trim_value[i] +=  (AXIS_FULLSCALE)/p_dev_config->axis_config[i].divider;
+				}
+				else if ((inc_button_num & 0x01) && axis_buttons[i][0].prev_physical_state && millis - axis_buttons[i][0].time_last > 50)
+				{
+					axis_buttons[i][0].time_last = millis;
+					axis_trim_value[i] += (AXIS_FULLSCALE)/p_dev_config->axis_config[i].divider;
+				}
+				else if ((inc_button_num & 0x04) && axis_buttons[i][2].current_state > axis_buttons[i][2].prev_physical_state)
+				{
+					axis_buttons[i][2].time_last = millis + 500;
+					axis_trim_value[i] +=  (AXIS_FULLSCALE)/p_dev_config->axis_config[i].divider;
+				}
+				else if ((inc_button_num & 0x04) && axis_buttons[i][2].prev_physical_state && millis - axis_buttons[i][2].time_last > 50)
+				{
+					axis_buttons[i][2].time_last = millis;
+					axis_trim_value[i] += (AXIS_FULLSCALE)/p_dev_config->axis_config[i].divider;
+				}
+						
+				// decrement
+				if ((dec_button_num & 0x01) && axis_buttons[i][0].current_state > axis_buttons[i][0].prev_physical_state)
+				{
+					axis_buttons[i][0].time_last = millis + 500;
+					axis_trim_value[i] -=  (AXIS_FULLSCALE)/p_dev_config->axis_config[i].divider;
+				}
+				else if ((dec_button_num & 0x01) && axis_buttons[i][0].prev_physical_state && millis - axis_buttons[i][0].time_last > 50)
+				{
+					axis_buttons[i][0].time_last = millis;
+					axis_trim_value[i] -= (AXIS_FULLSCALE)/p_dev_config->axis_config[i].divider;
+				}
+				else if ((dec_button_num & 0x04) && axis_buttons[i][2].current_state > axis_buttons[i][2].prev_physical_state)
+				{
+					axis_buttons[i][2].time_last = millis + 500;
+					axis_trim_value[i] -=  (AXIS_FULLSCALE)/p_dev_config->axis_config[i].divider;
+				}
+				else if ((dec_button_num & 0x04) && axis_buttons[i][2].prev_physical_state && millis - axis_buttons[i][2].time_last > 50)
+				{
+					axis_buttons[i][2].time_last = millis;
+					axis_trim_value[i] -= (AXIS_FULLSCALE)/p_dev_config->axis_config[i].divider;
+				}
+				
+				// reset
+				if ((rst_button_num & 0x01) && axis_buttons[i][0].current_state)
+				{
+					axis_trim_value[i] = 0;
+				}
+				else if ((rst_button_num & 0x02) && axis_buttons[i][1].current_state)
+				{
+					axis_trim_value[i] = 0;
+				}
+				else if ((rst_button_num & 0x04) && axis_buttons[i][2].current_state)
+				{
+					axis_trim_value[i] = 0;
+				}	
+			}
+
+			// Centering
+			if (cent_button_num > 0)
+			{
+				if ((cent_button_num & 0x01) && axis_buttons[i][0].current_state)
+				{
+					axis_trim_value[i] = -tmp[i];
+				}
+				else if ((cent_button_num & 0x02) && axis_buttons[i][1].current_state)
+				{
+					axis_trim_value[i] = -tmp[i];
+				}
+				else if ((cent_button_num & 0x04) && axis_buttons[i][2].current_state)
+				{
+					axis_trim_value[i] = -tmp[i];
+				}
+			}
+			
+			if (axis_trim_value[i] > AXIS_FULLSCALE) axis_trim_value[i] = AXIS_FULLSCALE;
+			if (axis_trim_value[i] < -AXIS_FULLSCALE) axis_trim_value[i] = -AXIS_FULLSCALE;
+						
+			tmp[i] += axis_trim_value[i];
+			
+			if (tmp[i] > AXIS_MAX_VALUE) tmp[i] = AXIS_MAX_VALUE;
+			if (tmp[i] < AXIS_MIN_VALUE) tmp[i] = AXIS_MIN_VALUE;
+    }		
+
 		// Deadband processing and scaling		
 		if (!p_dev_config->axis_config[i].is_dynamic_deadband)
 		{
@@ -951,156 +1156,18 @@ void AxesProcess (dev_config_t * p_dev_config)
 						(p_dev_config->axis_config[i].button2 < 0 || p_dev_config->axis_config[i].button2_type != AXIS_BUTTON_PRESCALER_EN) &&
 						(p_dev_config->axis_config[i].button3 < 0 || p_dev_config->axis_config[i].button3_type != AXIS_BUTTON_PRESCALER_EN)) ||
 						// or defined and pressed
-						((p_dev_config->axis_config[i].button1 >=0 && axes_buttons[i][0].current_state && 
+						((p_dev_config->axis_config[i].button1 >=0 && axis_buttons[i][0].current_state && 
 							p_dev_config->axis_config[i].button1_type == AXIS_BUTTON_PRESCALER_EN) ||
-						 (p_dev_config->axis_config[i].button2 >=0 && axes_buttons[i][1].current_state && 
+						 (p_dev_config->axis_config[i].button2 >=0 && axis_buttons[i][1].current_state && 
 							p_dev_config->axis_config[i].button2_type == AXIS_BUTTON_PRESCALER_EN) ||
-						 (p_dev_config->axis_config[i].button3 >=0 && axes_buttons[i][2].current_state && 
+						 (p_dev_config->axis_config[i].button3 >=0 && axis_buttons[i][2].current_state && 
 							p_dev_config->axis_config[i].button3_type == AXIS_BUTTON_PRESCALER_EN))
 				 )
 			{
-				tmp[i] = tmp[i]  * p_dev_config->axis_config[i].prescaler / 100;
+				if (p_dev_config->axis_config[i].is_centered)	tmp[i] = tmp[i]*p_dev_config->axis_config[i].prescaler / 100;
+				else	tmp[i] = (tmp[i] - AXIS_MIN_VALUE)*p_dev_config->axis_config[i].prescaler / 100 + AXIS_MIN_VALUE;
 			}
 		}
-		// Buttons section
-    {
-			int64_t millis = GetTick();
-			
-			uint8_t inc_button_num = 0;
-			uint8_t rst_button_num = 0;
-			uint8_t dec_button_num = 0;
-			uint8_t cent_button_num = 0;
-			
-			// detect buttons
-			if (p_dev_config->axis_config[i].button1 >= 0 && 
-					p_dev_config->axis_config[i].button1_type == AXIS_BUTTON_UP)	inc_button_num |= 1<<0;
-			if (p_dev_config->axis_config[i].button3 >= 0 && 
-							 p_dev_config->axis_config[i].button3_type == AXIS_BUTTON_UP)	inc_button_num |= 1<<2;
-			
-			if (p_dev_config->axis_config[i].button1 >= 0 && 
-					p_dev_config->axis_config[i].button1_type == AXIS_BUTTON_RESET)	rst_button_num |= 1<<0;
-			if (p_dev_config->axis_config[i].button2 >= 0 && 
-							 p_dev_config->axis_config[i].button2_type == AXIS_BUTTON_RESET)	rst_button_num |= 1<<1;
-			if (p_dev_config->axis_config[i].button3 >= 0 && 
-							 p_dev_config->axis_config[i].button3_type == AXIS_BUTTON_RESET)	rst_button_num |= 1<<2;
-			
-			if (p_dev_config->axis_config[i].button1 >= 0 && 
-					p_dev_config->axis_config[i].button1_type == AXIS_BUTTON_DOWN)	dec_button_num |= 1<<0;
-			if (p_dev_config->axis_config[i].button3 >= 0 && 
-							 p_dev_config->axis_config[i].button3_type == AXIS_BUTTON_DOWN)	dec_button_num |= 1<<2;
-			
-			if (p_dev_config->axis_config[i].button1 >= 0 && 
-					p_dev_config->axis_config[i].button1_type == AXIS_BUTTON_CENTER)	cent_button_num |= 1<<0;
-			if (p_dev_config->axis_config[i].button2 >= 0 && 
-							 p_dev_config->axis_config[i].button2_type == AXIS_BUTTON_CENTER)	cent_button_num |= 1<<1;
-			if (p_dev_config->axis_config[i].button3 >= 0 && 
-							 p_dev_config->axis_config[i].button3_type == AXIS_BUTTON_CENTER)	cent_button_num |= 1<<2;
-			
-			axes_buttons[i][0].prev_physical_state = axes_buttons[i][0].current_state;
-			axes_buttons[i][1].prev_physical_state = axes_buttons[i][1].current_state;
-			axes_buttons[i][2].prev_physical_state = axes_buttons[i][2].current_state;
-
-			// get new button's states
-			if (p_dev_config->axis_config[i].button1 >= 0)
-			{
-				axes_buttons[i][0].current_state = logical_buttons_state[p_dev_config->axis_config[i].button1].current_state;
-			}
-			if (p_dev_config->axis_config[i].button2 >= 0)
-			{
-				axes_buttons[i][1].current_state = logical_buttons_state[p_dev_config->axis_config[i].button2].current_state;
-			}
-			if (p_dev_config->axis_config[i].button3 >= 0)
-			{
-				axes_buttons[i][2].current_state = logical_buttons_state[p_dev_config->axis_config[i].button3].current_state;
-			}	
-			
-			// Trimming by buttons
-			if (inc_button_num > 0 || rst_button_num > 0 || dec_button_num > 0)
-			{
-				// increment
-				if ((inc_button_num & 0x01) && axes_buttons[i][0].current_state > axes_buttons[i][0].prev_physical_state)
-				{
-					axes_buttons[i][0].time_last = millis + 500;
-					axes_trim_value[i] +=  (AXIS_FULLSCALE)/p_dev_config->axis_config[i].divider;
-				}
-				else if ((inc_button_num & 0x01) && axes_buttons[i][0].prev_physical_state && millis - axes_buttons[i][0].time_last > 50)
-				{
-					axes_buttons[i][0].time_last = millis;
-					axes_trim_value[i] += (AXIS_FULLSCALE)/p_dev_config->axis_config[i].divider;
-				}
-				else if ((inc_button_num & 0x04) && axes_buttons[i][2].current_state > axes_buttons[i][2].prev_physical_state)
-				{
-					axes_buttons[i][2].time_last = millis + 500;
-					axes_trim_value[i] +=  (AXIS_FULLSCALE)/p_dev_config->axis_config[i].divider;
-				}
-				else if ((inc_button_num & 0x04) && axes_buttons[i][2].prev_physical_state && millis - axes_buttons[i][2].time_last > 50)
-				{
-					axes_buttons[i][2].time_last = millis;
-					axes_trim_value[i] += (AXIS_FULLSCALE)/p_dev_config->axis_config[i].divider;
-				}
-						
-				// decrement
-				if ((dec_button_num & 0x01) && axes_buttons[i][0].current_state > axes_buttons[i][0].prev_physical_state)
-				{
-					axes_buttons[i][0].time_last = millis + 500;
-					axes_trim_value[i] -=  (AXIS_FULLSCALE)/p_dev_config->axis_config[i].divider;
-				}
-				else if ((dec_button_num & 0x01) && axes_buttons[i][0].prev_physical_state && millis - axes_buttons[i][0].time_last > 50)
-				{
-					axes_buttons[i][0].time_last = millis;
-					axes_trim_value[i] -= (AXIS_FULLSCALE)/p_dev_config->axis_config[i].divider;
-				}
-				else if ((dec_button_num & 0x04) && axes_buttons[i][2].current_state > axes_buttons[i][2].prev_physical_state)
-				{
-					axes_buttons[i][2].time_last = millis + 500;
-					axes_trim_value[i] -=  (AXIS_FULLSCALE)/p_dev_config->axis_config[i].divider;
-				}
-				else if ((dec_button_num & 0x04) && axes_buttons[i][2].prev_physical_state && millis - axes_buttons[i][2].time_last > 50)
-				{
-					axes_buttons[i][2].time_last = millis;
-					axes_trim_value[i] -= (AXIS_FULLSCALE)/p_dev_config->axis_config[i].divider;
-				}
-				
-				// reset
-				if ((rst_button_num & 0x01) && axes_buttons[i][0].current_state)
-				{
-					axes_trim_value[i] = 0;
-				}
-				else if ((rst_button_num & 0x02) && axes_buttons[i][1].current_state)
-				{
-					axes_trim_value[i] = 0;
-				}
-				else if ((rst_button_num & 0x04) && axes_buttons[i][2].current_state)
-				{
-					axes_trim_value[i] = 0;
-				}	
-			}
-
-			// Centering
-			if (cent_button_num > 0)
-			{
-				if ((cent_button_num & 0x01) && axes_buttons[i][0].current_state)
-				{
-					axes_trim_value[i] = -tmp[i];
-				}
-				else if ((cent_button_num & 0x02) && axes_buttons[i][1].current_state)
-				{
-					axes_trim_value[i] = -tmp[i];
-				}
-				else if ((cent_button_num & 0x04) && axes_buttons[i][2].current_state)
-				{
-					axes_trim_value[i] = -tmp[i];
-				}
-			}
-			
-			if (axes_trim_value[i] > AXIS_FULLSCALE) axes_trim_value[i] = AXIS_FULLSCALE;
-			if (axes_trim_value[i] < -AXIS_FULLSCALE) axes_trim_value[i] = -AXIS_FULLSCALE;
-						
-			tmp[i] += axes_trim_value[i];
-			
-			if (tmp[i] > AXIS_MAX_VALUE) tmp[i] = AXIS_MAX_VALUE;
-			if (tmp[i] < AXIS_MIN_VALUE) tmp[i] = AXIS_MIN_VALUE;		
-    }
 		
 	} 
 	
@@ -1109,9 +1176,9 @@ void AxesProcess (dev_config_t * p_dev_config)
 	{
 		
 		// check axis function activation 
-		if(((axes_buttons[i][0].current_state && p_dev_config->axis_config[i].button1_type == AXIS_BUTTON_FUNC_EN) ||
-			 (axes_buttons[i][1].current_state && p_dev_config->axis_config[i].button2_type == AXIS_BUTTON_FUNC_EN) ||
-		   (axes_buttons[i][2].current_state && p_dev_config->axis_config[i].button3_type == AXIS_BUTTON_FUNC_EN) ||
+		if(((axis_buttons[i][0].current_state && p_dev_config->axis_config[i].button1_type == AXIS_BUTTON_FUNC_EN) ||
+			 (axis_buttons[i][1].current_state && p_dev_config->axis_config[i].button2_type == AXIS_BUTTON_FUNC_EN) ||
+		   (axis_buttons[i][2].current_state && p_dev_config->axis_config[i].button3_type == AXIS_BUTTON_FUNC_EN) ||
 		   (p_dev_config->axis_config[i].button1_type != AXIS_BUTTON_FUNC_EN && 
 				p_dev_config->axis_config[i].button2_type != AXIS_BUTTON_FUNC_EN && 
 				p_dev_config->axis_config[i].button3_type != AXIS_BUTTON_FUNC_EN)) && 
@@ -1155,17 +1222,12 @@ void AxesProcess (dev_config_t * p_dev_config)
 			else if (tmp[i] < AXIS_MIN_VALUE) tmp[i] = AXIS_MIN_VALUE;
 		}
 		
-		// disable data updating from IRQ
-		NVIC_DisableIRQ(TIM2_IRQn);
-		
     // setting technical axis data
     scaled_axis_data[i] = tmp[i];
     // setting output axis data
     if (p_dev_config->axis_config[i].out_enabled)  out_axis_data[i] = scaled_axis_data[i];
     else  out_axis_data[i] = 0;
 		
-		// restore IRQ
-		NVIC_EnableIRQ(TIM2_IRQn);
 	}
 	
 }
@@ -1184,10 +1246,10 @@ void AxisResetCalibration (dev_config_t * p_dev_config, uint8_t axis_num)
 }
 
 /**
-  * @brief  Getting axes data in report format
-	*	@param	out_data: Pointer to target buffer of axes output data (may be disabled in configuration)
-	*	@param	scaled_data: Pointer to target buffer of axes scaled output data
-	*	@param	raw_data: Pointer to target buffer of axes raw output data 
+  * @brief  Getting axis data in report format
+	*	@param	out_data: Pointer to target buffer of axis output data (may be disabled in configuration)
+	*	@param	scaled_data: Pointer to target buffer of axis scaled output data
+	*	@param	raw_data: Pointer to target buffer of axis raw output data 
   * @retval None
   */
 void AnalogGet (analog_data_t * out_data, analog_data_t * scaled_data, analog_data_t * raw_data)

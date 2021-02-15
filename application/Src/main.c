@@ -66,24 +66,30 @@ int main(void)
 	}
 	AppConfigInit(&dev_config);
 	
+	USB_HW_Init();
+	// wait for USB initialization
+	Delay_ms(1000);	
 	
 	IO_Init(&dev_config);
 	 
 	EncodersInit(&dev_config);	
 	ShiftRegistersInit(&dev_config);
 	RadioButtons_Init(&dev_config);
-	SequentialButtons_Init(&dev_config);
+	SequentialButtons_Init(&dev_config);		
+	
+	// init sensors
 	AxesInit(&dev_config);
+	// start sequential periphery reading
+	Timers_Init(&dev_config);		
 	
-	Delay_ms(50);	
-	USB_HW_Init();
-	
-	Timers_Init(&dev_config);
-
   while (1)
   {
 		ButtonsReadLogical(&dev_config);
 		LEDs_PhysicalProcess(&dev_config);
+		
+		analog_data_t tmp[8];
+		AnalogGet(NULL, tmp, NULL);
+		PWM_SetFromAxis(&dev_config, tmp);
 		
 		// Enter flasher command received
 		if (bootloader > 0)

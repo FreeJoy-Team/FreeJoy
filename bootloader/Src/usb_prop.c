@@ -191,12 +191,21 @@ void CustomHID_Reset(void)
   SetEPRxCount(ENDP1, 64);
   SetEPRxStatus(ENDP1, EP_RX_VALID);
   SetEPTxStatus(ENDP1, EP_TX_NAK);
+	
+//	/* Initialize Endpoint 2 */
+//  SetEPType(ENDP2, EP_INTERRUPT);
+//  SetEPTxAddr(ENDP2, ENDP2_TXADDR);
+//  SetEPRxAddr(ENDP2, ENDP2_RXADDR);
+//  SetEPTxCount(ENDP2, 0);
+//  SetEPRxCount(ENDP2, 64);
+//  SetEPRxStatus(ENDP2, EP_RX_VALID);
+//  SetEPTxStatus(ENDP2, EP_TX_NAK);
 
   /* Set this device to response on default address */
   SetDeviceAddress(0);
   bDeviceState = ATTACHED;
 	
-	PrevXferComplete = 1;
+	EP1_PrevXferComplete = 1;
 }
 /*******************************************************************************
 * Function Name  : CustomHID_SetConfiguration.

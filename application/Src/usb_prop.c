@@ -94,34 +94,46 @@ USER_STANDARD_REQUESTS User_Standard_Requests =
 
 ONE_DESCRIPTOR Device_Descriptor =
   {
-    (uint8_t*)CustomHID_DeviceDescriptor,
-    CUSTOMHID_SIZ_DEVICE_DESC
+    (uint8_t*)Composite_DeviceDescriptor,
+    Composite_SIZ_DEVICE_DESC
   };
 
 ONE_DESCRIPTOR Config_Descriptor =
   {
-    (uint8_t*)CustomHID_ConfigDescriptor,
-    CUSTOMHID_SIZ_CONFIG_DESC
+    (uint8_t*)Composite_ConfigDescriptor,
+    Composite_SIZ_CONFIG_DESC
   };
 
+ONE_DESCRIPTOR JoystickHID_Report_Descriptor =
+  {
+    (uint8_t *)JoystickHID_ReportDescriptor,
+    JoystickHID_SIZ_REPORT_DESC
+  };
+	
 ONE_DESCRIPTOR CustomHID_Report_Descriptor =
   {
     (uint8_t *)CustomHID_ReportDescriptor,
-    CUSTOMHID_SIZ_REPORT_DESC
+    CustomHID_SIZ_REPORT_DESC
   };
 
+ONE_DESCRIPTOR JoystickHID_Hid_Descriptor =
+  {
+    (uint8_t*)Composite_ConfigDescriptor + JoystickHID_OFF_HID_DESC,
+    JoystickHID_SIZ_HID_DESC
+  };
+	
 ONE_DESCRIPTOR CustomHID_Hid_Descriptor =
   {
-    (uint8_t*)CustomHID_ConfigDescriptor + CUSTOMHID_OFF_HID_DESC,
-    CUSTOMHID_SIZ_HID_DESC
+    (uint8_t*)Composite_ConfigDescriptor + CustomHID_OFF_HID_DESC,
+    CustomHID_SIZ_HID_DESC
   };
 
 ONE_DESCRIPTOR String_Descriptor[4] =
   {
-    {(uint8_t*)CustomHID_StringLangID, CUSTOMHID_SIZ_STRING_LANGID},
-    {(uint8_t*)CustomHID_StringVendor, CUSTOMHID_SIZ_STRING_VENDOR},
-    {(uint8_t*)CustomHID_StringProduct, CUSTOMHID_SIZ_STRING_PRODUCT},
-    {(uint8_t*)CustomHID_StringSerial, CUSTOMHID_SIZ_STRING_SERIAL}
+    {(uint8_t*)Composite_StringLangID, Composite_SIZ_STRING_LANGID},
+    {(uint8_t*)Composite_StringVendor, Composite_SIZ_STRING_VENDOR},
+    {(uint8_t*)Composite_StringProduct, Composite_SIZ_STRING_PRODUCT},
+    {(uint8_t*)Composite_StringSerial, Composite_SIZ_STRING_SERIAL}
   };
 
 /* Extern variables ----------------------------------------------------------*/
@@ -143,11 +155,11 @@ uint8_t *CustomHID_SetReport_Feature(uint16_t Length);
 void CustomHID_init(void)
 {
   /* Update the serial number string descriptor with the data from the unique 
-  ID*/
+  ID*/	
   Get_SerialNum();
 	Get_ProductStr();
 	Get_VidPid();
-	Get_ReportDesc();
+	JoystickHID_Report_Descriptor.Descriptor_Size = Get_ReportDesc();
     
   pInformation->Current_Configuration = 0;
   /* Connect the device */
@@ -173,7 +185,7 @@ void CustomHID_Reset(void)
   pInformation->Current_Interface = 0;/*the default Interface*/
   
   /* Current Feature initialization */
-  pInformation->Current_Feature = CustomHID_ConfigDescriptor[7];
+  pInformation->Current_Feature = Composite_ConfigDescriptor[7];
  
   SetBTABLE(BTABLE_ADDRESS);
 
@@ -194,12 +206,22 @@ void CustomHID_Reset(void)
   SetEPRxCount(ENDP1, 64);
   SetEPRxStatus(ENDP1, EP_RX_VALID);
   SetEPTxStatus(ENDP1, EP_TX_NAK);
+	
+	/* Initialize Endpoint 2 */
+  SetEPType(ENDP2, EP_INTERRUPT);
+  SetEPTxAddr(ENDP2, ENDP2_TXADDR);
+  SetEPRxAddr(ENDP2, ENDP2_RXADDR);
+  SetEPTxCount(ENDP2, 0);
+  SetEPRxCount(ENDP2, 64);
+  SetEPRxStatus(ENDP2, EP_RX_VALID);
+  SetEPTxStatus(ENDP2, EP_TX_NAK);
 
   /* Set this device to response on default address */
   SetDeviceAddress(0);
   bDeviceState = ATTACHED;
 	
-	PrevXferComplete = 1;
+	EP1_PrevXferComplete = 1;
+	EP2_PrevXferComplete = 1;
 }
 /*******************************************************************************
 * Function Name  : CustomHID_SetConfiguration.
@@ -263,8 +285,8 @@ RESULT CustomHID_Data_Setup(uint8_t RequestNo)
 {
   uint8_t *(*CopyRoutine)(uint16_t);
   
-  if (pInformation->USBwIndex != 0) 
-    return USB_UNSUPPORT;    
+//  if (pInformation->USBwIndex != 0) 				// I had to exclude this code to allow 
+//    return USB_UNSUPPORT;    								// programm setup Interface #1
   
   CopyRoutine = NULL;
   
@@ -275,11 +297,25 @@ RESULT CustomHID_Data_Setup(uint8_t RequestNo)
     
     if (pInformation->USBwValue1 == REPORT_DESCRIPTOR)
     {
-      CopyRoutine = CustomHID_GetReportDescriptor;
+			if (pInformation->USBwIndex0	== 0)				// Interface #0
+			{
+				CopyRoutine = JoystickHID_GetReportDescriptor;
+			}
+			else if (pInformation->USBwIndex0 == 1)	// Interface #1
+			{
+				CopyRoutine = CustomHID_GetReportDescriptor;
+			}
     }
     else if (pInformation->USBwValue1 == HID_DESCRIPTOR_TYPE)
     {
-      CopyRoutine = CustomHID_GetHIDDescriptor;
+			if (pInformation->USBwIndex0	== 0)				// Interface #0
+			{
+				CopyRoutine = JoystickHID_GetHIDDescriptor;
+			}
+			else if (pInformation->USBwIndex0	== 1)	// Interface #1
+			{
+				CopyRoutine = CustomHID_GetHIDDescriptor;
+			}
     }
     
   } /* End of GET_DESCRIPTOR */
@@ -398,6 +434,18 @@ uint8_t *CustomHID_GetStringDescriptor(uint16_t Length)
 }
 
 /*******************************************************************************
+* Function Name  : JoystickHID_GetReportDescriptor.
+* Description    : Gets the HID report descriptor.
+* Input          : Length
+* Output         : None.
+* Return         : The address of the configuration descriptor.
+*******************************************************************************/
+uint8_t *JoystickHID_GetReportDescriptor(uint16_t Length)
+{
+  return Standard_GetDescriptorData(Length, &JoystickHID_Report_Descriptor);
+}
+
+/*******************************************************************************
 * Function Name  : CustomHID_GetReportDescriptor.
 * Description    : Gets the HID report descriptor.
 * Input          : Length
@@ -407,6 +455,18 @@ uint8_t *CustomHID_GetStringDescriptor(uint16_t Length)
 uint8_t *CustomHID_GetReportDescriptor(uint16_t Length)
 {
   return Standard_GetDescriptorData(Length, &CustomHID_Report_Descriptor);
+}
+
+/*******************************************************************************
+* Function Name  : JoystickHID_GetHIDDescriptor.
+* Description    : Gets the HID descriptor.
+* Input          : Length
+* Output         : None.
+* Return         : The address of the configuration descriptor.
+*******************************************************************************/
+uint8_t *JoystickHID_GetHIDDescriptor(uint16_t Length)
+{
+  return Standard_GetDescriptorData(Length, &JoystickHID_Hid_Descriptor);
 }
 
 /*******************************************************************************

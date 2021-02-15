@@ -37,6 +37,7 @@ extern pin_config_t pin_config[USED_PINS_NUM];
 
 void SysTick_Init(void);
 void Timers_Init(dev_config_t * p_dev_config);
+void PWM_SetFromAxis(dev_config_t * p_dev_config, analog_data_t * axis_data);
 
 uint64_t GetTick(void);
 

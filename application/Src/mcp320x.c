@@ -41,6 +41,8 @@ uint16_t MCP320x_GetData(sensor_t * sensor, uint8_t channel)
 
 void MCP320x_StartDMA(sensor_t * sensor, uint8_t channel)
 {	
+	uint8_t tmp_buf[3];
+	
 	sensor->rx_complete = 0;
 	sensor->tx_complete = 1;
 	sensor->curr_channel = channel;
@@ -51,19 +53,19 @@ void MCP320x_StartDMA(sensor_t * sensor, uint8_t channel)
 	
 	if (sensor->type == MCP3201)
 	{		
-		SPI_FullDuplex_TransmitReceive(&sensor->data[0],&sensor->data[1], 2, MCP32xx_SPI_MODE);
+		SPI_FullDuplex_TransmitReceive(&tmp_buf[0],&sensor->data[1], 2, MCP32xx_SPI_MODE);
 	}
 	else if (sensor->type == MCP3202)
 	{
-		sensor->data[3*channel] = 0x01;
-		sensor->data[1 + 3*channel] = (channel == 1) ? 0xE0 : 0xA0;
-		SPI_FullDuplex_TransmitReceive(&sensor->data[3*channel],&sensor->data[3*channel], 3, MCP32xx_SPI_MODE);
+		tmp_buf[0] = 0x01;
+		tmp_buf[1] = (channel == 1) ? 0xE0 : 0xA0;
+		SPI_FullDuplex_TransmitReceive(&tmp_buf[0],&sensor->data[3*channel], 3, MCP32xx_SPI_MODE);
 	}
 	else if (sensor->type == MCP3204 || sensor->type == MCP3208)
 	{		
-		sensor->data[3*channel] = 0x06 | ((channel & 0x04) >> 2);
-		sensor->data[1 + 3*channel] = (channel & 0x03)<<6;
-		SPI_FullDuplex_TransmitReceive(&sensor->data[3*channel],&sensor->data[3*channel], 3, MCP32xx_SPI_MODE);
+		tmp_buf[0] = 0x06 | ((channel & 0x04) >> 2);
+		tmp_buf[1] = (channel & 0x03)<<6;
+		SPI_FullDuplex_TransmitReceive(&tmp_buf[0],&sensor->data[3*channel], 3, MCP32xx_SPI_MODE);
 	}
 }
 

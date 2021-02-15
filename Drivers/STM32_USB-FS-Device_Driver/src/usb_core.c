@@ -712,7 +712,7 @@ exit_NoData_Setup0:
   * Output         : None.
   * Return         : None.
   */
-void Data_Setup0(void)
+void Data_Setup0()
 {
   uint8_t *(*CopyRoutine)(uint16_t);
   RESULT Result;
@@ -749,9 +749,10 @@ void Data_Setup0(void)
       else if (wValue1 == STRING_DESCRIPTOR)
       {
         CopyRoutine = pProperty->GetStringDescriptor;
-      }  /* End of GET_DESCRIPTOR */
+      }
     }
   }
+	/* End of GET_DESCRIPTOR */
 
   /*GET STATUS*/
   else if ((Request_No == GET_STATUS) && (pInformation->USBwValue == 0)
@@ -814,7 +815,7 @@ void Data_Setup0(void)
   {
     if ((Type_Recipient == (STANDARD_REQUEST | INTERFACE_RECIPIENT))
         && (pInformation->Current_Configuration != 0) && (pInformation->USBwValue == 0)
-        && (pInformation->USBwIndex1 == 0) && (pInformation->USBwLength == 0x0001)
+        && (pInformation->USBwIndex1 == 0) &&  (pInformation->USBwLength == 0x0001)
         && ((*pProperty->Class_Get_Interface_Setting)(pInformation->USBwIndex0, 0) == USB_SUCCESS))
     {
       CopyRoutine = Standard_GetInterface;

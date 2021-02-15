@@ -30,13 +30,20 @@
   * @param in_data: Buffer for incoming data
   * @retval None
   */
-void MLX90393_NOP(uint8_t * in_data)
+void MLX90393_NOP(uint8_t mode, uint8_t * in_data)
 {
 	uint8_t tmp_buf[1];
 	
 	tmp_buf[0] = 0x00;
 	
-	SPI_FullDuplex_TransmitReceive(tmp_buf, in_data, 1, MLX90393_SPI_MODE);
+	if (mode == MLX_SPI)
+	{
+		SPI_FullDuplex_TransmitReceive(tmp_buf, in_data, 1, MLX90393_SPI_MODE);
+	}
+	else if (mode == MLX_I2C)
+	{
+		
+	}
 }
 
 /**
@@ -44,13 +51,20 @@ void MLX90393_NOP(uint8_t * in_data)
   * @param in_data: Buffer for incoming data
   * @retval None
   */
-void MLX90393_Reset(uint8_t * in_data)
+void MLX90393_Reset(uint8_t mode, uint8_t * in_data)
 {
 	uint8_t tmp_buf[1];
 	
 	tmp_buf[0] = 0xF0;
-	
-	SPI_FullDuplex_TransmitReceive(tmp_buf, in_data, 1, MLX90393_SPI_MODE);
+
+	if (mode == MLX_SPI)
+	{
+		SPI_FullDuplex_TransmitReceive(tmp_buf, in_data, 1, MLX90393_SPI_MODE);
+	}
+	else if (mode == MLX_I2C)
+	{
+		
+	}
 }
 
 /**
@@ -59,14 +73,21 @@ void MLX90393_Reset(uint8_t * in_data)
   * @param in_data: Buffer for incoming data
   * @retval None
   */
-void MLX90393_WriteCommand(uint8_t command, uint8_t * in_data)
+void MLX90393_WriteCommand(uint8_t mode, uint8_t command, uint8_t * in_data)
 {
 	uint8_t tmp_buf[2];
 	
 	tmp_buf[0] = command;
 	tmp_buf[1] = 0;
 	
-	SPI_FullDuplex_TransmitReceive(tmp_buf, in_data, 2, MLX90393_SPI_MODE);
+	if (mode == MLX_SPI)
+	{
+		SPI_FullDuplex_TransmitReceive(tmp_buf, in_data, 2, MLX90393_SPI_MODE);
+	}
+	else if (mode == MLX_I2C)
+	{
+		
+	}
 }
 
 /**
@@ -76,7 +97,7 @@ void MLX90393_WriteCommand(uint8_t command, uint8_t * in_data)
   * @param in_data: Buffer for incoming data
   * @retval None
   */
-void MLX90393_WriteRegister(uint16_t data,  uint8_t addr , uint8_t * in_data)
+void MLX90393_WriteRegister(uint8_t mode, uint16_t data,  uint8_t addr , uint8_t * in_data)
 {
 	uint8_t tmp_buf[5];
 	
@@ -86,7 +107,14 @@ void MLX90393_WriteRegister(uint16_t data,  uint8_t addr , uint8_t * in_data)
 	tmp_buf[3] = addr<<2;							// Register address	
 	tmp_buf[4] = 0;										// Status
 	
-	SPI_FullDuplex_TransmitReceive(tmp_buf, in_data, 5, MLX90393_SPI_MODE);
+	if (mode == MLX_SPI)
+	{
+		SPI_FullDuplex_TransmitReceive(tmp_buf, in_data, 5, MLX90393_SPI_MODE);
+	}
+	else if (mode == MLX_I2C)
+	{
+		
+	}
 }
 
 /**
@@ -96,7 +124,7 @@ void MLX90393_WriteRegister(uint16_t data,  uint8_t addr , uint8_t * in_data)
   * @param in_data: Buffer for incoming data
   * @retval None
   */
-void MLX90393_ReadRegister(uint8_t addr , uint8_t * in_data)
+void MLX90393_ReadRegister(uint8_t mode, uint8_t addr , uint8_t * in_data)
 {
 	uint8_t tmp_buf[5];
 	
@@ -106,7 +134,14 @@ void MLX90393_ReadRegister(uint8_t addr , uint8_t * in_data)
 	tmp_buf[3] = 0;										// MSB
 	tmp_buf[4] = 0;										// LSB
 	
-	SPI_FullDuplex_TransmitReceive(tmp_buf, in_data, 5, MLX90393_SPI_MODE);
+	if (mode == MLX_SPI)
+	{
+		SPI_FullDuplex_TransmitReceive(tmp_buf, in_data, 5, MLX90393_SPI_MODE);
+	}
+	else if (mode == MLX_I2C)
+	{
+		
+	}
 }
 
 /**
@@ -114,21 +149,28 @@ void MLX90393_ReadRegister(uint8_t addr , uint8_t * in_data)
   * @param sensor: Sensor struct
   * @retval None
   */
-void MLX90393_Start(sensor_t * sensor)
+void MLX90393_Start(uint8_t mode, sensor_t * sensor)
 {
 	uint8_t rx_buf[5];
 	uint16_t tmp_data;
 	
+	// Configure MOSI as open drain
+	GPIO_InitTypeDef GPIO_InitStructure;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;
+	GPIO_Init (GPIOB,&GPIO_InitStructure);
+	
 	// Exit
 	pin_config[sensor->source].port->ODR &= ~pin_config[sensor->source].pin;
-	MLX90393_WriteCommand(MLX_EXIT, rx_buf);							
+	MLX90393_WriteCommand(mode, MLX_EXIT, rx_buf);							
 	Delay_us(50);
 	pin_config[sensor->source].port->ODR |= pin_config[sensor->source].pin;
 	Delay_ms(20);
 	
 	// Reset
 	pin_config[sensor->source].port->ODR &= ~pin_config[sensor->source].pin;
-	MLX90393_Reset(rx_buf);							
+	MLX90393_Reset(mode, rx_buf);							
 	Delay_us(50);
 	pin_config[sensor->source].port->ODR |= pin_config[sensor->source].pin;
 	Delay_ms(50);
@@ -137,7 +179,7 @@ void MLX90393_Start(sensor_t * sensor)
 	
 	// Read register value
 	pin_config[sensor->source].port->ODR &= ~pin_config[sensor->source].pin;
-	MLX90393_ReadRegister(0x00, rx_buf);					
+	MLX90393_ReadRegister(mode, 0x00, rx_buf);					
 	Delay_us(70);
 	pin_config[sensor->source].port->ODR |= pin_config[sensor->source].pin;
 	Delay_us(10);	
@@ -147,7 +189,7 @@ void MLX90393_Start(sensor_t * sensor)
 	tmp_data |= GAIN_SEL(0)|HAL_CONF(0x00);
 	// Write register value
 	pin_config[sensor->source].port->ODR &= ~pin_config[sensor->source].pin;
-	MLX90393_WriteRegister(tmp_data, 0x00, rx_buf);					
+	MLX90393_WriteRegister(mode, tmp_data, 0x00, rx_buf);					
 	Delay_us(70);
 	pin_config[sensor->source].port->ODR |= pin_config[sensor->source].pin;
 	Delay_ms(20);	
@@ -156,7 +198,7 @@ void MLX90393_Start(sensor_t * sensor)
 	
 	// Read register value
 	pin_config[sensor->source].port->ODR &= ~pin_config[sensor->source].pin;
-	MLX90393_ReadRegister(0x01, rx_buf);					
+	MLX90393_ReadRegister(mode, 0x01, rx_buf);					
 	Delay_us(70);
 	pin_config[sensor->source].port->ODR |= pin_config[sensor->source].pin;
 	Delay_us(20);
@@ -164,7 +206,7 @@ void MLX90393_Start(sensor_t * sensor)
 	tmp_data = SPI_MODE|BURST_SEL_X|BURST_SEL_Y|BURST_SEL_Z;
 	// Write register value
 	pin_config[sensor->source].port->ODR &= ~pin_config[sensor->source].pin;
-	MLX90393_WriteRegister(tmp_data, 0x01, rx_buf);					
+	MLX90393_WriteRegister(mode, tmp_data, 0x01, rx_buf);					
 	Delay_us(70);
 	pin_config[sensor->source].port->ODR |= pin_config[sensor->source].pin;
 	Delay_ms(20);
@@ -173,7 +215,7 @@ void MLX90393_Start(sensor_t * sensor)
 	
 	// Read register value
 	pin_config[sensor->source].port->ODR &= ~pin_config[sensor->source].pin;
-	MLX90393_ReadRegister(0x02, rx_buf);					
+	MLX90393_ReadRegister(mode, 0x02, rx_buf);					
 	Delay_us(70);
 	pin_config[sensor->source].port->ODR |= pin_config[sensor->source].pin;
 	Delay_us(20);
@@ -183,17 +225,23 @@ void MLX90393_Start(sensor_t * sensor)
 	tmp_data |= RES(1,1,1)|OSR(0)|DIG_FILT(0);
 	// Write register value
 	pin_config[sensor->source].port->ODR &= ~pin_config[sensor->source].pin;
-	MLX90393_WriteRegister(tmp_data, 0x02, rx_buf);					
+	MLX90393_WriteRegister(mode, tmp_data, 0x02, rx_buf);					
 	Delay_us(70);
 	pin_config[sensor->source].port->ODR |= pin_config[sensor->source].pin;
 	Delay_ms(20);	
 	
 	// Burst mode XYZ	
 	pin_config[sensor->source].port->ODR &= ~pin_config[sensor->source].pin;
-	MLX90393_WriteCommand(MLX_START_BURST|MLX_X|MLX_Y|MLX_Z, rx_buf);							
+	MLX90393_WriteCommand(mode, MLX_START_BURST|MLX_X|MLX_Y|MLX_Z, rx_buf);							
 	Delay_us(50);
 	pin_config[sensor->source].port->ODR |= pin_config[sensor->source].pin;
 	Delay_ms(20);
+	
+	// Set MOSI back to push-pull
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+	GPIO_Init (GPIOB,&GPIO_InitStructure);
 }
 
 /**
@@ -219,7 +267,7 @@ int MLX90393_GetData(uint16_t * data, sensor_t * sensor, uint8_t channel)
   * @param sensor: Sensor struct
   * @retval None
   */
-void MLX90393_StartDMA(sensor_t * sensor)
+void MLX90393_StartDMA(uint8_t mode, sensor_t * sensor)
 {	
 	uint8_t tmp_buf[8];
 	
@@ -235,9 +283,22 @@ void MLX90393_StartDMA(sensor_t * sensor)
 	tmp_buf[6] = 0x00;		// Z MSB
 	tmp_buf[7] = 0x00;		// Z LSB
 	
-	// CS low
-	pin_config[sensor->source].port->ODR &= ~pin_config[sensor->source].pin;
-	SPI_FullDuplex_TransmitReceive(tmp_buf, sensor->data, 8, MLX90393_SPI_MODE);
+	if (mode == MLX_SPI)
+	{
+		// Configure MOSI as open drain
+		GPIO_InitTypeDef GPIO_InitStructure;
+		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
+		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;
+		GPIO_Init (GPIOB,&GPIO_InitStructure);
+		// CS low
+		pin_config[sensor->source].port->ODR &= ~pin_config[sensor->source].pin;
+		SPI_FullDuplex_TransmitReceive(tmp_buf, sensor->data, 8, MLX90393_SPI_MODE);
+	}
+	else if (mode == MLX_I2C)
+	{
+		
+	}
 }
 
 void MLX90393_StopDMA(sensor_t * sensor)
@@ -247,6 +308,13 @@ void MLX90393_StopDMA(sensor_t * sensor)
 	pin_config[sensor->source].port->ODR |= pin_config[sensor->source].pin;
 	sensor->rx_complete = 1;
 	sensor->tx_complete = 1;
+	
+	// Set MOSI back to push-pull
+	GPIO_InitTypeDef GPIO_InitStructure;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+	GPIO_Init (GPIOB,&GPIO_InitStructure);
 }
 
 

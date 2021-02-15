@@ -92,7 +92,7 @@ uint8_t CustomHID_ConfigDescriptor[CUSTOMHID_SIZ_CONFIG_DESC] =
     0x00,         /* iConfiguration: Index of string descriptor describing
                                  the configuration*/
     0x80,         /* bmAttributes: Bus powered */
-    0x7D,         /* MaxPower 250 mA: this current is used for detecting Vbus */
+    0x32,         /* MaxPower 100 mA: this current is used for detecting Vbus */
 
     /************** Descriptor of Custom HID interface ****************/
     /* 09 */
