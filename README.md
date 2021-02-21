@@ -19,9 +19,9 @@ FreeJoy supports the following external periphery:
 - 4 hat povs
 - 16 incremental encoders
 - shift registers 74HC165 and CD4021
-- digital sensors  TLE5010/5011, AS5600, MLX90393 (SPI interface only)
+- digital sensors  TLE5010/5011, TLE5012B, AS5048A, AS5600, MLX90393 (SPI interface only)
 - external ADCs ADS1115 and MCP3201/02/04/08
-- 3 PWM channels for lighting
+- 4 PWM channels for lighting
 - 24 LEDs (single or matrix) bindable to button's states
 - device name and other USB settings
 
