@@ -291,7 +291,7 @@ void Get_VidPid(void)
 uint8_t Get_ReportDesc(void)
 {
 	app_config_t tmp_app_config;
-	uint8_t i = 0;
+	uint16_t i = 0;
 	
 	AppConfigGet(&tmp_app_config);
 	
@@ -340,7 +340,7 @@ uint8_t Get_ReportDesc(void)
 				JoystickHID_ReportDescriptor[i++] = 0x30 + axis;						// Main axis
 			}
 		}
-		for (uint8_t axis = 0; axis < 2; axis++)
+		for (uint8_t axis = 6; axis < 8; axis++)
 		{
 			if (tmp_app_config.axis & (1<<axis))
 			{
