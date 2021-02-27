@@ -905,10 +905,8 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 	for (int i=0;i<MAX_BUTTONS_NUM;i++)
 	{
 			uint8_t is_enabled = !p_dev_config->buttons[i].is_disabled && (p_dev_config->buttons[i].physical_num >= 0);
-		
-			if (is_enabled && !(p_dev_config->buttons[i].type >= POV1_UP && p_dev_config->buttons[i].type <= POV1_LEFT) &&
-												!(p_dev_config->buttons[i].type >= POV2_UP && p_dev_config->buttons[i].type <= POV2_LEFT) &&
-												!(p_dev_config->buttons[i].type >= POV3_UP && p_dev_config->buttons[i].type <= POV4_LEFT))
+
+			if (is_enabled)
 			{
 				//out_buttons_data[(k & 0xF8)>>3] &= ~(1 << (k & 0x07));
 				if (!p_dev_config->buttons[i].is_inverted)
