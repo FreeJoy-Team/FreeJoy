@@ -905,7 +905,7 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 	for (int i=0;i<MAX_BUTTONS_NUM;i++)
 	{
 			uint8_t is_enabled = !p_dev_config->buttons[i].is_disabled && (p_dev_config->buttons[i].physical_num >= 0);
-		
+
 			if (is_enabled)
 			{
 				//out_buttons_data[(k & 0xF8)>>3] &= ~(1 << (k & 0x07));

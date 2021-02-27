@@ -26,6 +26,10 @@
 #include "periphery.h"
 #include "usb_hw.h"
 
+uint16_t magic_word;
+uint16_t boot1;
+uint16_t checkUserCode;
+
 /* Private types */
 typedef void (*funct_ptr)(void);
 /* Private variables ---------------------------------------------------------*/
@@ -46,9 +50,9 @@ int main(void)
     IO_Init();
     Delay(100);
 
-    uint16_t magic_word = GetMagicWord();
-    uint16_t boot1 = READ_BIT(GPIOB->IDR, GPIO_IDR_IDR2);
-    uint16_t checkUserCode = CheckUserCode(FIRMWARE_COPY_ADDR);
+    magic_word = GetMagicWord();
+    boot1 = READ_BIT(GPIOB->IDR, GPIO_IDR_IDR2);
+    checkUserCode = CheckUserCode(FIRMWARE_COPY_ADDR);
 
     if ((magic_word == 0x424C) || boot1 || checkUserCode == 0) 
 		{
