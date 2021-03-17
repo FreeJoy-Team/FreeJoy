@@ -323,15 +323,14 @@ uint8_t Get_ReportDesc(void)
 		JoystickHID_ReportDescriptor[i++] = 0x95;												// Report Count
 		JoystickHID_ReportDescriptor[i++] = ((tmp_app_config.buttons_cnt - 1)/8 + 1) * 8;	
 		JoystickHID_ReportDescriptor[i++] = 0x81;												// Input
-		JoystickHID_ReportDescriptor[i++] = 0x00;												// (Data, Var, Abs)
+		JoystickHID_ReportDescriptor[i++] = 0x02;												// (Data, Var, Abs)
 	}
 	
 	// --- Axis section --- //
-	JoystickHID_ReportDescriptor[i++] = 0x05;												// User Page
-	JoystickHID_ReportDescriptor[i++] = 0x01;												// (Generic Desktop)	
-	
 	if (tmp_app_config.axis_cnt > 0)
 	{	
+		JoystickHID_ReportDescriptor[i++] = 0x05;												// User Page
+		JoystickHID_ReportDescriptor[i++] = 0x01;												// (Generic Desktop)	
 		for (uint8_t axis = 0; axis < 6; axis++)
 		{
 			if (tmp_app_config.axis & (1<<axis))
