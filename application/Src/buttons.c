@@ -912,15 +912,15 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 				if (!p_dev_config->buttons[i].is_inverted)
 				{					
 					out_buttons_data[(k & 0xF8)>>3] |= (logical_buttons_state[i].current_state << (k & 0x07));
+					log_buttons_data[(k & 0xF8)>>3] |= (logical_buttons_state[i].current_state << (k & 0x07));
 				}
 				else
 				{
 					out_buttons_data[(k & 0xF8)>>3] |= (!logical_buttons_state[i].current_state << (k & 0x07));
+					log_buttons_data[(k & 0xF8)>>3] |= (!logical_buttons_state[i].current_state << (k & 0x07));
 				}
 				k++;				
 			}
-				
-			log_buttons_data[(i & 0xF8)>>3] |= (logical_buttons_state[i].current_state << (i & 0x07));
 			phy_buttons_data[(i & 0xF8)>>3] |= (physical_buttons_state[i].current_state << (i & 0x07));			
 	}
 	// resume IRQ
