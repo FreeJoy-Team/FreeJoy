@@ -237,20 +237,30 @@ void EP2_IN_Callback(void)
   EP2_PrevXferComplete = 1;
 }
 
-void USB_CUSTOM_HID_SendReport(uint8_t EP_num, uint8_t * data, uint8_t length)
+/*******************************************************************************
+* Function Name  : USB_CUSTOM_HID_SendReport.
+* Description    : 
+* Input          : None.
+* Output         : None.
+* Return         : 1 if success otherwise 0.
+*******************************************************************************/
+int8_t USB_CUSTOM_HID_SendReport(uint8_t EP_num, uint8_t * data, uint8_t length)
 {
 	if ((EP_num == 1) && (EP1_PrevXferComplete) && (bDeviceState == CONFIGURED))
 	{
 			USB_SIL_Write(EP1_IN, data, length);
 			SetEPTxValid(ENDP1);
 			EP1_PrevXferComplete = 0;
+			return 1;
 	}
 	else if ((EP_num == 2) && (EP2_PrevXferComplete) && (bDeviceState == CONFIGURED))
 	{
 			USB_SIL_Write(EP2_IN, data, length);
 			SetEPTxValid(ENDP2);
 			EP2_PrevXferComplete = 0;
+			return 1;
 	}
+	return 0;
 }
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
 
