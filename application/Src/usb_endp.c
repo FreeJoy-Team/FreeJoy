@@ -251,16 +251,16 @@ int8_t USB_CUSTOM_HID_SendReport(uint8_t EP_num, uint8_t * data, uint8_t length)
 			USB_SIL_Write(EP1_IN, data, length);
 			SetEPTxValid(ENDP1);
 			EP1_PrevXferComplete = 0;
-			return 1;
+			return 0;
 	}
 	else if ((EP_num == 2) && (EP2_PrevXferComplete) && (bDeviceState == CONFIGURED))
 	{
 			USB_SIL_Write(EP2_IN, data, length);
 			SetEPTxValid(ENDP2);
 			EP2_PrevXferComplete = 0;
-			return 1;
+			return 0;
 	}
-	return 0;
+	return -1;
 }
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
 

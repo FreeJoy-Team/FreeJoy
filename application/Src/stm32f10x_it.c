@@ -250,7 +250,7 @@ void TIM2_IRQHandler(void)
 			}
 			
 			// send params report
-			if (USB_CUSTOM_HID_SendReport(2, report_buf, 64))
+			if (USB_CUSTOM_HID_SendReport(2, report_buf, 64) == 0)
 			{
 				report = !report;
 			}
