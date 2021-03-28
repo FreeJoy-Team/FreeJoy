@@ -188,14 +188,16 @@ void EP1_IN_Callback(void)
   EP1_PrevXferComplete = 1;
 }
 
-void USB_CUSTOM_HID_SendReport(uint8_t EP_num, uint8_t * data, uint8_t length)
+int8_t USB_CUSTOM_HID_SendReport(uint8_t EP_num, uint8_t * data, uint8_t length)
 {
 	if ((EP1_PrevXferComplete) && (bDeviceState == CONFIGURED))
 	{
 			USB_SIL_Write(EP1_IN, data, length);
 			SetEPTxValid(ENDP1);
 			EP1_PrevXferComplete = 0;
+			return 0;
 	}
+	return -1;
 }
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
 
