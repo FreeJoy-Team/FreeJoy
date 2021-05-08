@@ -433,6 +433,7 @@ void IO_Init (dev_config_t * p_dev_config)
 						 p_dev_config->pins[i] == MCP3202_CS ||
 						 p_dev_config->pins[i] == MCP3204_CS ||
 						 p_dev_config->pins[i] == MCP3208_CS ||
+						 p_dev_config->pins[i] == MLX90363_CS ||
 						 p_dev_config->pins[i] == MLX90393_CS ||
 						 p_dev_config->pins[i] == AS5048A_CS)
 		{
