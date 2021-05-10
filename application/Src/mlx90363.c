@@ -59,7 +59,7 @@ void MLX90363_Start(sensor_t * sensor)
 	MLX90363_GET1(rx_buf);
 	Delay_us(50);
 	pin_config[sensor->source].port->ODR |= pin_config[sensor->source].pin;
-	Delay_ms(50);
+	Delay_ms(5);
 }
 
 /**
@@ -85,6 +85,11 @@ void MLX90363_StartDMA(sensor_t * sensor)
 {	
 	sensor->rx_complete = 0;
 	sensor->tx_complete = 1;
+	
+	// ToDo: Add check if last MLX90363_StartDMA was called more than maximum time out rate of 65ms.
+	// When this happens it's necessary to interlace GET1 and NOP messages to avoid receiving the NTT error.
+	// I don't know if it may happen but if it can then we need a timer so if that happens, we call
+	// MLX90363_NOP first, set the CS to high and then again to low to send MLX90363_GET1.
 	
 	// CS low
 	pin_config[sensor->source].port->ODR &= ~pin_config[sensor->source].pin;
