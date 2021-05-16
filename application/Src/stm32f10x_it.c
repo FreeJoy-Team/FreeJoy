@@ -32,6 +32,7 @@
 #include "tle5011.h"
 #include "tle5012.h"
 #include "mcp320x.h"
+#include "mlx90363.h"
 #include "mlx90393.h"
 #include "as5048a.h"
 #include "ads1115.h"
@@ -327,6 +328,11 @@ void TIM2_IRQHandler(void)
 						MCP320x_StartDMA(&sensors[i], 0);
 						break;
 					}
+					else if (sensors[i].type == MLX90363)
+					{
+						MLX90363_StartDMA(&sensors[i]);
+						break;
+					}
 					else if (sensors[i].type == MLX90393_SPI)
 					{
 						MLX90393_StartDMA(MLX_SPI, &sensors[i]);
@@ -429,6 +435,10 @@ void DMA1_Channel2_IRQHandler(void)
 				}
 				i++;
 			}
+			else if (sensors[i].type == MLX90363)
+			{
+				MLX90363_StopDMA(&sensors[i++]);
+			}
 			else if (sensors[i].type == MLX90393_SPI)
 			{
 				MLX90393_StopDMA(&sensors[i++]);
@@ -461,6 +471,11 @@ void DMA1_Channel2_IRQHandler(void)
 								 sensors[i].type == MCP3208)
 				{
 					MCP320x_StartDMA(&sensors[i], 0);
+					return;
+				}
+				else if (sensors[i].type == MLX90363)
+				{
+					MLX90363_StartDMA(&sensors[i]);
 					return;
 				}
 				else if (sensors[i].type == MLX90393_SPI)
