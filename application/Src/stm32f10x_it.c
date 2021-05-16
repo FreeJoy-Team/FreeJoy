@@ -60,6 +60,7 @@ volatile int32_t encoder_ticks = 0;
 volatile int32_t adc_ticks = 0;
 volatile int32_t sensors_ticks = 1;
 volatile int32_t buttons_ticks = 0;
+volatile int32_t configurator_ticks = 0;
 volatile int status = 0;
 extern dev_config_t dev_config;
 
@@ -235,25 +236,28 @@ void TIM2_IRQHandler(void)
 			USB_CUSTOM_HID_SendReport(1, report_buf, pos);
 		
 			// fill params report buffer
-			static uint8_t report = 0;
-			report_buf[0] = REPORT_ID_PARAM;
-			memcpy(params_report.axis_data, joy_report.axis_data, sizeof(params_report.axis_data));
-			
-			if (report == 0)
+			if (configurator_ticks > ticks)
 			{
-				report_buf[1] = 0;
-				memcpy(&report_buf[2], (uint8_t *)&(params_report), 62);
-			}
-			else
-			{
-				report_buf[1] = 1;
-				memcpy(&report_buf[2], (uint8_t *)&(params_report) + 62, sizeof(params_report_t) - 62);
-			}
-			
-			// send params report
-			if (USB_CUSTOM_HID_SendReport(2, report_buf, 64) == 0)
-			{
-				report = !report;
+				static uint8_t report = 0;
+				report_buf[0] = REPORT_ID_PARAM;
+				memcpy(params_report.axis_data, joy_report.axis_data, sizeof(params_report.axis_data));
+				
+				if (report == 0)
+				{
+					report_buf[1] = 0;
+					memcpy(&report_buf[2], (uint8_t *)&(params_report), 62);
+				}
+				else
+				{
+					report_buf[1] = 1;
+					memcpy(&report_buf[2], (uint8_t *)&(params_report) + 62, sizeof(params_report_t) - 62);
+				}
+				
+				// send params report
+				if (USB_CUSTOM_HID_SendReport(2, report_buf, 64) == 0)
+				{
+					report = !report;
+				}
 			}
 		}
 

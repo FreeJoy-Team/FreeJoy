@@ -52,6 +52,7 @@
 /* Private variables ---------------------------------------------------------*/
 volatile extern uint8_t bootloader;
 volatile extern int32_t joy_ticks;
+volatile extern int32_t configurator_ticks;
 
 __IO uint8_t EP1_PrevXferComplete = 1;
 __IO uint8_t EP2_PrevXferComplete = 1;
@@ -86,17 +87,24 @@ void EP2_OUT_Callback(void)
 	uint8_t config_out_cnt;
 	uint8_t tmp_buf[64];
 	uint8_t hid_buf[64];
-//	uint8_t i;
-//	uint8_t pos = 2;
 	uint8_t repotId;
 
-	// 2 second delay for joy report
-	joy_ticks = GetTick() + 2000;
-	
-	/* Read received data (2 bytes) */  
+	/* Read received data (2 bytes) */
   USB_SIL_Read(EP2_OUT, hid_buf);
 	
 	repotId = hid_buf[0];
+	
+	if (repotId == REPORT_ID_PARAM)
+	{
+		configurator_ticks = GetTick() + 30000;
+		SetEPRxStatus(ENDP2, EP_RX_VALID);
+		return;
+	}
+	else 
+	{
+		// 2 second delay for joy report
+		joy_ticks = GetTick() + 2000;
+	}
 	
 	uint8_t cfg_count = sizeof(dev_config_t) / 62;
   uint8_t last_cfg_size = sizeof(dev_config_t) % 62;

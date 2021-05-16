@@ -160,7 +160,7 @@ uint8_t Composite_ConfigDescriptor[Composite_SIZ_CONFIG_DESC] =
     0x03,          /* bmAttributes: Interrupt endpoint */
     0x40,          /* wMaxPacketSize: 64 Bytes max */
     0x00,
-    0x10,          /* bInterval: Polling Interval (16 ms) */
+    0x02,          /* bInterval: Polling Interval (2 ms)*/
     /* 59 */
     	
     0x07,	/* bLength: Endpoint Descriptor size */
@@ -244,40 +244,45 @@ uint8_t CustomHID_ReportDescriptor[CustomHID_SIZ_REPORT_DESC] =
     0x75, 0x08,                    //   REPORT_SIZE (8)
     0x95, 0x3f,                    //   REPORT_COUNT (63)
     0x81, 0x00,                    //   INPUT (Data,Ary,Abs)
+		
+		0x09, 0x03,                    //   USAGE (Vendor Usage 3)
+    0x75, 0x08,                    //   REPORT_SIZE (8)
+    0x95, 0x01,                    //   REPORT_COUNT (1)
+    0x91, 0x00,                    //   OUTPUT (Data,Ary,Abs)
 
 		// config data
 		0x85, REPORT_ID_CONFIG_IN,     //   REPORT_ID (2)
 		0x06, 0x00, 0xff,              // 	USAGE_PAGE (Vendor Defined Page 1)
-    0x09, 0x03,                    //   USAGE (Vendor Usage 3)
+    0x09, 0x04,                    //   USAGE (Vendor Usage 4)
     0x15, 0x00,                    //   LOGICAL_MINIMUM (0)
     0x26, 0xff, 0x00,              //   LOGICAL_MAXIMUM (255)
     0x75, 0x08,                    //   REPORT_SIZE (8)
     0x95, 0x3f,                    //   REPORT_COUNT (63)
     0x81, 0x00,                    //   INPUT (Data,Ary,Abs)
 		
-    0x09, 0x03,                    //   USAGE (Vendor Usage 3)
+    0x09, 0x05,                    //   USAGE (Vendor Usage 5)
     0x75, 0x08,                    //   REPORT_SIZE (8)
     0x95, 0x01,                    //   REPORT_COUNT (1)
     0x91, 0x00,                    //   OUTPUT (Data,Ary,Abs)
 		
     0x85, REPORT_ID_CONFIG_OUT,    //   REPORT_ID (3)	
-    0x09, 0x04,                    //   USAGE (Vendor Usage 4)
+    0x09, 0x06,                    //   USAGE (Vendor Usage 6)
     0x75, 0x08,                    //   REPORT_SIZE (8)
     0x95, 0x01,                    //   REPORT_COUNT (1)
 		0x81, 0x00,                    //   INPUT (Data,Ary,Abs)
 		
-    0x09, 0x05,                    //   USAGE (Vendor Usage 5)
+    0x09, 0x07,                    //   USAGE (Vendor Usage 7)
     0x75, 0x08,                    //   REPORT_SIZE (8)
     0x95, 0x3f,                    //   REPORT_COUNT (63)
 		0x91, 0x00,                    //   OUTPUT (Data,Ary,Abs)
 		
 		0x85, REPORT_ID_FIRMWARE,    	 //   REPORT_ID (4)	
-    0x09, 0x06,                    //   USAGE (Vendor Usage 6)
+    0x09, 0x08,                    //   USAGE (Vendor Usage 8)
     0x75, 0x08,                    //   REPORT_SIZE (8)
     0x95, 0x02,                    //   REPORT_COUNT (2)
 		0x81, 0x00,                    //   INPUT (Data,Ary,Abs)
 		
-    0x09, 0x07,                    //   USAGE (Vendor Usage 7)
+    0x09, 0x09,                    //   USAGE (Vendor Usage 9)
     0x75, 0x08,                    //   REPORT_SIZE (8)
 		0x95, 0x3f,                    //   REPORT_COUNT (63)
 		0x91, 0x00,                    //   OUTPUT (Data,Ary,Abs)
