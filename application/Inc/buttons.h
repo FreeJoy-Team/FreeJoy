@@ -23,7 +23,7 @@ extern uint8_t									shifts_state;
 typedef uint8_t button_data_t;
 typedef uint8_t pov_data_t;
 
-void ButtonsDebouceProcess(dev_config_t * p_dev_config);
+void ButtonsDebounceProcess(dev_config_t * p_dev_config);
 void LogicalButtonProcessState (logical_buttons_state_t * p_button_state, uint8_t * pov_buf, dev_config_t * p_dev_config, uint8_t pos);
 void RadioButtons_Init (dev_config_t * p_dev_config);
 void SequentialButtons_Init (dev_config_t * p_dev_config);

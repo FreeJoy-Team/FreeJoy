@@ -42,7 +42,7 @@ uint8_t												a2b_last = 0;
 	* @param  p_dev_config: Pointer to device configuration
   * @retval None
   */
-void ButtonsDebouceProcess (dev_config_t * p_dev_config)
+void ButtonsDebounceProcess (dev_config_t * p_dev_config)
 {
 	uint32_t 	millis;
 	uint16_t	debounce;

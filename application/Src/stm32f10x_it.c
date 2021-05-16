@@ -47,8 +47,8 @@
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 
-#define ADC_PERIOD_TICKS										2					// 1 tick = 1ms
-#define SENSORS_PERIOD_TICKS								2
+#define ADC_PERIOD_TICKS										4					// 1 tick = 500us
+#define SENSORS_PERIOD_TICKS								4
 #define BUTTONS_PERIOD_TICKS								1
 #define ENCODERS_PERIOD_TICKS								1
 
@@ -262,7 +262,6 @@ void TIM2_IRQHandler(void)
 		{
 			buttons_ticks = ticks;
 			ButtonsReadPhysical(&dev_config, raw_buttons_data);
-			ButtonsDebouceProcess(&dev_config);
 			
 			if (ticks - encoder_ticks >= ENCODERS_PERIOD_TICKS)
 			{
