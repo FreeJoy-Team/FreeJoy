@@ -474,6 +474,11 @@
               <FilePath>..\application\Src\mcp320x.c</FilePath>
             </File>
             <File>
+              <FileName>mlx90363.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\application\Src\mlx90363.c</FilePath>
+            </File>
+            <File>
               <FileName>mlx90393.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\application\Src\mlx90393.c</FilePath>
@@ -1306,6 +1311,11 @@
               <FileName>mcp320x.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\application\Src\mcp320x.c</FilePath>
+            </File>
+            <File>
+              <FileName>mlx90363.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\application\Src\mlx90363.c</FilePath>
             </File>
             <File>
               <FileName>mlx90393.c</FileName>
