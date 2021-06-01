@@ -905,22 +905,30 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 	for (int i=0;i<MAX_BUTTONS_NUM;i++)
 	{
 			uint8_t is_enabled = !p_dev_config->buttons[i].is_disabled && (p_dev_config->buttons[i].physical_num >= 0);
-
+			// joy buttons
 			if (is_enabled)
 			{
 				//out_buttons_data[(k & 0xF8)>>3] &= ~(1 << (k & 0x07));
 				if (!p_dev_config->buttons[i].is_inverted)
 				{					
 					out_buttons_data[(k & 0xF8)>>3] |= (logical_buttons_state[i].current_state << (k & 0x07));
-					log_buttons_data[(k & 0xF8)>>3] |= (logical_buttons_state[i].current_state << (k & 0x07));
 				}
 				else
 				{
 					out_buttons_data[(k & 0xF8)>>3] |= (!logical_buttons_state[i].current_state << (k & 0x07));
-					log_buttons_data[(k & 0xF8)>>3] |= (!logical_buttons_state[i].current_state << (k & 0x07));
 				}
 				k++;				
 			}
+			// logical buttons
+			if (!p_dev_config->buttons[i].is_inverted)
+			{
+				log_buttons_data[(i & 0xF8)>>3] |= (logical_buttons_state[i].current_state << (i & 0x07));
+			}
+			else
+			{
+				log_buttons_data[(i & 0xF8)>>3] |= (!logical_buttons_state[i].current_state << (i & 0x07));
+			}
+			// physical buttons
 			phy_buttons_data[(i & 0xF8)>>3] |= (physical_buttons_state[i].current_state << (i & 0x07));			
 	}
 	// resume IRQ
