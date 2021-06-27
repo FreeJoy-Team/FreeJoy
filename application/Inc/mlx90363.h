@@ -12,7 +12,14 @@
 #include "common_types.h"
 #include "periphery.h"
 
-#define MLX90363_SPI_MODE	1
+#define MLX90363_SPI_MODE			1
+
+#define GET1_OPCODE 				0x13
+#define NOP_OPCODE					0xD0
+
+#define NULL_DATA					0x00
+#define NOP_KEY						0xAA
+#define GET_TIME_OUT 				0xFF
 
 void MLX90363_Start(sensor_t * sensor);
 
