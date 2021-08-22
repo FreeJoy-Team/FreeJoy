@@ -25,15 +25,15 @@
 #include "mlx90393.h"
 #include <math.h>
 
+static uint8_t tmp_buf[8];
+
 /**
   * @brief MLX90393 NOP
   * @param in_data: Buffer for incoming data
   * @retval None
   */
 void MLX90393_NOP(uint8_t mode, uint8_t * in_data)
-{
-	uint8_t tmp_buf[1];
-	
+{	
 	tmp_buf[0] = 0x00;
 	
 	if (mode == MLX_SPI)
@@ -53,8 +53,6 @@ void MLX90393_NOP(uint8_t mode, uint8_t * in_data)
   */
 void MLX90393_Reset(uint8_t mode, uint8_t * in_data)
 {
-	uint8_t tmp_buf[1];
-	
 	tmp_buf[0] = 0xF0;
 
 	if (mode == MLX_SPI)
@@ -75,8 +73,6 @@ void MLX90393_Reset(uint8_t mode, uint8_t * in_data)
   */
 void MLX90393_WriteCommand(uint8_t mode, uint8_t command, uint8_t * in_data)
 {
-	uint8_t tmp_buf[2];
-	
 	tmp_buf[0] = command;
 	tmp_buf[1] = 0;
 	
@@ -99,8 +95,6 @@ void MLX90393_WriteCommand(uint8_t mode, uint8_t command, uint8_t * in_data)
   */
 void MLX90393_WriteRegister(uint8_t mode, uint16_t data,  uint8_t addr , uint8_t * in_data)
 {
-	uint8_t tmp_buf[5];
-	
 	tmp_buf[0] = 0x60;								// Write Register command	
 	tmp_buf[1] = data >> 8;						// MSB
 	tmp_buf[2] = data & 0xFF;					// LSB
@@ -126,8 +120,6 @@ void MLX90393_WriteRegister(uint8_t mode, uint16_t data,  uint8_t addr , uint8_t
   */
 void MLX90393_ReadRegister(uint8_t mode, uint8_t addr , uint8_t * in_data)
 {
-	uint8_t tmp_buf[5];
-	
 	tmp_buf[0] = 0x50;								// Write Register command	
 	tmp_buf[1] = addr<<2;							// Register address	
 	tmp_buf[2] = 0;										// Status
@@ -269,8 +261,6 @@ int MLX90393_GetData(uint16_t * data, sensor_t * sensor, uint8_t channel)
   */
 void MLX90393_StartDMA(uint8_t mode, sensor_t * sensor)
 {	
-	uint8_t tmp_buf[8];
-	
 	sensor->rx_complete = 0;
 	sensor->tx_complete = 1;
 
