@@ -54,13 +54,13 @@
 
 /* Private variables ---------------------------------------------------------*/
 
-volatile int32_t ticks = 0;
-volatile int32_t joy_ticks = 0; 
+volatile int32_t millis = 0;
+volatile int32_t joy_millis = 0; 
 volatile int32_t encoder_ticks = 0;
 volatile int32_t adc_ticks = 0;
 volatile int32_t sensors_ticks = 1;
 volatile int32_t buttons_ticks = 0;
-volatile int32_t configurator_ticks = 0;
+volatile int32_t configurator_millis = 0;
 volatile int status = 0;
 extern dev_config_t dev_config;
 
@@ -193,12 +193,12 @@ void TIM2_IRQHandler(void)
 		TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
 		
 		Ticks++;
-
-		ticks = GetTick();
+		millis = GetMillis();
+		
 		// check if it is time to send joystick data
-		if (ticks - joy_ticks >= dev_config.exchange_period_ms )
+		if (millis - joy_millis >= dev_config.exchange_period_ms )
 		{
-			joy_ticks = ticks;
+			joy_millis = millis;
 			
 			AppConfigGet(&tmp_app_config);
 				
@@ -236,7 +236,7 @@ void TIM2_IRQHandler(void)
 			USB_CUSTOM_HID_SendReport(1, report_buf, pos);
 		
 			// fill params report buffer
-			if (configurator_ticks > ticks)
+			if (configurator_millis > millis)
 			{
 				static uint8_t report = 0;
 				report_buf[0] = REPORT_ID_PARAM;
@@ -262,22 +262,22 @@ void TIM2_IRQHandler(void)
 		}
 
 		// digital inputs polling
-		if (ticks - buttons_ticks >= BUTTONS_PERIOD_TICKS)
+		if (Ticks - buttons_ticks >= BUTTONS_PERIOD_TICKS)
 		{
-			buttons_ticks = ticks;
+			buttons_ticks = Ticks;
 			ButtonsReadPhysical(&dev_config, raw_buttons_data);
 			
-			if (ticks - encoder_ticks >= ENCODERS_PERIOD_TICKS)
+			if (Ticks - encoder_ticks >= ENCODERS_PERIOD_TICKS)
 			{
-				encoder_ticks = ticks;
+				encoder_ticks = Ticks;
 				EncoderProcess(logical_buttons_state, &dev_config);
 			}
 		}
 		
 		// Internal ADC conversion
-		if (ticks - adc_ticks >= ADC_PERIOD_TICKS)
+		if (Ticks - adc_ticks >= ADC_PERIOD_TICKS)
 		{		
-			adc_ticks = ticks;	
+			adc_ticks = Ticks;	
 
 			AxesProcess(&dev_config);					// process axis only once for one data reading
 			
@@ -304,9 +304,9 @@ void TIM2_IRQHandler(void)
 			RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB|RCC_APB2Periph_GPIOC|RCC_APB2Periph_TIM1,ENABLE);
 		}
 		// External sensors data receiption
-		if (ticks - sensors_ticks >= SENSORS_PERIOD_TICKS && ticks != adc_ticks)		// prevent ADC and sensors reading during same period
+		if (Ticks - sensors_ticks >= SENSORS_PERIOD_TICKS && Ticks != adc_ticks)		// prevent ADC and sensors reading during same period
 		{																																						
-			sensors_ticks = ticks;
+			sensors_ticks = Ticks;
 
 			// start SPI sensors 
 			for (uint8_t i=0; i<MAX_AXIS_NUM; i++)

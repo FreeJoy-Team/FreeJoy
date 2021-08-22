@@ -51,8 +51,8 @@
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 volatile extern uint8_t bootloader;
-volatile extern int32_t joy_ticks;
-volatile extern int32_t configurator_ticks;
+volatile extern int32_t joy_millis;
+volatile extern int32_t configurator_millis;
 
 __IO uint8_t EP1_PrevXferComplete = 1;
 __IO uint8_t EP2_PrevXferComplete = 1;
@@ -96,14 +96,14 @@ void EP2_OUT_Callback(void)
 	
 	if (repotId == REPORT_ID_PARAM)
 	{
-		configurator_ticks = GetTick() + 30000;
+		configurator_millis = GetMillis() + 30000;
 		SetEPRxStatus(ENDP2, EP_RX_VALID);
 		return;
 	}
 	else 
 	{
 		// 2 second delay for joy report
-		joy_ticks = GetTick() + 2000;
+		joy_millis = GetMillis() + 2000;
 	}
 	
 	uint8_t cfg_count = sizeof(dev_config_t) / 62;

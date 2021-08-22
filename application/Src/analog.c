@@ -927,7 +927,7 @@ void AxesProcess (dev_config_t * p_dev_config)
 
 		// Buttons section
     {
-			int64_t millis = GetTick();
+			int64_t millis = GetMillis();
 			
 			uint8_t inc_button_num = 0;
 			uint8_t rst_button_num = 0;

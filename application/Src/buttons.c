@@ -47,7 +47,7 @@ void ButtonsDebounceProcess (dev_config_t * p_dev_config)
 	uint32_t 	millis;
 	uint16_t	debounce;
 	
-	millis = GetTick();
+	millis = GetMillis();
 	
 	for (uint8_t i=0; i<MAX_BUTTONS_NUM; i++)
 	{
@@ -171,7 +171,7 @@ void LogicalButtonProcessState (logical_buttons_state_t * p_button_state, uint8_
 	uint32_t millis;
 	uint8_t pov_group = 0;
 	
-	millis = GetTick();
+	millis = GetMillis();
 	LogicalButtonProcessTimer(p_button_state, millis, p_dev_config, num);
 	
 		switch (p_dev_config->buttons[num].type)

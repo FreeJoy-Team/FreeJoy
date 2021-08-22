@@ -44,6 +44,7 @@
 
 #endif
 
+
 volatile uint64_t Ticks;
 volatile uint32_t TimingDelay;
 
@@ -236,11 +237,12 @@ void PWM_SetFromAxis(dev_config_t * p_dev_config, analog_data_t * axis_data)
 
 
 /**
-  * @brief Get system ticks
-  * @retval ticks
+  * @brief Get up-time milliseconds
+  * @retval milliseconds
   */
-uint64_t GetTick(void) {
-    return Ticks;
+uint64_t GetMillis(void) 
+{
+    return Ticks/(TICKS_IN_MILLISECOND);
 }
 
 
@@ -248,7 +250,8 @@ uint64_t GetTick(void) {
   * @brief Delay implementation
   * @retval None
   */
-void Delay_ms(uint32_t nTime) {
+void Delay_ms(uint32_t nTime) 
+{
     TimingDelay = nTime;
     while (TimingDelay != 0);
 }
@@ -257,7 +260,8 @@ void Delay_ms(uint32_t nTime) {
   * @brief Delay implementation
   * @retval None
   */
-void Delay_us(uint32_t nTime) {
+void Delay_us(uint32_t nTime) 
+{
     int32_t us = nTime * 5;
 
     while (us > 0) {
