@@ -438,6 +438,7 @@ typedef struct
 
 typedef struct
 {
+	uint16_t 						firmware_version;
 	analog_data_t				raw_axis_data[MAX_AXIS_NUM];
 	analog_data_t			 	axis_data[MAX_AXIS_NUM];
 	uint8_t							phy_button_data[MAX_BUTTONS_NUM/8];
