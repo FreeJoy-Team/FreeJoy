@@ -92,18 +92,12 @@ static int32_t map2(	int32_t x,
 											int32_t out_min,
 											int32_t out_max)
 {
-	int32_t tmp;
-	int32_t ret;
-	
-	tmp = x;
-	
-	
-	if (tmp < in_min)	return out_min;
-	if (tmp > in_max)	return out_max;
+	if (x < in_min)	return out_min;
+	if (x > in_max)	return out_max;
 		
-	ret = (tmp - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+	x = (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 	
-	return ret;
+	return x;
 }
 
 /**
@@ -113,14 +107,12 @@ static int32_t map2(	int32_t x,
   */
 static int32_t map_tle (int32_t x)
 {
-	int32_t tmp;
-	int32_t ret;
+	x = x * 100 / 549;
 	
-	tmp = x;
+	if (x > AXIS_MAX_VALUE) x = AXIS_MAX_VALUE;
+	else if (x < AXIS_MIN_VALUE) x = AXIS_MIN_VALUE;
 	
-	ret = tmp * 100 / 549;
-	
-	return ret;
+	return x;
 }
 
 /**
@@ -144,33 +136,30 @@ static int32_t map3(	int32_t x,
 											int32_t out_max,
 											uint8_t deadband_size)
 {
-	int32_t tmp;
-	int32_t ret;
 	int32_t dead_zone_right;
 	int32_t dead_zone_left;
 	
-	tmp = x;
 	dead_zone_right = ((in_max - in_center)*deadband_size)>>10;
 	dead_zone_left = ((in_center - in_min)*deadband_size)>>10;
 	
-	if (tmp < in_min)	return out_min;
-	if (tmp > in_max)	return out_max; 
-	if ((tmp > in_center && (tmp - in_center) < dead_zone_right) || 
-			(tmp < in_center &&	(in_center - tmp) < dead_zone_left) || 
-			tmp == in_center)
+	if (x < in_min)	return out_min;
+	if (x > in_max)	return out_max; 
+	if ((x > in_center && (x - in_center) < dead_zone_right) || 
+			(x < in_center &&	(in_center - x) < dead_zone_left) || 
+			x == in_center)
 	{
 		return out_center;
 	}		
 	
-	if (tmp < in_center)
+	if (x < in_center)
 	{
-		ret = ((tmp - in_min) * (out_center - out_min) / (in_center - dead_zone_left - in_min) + out_min);
+		x = ((x - in_min) * (out_center - out_min) / (in_center - dead_zone_left - in_min) + out_min);
   }
 	else
 	{
-		ret = ((tmp - in_center - dead_zone_right) * (out_max - out_center) / (in_max - in_center - dead_zone_right) + out_center);
+		x = ((x - in_center - dead_zone_right) * (out_max - out_center) / (in_max - in_center - dead_zone_right) + out_center);
 	}
-	return ret;
+	return x;
 }
 
 /**
