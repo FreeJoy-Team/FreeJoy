@@ -12,7 +12,7 @@
 #include "common_types.h"
 #include "periphery.h"
 
-#define MCP32xx_SPI_MODE						3
+#define MCP32xx_SPI_MODE						1
 
 uint16_t MCP320x_GetData(sensor_t * sensor, uint8_t channel);
 void MCP320x_StartDMA(sensor_t * sensor, uint8_t channel);
