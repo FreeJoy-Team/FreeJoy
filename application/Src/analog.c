@@ -863,8 +863,14 @@ void AxesProcess (dev_config_t * p_dev_config)
 		{
 			uint8_t encoder_num = p_dev_config->axis_config[i].channel;
 			
-			if (encoders_state[encoder_num].cnt > AXIS_MAX_VALUE) encoders_state[encoder_num].cnt = AXIS_MAX_VALUE;
-			if (encoders_state[encoder_num].cnt < AXIS_MIN_VALUE) encoders_state[encoder_num].cnt = AXIS_MIN_VALUE;
+			if (encoders_state[encoder_num].cnt > p_dev_config->axis_config[i].calib_max) 
+			{
+				encoders_state[encoder_num].cnt = p_dev_config->axis_config[i].calib_max;
+			}
+			if (encoders_state[encoder_num].cnt < p_dev_config->axis_config[i].calib_min) 
+			{
+				encoders_state[encoder_num].cnt = p_dev_config->axis_config[i].calib_min;
+			}
 				
 			tmp[i] = encoders_state[p_dev_config->axis_config[i].channel].cnt;
 			
@@ -1005,13 +1011,20 @@ void AxesProcess (dev_config_t * p_dev_config)
 				}
 			}
 			
-			if (axis_trim_value[i] > AXIS_FULLSCALE) axis_trim_value[i] = AXIS_FULLSCALE;
-			if (axis_trim_value[i] < -AXIS_FULLSCALE) axis_trim_value[i] = -AXIS_FULLSCALE;
-						
-			tmp[i] += axis_trim_value[i];
-			
-			if (tmp[i] > AXIS_MAX_VALUE) tmp[i] = AXIS_MAX_VALUE;
-			if (tmp[i] < AXIS_MIN_VALUE) tmp[i] = AXIS_MIN_VALUE;
+			if (tmp[i] + axis_trim_value[i] > AXIS_MAX_VALUE) 
+			{
+				axis_trim_value[i] = AXIS_MAX_VALUE - tmp[i];
+				tmp[i] = AXIS_MAX_VALUE;
+			}
+			else if (tmp[i] + axis_trim_value[i] < AXIS_MIN_VALUE) 
+			{
+				axis_trim_value[i] = tmp[i] + AXIS_MIN_VALUE;
+				tmp[i] = AXIS_MIN_VALUE;
+			}
+			else
+			{
+				tmp[i] += axis_trim_value[i];
+			}
     }		
 
 		// Deadband processing and scaling		
