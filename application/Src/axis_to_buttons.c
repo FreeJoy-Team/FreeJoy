@@ -33,80 +33,78 @@
 	* @param  axis_to_btn: Pointer to axis to button configuration
   * @retval Button state
   */
-uint8_t GetPressedFromAxis (analog_data_t axis_data, uint8_t btn_num, axis_to_buttons_t * axis_to_btn)
+uint8_t GetPressedFromAxis (uint8_t btn_num, axis_to_buttons_t * axis_to_btn, int32_t tmp)
 {
 	uint8_t ret = 0;
-	int32_t tmp = ((int32_t)axis_data - AXIS_MIN_VALUE) * 255;
-	
-	if (tmp >= (uint32_t) (axis_to_btn->points[0] * AXIS_FULLSCALE) &&
-			tmp <= (uint32_t) (axis_to_btn->points[1] * AXIS_FULLSCALE) &&
-			btn_num == 0)
+	if (btn_num == 0 && 
+			tmp >= (uint32_t) (axis_to_btn->points[0] * AXIS_FULLSCALE) &&
+			tmp <= (uint32_t) (axis_to_btn->points[1] * AXIS_FULLSCALE))
 	{
 		ret =  1;
 	}	
-	else if (tmp > (uint32_t) (axis_to_btn->points[1] * AXIS_FULLSCALE ) && 
-			tmp <= (uint32_t) (axis_to_btn->points[2] * AXIS_FULLSCALE) && 
-			btn_num == 1)
+	else if (btn_num == 1 && 
+			tmp > (uint32_t) (axis_to_btn->points[1] * AXIS_FULLSCALE ) && 
+			tmp <= (uint32_t) (axis_to_btn->points[2] * AXIS_FULLSCALE))
 	{
 		ret =  1;
 	}
-	else if (tmp > (uint32_t) (axis_to_btn->points[2] * AXIS_FULLSCALE) && 
-			tmp <= (uint32_t) (axis_to_btn->points[3] * AXIS_FULLSCALE) && 
-			btn_num == 2)
+	else if (btn_num == 2 && 
+			tmp > (uint32_t) (axis_to_btn->points[2] * AXIS_FULLSCALE) && 
+			tmp <= (uint32_t) (axis_to_btn->points[3] * AXIS_FULLSCALE))
 	{
 		ret =  1;
 	}
-	else if (tmp > (uint32_t) (axis_to_btn->points[3] * AXIS_FULLSCALE) && 
-			tmp <= (uint32_t) (axis_to_btn->points[4] * AXIS_FULLSCALE) && 
-			btn_num == 3)
+	else if (btn_num == 3 && 
+			tmp > (uint32_t) (axis_to_btn->points[3] * AXIS_FULLSCALE) && 
+			tmp <= (uint32_t) (axis_to_btn->points[4] * AXIS_FULLSCALE))
 	{
 		ret =  1;
 	}
-	else if (tmp > (uint32_t) (axis_to_btn->points[4] * AXIS_FULLSCALE) && 
-			tmp <= (uint32_t) (axis_to_btn->points[5] * AXIS_FULLSCALE) && 
-			btn_num == 4)
+	else if (btn_num == 4 && 
+			tmp > (uint32_t) (axis_to_btn->points[4] * AXIS_FULLSCALE) && 
+			tmp <= (uint32_t) (axis_to_btn->points[5] * AXIS_FULLSCALE))
 	{
 		ret =  1;
 	}
-	else if (tmp > (uint32_t) (axis_to_btn->points[5] * AXIS_FULLSCALE) && 
-			tmp <= (uint32_t) (axis_to_btn->points[6] * AXIS_FULLSCALE) && 
-			btn_num == 5)
+	else if (btn_num == 5 && 
+			tmp > (uint32_t) (axis_to_btn->points[5] * AXIS_FULLSCALE) && 
+			tmp <= (uint32_t) (axis_to_btn->points[6] * AXIS_FULLSCALE))
 	{
 		ret =  1;
 	}
-	else if (tmp > (uint32_t) (axis_to_btn->points[6] * AXIS_FULLSCALE) && 
-			tmp <= (uint32_t) (axis_to_btn->points[7] * AXIS_FULLSCALE) && 
-			btn_num == 6)
+	else if (btn_num == 6 && 
+			tmp > (uint32_t) (axis_to_btn->points[6] * AXIS_FULLSCALE) && 
+			tmp <= (uint32_t) (axis_to_btn->points[7] * AXIS_FULLSCALE))
 	{
 		ret =  1;
 	}
-	else if (tmp > (uint32_t) (axis_to_btn->points[7] * AXIS_FULLSCALE) && 
-			tmp <= (uint32_t) (axis_to_btn->points[8] * AXIS_FULLSCALE) && 
-			btn_num == 7)
+	else if (btn_num == 7 && 
+			tmp > (uint32_t) (axis_to_btn->points[7] * AXIS_FULLSCALE) && 
+			tmp <= (uint32_t) (axis_to_btn->points[8] * AXIS_FULLSCALE))
 	{
 		ret =  1;
 	}
-	else if (tmp > (uint32_t) (axis_to_btn->points[8] * AXIS_FULLSCALE) && 
-			tmp <= (uint32_t) (axis_to_btn->points[9] * AXIS_FULLSCALE) && 
-			btn_num == 8)
+	else if (btn_num == 8 && 
+			tmp > (uint32_t) (axis_to_btn->points[8] * AXIS_FULLSCALE) && 
+			tmp <= (uint32_t) (axis_to_btn->points[9] * AXIS_FULLSCALE))
 	{
 		ret =  1;
 	}
-	else if (tmp > (uint32_t) (axis_to_btn->points[9] * AXIS_FULLSCALE) && 
-			tmp <= (uint32_t) (axis_to_btn->points[10] * AXIS_FULLSCALE) && 
-			btn_num == 9)
+	else if (btn_num == 9 && 
+			tmp > (uint32_t) (axis_to_btn->points[9] * AXIS_FULLSCALE) && 
+			tmp <= (uint32_t) (axis_to_btn->points[10] * AXIS_FULLSCALE))
 	{
 		ret =  1;
 	}
-	else if (tmp > (uint32_t) (axis_to_btn->points[10] * AXIS_FULLSCALE) && 
-			tmp <= (uint32_t) (axis_to_btn->points[11] * AXIS_FULLSCALE ) && 
-			btn_num == 10)
+	else if (btn_num == 10 && 
+			tmp > (uint32_t) (axis_to_btn->points[10] * AXIS_FULLSCALE) && 
+			tmp <= (uint32_t) (axis_to_btn->points[11] * AXIS_FULLSCALE ))
 	{
 		ret =  1;
 	}
-	else if (tmp > (uint32_t) (axis_to_btn->points[11] * AXIS_FULLSCALE) && 
-			tmp <= (uint32_t) (axis_to_btn->points[12] * AXIS_FULLSCALE) && 
-			btn_num == 11)
+	else if (btn_num == 11 && 
+			tmp > (uint32_t) (axis_to_btn->points[11] * AXIS_FULLSCALE) && 
+			tmp <= (uint32_t) (axis_to_btn->points[12] * AXIS_FULLSCALE))
 	{
 		ret =  1;
 	}
@@ -132,13 +130,21 @@ void AxisToButtonsGet (uint8_t * raw_button_data_buf, dev_config_t * p_dev_confi
 	{
 		if (p_dev_config->axes_to_buttons[i].buttons_cnt > 0)
 		{
+			int32_t tmp = ((int32_t)scaled_axis_data[i] - AXIS_MIN_VALUE) * 255;
 			for (uint8_t j=0; j<p_dev_config->axes_to_buttons[i].buttons_cnt; j++)
 			{
 				if ((*pos) < MAX_BUTTONS_NUM)
 				{
 					// get raw button state from axis
-					raw_button_data_buf[*pos] = GetPressedFromAxis(scaled_axis_data[i], j, &p_dev_config->axes_to_buttons[i]);
+					raw_button_data_buf[*pos] = GetPressedFromAxis(j, &p_dev_config->axes_to_buttons[i], tmp);
 
+					if (raw_button_data_buf[*pos] == 1)
+					{
+						uint8_t size = p_dev_config->axes_to_buttons[i].buttons_cnt - j;
+						memset(&raw_button_data_buf[(*pos) +1], 0, size);
+						*pos += size;
+						break;
+					}
 					(*pos)++;
 				}
 				else break;
@@ -146,5 +152,3 @@ void AxisToButtonsGet (uint8_t * raw_button_data_buf, dev_config_t * p_dev_confi
 		}
 	}	
 }
-
-
