@@ -93,18 +93,12 @@ static int32_t map2(	int32_t x,
 											int32_t out_min,
 											int32_t out_max)
 {
-	int32_t tmp;
-	int32_t ret;
-	
-	tmp = x;
-	
-	
-	if (tmp < in_min)	return out_min;
-	if (tmp > in_max)	return out_max;
+	if (x < in_min)	return out_min;
+	if (x > in_max)	return out_max;
 		
-	ret = (tmp - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+	x = (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 	
-	return ret;
+	return x;
 }
 
 /**
@@ -114,14 +108,12 @@ static int32_t map2(	int32_t x,
   */
 static int32_t map_tle (int32_t x)
 {
-	int32_t tmp;
-	int32_t ret;
+	x = x * 100 / 549;
 	
-	tmp = x;
+	if (x > AXIS_MAX_VALUE) x = AXIS_MAX_VALUE;
+	else if (x < AXIS_MIN_VALUE) x = AXIS_MIN_VALUE;
 	
-	ret = tmp * 100 / 549;
-	
-	return ret;
+	return x;
 }
 
 /**
@@ -134,6 +126,7 @@ static int32_t map_tle (int32_t x)
 	*	@param	out_center:	Center value of input range
 	*	@param	out_max: Maximum value of output range
 	*	@param	deadband_size: Width of center dead zone
+	* @param offset: applied axis offset
   * @retval Transformed value
   */
 static int32_t map3(	int32_t x, 
@@ -173,7 +166,6 @@ static int32_t map3(	int32_t x,
 		ret = ((tmp - in_center - dead_zone_right) * (out_max - out_center) / (in_max - in_center - dead_zone_right) + out_center);
 	}
 	return ret - offset * 2730;
-
 }
 
 /**
@@ -758,7 +750,6 @@ void AxesProcess (dev_config_t * p_dev_config)
 				{
 					if (sensors[k].source == source) break;
 				}
-
 				tmp[i] = adc_data[sensors[k].curr_channel];			
 				raw_axis_data[i] = map2(tmp[i], 0, 4095, AXIS_MIN_VALUE, AXIS_MAX_VALUE);
 			}
@@ -915,6 +906,8 @@ void AxesProcess (dev_config_t * p_dev_config)
 			{
 				encoders_state[encoder_num].cnt = p_dev_config->axis_config[i].calib_min;
 			}
+				
+			tmp[i] = encoders_state[p_dev_config->axis_config[i].channel].cnt;
 			
 			tmp[i] = encoders_state[p_dev_config->axis_config[i].channel].cnt;
 			
@@ -1085,7 +1078,6 @@ void AxesProcess (dev_config_t * p_dev_config)
 									 AXIS_MAX_VALUE,
 									 p_dev_config->axis_config[i].deadband_size,
 									 p_dev_config->axis_config[i].offset_angle); 
-		
 		}
 		else
 		{
