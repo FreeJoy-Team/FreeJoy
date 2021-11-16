@@ -44,6 +44,7 @@
 
 #endif
 
+
 volatile uint64_t Ticks;
 volatile uint32_t TimingDelay;
 
@@ -113,7 +114,7 @@ void Timers_Init(dev_config_t * p_dev_config)
 		
 	TIM_TimeBaseStructInit(&TIM_TimeBaseInitStructure);	
 	TIM_TimeBaseInitStructure.TIM_Prescaler = RCC_Clocks.PCLK1_Frequency/100000 - 1;
-	TIM_TimeBaseInitStructure.TIM_Period = 200 - 1;			// 1ms, 1000Hz
+	TIM_TimeBaseInitStructure.TIM_Period = 100 - 1;			// 2000Hz
 	TIM_TimeBaseInitStructure.TIM_ClockDivision = 0;
 	TIM_TimeBaseInitStructure.TIM_CounterMode = TIM_CounterMode_Up;
 	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseInitStructure);
@@ -236,11 +237,12 @@ void PWM_SetFromAxis(dev_config_t * p_dev_config, analog_data_t * axis_data)
 
 
 /**
-  * @brief Get system ticks
-  * @retval ticks
+  * @brief Get up-time milliseconds
+  * @retval milliseconds
   */
-uint64_t GetTick(void) {
-    return Ticks;
+uint64_t GetMillis(void) 
+{
+    return Ticks/(TICKS_IN_MILLISECOND);
 }
 
 
@@ -248,7 +250,8 @@ uint64_t GetTick(void) {
   * @brief Delay implementation
   * @retval None
   */
-void Delay_ms(uint32_t nTime) {
+void Delay_ms(uint32_t nTime) 
+{
     TimingDelay = nTime;
     while (TimingDelay != 0);
 }
@@ -257,7 +260,8 @@ void Delay_ms(uint32_t nTime) {
   * @brief Delay implementation
   * @retval None
   */
-void Delay_us(uint32_t nTime) {
+void Delay_us(uint32_t nTime) 
+{
     int32_t us = nTime * 5;
 
     while (us > 0) {
@@ -388,7 +392,7 @@ void IO_Init (dev_config_t * p_dev_config)
 			GPIO_InitStructure.GPIO_Pin = pin_config[i].pin;
 			GPIO_Init(pin_config[i].port, &GPIO_InitStructure);
 		}
-		else if (p_dev_config->pins[i] == SPI_SCK)//  && i == 14)		// PB3
+		else if (p_dev_config->pins[i] == SPI_SCK && i == 14)		// PB3
 		{
 			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 			GPIO_InitStructure.GPIO_Pin = pin_config[i].pin;
@@ -433,6 +437,7 @@ void IO_Init (dev_config_t * p_dev_config)
 						 p_dev_config->pins[i] == MCP3202_CS ||
 						 p_dev_config->pins[i] == MCP3204_CS ||
 						 p_dev_config->pins[i] == MCP3208_CS ||
+						 p_dev_config->pins[i] == MLX90363_CS ||
 						 p_dev_config->pins[i] == MLX90393_CS ||
 						 p_dev_config->pins[i] == AS5048A_CS)
 		{
@@ -445,6 +450,14 @@ void IO_Init (dev_config_t * p_dev_config)
 		else if (p_dev_config->pins[i] == TLE5011_GEN  && i == 17)
 		{
 			Generator_Init();	// 4MHz output at PB6 pin
+		}
+		else if (p_dev_config->pins[i] == SHIFT_REG_CLK)
+		{
+			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+			GPIO_InitStructure.GPIO_Pin = pin_config[i].pin;
+			GPIO_Init(pin_config[i].port, &GPIO_InitStructure);
+			GPIO_WriteBit(pin_config[i].port, pin_config[i].pin, Bit_RESET);
 		}
 		else if (p_dev_config->pins[i] == SHIFT_REG_LATCH)
 		{

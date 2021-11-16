@@ -39,9 +39,11 @@ void ShiftRegistersInit(dev_config_t * p_dev_config)
 	uint8_t pos = 0;
 	int8_t prev_data = -1;
 	int8_t prev_latch = -1;
+	int8_t prev_clk = -1;
 
 	for (int i=0; i<MAX_SHIFT_REG_NUM; i++)
 	{
+		shift_registers[i].pin_clk = -1;
 		shift_registers[i].pin_data = -1;
 		shift_registers[i].pin_latch = -1;
 		shift_registers[i].button_cnt = p_dev_config->shift_registers[i].button_cnt;
@@ -69,12 +71,27 @@ void ShiftRegistersInit(dev_config_t * p_dev_config)
 			pos++;			
 		}
 	}
-	// if latch pin not set and data pin is set than set last defined latch pin
+	// set clk pins
+	pos = 0;
+	for (int i=0; i<USED_PINS_NUM; i++)
+	{
+		if (p_dev_config->pins[i] == SHIFT_REG_CLK && i > prev_clk)
+		{
+			shift_registers[pos].pin_clk = i;					
+			prev_clk = i;
+			pos++;			
+		}
+	}
+	// if latch or clk pin not set and data pin is set than set last defined latch pin
 	for (int i=0; i<MAX_SHIFT_REG_NUM; i++)
 	{
 		if (shift_registers[i].pin_data >= 0 && shift_registers[i].pin_latch == -1)
 		{
 			shift_registers[i].pin_latch = prev_latch;
+		}
+		if (shift_registers[i].pin_data >= 0 && shift_registers[i].pin_latch >= 0 &&  shift_registers[i].pin_clk == -1)
+		{
+			shift_registers[i].pin_clk = prev_clk;
 		}
 	}
 }
@@ -89,16 +106,10 @@ void ShiftRegisterRead(shift_reg_t * shift_register, uint8_t * data)
 {
 	uint8_t reg_cnt;
 	
-	GPIO_InitTypeDef 					GPIO_InitStructure;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;	
-	GPIO_Init (GPIOB,&GPIO_InitStructure);
-	
 	if (shift_register->type == CD4021_PULL_DOWN || shift_register->type == CD4021_PULL_UP)		// positive polarity
 	{
 		// set SCK low
-		GPIOB->ODR &= ~GPIO_Pin_3;
+		pin_config[shift_register->pin_clk].port->ODR &= ~pin_config[shift_register->pin_clk].pin;
 		// Latch impulse
 		pin_config[shift_register->pin_latch].port->ODR |= pin_config[shift_register->pin_latch].pin;
 		for (int i=0; i<SHIFTREG_TICK_DELAY; i++) __NOP();
@@ -108,7 +119,7 @@ void ShiftRegisterRead(shift_reg_t * shift_register, uint8_t * data)
 	else	// HC165 negative polarity
 	{
 		// set SCK high
-		GPIOB->ODR |= GPIO_Pin_3;
+		pin_config[shift_register->pin_clk].port->ODR |= pin_config[shift_register->pin_clk].pin;
 		// Latch impulse
 		pin_config[shift_register->pin_latch].port->ODR &= ~pin_config[shift_register->pin_latch].pin;
 		for (int i=0; i<SHIFTREG_TICK_DELAY; i++) __NOP();
@@ -126,13 +137,13 @@ void ShiftRegisterRead(shift_reg_t * shift_register, uint8_t * data)
 		{
 			do
 			{
-				GPIOB->ODR &= ~GPIO_Pin_3;
+				pin_config[shift_register->pin_clk].port->ODR &= ~pin_config[shift_register->pin_clk].pin;
 				for (int i=0; i<SHIFTREG_TICK_DELAY; i++) __NOP();				
 				if(pin_config[shift_register->pin_data].port->IDR & pin_config[shift_register->pin_data].pin)
 				{
 					data[i] |= mask; 
 				}
-				GPIOB->ODR |= GPIO_Pin_3;			
+				pin_config[shift_register->pin_clk].port->ODR |= pin_config[shift_register->pin_clk].pin;		
 				for (int i=0; i<SHIFTREG_TICK_DELAY; i++) __NOP();
 				
 				mask = mask >> 1;
@@ -142,13 +153,13 @@ void ShiftRegisterRead(shift_reg_t * shift_register, uint8_t * data)
 		{
 			do
 			{
-				GPIOB->ODR &= ~GPIO_Pin_3;
+				pin_config[shift_register->pin_clk].port->ODR &= ~pin_config[shift_register->pin_clk].pin;
 				for (int i=0; i<SHIFTREG_TICK_DELAY; i++) __NOP();
 				if(!(pin_config[shift_register->pin_data].port->IDR & pin_config[shift_register->pin_data].pin))
 				{
 					data[i] |= mask; 
 				}				
-				GPIOB->ODR |= GPIO_Pin_3;
+				pin_config[shift_register->pin_clk].port->ODR |= pin_config[shift_register->pin_clk].pin;
 				for (int i=0; i<SHIFTREG_TICK_DELAY; i++) __NOP();
 
 				mask = mask >> 1;

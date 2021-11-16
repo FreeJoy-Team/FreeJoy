@@ -25,6 +25,8 @@
 #include "tle5011.h"
 #include <math.h>
 
+static uint8_t cmd;
+
 static uint8_t MathCRC8(uint8_t crc, uint8_t data)
 {
 	crc ^= data;
@@ -58,7 +60,7 @@ static uint8_t CheckCrc(uint8_t * data, uint8_t crc, uint8_t initial, uint8_t le
 
 void TLE5011_Read(uint8_t * data, uint8_t addr, uint8_t length)
 {
-	uint8_t cmd = 0x80 | (addr & 0x0F)<<3 | (length & 0x07);
+	cmd = 0x80 | (addr & 0x0F)<<3 | (length & 0x07);
 	
 	SPI_HalfDuplex_Transmit(&cmd, 1, TLE5011_SPI_MODE);
 	if (length > 0)
@@ -70,7 +72,7 @@ void TLE5011_Read(uint8_t * data, uint8_t addr, uint8_t length)
 
 void TLE5011_Write(uint8_t * data, uint8_t addr, uint8_t length)
 {
-	uint8_t cmd = addr<<3 | (addr & 0x0F)<<3 | (length & 0x07);
+	cmd = addr<<3 | (addr & 0x0F)<<3 | (length & 0x07);
 	SPI_HalfDuplex_Transmit(&cmd, 1, TLE5011_SPI_MODE);
 	if (length > 0)
 	{

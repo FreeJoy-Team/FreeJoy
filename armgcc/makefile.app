@@ -38,6 +38,7 @@ C_SOURCES =  \
 ../application/Src/as5600.c \
 ../application/Src/as5048a.c \
 ../application/Src/ads1115.c \
+../application/Src/mlx90363.c \
 ../application/Src/mlx90393.c \
 ../application/Src/mcp320x.c \
 ../application/Src/shift_registers.c \

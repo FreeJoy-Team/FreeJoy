@@ -32,6 +32,7 @@
 #include "tle5011.h"
 #include "tle5012.h"
 #include "mcp320x.h"
+#include "mlx90363.h"
 #include "mlx90393.h"
 #include "as5048a.h"
 #include "ads1115.h"
@@ -46,19 +47,20 @@
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 
-#define ADC_PERIOD_TICKS										2					// 1 tick = 1ms
-#define SENSORS_PERIOD_TICKS								2
+#define ADC_PERIOD_TICKS										4					// 1 tick = 500us
+#define SENSORS_PERIOD_TICKS								4
 #define BUTTONS_PERIOD_TICKS								1
 #define ENCODERS_PERIOD_TICKS								1
 
 /* Private variables ---------------------------------------------------------*/
 
-volatile int32_t ticks = 0;
-volatile int32_t joy_ticks = 0; 
+volatile int32_t millis = 0;
+volatile int32_t joy_millis = 0; 
 volatile int32_t encoder_ticks = 0;
 volatile int32_t adc_ticks = 0;
 volatile int32_t sensors_ticks = 1;
 volatile int32_t buttons_ticks = 0;
+volatile int32_t configurator_millis = 0;
 volatile int status = 0;
 extern dev_config_t dev_config;
 
@@ -191,12 +193,12 @@ void TIM2_IRQHandler(void)
 		TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
 		
 		Ticks++;
-
-		ticks = GetTick();
+		millis = GetMillis();
+		
 		// check if it is time to send joystick data
-		if (ticks - joy_ticks >= dev_config.exchange_period_ms )
+		if (millis - joy_millis >= dev_config.exchange_period_ms )
 		{
-			joy_ticks = ticks;
+			joy_millis = millis;
 			
 			AppConfigGet(&tmp_app_config);
 				
@@ -234,46 +236,49 @@ void TIM2_IRQHandler(void)
 			USB_CUSTOM_HID_SendReport(1, report_buf, pos);
 		
 			// fill params report buffer
-			static uint8_t report = 0;
-			report_buf[0] = REPORT_ID_PARAM;
-			memcpy(params_report.axis_data, joy_report.axis_data, sizeof(params_report.axis_data));
-			
-			if (report == 0)
+			if (configurator_millis > millis)
 			{
-				report_buf[1] = 0;
-				memcpy(&report_buf[2], (uint8_t *)&(params_report), 62);
-			}
-			else
-			{
-				report_buf[1] = 1;
-				memcpy(&report_buf[2], (uint8_t *)&(params_report) + 62, sizeof(params_report_t) - 62);
-			}
-			
-			// send params report
-			if (USB_CUSTOM_HID_SendReport(2, report_buf, 64) == 0)
-			{
-				report = !report;
+				static uint8_t report = 0;
+				report_buf[0] = REPORT_ID_PARAM;
+				params_report.firmware_version = FIRMWARE_VERSION;
+				memcpy(params_report.axis_data, joy_report.axis_data, sizeof(params_report.axis_data));
+				
+				if (report == 0)
+				{
+					report_buf[1] = 0;
+					memcpy(&report_buf[2], (uint8_t *)&(params_report), 62);
+				}
+				else
+				{
+					report_buf[1] = 1;
+					memcpy(&report_buf[2], (uint8_t *)&(params_report) + 62, sizeof(params_report_t) - 62);
+				}
+				
+				// send params report
+				if (USB_CUSTOM_HID_SendReport(2, report_buf, 64) == 0)
+				{
+					report = !report;
+				}
 			}
 		}
 
 		// digital inputs polling
-		if (ticks - buttons_ticks >= BUTTONS_PERIOD_TICKS)
+		if (Ticks - buttons_ticks >= BUTTONS_PERIOD_TICKS)
 		{
-			buttons_ticks = ticks;
+			buttons_ticks = Ticks;
 			ButtonsReadPhysical(&dev_config, raw_buttons_data);
-			ButtonsDebouceProcess(&dev_config);
 			
-			if (ticks - encoder_ticks >= ENCODERS_PERIOD_TICKS)
+			if (Ticks - encoder_ticks >= ENCODERS_PERIOD_TICKS)
 			{
-				encoder_ticks = ticks;
+				encoder_ticks = Ticks;
 				EncoderProcess(logical_buttons_state, &dev_config);
 			}
 		}
 		
 		// Internal ADC conversion
-		if (ticks - adc_ticks >= ADC_PERIOD_TICKS)
+		if (Ticks - adc_ticks >= ADC_PERIOD_TICKS)
 		{		
-			adc_ticks = ticks;	
+			adc_ticks = Ticks;	
 
 			AxesProcess(&dev_config);					// process axis only once for one data reading
 			
@@ -300,9 +305,9 @@ void TIM2_IRQHandler(void)
 			RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB|RCC_APB2Periph_GPIOC|RCC_APB2Periph_TIM1,ENABLE);
 		}
 		// External sensors data receiption
-		if (ticks - sensors_ticks >= SENSORS_PERIOD_TICKS && ticks != adc_ticks)		// prevent ADC and sensors reading during same period
+		if (Ticks - sensors_ticks >= SENSORS_PERIOD_TICKS && Ticks != adc_ticks)		// prevent ADC and sensors reading during same period
 		{																																						
-			sensors_ticks = ticks;
+			sensors_ticks = Ticks;
 
 			// start SPI sensors 
 			for (uint8_t i=0; i<MAX_AXIS_NUM; i++)
@@ -325,6 +330,11 @@ void TIM2_IRQHandler(void)
 									 sensors[i].type == MCP3208)
 					{
 						MCP320x_StartDMA(&sensors[i], 0);
+						break;
+					}
+					else if (sensors[i].type == MLX90363)
+					{
+						MLX90363_StartDMA(&sensors[i]);
 						break;
 					}
 					else if (sensors[i].type == MLX90393_SPI)
@@ -429,6 +439,10 @@ void DMA1_Channel2_IRQHandler(void)
 				}
 				i++;
 			}
+			else if (sensors[i].type == MLX90363)
+			{
+				MLX90363_StopDMA(&sensors[i++]);
+			}
 			else if (sensors[i].type == MLX90393_SPI)
 			{
 				MLX90393_StopDMA(&sensors[i++]);
@@ -461,6 +475,11 @@ void DMA1_Channel2_IRQHandler(void)
 								 sensors[i].type == MCP3208)
 				{
 					MCP320x_StartDMA(&sensors[i], 0);
+					return;
+				}
+				else if (sensors[i].type == MLX90363)
+				{
+					MLX90363_StartDMA(&sensors[i]);
 					return;
 				}
 				else if (sensors[i].type == MLX90393_SPI)

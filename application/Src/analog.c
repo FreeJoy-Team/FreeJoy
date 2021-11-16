@@ -29,6 +29,7 @@
 #include "tle5011.h"
 #include "tle5012.h"
 #include "mcp320x.h"
+#include "mlx90363.h"
 #include "mlx90393.h"
 #include "as5048a.h"
 #include "ads1115.h"
@@ -509,6 +510,21 @@ void AxesInit (dev_config_t * p_dev_config)
 				}
 			}
 		}
+		else if (p_dev_config->pins[i] == MLX90363_CS)
+		{
+			for (uint8_t k = 0; k < MAX_AXIS_NUM; k++)
+			{
+				if (p_dev_config->axis_config[k].source_main == i && sensors_cnt < MAX_AXIS_NUM)
+				{
+					sensors[sensors_cnt].type = MLX90363;
+					sensors[sensors_cnt].source = i;
+
+					MLX90363_Start(&sensors[sensors_cnt]);
+					sensors_cnt++;
+					break;
+				}
+			}
+		}
 		else if (p_dev_config->pins[i] == MLX90393_CS)
 		{
 			for (uint8_t k=0; k<MAX_AXIS_NUM; k++)
@@ -734,8 +750,7 @@ void AxesProcess (dev_config_t * p_dev_config)
 				{
 					if (sensors[k].source == source) break;
 				}
-				
-				tmp[i] = adc_data[sensors[k].curr_channel];
+				tmp[i] = adc_data[sensors[k].curr_channel];			
 				raw_axis_data[i] = map2(tmp[i], 0, 4095, AXIS_MIN_VALUE, AXIS_MAX_VALUE);
 			}
 			else if (p_dev_config->pins[source] == TLE5011_CS)			// source TLE5011
@@ -796,7 +811,27 @@ void AxesProcess (dev_config_t * p_dev_config)
 				// get data
 				tmp[i] = MCP320x_GetData(&sensors[k], channel);
 				raw_axis_data[i] = map2(tmp[i], 0, 4095, AXIS_MIN_VALUE, AXIS_MAX_VALUE);
-			}	
+			}
+			else if (p_dev_config->pins[source] == MLX90363_CS)				// source MLX90363
+			{
+				uint8_t k = 0;
+				uint16_t tmp16 = 0;
+				// search for needed sensor
+				for (k = 0; k < MAX_AXIS_NUM; k++)
+				{
+					if (sensors[k].source == source) break;
+				}
+				if (MLX90363_GetData(&tmp16, &sensors[k], channel) == 0)
+				{
+					sensors[k].ok_cnt++;
+
+					raw_axis_data[i] = tmp16;
+				}
+				else
+				{
+					sensors[k].err_cnt++;
+				}
+			}
 			else if (p_dev_config->pins[source] == MLX90393_CS)				// source MLX90393
 			{
 				uint8_t k = 0;
@@ -874,15 +909,18 @@ void AxesProcess (dev_config_t * p_dev_config)
 				
 			tmp[i] = encoders_state[p_dev_config->axis_config[i].channel].cnt;
 			
+			tmp[i] = encoders_state[p_dev_config->axis_config[i].channel].cnt;
+			
 			raw_axis_data[i] = tmp[i];
 		}
 		
+		
 		// Filtering
 		tmp[i] = Filter(raw_axis_data[i], filter_buffer[i], p_dev_config->axis_config[i].filter);
-			
+
 		// Buttons section
     {
-			int64_t millis = GetTick();
+			int64_t millis = GetMillis();
 			
 			uint8_t inc_button_num = 0;
 			uint8_t rst_button_num = 0;
@@ -1040,7 +1078,7 @@ void AxesProcess (dev_config_t * p_dev_config)
 									 AXIS_MAX_VALUE,
 									 p_dev_config->axis_config[i].deadband_size,
 									 p_dev_config->axis_config[i].offset_angle); 
-		}	
+		}
 		else
 		{
 			// Scale output data
@@ -1060,7 +1098,7 @@ void AxesProcess (dev_config_t * p_dev_config)
 				tmp[i] = scaled_axis_data[i];			// keep value if deadband confidition is true
 			}	
 		}
-		 
+		
 		// Shaping
 		tmp[i] = ShapeFunc(&p_dev_config->axis_config[i], tmp[i], 11);
 		// Lowing resolution if needed
@@ -1071,7 +1109,7 @@ void AxesProcess (dev_config_t * p_dev_config)
 		{
 			tmp[i] = 0 - tmp[i];
 		}
-		
+
 		// Prescaling
 		if (p_dev_config->axis_config[i].prescaler != 100)
 		{

@@ -42,12 +42,12 @@ uint8_t												a2b_last = 0;
 	* @param  p_dev_config: Pointer to device configuration
   * @retval None
   */
-void ButtonsDebouceProcess (dev_config_t * p_dev_config)
+void ButtonsDebounceProcess (dev_config_t * p_dev_config)
 {
 	uint32_t 	millis;
 	uint16_t	debounce;
 	
-	millis = GetTick();
+	millis = GetMillis();
 	
 	for (uint8_t i=0; i<MAX_BUTTONS_NUM; i++)
 	{
@@ -171,7 +171,7 @@ void LogicalButtonProcessState (logical_buttons_state_t * p_button_state, uint8_
 	uint32_t millis;
 	uint8_t pov_group = 0;
 	
-	millis = GetTick();
+	millis = GetMillis();
 	LogicalButtonProcessTimer(p_button_state, millis, p_dev_config, num);
 	
 		switch (p_dev_config->buttons[num].type)
@@ -905,7 +905,7 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 	for (int i=0;i<MAX_BUTTONS_NUM;i++)
 	{
 			uint8_t is_enabled = !p_dev_config->buttons[i].is_disabled && (p_dev_config->buttons[i].physical_num >= 0);
-
+			// joy buttons
 			if (is_enabled)
 			{
 				//out_buttons_data[(k & 0xF8)>>3] &= ~(1 << (k & 0x07));
