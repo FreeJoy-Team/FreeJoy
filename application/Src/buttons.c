@@ -155,6 +155,11 @@ static void LogicalButtonProcessTimer (logical_buttons_state_t * p_button_state,
 	{
 		p_button_state->delay_act = BUTTON_ACTION_IDLE;
 	}
+	else if (p_button_state->delay_act == BUTTON_ACTION_BLOCK && 			// blocking button for 100ms (needed for Alps hats)
+			 millis - p_button_state->time_last > 100)
+	{
+		p_button_state->delay_act = BUTTON_ACTION_IDLE;
+	}
 }
 
 /**
@@ -187,7 +192,8 @@ void LogicalButtonProcessState (logical_buttons_state_t * p_button_state, uint8_
 				{
 					p_button_state->current_state = p_button_state->on_state;
 				}
-				else if (p_button_state->curr_physical_state > p_button_state->prev_physical_state)		// triggered in IDLE
+				else if (p_button_state->curr_physical_state > p_button_state->prev_physical_state && 
+								p_button_state->delay_act != BUTTON_ACTION_BLOCK)		// triggered in IDLE
 				{
 					p_button_state->delay_act = BUTTON_ACTION_DELAY;
 					p_button_state->time_last = millis;
@@ -367,12 +373,12 @@ void LogicalButtonProcessState (logical_buttons_state_t * p_button_state, uint8_
 						{
 							if (p_dev_config->buttons[i].type == POV1_CENTER)	
 							{
-								logical_buttons_state[i].delay_act = BUTTON_ACTION_IDLE;
+								logical_buttons_state[i].delay_act = BUTTON_ACTION_BLOCK;
 								logical_buttons_state[i].on_state = 0;
 								logical_buttons_state[i].off_state = 0;
 								logical_buttons_state[i].current_state = 0;
 								logical_buttons_state[i].curr_physical_state = 0;
-								logical_buttons_state[i].time_last = 0;		 
+								logical_buttons_state[i].time_last = millis;		 
 							}
 						}
 					}
@@ -382,12 +388,12 @@ void LogicalButtonProcessState (logical_buttons_state_t * p_button_state, uint8_
 						{
 							if (p_dev_config->buttons[i].type == POV2_CENTER)	
 							{
-								logical_buttons_state[i].delay_act = BUTTON_ACTION_IDLE;
+								logical_buttons_state[i].delay_act = BUTTON_ACTION_BLOCK;
 								logical_buttons_state[i].on_state = 0;
 								logical_buttons_state[i].off_state = 0;
 								logical_buttons_state[i].current_state = 0;
 								logical_buttons_state[i].curr_physical_state = 0;
-								logical_buttons_state[i].time_last = 0;		 
+								logical_buttons_state[i].time_last = millis;		 
 							}
 						}
 					}

@@ -248,7 +248,6 @@ typedef struct physical_buttons_state_t
 	uint8_t prev_pin_state			:1;
 	uint8_t current_state				:1;
 	uint8_t changed							:1;
-	//uint8_t cnt;
 	
 } physical_buttons_state_t;
 
@@ -257,6 +256,7 @@ enum
 	BUTTON_ACTION_IDLE = 0,
 	BUTTON_ACTION_DELAY,
 	BUTTON_ACTION_PRESS,
+	BUTTON_ACTION_BLOCK,
 	
 };
 typedef uint8_t button_action_t;
