@@ -101,6 +101,7 @@ void AppConfigInit (dev_config_t * p_dev_config)
 					p_dev_config->buttons[i].type == POV1_LEFT ||
 					p_dev_config->buttons[i].type == POV1_RIGHT)
 		{
+			p_dev_config->buttons[i].is_disabled = 1;
 			app_config.pov |= 0x01;
 		}
 		else if (p_dev_config->buttons[i].type == POV2_DOWN ||
@@ -108,6 +109,7 @@ void AppConfigInit (dev_config_t * p_dev_config)
 					p_dev_config->buttons[i].type == POV2_LEFT ||
 					p_dev_config->buttons[i].type == POV2_RIGHT)
 		{
+			p_dev_config->buttons[i].is_disabled = 1;
 			app_config.pov |= 0x02;
 		}
 		else if (p_dev_config->buttons[i].type == POV3_DOWN ||
@@ -115,6 +117,7 @@ void AppConfigInit (dev_config_t * p_dev_config)
 					p_dev_config->buttons[i].type == POV3_LEFT ||
 					p_dev_config->buttons[i].type == POV3_RIGHT)
 		{
+			p_dev_config->buttons[i].is_disabled = 1;
 			app_config.pov |= 0x04;
 		}
 		else if (p_dev_config->buttons[i].type == POV4_DOWN ||
@@ -122,6 +125,7 @@ void AppConfigInit (dev_config_t * p_dev_config)
 					p_dev_config->buttons[i].type == POV4_LEFT ||
 					p_dev_config->buttons[i].type == POV4_RIGHT)
 		{
+			p_dev_config->buttons[i].is_disabled = 1;
 			app_config.pov |= 0x08;
 		}
 		

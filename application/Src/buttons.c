@@ -135,7 +135,7 @@ static void LogicalButtonProcessTimer (logical_buttons_state_t * p_button_state,
 	if ( tmp_delay_time == 0 && (p_dev_config->buttons[num].type == POV1_CENTER ||
 			p_dev_config->buttons[num].type == POV2_CENTER))
 	{	
-		tmp_delay_time = 200;
+		tmp_delay_time = 100;
 	}		
 		
 	// set max delay timer for sequential and radio buttons // heroviy kostil`, need if for check all seq buttons for types of timings
@@ -163,7 +163,7 @@ static void LogicalButtonProcessTimer (logical_buttons_state_t * p_button_state,
 		p_button_state->delay_act = BUTTON_ACTION_IDLE;
 	}
 	else if (p_button_state->delay_act == BUTTON_ACTION_BLOCK && 			// blocking button needed for Alps hats
-			 millis - p_button_state->time_last > 200)
+			 millis - p_button_state->time_last > 100)
 	{
 		p_button_state->delay_act = BUTTON_ACTION_IDLE;
 	}

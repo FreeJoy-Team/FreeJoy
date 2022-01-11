@@ -249,7 +249,8 @@ typedef struct physical_buttons_state_t
 	uint8_t current_state				:1;
 	uint8_t changed							:1;
 	
-} physical_buttons_state_t;
+} //.
+physical_buttons_state_t;
 
 enum
 {

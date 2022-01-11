@@ -25,7 +25,7 @@
 #include "encoders.h"
 
 
-int8_t enc_array_1 [16] =
+const int8_t enc_array_1 [16] =
 {
 	0,  0,  0,  0,
 	-1,  0,  0,  0,
@@ -33,7 +33,7 @@ int8_t enc_array_1 [16] =
 	0,  0,  0,  0
 };
 
-int8_t enc_array_2 [16] =
+const int8_t enc_array_2 [16] =
 {
 	0,  0,  0,  0,
 	-1,  0,  0,  1,
@@ -41,7 +41,7 @@ int8_t enc_array_2 [16] =
 	0,  0,  0,  0
 };
 
-int8_t enc_array_4 [16] =
+const int8_t enc_array_4 [16] =
 {
 	0,  1, -1,  0,
 	-1,  0,  0,  1,
