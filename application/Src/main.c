@@ -83,8 +83,10 @@ int main(void)
 	Timers_Init(&dev_config);		
 	
   while (1)
-  {
+  {		
+		ButtonsDebounceProcess(&dev_config);
 		ButtonsReadLogical(&dev_config);
+		
 		LEDs_PhysicalProcess(&dev_config);
 		
 		analog_data_t tmp[8];

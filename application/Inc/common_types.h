@@ -103,6 +103,7 @@ enum
 	AS5600,
 	AS5048A_SPI,
 	TLE5012,
+	MLX90363,
 	
 };
 
@@ -139,25 +140,25 @@ enum
 	FAST_ENCODER,
 	
 	SPI_SCK,
-  SPI_MOSI,
-  SPI_MISO,
+	SPI_MOSI,
+	SPI_MISO,
 
 	TLE5011_GEN,
-  TLE5011_CS,
+	TLE5011_CS,
 	TLE5012_CS,
   
 
-  MCP3201_CS,
-  MCP3202_CS,
-  MCP3204_CS,
-  MCP3208_CS,
+	MCP3201_CS,
+	MCP3202_CS,
+	MCP3204_CS,
+	MCP3208_CS,
 
-  MLX90393_CS,
+	MLX90393_CS,
 
 	AS5048A_CS,
 	
-  SHIFT_REG_LATCH,
-  SHIFT_REG_DATA,
+	SHIFT_REG_LATCH,
+	SHIFT_REG_DATA,
 	
 	LED_PWM,
 	LED_SINGLE,
@@ -167,6 +168,8 @@ enum
 	I2C_SCL,
 	I2C_SDA,
 	
+	MLX90363_CS,
+	SHIFT_REG_CLK,
 };
 typedef int8_t pin_t;
 
@@ -245,15 +248,16 @@ typedef struct physical_buttons_state_t
 	uint8_t prev_pin_state			:1;
 	uint8_t current_state				:1;
 	uint8_t changed							:1;
-	//uint8_t cnt;
 	
-} physical_buttons_state_t;
+} //.
+physical_buttons_state_t;
 
 enum
 {
 	BUTTON_ACTION_IDLE = 0,
 	BUTTON_ACTION_DELAY,
 	BUTTON_ACTION_PRESS,
+	BUTTON_ACTION_BLOCK,
 	
 };
 typedef uint8_t button_action_t;
@@ -321,6 +325,7 @@ typedef struct
 	uint8_t 			button_cnt;	
 	int8_t 				pin_latch;
 	int8_t 				pin_data;
+	int8_t 				pin_clk;
 	
 } shift_reg_t;
 
@@ -386,7 +391,7 @@ typedef struct
 	uint16_t						button_timer1_ms;						// config packet 6				
 	uint16_t						button_timer2_ms;						// config packet 7
 	uint16_t						button_timer3_ms;						// config packet 8
-	uint16_t 						a2b_debounce_ms;					// config packet 9
+	uint16_t 						a2b_debounce_ms;						// config packet 9	
 	
 	// config 12-13-14
 	axis_to_buttons_t		axes_to_buttons[MAX_AXIS_NUM];
@@ -434,6 +439,7 @@ typedef struct
 
 typedef struct
 {
+	uint16_t 						firmware_version;
 	analog_data_t				raw_axis_data[MAX_AXIS_NUM];
 	analog_data_t			 	axis_data[MAX_AXIS_NUM];
 	uint8_t							phy_button_data[MAX_BUTTONS_NUM/8];

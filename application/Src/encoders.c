@@ -25,7 +25,7 @@
 #include "encoders.h"
 
 
-int8_t enc_array_1 [16] =
+const int8_t enc_array_1 [16] =
 {
 	0,  0,  0,  0,
 	-1,  0,  0,  0,
@@ -33,7 +33,7 @@ int8_t enc_array_1 [16] =
 	0,  0,  0,  0
 };
 
-int8_t enc_array_2 [16] =
+const int8_t enc_array_2 [16] =
 {
 	0,  0,  0,  0,
 	-1,  0,  0,  1,
@@ -41,7 +41,7 @@ int8_t enc_array_2 [16] =
 	0,  0,  0,  0
 };
 
-int8_t enc_array_4 [16] =
+const int8_t enc_array_4 [16] =
 {
 	0,  1, -1,  0,
 	-1,  0,  0,  1,
@@ -119,7 +119,7 @@ void EncoderProcess (logical_buttons_state_t * button_state_buf, dev_config_t * 
 	uint8_t tmp_a = 0;
 	uint8_t tmp_b = 0;
 	
-	uint32_t millis = GetTick();
+	uint32_t millis = GetMillis();
 	
 	for (int k = 0; k < MAX_ENCODERS_NUM; k++)
 	{

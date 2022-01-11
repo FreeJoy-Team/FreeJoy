@@ -24,6 +24,8 @@
 
 #include "mcp320x.h"
 
+static uint8_t tmp_buf[3];
+
 uint16_t MCP320x_GetData(sensor_t * sensor, uint8_t channel)
 {
 	uint16_t ret;
@@ -41,8 +43,6 @@ uint16_t MCP320x_GetData(sensor_t * sensor, uint8_t channel)
 
 void MCP320x_StartDMA(sensor_t * sensor, uint8_t channel)
 {	
-	uint8_t tmp_buf[3];
-	
 	sensor->rx_complete = 0;
 	sensor->tx_complete = 1;
 	sensor->curr_channel = channel;
