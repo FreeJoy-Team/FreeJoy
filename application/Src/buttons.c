@@ -935,8 +935,6 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 	
 	// convert data to report format	
 	uint8_t k = 0;
-		
-	NVIC_DisableIRQ(TIM2_IRQn);			// prevent not atomic read
 	
 	memset(out_buttons_data, 0, sizeof(out_buttons_data));
 	memset(log_buttons_data, 0, sizeof(log_buttons_data));
@@ -970,8 +968,6 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 			// physical buttons
 			phy_buttons_data[(i & 0xF8)>>3] |= (physical_buttons_state[i].current_state << (i & 0x07));			
 	}
-	// resume IRQ
-	NVIC_EnableIRQ(TIM2_IRQn);
 	
 	// convert POV data to report format
 	for (int i=0; i<MAX_POVS_NUM; i++)
