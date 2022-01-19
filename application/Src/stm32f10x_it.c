@@ -307,7 +307,7 @@ void TIM2_IRQHandler(void)
 			RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB|RCC_APB2Periph_GPIOC|RCC_APB2Periph_TIM1,ENABLE);
 		}
 		// External sensors data receiption
-		if (Ticks - sensors_ticks >= SENSORS_PERIOD_TICKS && Ticks != adc_ticks)		// prevent ADC and sensors reading during same period
+		if (Ticks - sensors_ticks >= SENSORS_PERIOD_TICKS && Ticks > adc_ticks +1)		// prevent ADC and sensors reading during same ms
 		{																																						
 			sensors_ticks = Ticks;
 
