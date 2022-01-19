@@ -51,8 +51,12 @@
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 volatile extern uint8_t bootloader;
-volatile extern int32_t joy_millis;
-volatile extern int32_t configurator_millis;
+volatile extern uint64_t joy_millis;
+volatile extern uint64_t encoder_ticks;
+volatile extern uint64_t adc_ticks;
+volatile extern uint64_t sensors_ticks;
+volatile extern uint64_t buttons_ticks;
+volatile extern uint64_t configurator_millis;
 
 __IO uint8_t EP1_PrevXferComplete = 1;
 __IO uint8_t EP2_PrevXferComplete = 1;
@@ -104,6 +108,10 @@ void EP2_OUT_Callback(void)
 	{
 		// 2 second delay for joy report
 		joy_millis = GetMillis() + 2000;
+		adc_ticks = (GetMillis() + 2000) * TICKS_IN_MILLISECOND;
+		buttons_ticks = (GetMillis() + 2000) * TICKS_IN_MILLISECOND;
+		sensors_ticks = (GetMillis() + 2000) * TICKS_IN_MILLISECOND;
+		encoder_ticks = (GetMillis() + 2000) * TICKS_IN_MILLISECOND;
 	}
 	
 	uint8_t cfg_count = sizeof(dev_config_t) / 62;

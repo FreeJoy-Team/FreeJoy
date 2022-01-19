@@ -54,13 +54,13 @@
 
 /* Private variables ---------------------------------------------------------*/
 
-volatile int32_t millis = 0;
-volatile int32_t joy_millis = 0; 
-volatile int32_t encoder_ticks = 0;
-volatile int32_t adc_ticks = 0;
-volatile int32_t sensors_ticks = 1;
-volatile int32_t buttons_ticks = 0;
-volatile int32_t configurator_millis = 0;
+volatile uint64_t millis = 0;
+volatile uint64_t joy_millis = 0; 
+volatile uint64_t encoder_ticks = 0;
+volatile uint64_t adc_ticks = 0;
+volatile uint64_t sensors_ticks = 1;
+volatile uint64_t buttons_ticks = 0;
+volatile uint64_t configurator_millis = 0;
 volatile int status = 0;
 extern dev_config_t dev_config;
 
@@ -195,18 +195,20 @@ void TIM2_IRQHandler(void)
 		Ticks++;
 		millis = GetMillis();
 		
+		
+		
 		// check if it is time to send joystick data
 		if (millis - joy_millis >= dev_config.exchange_period_ms )
 		{
 			joy_millis = millis;
-			
+
 			AppConfigGet(&tmp_app_config);
 				
 			// getting fresh data to joystick report buffer
 			ButtonsGet(joy_report.button_data, 
 								 params_report.log_button_data, 
 								 params_report.phy_button_data, 
-								 &params_report.shift_button_data);			
+								 &params_report.shift_button_data);
 			AnalogGet(joy_report.axis_data, NULL, params_report.raw_axis_data);	
 			POVsGet(joy_report.pov_data);
 			
@@ -305,7 +307,7 @@ void TIM2_IRQHandler(void)
 			RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB|RCC_APB2Periph_GPIOC|RCC_APB2Periph_TIM1,ENABLE);
 		}
 		// External sensors data receiption
-		if (Ticks - sensors_ticks >= SENSORS_PERIOD_TICKS && Ticks != adc_ticks)		// prevent ADC and sensors reading during same period
+		if (Ticks - sensors_ticks >= SENSORS_PERIOD_TICKS && Ticks > adc_ticks +1)		// prevent ADC and sensors reading during same ms
 		{																																						
 			sensors_ticks = Ticks;
 

@@ -84,7 +84,7 @@ int TLE5011_GetAngle(sensor_t * sensor, float * angle)
 {
 	int16_t x_value, y_value;
 	float out = 0;
-	int ret = 0;
+	int ret = -1;
 	
 	
 	
@@ -93,23 +93,13 @@ int TLE5011_GetAngle(sensor_t * sensor, float * angle)
 		x_value = sensor->data[3]<<8 | sensor->data[2];
 		y_value = sensor->data[5]<<8 | sensor->data[4];
 		
-		if(
-			(x_value != 32767) && (x_value != -32768) && (x_value != 0) &&
-			(y_value != 32767) && (y_value != -32768) && (y_value != 0)
-		  )
+		if((x_value != 32767) && (x_value != -32768) && (x_value != 0) &&
+			 (y_value != 32767) && (y_value != -32768) && (y_value != 0))
 		{				
 			out = atan2f((float)y_value, (float)x_value)/ M_PI * (float)180.0;			
 			*angle = out;
 			ret = 0;
 		}
-		else 
-		{
-			ret = -1;
-		}
-	}
-	else
-	{
-		ret = -1;
 	}
 	return ret;
 }

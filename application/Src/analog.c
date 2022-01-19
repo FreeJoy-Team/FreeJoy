@@ -126,7 +126,6 @@ static int32_t map_tle (int32_t x)
 	*	@param	out_center:	Center value of input range
 	*	@param	out_max: Maximum value of output range
 	*	@param	deadband_size: Width of center dead zone
-	* @param offset: applied axis offset
   * @retval Transformed value
   */
 static int32_t map3(	int32_t x, 
@@ -136,8 +135,7 @@ static int32_t map3(	int32_t x,
 											int32_t out_min,
 											int32_t out_center,
 											int32_t out_max,
-											uint8_t deadband_size,
-											uint8_t offset)
+											uint8_t deadband_size)
 {
 	int32_t tmp;
 	int32_t ret;
@@ -148,24 +146,24 @@ static int32_t map3(	int32_t x,
 	dead_zone_right = ((in_max - in_center)*deadband_size)>>10;
 	dead_zone_left = ((in_center - in_min)*deadband_size)>>10;
 	
-	if (tmp < in_min)	return out_min - offset * 2730;
-	if (tmp > in_max)	return out_max - offset * 2730; 
+	if (tmp < in_min)	return out_min;
+	if (tmp > in_max)	return out_max; 
 	if ((tmp > in_center && (tmp - in_center) < dead_zone_right) || 
 			(tmp < in_center &&	(in_center - tmp) < dead_zone_left) || 
 			tmp == in_center)
 	{
-		return out_center - offset * 2730;
+		return out_center;
 	}		
 	
 	if (tmp < in_center)
 	{
 		ret = ((tmp - in_min) * (out_center - out_min) / (in_center - dead_zone_left - in_min) + out_min);
-	}
+  }
 	else
 	{
 		ret = ((tmp - in_center - dead_zone_right) * (out_max - out_center) / (in_max - in_center - dead_zone_right) + out_center);
 	}
-	return ret - offset * 2730;
+	return ret;
 }
 
 /**
@@ -750,7 +748,17 @@ void AxesProcess (dev_config_t * p_dev_config)
 				{
 					if (sensors[k].source == source) break;
 				}
-				tmp[i] = adc_data[sensors[k].curr_channel];			
+				
+				if (p_dev_config->axis_config[i].offset_angle > 0)
+				{
+						tmp[i] = adc_data[sensors[k].curr_channel] - p_dev_config->axis_config[i].offset_angle * 170;
+						if (tmp[i] < 0) tmp[i] += 4095;
+						else if (tmp[i] > 4095) tmp[i] -= 4095;
+				}
+				else
+				{
+					tmp[i] = adc_data[sensors[k].curr_channel];
+				}		
 				raw_axis_data[i] = map2(tmp[i], 0, 4095, AXIS_MIN_VALUE, AXIS_MAX_VALUE);
 			}
 			else if (p_dev_config->pins[source] == TLE5011_CS)			// source TLE5011
@@ -766,7 +774,14 @@ void AxesProcess (dev_config_t * p_dev_config)
 				if (TLE5011_GetAngle(&sensors[k], &tmpf) == 0)
 				{
 					sensors[k].ok_cnt++;
-
+					
+					if (p_dev_config->axis_config[i].offset_angle > 0)
+					{
+						tmpf -= p_dev_config->axis_config[i].offset_angle * 15;
+						if (tmpf < -180) tmpf += 360;
+						else if (tmpf > 180) tmpf -= 360;
+					}
+					
 					tmpf *= 1000;
 					raw_axis_data[i] = map_tle(tmpf);
 				}
@@ -788,7 +803,14 @@ void AxesProcess (dev_config_t * p_dev_config)
 				if (TLE5012_GetAngle(&sensors[k], &tmpf) == 0)
 				{
 					sensors[k].ok_cnt++;
-
+					
+					if (p_dev_config->axis_config[i].offset_angle > 0)
+					{
+						tmpf -= p_dev_config->axis_config[i].offset_angle * 15;
+						if (tmpf < -180) tmpf += 360;
+						else if (tmpf > 180) tmpf -= 360;
+					}
+					
 					tmpf *= 1000;
 					raw_axis_data[i] = map_tle(tmpf);
 				}
@@ -809,7 +831,16 @@ void AxesProcess (dev_config_t * p_dev_config)
 					if (sensors[k].source == source) break;
 				}
 				// get data
-				tmp[i] = MCP320x_GetData(&sensors[k], channel);
+				if (p_dev_config->axis_config[i].offset_angle > 0)	// offset enabled
+				{
+					tmp[i] = MCP320x_GetData(&sensors[k], channel) - p_dev_config->axis_config[i].offset_angle * 170;
+					if (tmp[i] < 0) tmp[i] += 4095;
+					else if (tmp[i] > 4095) tmp[i] -= 4095;
+				}
+				else		// offset disabled
+				{
+					tmp[i] = MCP320x_GetData(&sensors[k], channel);
+				}
 				raw_axis_data[i] = map2(tmp[i], 0, 4095, AXIS_MIN_VALUE, AXIS_MAX_VALUE);
 			}
 			else if (p_dev_config->pins[source] == MLX90363_CS)				// source MLX90363
@@ -825,7 +856,16 @@ void AxesProcess (dev_config_t * p_dev_config)
 				{
 					sensors[k].ok_cnt++;
 
-					raw_axis_data[i] = tmp16;
+					if (p_dev_config->axis_config[i].offset_angle > 0)	// offset enabled
+					{
+						raw_axis_data[i] = tmp16 - p_dev_config->axis_config[i].offset_angle * 2730;
+						if (raw_axis_data[i] < AXIS_MIN_VALUE) raw_axis_data[i] += AXIS_FULLSCALE;
+						else if (raw_axis_data[i] > AXIS_MAX_VALUE) raw_axis_data[i] -= AXIS_FULLSCALE;		// always false
+					}
+					else
+					{
+						raw_axis_data[i] = tmp16;
+					}
 				}
 				else
 				{
@@ -845,7 +885,16 @@ void AxesProcess (dev_config_t * p_dev_config)
 				{
 					sensors[k].ok_cnt++;
 					
-					raw_axis_data[i] = tmp16;
+					if (p_dev_config->axis_config[i].offset_angle > 0)	// offset enabled
+					{
+						raw_axis_data[i] = tmp16 - p_dev_config->axis_config[i].offset_angle * 2730;
+						if (raw_axis_data[i] < AXIS_MIN_VALUE) raw_axis_data[i] += AXIS_FULLSCALE;
+						else if (raw_axis_data[i] > AXIS_MAX_VALUE) raw_axis_data[i] -= AXIS_FULLSCALE;		// always false
+					}
+					else
+					{
+						raw_axis_data[i] = tmp16;
+					}
 				}
 				else
 				{
@@ -865,7 +914,16 @@ void AxesProcess (dev_config_t * p_dev_config)
 				{
 					sensors[k].ok_cnt++;
 					
-					raw_axis_data[i] = tmp16;
+					if (p_dev_config->axis_config[i].offset_angle > 0)	// offset enabled
+					{
+						raw_axis_data[i] = tmp16 - p_dev_config->axis_config[i].offset_angle * 2730;
+						if (raw_axis_data[i] < AXIS_MIN_VALUE) raw_axis_data[i] += AXIS_FULLSCALE;
+						else if (raw_axis_data[i] > AXIS_MAX_VALUE) raw_axis_data[i] -= AXIS_FULLSCALE;		// always false
+					}
+					else
+					{
+						raw_axis_data[i] = tmp16;
+					}
 				}
 				else
 				{
@@ -884,12 +942,30 @@ void AxesProcess (dev_config_t * p_dev_config)
 			// get data
 			if (sensors[k].type == ADS1115)
 			{					
-				tmp[i] = ADS1115_GetData(&sensors[k], channel);
+				if (p_dev_config->axis_config[i].offset_angle > 0)	// offset enabled
+				{
+					tmp[i] = ADS1115_GetData(&sensors[k], channel) - p_dev_config->axis_config[i].offset_angle * 2730;
+					if (tmp[i] < 0) tmp[i] += 32767;
+					else if (tmp[i] > 32767) tmp[i] -= 32767;		// always false, ADS1115_GetData return int16_t
+				}
+				else		// offset disabled
+				{
+					tmp[i] = ADS1115_GetData(&sensors[k], channel);
+				}
 				raw_axis_data[i] = map2(tmp[i], 0, 32767, AXIS_MIN_VALUE, AXIS_MAX_VALUE);
 			}
 			else if (sensors[k].type == AS5600)
 			{
-				tmp[i] = AS5600_GetScaledData(&sensors[k]);				
+				if (p_dev_config->axis_config[i].offset_angle > 0)	// offset enabled
+				{
+					tmp[i] = AS5600_GetScaledData(&sensors[k]) - p_dev_config->axis_config[i].offset_angle * 170;
+					if (tmp[i] < 0) tmp[i] += 4095;
+					else if (tmp[i] > 4095) tmp[i] -= 4095;
+				}
+				else		// offset disabled
+				{
+					tmp[i] = AS5600_GetScaledData(&sensors[k]);
+				}					
 				raw_axis_data[i] = map2(tmp[i], 0, 4095, AXIS_MIN_VALUE, AXIS_MAX_VALUE);
 			}
 		}				
@@ -907,9 +983,16 @@ void AxesProcess (dev_config_t * p_dev_config)
 				encoders_state[encoder_num].cnt = p_dev_config->axis_config[i].calib_min;
 			}
 				
-			tmp[i] = encoders_state[p_dev_config->axis_config[i].channel].cnt;
-			
-			tmp[i] = encoders_state[p_dev_config->axis_config[i].channel].cnt;
+			if (p_dev_config->axis_config[i].offset_angle > 0)	// offset enabled
+			{
+				tmp[i] = encoders_state[p_dev_config->axis_config[i].channel].cnt - p_dev_config->axis_config[i].offset_angle * 170;
+				if (tmp[i] < 0) tmp[i] += 32767;
+				else if (tmp[i] > 32767) tmp[i] -= 32767;
+			}
+			else		// offset disabled
+			{	
+				tmp[i] = encoders_state[p_dev_config->axis_config[i].channel].cnt;
+			}
 			
 			raw_axis_data[i] = tmp[i];
 		}
@@ -917,6 +1000,70 @@ void AxesProcess (dev_config_t * p_dev_config)
 		
 		// Filtering
 		tmp[i] = Filter(raw_axis_data[i], filter_buffer[i], p_dev_config->axis_config[i].filter);
+
+				// Deadband processing and scaling		
+		if (!p_dev_config->axis_config[i].is_dynamic_deadband)
+		{
+			// Scale output data
+			tmp[i] = map3( tmp[i], 
+									 p_dev_config->axis_config[i].calib_min,
+									 p_dev_config->axis_config[i].calib_center,    
+									 p_dev_config->axis_config[i].calib_max, 
+									 AXIS_MIN_VALUE,
+									 AXIS_CENTER_VALUE,
+									 AXIS_MAX_VALUE,
+									 p_dev_config->axis_config[i].deadband_size); 
+		}
+		else
+		{
+			// Scale output data
+			tmp[i] = map3( tmp[i],
+									 p_dev_config->axis_config[i].calib_min,
+									 p_dev_config->axis_config[i].calib_center,    
+									 p_dev_config->axis_config[i].calib_max, 
+									 AXIS_MIN_VALUE,
+									 AXIS_CENTER_VALUE,
+									 AXIS_MAX_VALUE,
+									 0); 
+		
+			if (iabs(tmp[i] - scaled_axis_data[i]) < 3*3*p_dev_config->axis_config[i].deadband_size &&			// 3*3*deadband_size = 3 sigma
+					IsDynamicDeadbandHolding(tmp[i], deadband_buffer[i], p_dev_config->axis_config[i].deadband_size))
+			{
+				tmp[i] = scaled_axis_data[i];			// keep value if deadband confidition is true
+			}	
+		}
+		
+		// Shaping
+		tmp[i] = ShapeFunc(&p_dev_config->axis_config[i], tmp[i], 11);
+		// Lowing resolution if needed
+		tmp[i] = SetResolutioin(tmp[i], p_dev_config->axis_config[i].resolution + 1);
+		
+		// Invertion
+		if (p_dev_config->axis_config[i].inverted > 0)
+		{
+			tmp[i] = 0 - tmp[i];
+		}
+
+		// Prescaling
+		if (p_dev_config->axis_config[i].prescaler != 100)
+		{
+			if ( 	// no prescaler button defined
+					 ((p_dev_config->axis_config[i].button1 < 0 || p_dev_config->axis_config[i].button1_type != AXIS_BUTTON_PRESCALER_EN) &&			
+						(p_dev_config->axis_config[i].button2 < 0 || p_dev_config->axis_config[i].button2_type != AXIS_BUTTON_PRESCALER_EN) &&
+						(p_dev_config->axis_config[i].button3 < 0 || p_dev_config->axis_config[i].button3_type != AXIS_BUTTON_PRESCALER_EN)) ||
+						// or defined and pressed
+						((p_dev_config->axis_config[i].button1 >=0 && axis_buttons[i][0].current_state && 
+							p_dev_config->axis_config[i].button1_type == AXIS_BUTTON_PRESCALER_EN) ||
+						 (p_dev_config->axis_config[i].button2 >=0 && axis_buttons[i][1].current_state && 
+							p_dev_config->axis_config[i].button2_type == AXIS_BUTTON_PRESCALER_EN) ||
+						 (p_dev_config->axis_config[i].button3 >=0 && axis_buttons[i][2].current_state && 
+							p_dev_config->axis_config[i].button3_type == AXIS_BUTTON_PRESCALER_EN))
+				 )
+			{
+				if (p_dev_config->axis_config[i].is_centered)	tmp[i] = tmp[i]*p_dev_config->axis_config[i].prescaler / 100;
+				else	tmp[i] = (tmp[i] - AXIS_MIN_VALUE)*p_dev_config->axis_config[i].prescaler / 100 + AXIS_MIN_VALUE;
+			}
+		}
 
 		// Buttons section
     {
@@ -1064,73 +1211,6 @@ void AxesProcess (dev_config_t * p_dev_config)
 				tmp[i] += axis_trim_value[i];
 			}
     }		
-
-		// Deadband processing and scaling		
-		if (!p_dev_config->axis_config[i].is_dynamic_deadband)
-		{
-			// Scale output data
-			tmp[i] = map3( tmp[i], 
-									 p_dev_config->axis_config[i].calib_min,
-									 p_dev_config->axis_config[i].calib_center,    
-									 p_dev_config->axis_config[i].calib_max, 
-									 AXIS_MIN_VALUE,
-									 AXIS_CENTER_VALUE,
-									 AXIS_MAX_VALUE,
-									 p_dev_config->axis_config[i].deadband_size,
-									 p_dev_config->axis_config[i].offset_angle); 
-		}
-		else
-		{
-			// Scale output data
-			tmp[i] = map3( tmp[i],
-									 p_dev_config->axis_config[i].calib_min,
-									 p_dev_config->axis_config[i].calib_center,    
-									 p_dev_config->axis_config[i].calib_max, 
-									 AXIS_MIN_VALUE,
-									 AXIS_CENTER_VALUE,
-									 AXIS_MAX_VALUE,
-									 0,
-									 p_dev_config->axis_config[i].offset_angle); 
-		
-			if (iabs(tmp[i] - scaled_axis_data[i]) < 3*3*p_dev_config->axis_config[i].deadband_size &&			// 3*3*deadband_size = 3 sigma
-					IsDynamicDeadbandHolding(tmp[i], deadband_buffer[i], p_dev_config->axis_config[i].deadband_size))
-			{
-				tmp[i] = scaled_axis_data[i];			// keep value if deadband confidition is true
-			}	
-		}
-		
-		// Shaping
-		tmp[i] = ShapeFunc(&p_dev_config->axis_config[i], tmp[i], 11);
-		// Lowing resolution if needed
-		tmp[i] = SetResolutioin(tmp[i], p_dev_config->axis_config[i].resolution + 1);
-		
-		// Invertion
-		if (p_dev_config->axis_config[i].inverted > 0)
-		{
-			tmp[i] = 0 - tmp[i];
-		}
-
-		// Prescaling
-		if (p_dev_config->axis_config[i].prescaler != 100)
-		{
-			if ( 	// no prescaler button defined
-					 ((p_dev_config->axis_config[i].button1 < 0 || p_dev_config->axis_config[i].button1_type != AXIS_BUTTON_PRESCALER_EN) &&			
-						(p_dev_config->axis_config[i].button2 < 0 || p_dev_config->axis_config[i].button2_type != AXIS_BUTTON_PRESCALER_EN) &&
-						(p_dev_config->axis_config[i].button3 < 0 || p_dev_config->axis_config[i].button3_type != AXIS_BUTTON_PRESCALER_EN)) ||
-						// or defined and pressed
-						((p_dev_config->axis_config[i].button1 >=0 && axis_buttons[i][0].current_state && 
-							p_dev_config->axis_config[i].button1_type == AXIS_BUTTON_PRESCALER_EN) ||
-						 (p_dev_config->axis_config[i].button2 >=0 && axis_buttons[i][1].current_state && 
-							p_dev_config->axis_config[i].button2_type == AXIS_BUTTON_PRESCALER_EN) ||
-						 (p_dev_config->axis_config[i].button3 >=0 && axis_buttons[i][2].current_state && 
-							p_dev_config->axis_config[i].button3_type == AXIS_BUTTON_PRESCALER_EN))
-				 )
-			{
-				if (p_dev_config->axis_config[i].is_centered)	tmp[i] = tmp[i]*p_dev_config->axis_config[i].prescaler / 100;
-				else	tmp[i] = (tmp[i] - AXIS_MIN_VALUE)*p_dev_config->axis_config[i].prescaler / 100 + AXIS_MIN_VALUE;
-			}
-		}
-		
 	} 
 	
 	// Multi-axis process

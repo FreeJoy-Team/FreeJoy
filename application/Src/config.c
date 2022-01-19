@@ -170,3 +170,10 @@ void AppConfigGet (app_config_t * p_app_config)
 	memcpy(p_app_config, &app_config, sizeof(app_config_t));
 }
 
+uint8_t IsAppConfigEmpty (app_config_t * p_app_config)
+{
+	if (p_app_config->axis_cnt == 0 && p_app_config->buttons_cnt == 0 &&
+		  p_app_config->pov_cnt == 0) return 1;
+	return 0;
+}
+
