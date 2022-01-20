@@ -44,7 +44,7 @@ uint8_t												a2b_last = 0;
   */
 void ButtonsDebounceProcess (dev_config_t * p_dev_config)
 {
-	uint32_t 	millis;
+	int64_t 	millis;
 	uint16_t	debounce;
 	
 	millis = GetMillis();
@@ -88,7 +88,7 @@ void ButtonsDebounceProcess (dev_config_t * p_dev_config)
 	}
 }
 
-static void LogicalButtonProcessTimer (logical_buttons_state_t * p_button_state, uint32_t millis, dev_config_t * p_dev_config, uint8_t num)
+static void LogicalButtonProcessTimer (logical_buttons_state_t * p_button_state, int64_t millis, dev_config_t * p_dev_config, uint8_t num)
 {
 	uint16_t tmp_press_time;
 	uint16_t tmp_delay_time;
@@ -180,7 +180,7 @@ static void LogicalButtonProcessTimer (logical_buttons_state_t * p_button_state,
 void LogicalButtonProcessState (logical_buttons_state_t * p_button_state, uint8_t * pov_buf, dev_config_t * p_dev_config, uint8_t num)
 {	
 	
-	uint32_t millis;
+	int64_t millis;
 	uint8_t pov_group = 0;
 	
 	millis = GetMillis();

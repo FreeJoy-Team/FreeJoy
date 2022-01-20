@@ -54,13 +54,13 @@
 
 /* Private variables ---------------------------------------------------------*/
 
-volatile uint64_t millis = 0;
-volatile uint64_t joy_millis = 0; 
-volatile uint64_t encoder_ticks = 0;
-volatile uint64_t adc_ticks = 0;
-volatile uint64_t sensors_ticks = 1;
-volatile uint64_t buttons_ticks = 0;
-volatile uint64_t configurator_millis = 0;
+volatile int64_t millis = 0;
+volatile int64_t joy_millis = 0; 
+volatile int64_t encoder_ticks = 0;
+volatile int64_t adc_ticks = 0;
+volatile int64_t sensors_ticks = 1;
+volatile int64_t buttons_ticks = 0;
+volatile int64_t configurator_millis = 0;
 volatile int status = 0;
 extern dev_config_t dev_config;
 
