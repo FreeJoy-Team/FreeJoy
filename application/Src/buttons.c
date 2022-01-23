@@ -36,6 +36,7 @@ uint8_t												pov_pos[MAX_POVS_NUM];
 uint8_t												shifts_state = 0;
 uint8_t												a2b_first = 0;
 uint8_t												a2b_last = 0;
+uint8_t												button_mutex = 0;
 
 /**
   * @brief  Processing debounce for raw buttons input
@@ -44,7 +45,7 @@ uint8_t												a2b_last = 0;
   */
 void ButtonsDebounceProcess (dev_config_t * p_dev_config)
 {
-	int64_t 	millis;
+	int32_t 	millis;
 	uint16_t	debounce;
 	
 	millis = GetMillis();
@@ -88,7 +89,7 @@ void ButtonsDebounceProcess (dev_config_t * p_dev_config)
 	}
 }
 
-static void LogicalButtonProcessTimer (logical_buttons_state_t * p_button_state, int64_t millis, dev_config_t * p_dev_config, uint8_t num)
+static void LogicalButtonProcessTimer (logical_buttons_state_t * p_button_state, int32_t millis, dev_config_t * p_dev_config, uint8_t num)
 {
 	uint16_t tmp_press_time;
 	uint16_t tmp_delay_time;
@@ -180,7 +181,7 @@ static void LogicalButtonProcessTimer (logical_buttons_state_t * p_button_state,
 void LogicalButtonProcessState (logical_buttons_state_t * p_button_state, uint8_t * pov_buf, dev_config_t * p_dev_config, uint8_t num)
 {	
 	
-	int64_t millis;
+	int32_t millis;
 	uint8_t pov_group = 0;
 	
 	millis = GetMillis();
@@ -936,9 +937,13 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 	// convert data to report format	
 	uint8_t k = 0;
 	
+	// buttons read is permitted
+	button_mutex = 1;
+	
 	memset(out_buttons_data, 0, sizeof(out_buttons_data));
 	memset(log_buttons_data, 0, sizeof(log_buttons_data));
 	memset(phy_buttons_data, 0, sizeof(phy_buttons_data));
+	
 	for (int i=0;i<MAX_BUTTONS_NUM;i++)
 	{
 			uint8_t is_enabled = !p_dev_config->buttons[i].is_disabled && (p_dev_config->buttons[i].physical_num >= 0);
@@ -968,6 +973,9 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
 			// physical buttons
 			phy_buttons_data[(i & 0xF8)>>3] |= (physical_buttons_state[i].current_state << (i & 0x07));			
 	}
+	
+	// buttons read is allowed
+	button_mutex = 0;
 	
 	// convert POV data to report format
 	for (int i=0; i<MAX_POVS_NUM; i++)
@@ -1013,19 +1021,19 @@ void ButtonsReadLogical (dev_config_t * p_dev_config)
   */
 void ButtonsGet (uint8_t * out_data, uint8_t * log_data, uint8_t * phy_data, uint8_t * shift_data)
 {
-	if (out_data != NULL)
+	if (out_data != NULL && !button_mutex)
 	{
 		memcpy(out_data, out_buttons_data, sizeof(out_buttons_data));
 	}
-	if (log_data != NULL)
+	if (log_data != NULL  && !button_mutex)
 	{
 		memcpy(log_data, log_buttons_data, sizeof(log_buttons_data));
 	}
-	if (phy_data != NULL)
+	if (phy_data != NULL  && !button_mutex)
 	{
 		memcpy(phy_data, &phy_buttons_data, sizeof(phy_buttons_data));
 	}
-	if (shift_data != NULL)
+	if (shift_data != NULL  && !button_mutex)
 	{
 		memcpy(shift_data, &shifts_state, sizeof(shifts_state));
 	}

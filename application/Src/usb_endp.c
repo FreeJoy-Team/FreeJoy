@@ -51,12 +51,12 @@
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 volatile extern uint8_t bootloader;
-volatile extern int64_t joy_millis;
-volatile extern int64_t encoder_ticks;
-volatile extern int64_t adc_ticks;
-volatile extern int64_t sensors_ticks;
-volatile extern int64_t buttons_ticks;
-volatile extern int64_t configurator_millis;
+volatile extern int32_t joy_millis;
+volatile extern int32_t encoder_ticks;
+volatile extern int32_t adc_ticks;
+volatile extern int32_t sensors_ticks;
+volatile extern int32_t buttons_ticks;
+volatile extern int32_t configurator_millis;
 
 __IO uint8_t EP1_PrevXferComplete = 1;
 __IO uint8_t EP2_PrevXferComplete = 1;

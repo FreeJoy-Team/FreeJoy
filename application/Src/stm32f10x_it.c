@@ -54,13 +54,16 @@
 
 /* Private variables ---------------------------------------------------------*/
 
-volatile int64_t millis = 0;
-volatile int64_t joy_millis = 0; 
-volatile int64_t encoder_ticks = 0;
-volatile int64_t adc_ticks = 0;
-volatile int64_t sensors_ticks = 1;
-volatile int64_t buttons_ticks = 0;
-volatile int64_t configurator_millis = 0;
+static joy_report_t 			joy_report;
+static params_report_t 	params_report;
+
+volatile int32_t millis = 0;
+volatile int32_t joy_millis = 0; 
+volatile int32_t encoder_ticks = 0;
+volatile int32_t adc_ticks = 0;
+volatile int32_t sensors_ticks = 1;
+volatile int32_t buttons_ticks = 0;
+volatile int32_t configurator_millis = 0;
 volatile int status = 0;
 extern dev_config_t dev_config;
 
@@ -182,8 +185,6 @@ void SysTick_Handler(void)
 
 void TIM2_IRQHandler(void)
 {
-	joy_report_t 			joy_report;
-	params_report_t 	params_report;
 	uint8_t						report_buf[64];
 	uint8_t						pos = 0;
 	app_config_t			tmp_app_config;

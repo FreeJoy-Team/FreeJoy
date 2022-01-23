@@ -119,7 +119,7 @@ void EncoderProcess (logical_buttons_state_t * button_state_buf, dev_config_t * 
 	uint8_t tmp_a = 0;
 	uint8_t tmp_b = 0;
 	
-	int64_t millis = GetMillis();
+	int32_t millis = GetMillis();
 	
 	for (int k = 0; k < MAX_ENCODERS_NUM; k++)
 	{
