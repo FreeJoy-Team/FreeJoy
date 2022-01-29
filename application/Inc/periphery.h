@@ -23,7 +23,7 @@
 
 #define TICKS_IN_MILLISECOND		2
 
-extern volatile uint64_t Ticks;
+extern volatile int64_t Ticks;
 extern volatile uint32_t TimingDelay;
 
 

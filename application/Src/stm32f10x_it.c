@@ -59,11 +59,11 @@ static params_report_t 	params_report;
 
 volatile int32_t millis = 0;
 volatile int32_t joy_millis = 0; 
-volatile int32_t encoder_ticks = 0;
-volatile int32_t adc_ticks = 0;
-volatile int32_t sensors_ticks = 1;
-volatile int32_t buttons_ticks = 0;
 volatile int32_t configurator_millis = 0;
+volatile int64_t encoder_ticks = 0;
+volatile int64_t adc_ticks = 0;
+volatile int64_t sensors_ticks = 1;
+volatile int64_t buttons_ticks = 0;
 volatile int status = 0;
 extern dev_config_t dev_config;
 
