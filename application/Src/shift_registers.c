@@ -180,7 +180,7 @@ void ShiftRegistersGet (uint8_t * raw_button_data_buf, dev_config_t * p_dev_conf
 	uint8_t input_data[16];
 	for (uint8_t i=0; i<MAX_SHIFT_REG_NUM; i++)
 	{
-		if (shift_registers[i].pin_latch >=0 && shift_registers[i].pin_data >=0)
+		if (shift_registers[i].pin_latch >=0 && shift_registers[i].pin_data >=0 && shift_registers[i].pin_clk >= 0)
 		{
 			ShiftRegisterRead(&shift_registers[i], input_data);
 			
