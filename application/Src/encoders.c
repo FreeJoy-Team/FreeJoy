@@ -197,9 +197,8 @@ void EncoderProcess (logical_buttons_state_t * button_state_buf, dev_config_t * 
 										button_state_buf[encoders_state[i].pin_a].current_state = 1;			// CW
 									}
 								}
-								encoders_state[i].last_dir = 1;
 							}
-							else
+							else if (stt < 0)
 							{
 								// activate encoder with enable shift mod
 								if ((p_dev_config->buttons[encoders_state[i].pin_b].shift_modificator > 0 && 
@@ -226,8 +225,8 @@ void EncoderProcess (logical_buttons_state_t * button_state_buf, dev_config_t * 
 										button_state_buf[encoders_state[i].pin_b].current_state = 1;			// CCW
 									}
 								}
-								encoders_state[i].last_dir = -1;
-							}			
+							}		
+							encoders_state[i].last_dir = encoders_state[i].dir;
 							encoders_state[i].time_last = millis;
 							encoders_state[i].cnt += stt;
 							
@@ -239,7 +238,7 @@ void EncoderProcess (logical_buttons_state_t * button_state_buf, dev_config_t * 
 						{
 							encoders_state[i].time_last = millis;
 							encoders_state[i].cnt += encoders_state[i].last_dir;
-							encoders_state[i].state <<= 2;
+							//encoders_state[i].state <<= 2;
 							if (encoders_state[i].last_dir > 0)	
 							{
 								// activate encoder with enable shift mod
