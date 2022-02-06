@@ -41,7 +41,7 @@ void SysTick_Init(void);
 void Timers_Init(dev_config_t * p_dev_config);
 void PWM_SetFromAxis(dev_config_t * p_dev_config, analog_data_t * axis_data);
 
-uint64_t GetMillis(void);
+int64_t GetMillis(void);
 
 void Delay_ms(__IO uint32_t nTime);
 void Delay_us(__IO uint32_t nTime);

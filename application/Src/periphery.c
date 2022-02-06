@@ -45,7 +45,7 @@
 #endif
 
 
-volatile uint64_t Ticks;
+volatile int64_t Ticks;
 volatile uint32_t TimingDelay;
 
 pin_config_t pin_config[USED_PINS_NUM] =
@@ -240,7 +240,7 @@ void PWM_SetFromAxis(dev_config_t * p_dev_config, analog_data_t * axis_data)
   * @brief Get up-time milliseconds
   * @retval milliseconds
   */
-uint64_t GetMillis(void) 
+int64_t GetMillis(void) 
 {
     return Ticks/(TICKS_IN_MILLISECOND);
 }
