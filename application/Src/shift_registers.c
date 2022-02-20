@@ -105,6 +105,11 @@ void ShiftRegistersInit(dev_config_t * p_dev_config)
 void ShiftRegisterRead(shift_reg_t * shift_register, uint8_t * data)
 {
 	uint8_t reg_cnt;
+	uint8_t sr_tick_cnt = 1;
+	uint8_t is_reg_cd4021 = shift_register->type == CD4021_PULL_DOWN || shift_register->type == CD4021_PULL_UP;
+	
+	if (is_reg_cd4021) sr_tick_cnt = CD4021_TICK_DELAY;
+	else sr_tick_cnt = HC165_TICK_DELAY;
 	
 	if (shift_register->type == CD4021_PULL_DOWN || shift_register->type == CD4021_PULL_UP)		// positive polarity
 	{
@@ -112,7 +117,7 @@ void ShiftRegisterRead(shift_reg_t * shift_register, uint8_t * data)
 		pin_config[shift_register->pin_clk].port->ODR &= ~pin_config[shift_register->pin_clk].pin;
 		// Latch impulse
 		pin_config[shift_register->pin_latch].port->ODR |= pin_config[shift_register->pin_latch].pin;
-		for (int i=0; i<SHIFTREG_TICK_DELAY; i++) __NOP();
+		for (int i=0; i<sr_tick_cnt ; i++) __NOP();
 		pin_config[shift_register->pin_latch].port->ODR &= ~pin_config[shift_register->pin_latch].pin;
 			
 	}
@@ -122,7 +127,7 @@ void ShiftRegisterRead(shift_reg_t * shift_register, uint8_t * data)
 		pin_config[shift_register->pin_clk].port->ODR |= pin_config[shift_register->pin_clk].pin;
 		// Latch impulse
 		pin_config[shift_register->pin_latch].port->ODR &= ~pin_config[shift_register->pin_latch].pin;
-		for (int i=0; i<SHIFTREG_TICK_DELAY; i++) __NOP();
+		for (int i=0; i<sr_tick_cnt; i++) __NOP();
 		pin_config[shift_register->pin_latch].port->ODR |= pin_config[shift_register->pin_latch].pin;			
 	}
 	
@@ -138,13 +143,13 @@ void ShiftRegisterRead(shift_reg_t * shift_register, uint8_t * data)
 			do
 			{
 				pin_config[shift_register->pin_clk].port->ODR &= ~pin_config[shift_register->pin_clk].pin;
-				for (int i=0; i<SHIFTREG_TICK_DELAY; i++) __NOP();				
+				for (int i=0; i<sr_tick_cnt; i++) __NOP();				
 				if(pin_config[shift_register->pin_data].port->IDR & pin_config[shift_register->pin_data].pin)
 				{
 					data[i] |= mask; 
 				}
 				pin_config[shift_register->pin_clk].port->ODR |= pin_config[shift_register->pin_clk].pin;		
-				for (int i=0; i<SHIFTREG_TICK_DELAY; i++) __NOP();
+				for (int i=0; i<sr_tick_cnt; i++) __NOP();
 				
 				mask = mask >> 1;
 			} while (mask);
@@ -154,13 +159,13 @@ void ShiftRegisterRead(shift_reg_t * shift_register, uint8_t * data)
 			do
 			{
 				pin_config[shift_register->pin_clk].port->ODR &= ~pin_config[shift_register->pin_clk].pin;
-				for (int i=0; i<SHIFTREG_TICK_DELAY; i++) __NOP();
+				for (int i=0; i<sr_tick_cnt; i++) __NOP();
 				if(!(pin_config[shift_register->pin_data].port->IDR & pin_config[shift_register->pin_data].pin))
 				{
 					data[i] |= mask; 
 				}				
 				pin_config[shift_register->pin_clk].port->ODR |= pin_config[shift_register->pin_clk].pin;
-				for (int i=0; i<SHIFTREG_TICK_DELAY; i++) __NOP();
+				for (int i=0; i<sr_tick_cnt; i++) __NOP();
 
 				mask = mask >> 1;
 			} while (mask);
