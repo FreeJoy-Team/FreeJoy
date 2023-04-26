@@ -49,8 +49,8 @@
 
 #define ADC_PERIOD_TICKS										4					// 1 tick = 500us
 #define SENSORS_PERIOD_TICKS								4
-#define BUTTONS_PERIOD_TICKS								1
-#define ENCODERS_PERIOD_TICKS								1
+//#define BUTTONS_PERIOD_TICKS								4
+//#define ENCODERS_PERIOD_TICKS								1
 
 /* Private variables ---------------------------------------------------------*/
 
@@ -196,14 +196,12 @@ void TIM2_IRQHandler(void)
 		Ticks++;
 		millis = GetMillis();
 		
-		
+		AppConfigGet(&tmp_app_config);
 		
 		// check if it is time to send joystick data
 		if (millis - joy_millis >= dev_config.exchange_period_ms )
 		{
 			joy_millis = millis;
-
-			AppConfigGet(&tmp_app_config);
 				
 			// getting fresh data to joystick report buffer
 			ButtonsGet(joy_report.button_data, 
@@ -266,16 +264,15 @@ void TIM2_IRQHandler(void)
 		}
 
 		// digital inputs polling
-		if (Ticks - buttons_ticks >= BUTTONS_PERIOD_TICKS)
+		if (Ticks - buttons_ticks >= dev_config.button_polling_interval_ticks)
 		{
 			buttons_ticks = Ticks;
 			ButtonsReadPhysical(&dev_config, raw_buttons_data);
-			
-			if (Ticks - encoder_ticks >= ENCODERS_PERIOD_TICKS)
-			{
-				encoder_ticks = Ticks;
-				EncoderProcess(logical_buttons_state, &dev_config);
-			}
+		}
+		if (Ticks - encoder_ticks >= dev_config.encoder_polling_interval_ticks)
+		{
+			encoder_ticks = Ticks;
+			EncoderProcess(logical_buttons_state, &dev_config);
 		}
 		
 		// Internal ADC conversion

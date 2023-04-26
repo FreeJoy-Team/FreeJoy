@@ -391,7 +391,7 @@ typedef struct
 	uint16_t						button_timer1_ms;						// config packet 6				
 	uint16_t						button_timer2_ms;						// config packet 7
 	uint16_t						button_timer3_ms;						// config packet 8
-	uint16_t 						a2b_debounce_ms;						// config packet 9	
+	uint16_t 						a2b_debounce_ms;						// config packet 9
 	
 	// config 12-13-14
 	axis_to_buttons_t		axes_to_buttons[MAX_AXIS_NUM];
@@ -409,6 +409,8 @@ typedef struct
 	// config 16;
 	encoder_t						encoders[MAX_ENCODERS_NUM];
 	
+	uint8_t							button_polling_interval_ticks;
+	uint8_t							encoder_polling_interval_ticks;
 	
 }dev_config_t;
 

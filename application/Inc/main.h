@@ -57,6 +57,8 @@ static const dev_config_t init_config =
 	.button_timer2_ms = 200,					// amount of milliseconds of delay2 for a virtual button
 	.button_timer3_ms = 300,					// amount of milliseconds of delay3 for a virtual button
 	.a2b_debounce_ms = 50,
+	.button_polling_interval_ticks = 5,
+	.encoder_polling_interval_ticks = 1,
 	
 	/*
 		Device pins configuration. Available values:
