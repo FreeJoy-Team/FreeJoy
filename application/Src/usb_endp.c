@@ -58,8 +58,16 @@ volatile extern int32_t sensors_ticks;
 volatile extern int32_t buttons_ticks;
 volatile extern int32_t configurator_millis;
 
+extern __IO uint32_t packet_sent;
+extern __IO uint32_t packet_receive;
+extern __IO uint8_t Receive_Buffer[64];
+uint32_t Receive_length;
+
 __IO uint8_t EP1_PrevXferComplete = 1;
 __IO uint8_t EP2_PrevXferComplete = 1;
+__IO uint8_t EP3_PrevXferComplete = 1;
+__IO uint8_t EP4_PrevXferComplete = 1;
+__IO uint8_t EP5_PrevXferComplete = 1;
 
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
@@ -229,6 +237,26 @@ void EP2_OUT_Callback(void)
  
 }
 
+
+/*******************************************************************************
+* Function Name  : EP4_OUT_Callback.
+* Description    : EP4 OUT Callback Routine.
+* Input          : None.
+* Output         : None.
+* Return         : None.
+*******************************************************************************/
+void EP4_OUT_Callback(void)
+{
+	//SetEPRxStatus(ENDP4, EP_RX_VALID);
+	
+	packet_receive = 1;
+	//Receive_length = GetEPRxCount(ENDP4);
+  //PMAToUserBufferCopy((unsigned char*)Receive_Buffer, ENDP4_RXADDR, Receive_length);
+	
+	Receive_length = USB_SIL_Read(EP4_OUT, (unsigned char*)Receive_Buffer);
+	SetEPRxValid(ENDP4);
+}
+
 /*******************************************************************************
 * Function Name  : EP1_IN_Callback.
 * Description    : EP1 IN Callback Routine.
@@ -254,11 +282,24 @@ void EP2_IN_Callback(void)
 }
 
 /*******************************************************************************
+* Function Name  : EP4_IN_Callback.
+* Description    : EP4 IN Callback Routine.
+* Input          : None.
+* Output         : None.
+* Return         : None.
+*******************************************************************************/
+void EP5_IN_Callback(void)
+{
+  EP5_PrevXferComplete = 1;
+	packet_sent = 1;
+}
+
+/*******************************************************************************
 * Function Name  : USB_CUSTOM_HID_SendReport.
 * Description    : 
 * Input          : None.
 * Output         : None.
-* Return         : 1 if success otherwise 0.
+* Return         : 0 if success otherwise -1.
 *******************************************************************************/
 int8_t USB_CUSTOM_HID_SendReport(uint8_t EP_num, uint8_t * data, uint8_t length)
 {

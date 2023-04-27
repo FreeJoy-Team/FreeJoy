@@ -58,6 +58,9 @@
 /* External variables --------------------------------------------------------*/
 extern __IO uint8_t EP1_PrevXferComplete;
 extern __IO uint8_t EP2_PrevXferComplete;
+extern __IO uint8_t EP3_PrevXferComplete;
+extern __IO uint8_t EP4_PrevXferComplete;
+extern __IO uint8_t EP5_PrevXferComplete;
 
 int8_t USB_CUSTOM_HID_SendReport(uint8_t EP_num, uint8_t * data, uint8_t length);
 

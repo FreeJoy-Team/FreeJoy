@@ -50,7 +50,7 @@
 /* EP_NUM */
 /* defines how many endpoints are used by the device */
 /*-------------------------------------------------------------*/
-#define EP_NUM     (3)
+#define EP_NUM     (6)
 
 /*-------------------------------------------------------------*/
 /* --------------   Buffer Description Table  -----------------*/
@@ -74,6 +74,18 @@
 #define ENDP2_TXADDR        (0x98)
 #define ENDP2_RXADDR        (0xD8)
 
+/* EP3  */
+/* tx buffer base address */
+#define ENDP3_TXADDR        (0x15C)
+
+/* EP4  */
+/* rx buffer base address */
+#define ENDP4_RXADDR        (0x16C)
+
+/* EP5  */
+/* tx buffer base address */
+#define ENDP5_TXADDR        (0x1AC)
+
 /*-------------------------------------------------------------*/
 /* -------------------   ISTR events  -------------------------*/
 /*-------------------------------------------------------------*/
@@ -90,14 +102,14 @@
 //#define  EP2_IN_Callback   NOP_Process
 #define  EP3_IN_Callback   NOP_Process
 #define  EP4_IN_Callback   NOP_Process
-#define  EP5_IN_Callback   NOP_Process
+//#define  EP5_IN_Callback   NOP_Process
 #define  EP6_IN_Callback   NOP_Process
 #define  EP7_IN_Callback   NOP_Process
 
 //#define  EP1_OUT_Callback   NOP_Process
 //#define  EP2_OUT_Callback   NOP_Process
 #define  EP3_OUT_Callback   NOP_Process
-#define  EP4_OUT_Callback   NOP_Process
+//#define  EP4_OUT_Callback   NOP_Process
 #define  EP5_OUT_Callback   NOP_Process
 #define  EP6_OUT_Callback   NOP_Process
 #define  EP7_OUT_Callback   NOP_Process

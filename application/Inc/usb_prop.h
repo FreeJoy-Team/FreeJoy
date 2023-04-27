@@ -53,7 +53,24 @@ typedef enum _HID_REQUESTS
   SET_PROTOCOL
 } HID_REQUESTS;
 
+typedef struct
+{
+  uint32_t bitrate;
+  uint8_t format;
+  uint8_t paritytype;
+  uint8_t datatype;
+}LINE_CODING;
+
 /* Exported constants --------------------------------------------------------*/
+#define SEND_ENCAPSULATED_COMMAND   0x00
+#define GET_ENCAPSULATED_RESPONSE   0x01
+#define SET_COMM_FEATURE            0x02
+#define GET_COMM_FEATURE            0x03
+#define CLEAR_COMM_FEATURE          0x04
+#define SET_LINE_CODING             0x20
+#define GET_LINE_CODING             0x21
+#define SET_CONTROL_LINE_STATE      0x22
+#define SEND_BREAK                  0x23
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
 void CustomHID_init(void);
@@ -75,6 +92,9 @@ uint8_t *JoystickHID_GetReportDescriptor(uint16_t Length);
 uint8_t *CustomHID_GetReportDescriptor(uint16_t Length);
 uint8_t *JoystickHID_GetHIDDescriptor(uint16_t Length);
 uint8_t *CustomHID_GetHIDDescriptor(uint16_t Length);
+
+uint8_t *Virtual_Com_Port_GetLineCoding(uint16_t Length);
+uint8_t *Virtual_Com_Port_SetLineCoding(uint16_t Length);
 
 
 /* Exported define -----------------------------------------------------------*/

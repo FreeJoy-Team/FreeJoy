@@ -41,6 +41,13 @@
 dev_config_t dev_config;
 volatile uint8_t bootloader = 0;
 
+
+extern __IO uint8_t Receive_Buffer[64];
+extern __IO  uint32_t Receive_length ;
+uint8_t Send_Buffer[64];
+uint32_t packet_sent=1;
+uint32_t packet_receive=1;
+
 /* Private function prototypes -----------------------------------------------*/
 
 /**
@@ -82,8 +89,9 @@ int main(void)
 	// start sequential periphery reading
 	Timers_Init(&dev_config);		
 	
+	
   while (1)
-  {		
+  {	
 		ButtonsDebounceProcess(&dev_config);
 		ButtonsReadLogical(&dev_config);
 		
@@ -92,6 +100,18 @@ int main(void)
 		analog_data_t tmp[8];
 		AnalogGet(NULL, tmp, NULL);
 		PWM_SetFromAxis(&dev_config, tmp);
+		
+		if (bDeviceState == CONFIGURED)
+    {
+      CDC_Receive_DATA();
+      /*Check to see if we have data yet */
+      if (Receive_length  != 0)
+      {
+        if (packet_sent == 1)
+          CDC_Send_DATA ((unsigned char*)Receive_Buffer,Receive_length);
+        Receive_length = 0;
+      }
+    }
 		
 		// Enter flasher command received
 		if (bootloader > 0)

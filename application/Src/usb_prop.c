@@ -54,6 +54,14 @@ uint32_t ProtocolValue;
 __IO uint8_t EXTI_Enable;
 __IO uint8_t Request = 0;
 uint8_t Report_Buf[2];   
+
+LINE_CODING linecoding =
+  {
+    115200, /* baud rate*/
+    0x00,   /* stop bits-1*/
+    0x00,   /* parity - none*/
+    0x08    /* no. of bits 8*/
+  };
 /* -------------------------------------------------------------------------- */
 /*  Structures initializations */
 /* -------------------------------------------------------------------------- */
@@ -215,6 +223,25 @@ void CustomHID_Reset(void)
   SetEPRxCount(ENDP2, 64);
   SetEPRxStatus(ENDP2, EP_RX_VALID);
   SetEPTxStatus(ENDP2, EP_TX_NAK);
+	
+	/* Initialize Endpoint 3 */
+  SetEPType(ENDP3, EP_INTERRUPT);
+  SetEPTxAddr(ENDP3, ENDP3_TXADDR);
+  SetEPRxStatus(ENDP3, EP_RX_DIS);
+  SetEPTxStatus(ENDP3, EP_TX_NAK);
+
+  /* Initialize Endpoint 4 */
+  SetEPType(ENDP4, EP_BULK);
+  SetEPRxAddr(ENDP4, ENDP4_RXADDR);
+  SetEPRxCount(ENDP4, VIRTUAL_COM_PORT_DATA_SIZE);
+  SetEPRxStatus(ENDP4, EP_RX_VALID);
+  SetEPTxStatus(ENDP4, EP_TX_DIS);
+	
+	/* Initialize Endpoint 5 */
+  SetEPType(ENDP5, EP_BULK);
+  SetEPTxAddr(ENDP5, ENDP5_TXADDR);
+  SetEPTxStatus(ENDP5, EP_TX_NAK);
+  SetEPRxStatus(ENDP5, EP_RX_DIS);
 
   /* Set this device to response on default address */
   SetDeviceAddress(0);
@@ -222,6 +249,9 @@ void CustomHID_Reset(void)
 	
 	EP1_PrevXferComplete = 1;
 	EP2_PrevXferComplete = 1;
+	EP3_PrevXferComplete = 1;
+	EP4_PrevXferComplete = 1;
+	EP5_PrevXferComplete = 1;
 }
 /*******************************************************************************
 * Function Name  : CustomHID_SetConfiguration.
@@ -260,7 +290,10 @@ void CustomHID_SetDeviceAddress (void)
 *******************************************************************************/
 void CustomHID_Status_In(void)
 {  
-
+	if (Request == SET_LINE_CODING)
+  {
+    Request = 0;
+  }
 }
 
 /*******************************************************************************
@@ -332,6 +365,12 @@ RESULT CustomHID_Data_Setup(uint8_t RequestNo)
       CopyRoutine = CustomHID_SetReport_Feature;
       Request = SET_REPORT;
       break;
+		case GET_LINE_CODING:
+      CopyRoutine = Virtual_Com_Port_GetLineCoding;
+      break;
+		case SET_LINE_CODING:
+      CopyRoutine = Virtual_Com_Port_SetLineCoding;
+      break;
     default:
       break;
     }
@@ -380,7 +419,18 @@ RESULT CustomHID_NoData_Setup(uint8_t RequestNo)
   if ((Type_Recipient == (CLASS_REQUEST | INTERFACE_RECIPIENT))
       && (RequestNo == SET_PROTOCOL))
   {
-    return CustomHID_SetProtocol();
+		if (RequestNo == SET_COMM_FEATURE)
+    {
+      return USB_SUCCESS;
+    }
+    else if (RequestNo == SET_CONTROL_LINE_STATE)
+    {
+      return USB_SUCCESS;
+    }
+		else 
+		{
+			return CustomHID_SetProtocol();
+		}
   }
 
   else
@@ -535,6 +585,40 @@ uint8_t *CustomHID_GetProtocolValue(uint16_t Length)
   {
     return (uint8_t *)(&ProtocolValue);
   }
+}
+
+/*******************************************************************************
+* Function Name  : Virtual_Com_Port_GetLineCoding.
+* Description    : send the linecoding structure to the PC host.
+* Input          : Length.
+* Output         : None.
+* Return         : Linecoding structure base address.
+*******************************************************************************/
+uint8_t *Virtual_Com_Port_GetLineCoding(uint16_t Length)
+{
+  if (Length == 0)
+  {
+    pInformation->Ctrl_Info.Usb_wLength = sizeof(linecoding);
+    return NULL;
+  }
+  return(uint8_t *)&linecoding;
+}
+
+/*******************************************************************************
+* Function Name  : Virtual_Com_Port_SetLineCoding.
+* Description    : Set the linecoding structure fields.
+* Input          : Length.
+* Output         : None.
+* Return         : Linecoding structure base address.
+*******************************************************************************/
+uint8_t *Virtual_Com_Port_SetLineCoding(uint16_t Length)
+{
+  if (Length == 0)
+  {
+    pInformation->Ctrl_Info.Usb_wLength = sizeof(linecoding);
+    return NULL;
+  }
+  return(uint8_t *)&linecoding;
 }
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

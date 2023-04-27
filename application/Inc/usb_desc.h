@@ -58,13 +58,16 @@
 #define CustomHID_OFF_HID_DESC                  0x2B
 
 #define Composite_SIZ_DEVICE_DESC               18
-#define Composite_SIZ_CONFIG_DESC               66
+#define Composite_SIZ_CONFIG_DESC               132
 #define JoystickHID_SIZ_REPORT_DESC             86
 #define CustomHID_SIZ_REPORT_DESC             	96
 #define Composite_SIZ_STRING_LANGID             4
 #define Composite_SIZ_STRING_VENDOR             38
 #define Composite_SIZ_STRING_PRODUCT            52
 #define Composite_SIZ_STRING_SERIAL             26
+
+#define VIRTUAL_COM_PORT_DATA_SIZE              64
+#define VIRTUAL_COM_PORT_INT_SIZE               8
 
 #define STANDARD_ENDPOINT_DESC_SIZE             0x09
 
