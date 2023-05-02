@@ -287,11 +287,11 @@ void TIM2_IRQHandler(void)
 			RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C2|RCC_APB1Periph_TIM4, DISABLE);
 			RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB|RCC_APB2Periph_GPIOC,DISABLE);
 			
-			if (tmp_app_config.fast_encoder_cnt == 0)
+			if (tmp_app_config.rgb_cnt == 0 && tmp_app_config.fast_encoder_cnt == 0)
 			{
 				RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1,DISABLE);
 			}
-			if (tmp_app_config.pwm_cnt == 0)
+			if (tmp_app_config.rgb_cnt == 0 && tmp_app_config.pwm_cnt == 0)
 			{
 				RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3,DISABLE);
 			}

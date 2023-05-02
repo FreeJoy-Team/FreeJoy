@@ -63,6 +63,8 @@ extern __IO uint8_t EP4_PrevXferComplete;
 extern __IO uint8_t EP5_PrevXferComplete;
 
 int8_t USB_CUSTOM_HID_SendReport(uint8_t EP_num, uint8_t * data, uint8_t length);
+int8_t CDC_Send_DATA (uint8_t *ptrBuffer, uint8_t Send_length);
+int8_t CDC_Receive_DATA(void);
 
 #endif /* __USB_LIB_H */
 

@@ -16,6 +16,7 @@
 
 #include "spi.h"
 #include "i2c.h"
+#include "ws2812b.h"
 
 #include "string.h"
 

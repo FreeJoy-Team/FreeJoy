@@ -538,6 +538,26 @@
               <FileType>5</FileType>
               <FilePath>..\application\Inc\main.h</FilePath>
             </File>
+            <File>
+              <FileName>cdc_data_handler.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\application\Src\cdc_data_handler.c</FilePath>
+            </File>
+            <File>
+              <FileName>bitmap.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\application\Src\bitmap.c</FilePath>
+            </File>
+            <File>
+              <FileName>led_effects.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\application\Src\led_effects.c</FilePath>
+            </File>
+            <File>
+              <FileName>ws2812b.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\application\Src\ws2812b.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -780,8 +800,8 @@
       <TargetName>Bootloader</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pArmCC>6110000::V6.11::.\ARMCLANG</pArmCC>
-      <pCCUsed>6110000::V6.11::.\ARMCLANG</pCCUsed>
+      <pArmCC>6130001::V6.13.1::.\ARMCLANG</pArmCC>
+      <pCCUsed>6130001::V6.13.1::.\ARMCLANG</pCCUsed>
       <uAC6>1</uAC6>
       <TargetOption>
         <TargetCommonOption>
@@ -1376,6 +1396,26 @@
               <FileName>main.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\application\Inc\main.h</FilePath>
+            </File>
+            <File>
+              <FileName>cdc_data_handler.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\application\Src\cdc_data_handler.c</FilePath>
+            </File>
+            <File>
+              <FileName>bitmap.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\application\Src\bitmap.c</FilePath>
+            </File>
+            <File>
+              <FileName>led_effects.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\application\Src\led_effects.c</FilePath>
+            </File>
+            <File>
+              <FileName>ws2812b.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\application\Src\ws2812b.c</FilePath>
             </File>
           </Files>
         </Group>

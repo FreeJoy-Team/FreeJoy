@@ -31,6 +31,7 @@
 #include "buttons.h"
 #include "leds.h"
 #include "encoders.h"
+#include "led_effects.h"
 
 #include "usb_hw.h"
 #include "usb_lib.h"
@@ -40,13 +41,6 @@
 /* Private variables ---------------------------------------------------------*/
 dev_config_t dev_config;
 volatile uint8_t bootloader = 0;
-
-
-extern __IO uint8_t Receive_Buffer[64];
-extern __IO  uint32_t Receive_length ;
-uint8_t Send_Buffer[64];
-uint32_t packet_sent=1;
-uint32_t packet_receive=1;
 
 /* Private function prototypes -----------------------------------------------*/
 
@@ -79,7 +73,7 @@ int main(void)
 	
 	IO_Init(&dev_config);
 	 
-	EncodersInit(&dev_config);	
+	EncodersInit(&dev_config);	// add rgb timer check
 	ShiftRegistersInit(&dev_config);
 	RadioButtons_Init(&dev_config);
 	SequentialButtons_Init(&dev_config);		
@@ -87,8 +81,10 @@ int main(void)
 	// init sensors
 	AxesInit(&dev_config);
 	// start sequential periphery reading
-	Timers_Init(&dev_config);		
+	Timers_Init(&dev_config);
 	
+	uint8_t serial_num[12];
+	SerialNum(serial_num, 12);
 	
   while (1)
   {	
@@ -101,17 +97,7 @@ int main(void)
 		AnalogGet(NULL, tmp, NULL);
 		PWM_SetFromAxis(&dev_config, tmp);
 		
-		if (bDeviceState == CONFIGURED)
-    {
-      CDC_Receive_DATA();
-      /*Check to see if we have data yet */
-      if (Receive_length  != 0)
-      {
-        if (packet_sent == 1)
-          CDC_Send_DATA ((unsigned char*)Receive_Buffer,Receive_length);
-        Receive_length = 0;
-      }
-    }
+		WS2812b_Process(&dev_config, serial_num, 12, GetMillis());
 		
 		// Enter flasher command received
 		if (bootloader > 0)

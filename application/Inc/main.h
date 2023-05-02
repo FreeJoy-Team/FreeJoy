@@ -18,7 +18,7 @@
 
 static const dev_config_t init_config =
 {
-	.firmware_version = 0x1713,		// do not change	
+	.firmware_version = 0x1720,		// do not change	
 	/* 
 		Name of device in devices dispatcher
 	*/
@@ -68,17 +68,17 @@ static const dev_config_t init_config =
 		- BUTTON_COLUMN
 		- BUTTON_ROW
 	*/
-	.pins[0] 	= AXIS_ANALOG,					// PA0
-	.pins[1] 	= AXIS_ANALOG,					// PA1
-	.pins[2] 	= AXIS_ANALOG,					// PA2
-	.pins[3] 	= AXIS_ANALOG,					// PA3
+	.pins[0] 	= NOT_USED,					// PA0
+	.pins[1] 	= NOT_USED,					// PA1
+	.pins[2] 	= NOT_USED,					// PA2
+	.pins[3] 	= NOT_USED,					// PA3
 	.pins[4] 	= NOT_USED,							// PA4
 	.pins[5] 	= NOT_USED,							// PA5
 	.pins[6] 	= NOT_USED,							// PA6
 	.pins[7] 	= NOT_USED,							// PA7
 	.pins[8] 	= NOT_USED,							// PA8
 	.pins[9] 	= NOT_USED,							// PA9
-	.pins[10] = NOT_USED,							// PA10
+	.pins[10] = LED_RGB,							// PA10
 	.pins[11] = NOT_USED,							// PA15
 	.pins[12] = NOT_USED,							// PB0
 	.pins[13] = NOT_USED,							// PB1
@@ -91,10 +91,10 @@ static const dev_config_t init_config =
 	.pins[20] = NOT_USED,							// PB9
 	.pins[21] = NOT_USED,							// PB10
 	.pins[22] = NOT_USED,							// PB11
-	.pins[23] = BUTTON_GND,						// PB12
-	.pins[24] = BUTTON_GND,						// PB13
-	.pins[25] = BUTTON_GND,						// PB14
-	.pins[26] = BUTTON_GND,						// PB15
+	.pins[23] = NOT_USED,						// PB12
+	.pins[24] = NOT_USED,						// PB13
+	.pins[25] = NOT_USED,						// PB14
+	.pins[26] = NOT_USED,						// PB15
 	.pins[27] = NOT_USED,							// PC13
 	.pins[28] = NOT_USED,							// PC14
 	.pins[29] = NOT_USED,							// PC15
@@ -780,7 +780,11 @@ static const dev_config_t init_config =
 	.leds[22].input_num = -1,
 	.leds[22].type = LED_NORMAL,
 	.leds[23].input_num = -1,
-	.leds[23].type = LED_NORMAL,	
+	.leds[23].type = LED_NORMAL,
+
+	.rgb_effect = WS2812B_SIMHUB,
+	.rgb_count = 40,
+	.rgb_delay_ms = 20,
 		
 };
 

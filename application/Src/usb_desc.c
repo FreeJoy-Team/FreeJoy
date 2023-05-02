@@ -39,6 +39,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "usb_lib.h"
 #include "usb_desc.h"
+#include "usb_cdc_conf.h"
 
 #include "common_defines.h"
 
@@ -228,9 +229,9 @@ uint8_t Composite_ConfigDescriptor[Composite_SIZ_CONFIG_DESC] =
     /*Endpoint 3 Descriptor*/
     0x07,   /* bLength: Endpoint Descriptor size */
     USB_ENDPOINT_DESCRIPTOR_TYPE,   /* bDescriptorType: Endpoint */
-    0x83,   /* bEndpointAddress: (IN3) */
+    CDC_COMMAND_ENDP_ADR,   /* bEndpointAddress: (IN3) */
     0x03,   /* bmAttributes: Interrupt */
-    VIRTUAL_COM_PORT_INT_SIZE,      /* wMaxPacketSize: */
+    CDC_INT_SIZE,      /* wMaxPacketSize: */
     0x00,
     0x10,   /* bInterval: */ 				/// ????
 		
@@ -249,18 +250,18 @@ uint8_t Composite_ConfigDescriptor[Composite_SIZ_CONFIG_DESC] =
     /*Endpoint 4 Descriptor*/
     0x07,   /* bLength: Endpoint Descriptor size */
     USB_ENDPOINT_DESCRIPTOR_TYPE,   /* bDescriptorType: Endpoint */
-    0x04,   /* bEndpointAddress: (OUT4) */
+    CDC_DATA_OUT_ENDP_ADR,   /* bEndpointAddress: (OUT4) */
     0x02,   /* bmAttributes: Bulk */
-    VIRTUAL_COM_PORT_DATA_SIZE,             /* wMaxPacketSize: */
+    CDC_DATA_SIZE,             /* wMaxPacketSize: */
     0x00,
     0x00,   /* bInterval: ignore for Bulk transfer */
 		
     /*Endpoint 4 Descriptor*/
     0x07,   /* bLength: Endpoint Descriptor size */
     USB_ENDPOINT_DESCRIPTOR_TYPE,   /* bDescriptorType: Endpoint */
-    0x85,   /* bEndpointAddress: (IN5) */
+    CDC_DATA_IN_ENDP_ADR,   /* bEndpointAddress: (IN5) */
     0x02,   /* bmAttributes: Bulk */
-    VIRTUAL_COM_PORT_DATA_SIZE,             /* wMaxPacketSize: */
+    CDC_DATA_SIZE,             /* wMaxPacketSize: */
     0x00,
     0x00    /* bInterval */
 		

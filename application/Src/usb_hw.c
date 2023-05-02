@@ -16,15 +16,6 @@
 
 ErrorStatus HSEStartUpStatus;
 
-extern __IO uint32_t packet_sent;
-extern __IO uint8_t Send_Buffer[VIRTUAL_COM_PORT_DATA_SIZE] ;
-extern __IO  uint32_t packet_receive;
-extern __IO uint8_t Receive_length;
-
-
-uint8_t Receive_Buffer[64];
-uint32_t Send_length;
-
 /* Extern variables ----------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
 static void IntToUnicode (uint32_t value , uint8_t *pbuf , uint8_t len);
@@ -207,6 +198,34 @@ void Get_SerialNum(void)
     IntToUnicode (Device_Serial0, &Composite_StringSerial[2] , 8);
     IntToUnicode (Device_Serial1, &Composite_StringSerial[18], 4);
   }
+}
+
+/*******************************************************************************
+* Function Name  : SerialNum.
+* Description    : Get serial number.
+* Input          : Array ptr, length
+* Output         : Array ptr with serial num
+* Return         : 1 if success, otherwise -1.
+*******************************************************************************/
+uint8_t SerialNum(uint8_t *str, uint8_t length)
+{
+	if (length != 12) return 0;
+	
+	uint32_t Device_Serial0, Device_Serial1, Device_Serial2;
+  
+  Device_Serial0 = *(uint32_t*)ID1;
+  Device_Serial1 = *(uint32_t*)ID2;
+  Device_Serial2 = *(uint32_t*)ID3;
+  
+  Device_Serial0 += Device_Serial2;
+  
+  if (Device_Serial0 != 0)
+  {
+    IntToUnicode (Device_Serial0, str , 8);
+    IntToUnicode (Device_Serial1, str + 8, 4);
+		return 1;
+  }
+	return 0;
 }
 
 /*******************************************************************************
@@ -461,51 +480,6 @@ void USB_HW_DeInit(void)
   GPIO_Init(GPIOA, &GPIO_InitStructure);
 	
 	GPIOA->ODR &= ~(GPIO_Pin_11 | GPIO_Pin_12);
-}
-
-
-
-/*******************************************************************************
-* Function Name  : Send DATA .
-* Description    : send the data received from the STM32 to the PC through USB  
-* Input          : None.
-* Output         : None.
-* Return         : None.
-*******************************************************************************/
-uint32_t CDC_Send_DATA (uint8_t *ptrBuffer, uint8_t Send_length)
-{
-  /*if max buffer is Not reached*/
-  if(Send_length < VIRTUAL_COM_PORT_DATA_SIZE)     
-  {
-    /*Sent flag*/
-    packet_sent = 0;
-    /* send  packet to PMA*/
-    UserToPMABufferCopy((unsigned char*)ptrBuffer, ENDP5_TXADDR, Send_length);
-    SetEPTxCount(ENDP5, Send_length);
-		//USB_SIL_Write(EP4_OUT, (unsigned char*)ptrBuffer, Send_length);
-    SetEPTxValid(ENDP5);
-		EP4_PrevXferComplete = 0;
-  }
-  else
-  {
-    return 0;
-  } 
-  return 1;
-}
-
-/*******************************************************************************
-* Function Name  : Receive DATA .
-* Description    : receive the data from the PC to STM32 and send it through USB
-* Input          : None.
-* Output         : None.
-* Return         : None.
-*******************************************************************************/
-uint32_t CDC_Receive_DATA(void)
-{ 
-  /*Receive flag*/
-  packet_receive = 0;
-  SetEPRxValid(ENDP4); 
-  return 1 ;
 }
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
 

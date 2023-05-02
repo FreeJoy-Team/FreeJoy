@@ -93,8 +93,8 @@ uint8_t *CustomHID_GetReportDescriptor(uint16_t Length);
 uint8_t *JoystickHID_GetHIDDescriptor(uint16_t Length);
 uint8_t *CustomHID_GetHIDDescriptor(uint16_t Length);
 
-uint8_t *Virtual_Com_Port_GetLineCoding(uint16_t Length);
-uint8_t *Virtual_Com_Port_SetLineCoding(uint16_t Length);
+uint8_t *CDC_GetLineCoding(uint16_t Length);
+uint8_t *CDC_SetLineCoding(uint16_t Length);
 
 
 /* Exported define -----------------------------------------------------------*/

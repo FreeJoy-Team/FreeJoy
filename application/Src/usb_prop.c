@@ -44,6 +44,7 @@
 #include "usb_prop.h"
 #include "usb_desc.h"
 #include "usb_pwr.h"
+#include "usb_cdc_conf.h"
 
 
 /* Private typedef -----------------------------------------------------------*/ 
@@ -225,23 +226,23 @@ void CustomHID_Reset(void)
   SetEPTxStatus(ENDP2, EP_TX_NAK);
 	
 	/* Initialize Endpoint 3 */
-  SetEPType(ENDP3, EP_INTERRUPT);
-  SetEPTxAddr(ENDP3, ENDP3_TXADDR);
-  SetEPRxStatus(ENDP3, EP_RX_DIS);
-  SetEPTxStatus(ENDP3, EP_TX_NAK);
+  SetEPType(CDC_COMMAND_ENDP_NUM, EP_INTERRUPT);
+  SetEPTxAddr(CDC_COMMAND_ENDP_NUM, CDC_COMMAND_ENDP_BUF_ADR);
+  SetEPRxStatus(CDC_COMMAND_ENDP_NUM, EP_RX_DIS);
+  SetEPTxStatus(CDC_COMMAND_ENDP_NUM, EP_TX_NAK);
 
   /* Initialize Endpoint 4 */
-  SetEPType(ENDP4, EP_BULK);
-  SetEPRxAddr(ENDP4, ENDP4_RXADDR);
-  SetEPRxCount(ENDP4, VIRTUAL_COM_PORT_DATA_SIZE);
-  SetEPRxStatus(ENDP4, EP_RX_VALID);
-  SetEPTxStatus(ENDP4, EP_TX_DIS);
+  SetEPType(CDC_DATA_OUT_ENDP_NUM, EP_BULK);
+  SetEPRxAddr(CDC_DATA_OUT_ENDP_NUM, CDC_DATA_OUT_ENDP_BUF_ADR);
+  SetEPRxCount(CDC_DATA_OUT_ENDP_NUM, CDC_DATA_SIZE);
+  SetEPRxStatus(CDC_DATA_OUT_ENDP_NUM, EP_RX_VALID);
+  SetEPTxStatus(CDC_DATA_OUT_ENDP_NUM, EP_TX_DIS);
 	
 	/* Initialize Endpoint 5 */
-  SetEPType(ENDP5, EP_BULK);
-  SetEPTxAddr(ENDP5, ENDP5_TXADDR);
-  SetEPTxStatus(ENDP5, EP_TX_NAK);
-  SetEPRxStatus(ENDP5, EP_RX_DIS);
+  SetEPType(CDC_DATA_IN_ENDP_NUM, EP_BULK);
+  SetEPTxAddr(CDC_DATA_IN_ENDP_NUM, CDC_DATA_IN_ENDP_BUF_ADR);
+  SetEPTxStatus(CDC_DATA_IN_ENDP_NUM, EP_TX_NAK);
+  SetEPRxStatus(CDC_DATA_IN_ENDP_NUM, EP_RX_DIS);
 
   /* Set this device to response on default address */
   SetDeviceAddress(0);
@@ -324,8 +325,7 @@ RESULT CustomHID_Data_Setup(uint8_t RequestNo)
   CopyRoutine = NULL;
   
   if ((RequestNo == GET_DESCRIPTOR)
-      && (Type_Recipient == (STANDARD_REQUEST | INTERFACE_RECIPIENT))
-        )
+      && (Type_Recipient == (STANDARD_REQUEST | INTERFACE_RECIPIENT)))
   {
     
     if (pInformation->USBwValue1 == REPORT_DESCRIPTOR)
@@ -354,7 +354,7 @@ RESULT CustomHID_Data_Setup(uint8_t RequestNo)
   } /* End of GET_DESCRIPTOR */
   
   /*** GET_PROTOCOL, GET_REPORT, SET_REPORT ***/
-  else if ( (Type_Recipient == (CLASS_REQUEST | INTERFACE_RECIPIENT)) )
+  else if ((Type_Recipient == (CLASS_REQUEST | INTERFACE_RECIPIENT)))
   {         
     switch( RequestNo )
     {
@@ -366,14 +366,20 @@ RESULT CustomHID_Data_Setup(uint8_t RequestNo)
       Request = SET_REPORT;
       break;
 		case GET_LINE_CODING:
-      CopyRoutine = Virtual_Com_Port_GetLineCoding;
+      CopyRoutine = CDC_GetLineCoding;
       break;
 		case SET_LINE_CODING:
-      CopyRoutine = Virtual_Com_Port_SetLineCoding;
+      CopyRoutine = CDC_SetLineCoding;
+			//Request = SET_LINE_CODING;
       break;
     default:
       break;
     }
+  }
+	
+	if (RequestNo == SET_LINE_CODING)
+  {
+    Request = SET_LINE_CODING;
   }
   
   if (CopyRoutine == NULL)
@@ -416,27 +422,25 @@ uint8_t *CustomHID_SetReport_Feature(uint16_t Length)
 *******************************************************************************/
 RESULT CustomHID_NoData_Setup(uint8_t RequestNo)
 {
-  if ((Type_Recipient == (CLASS_REQUEST | INTERFACE_RECIPIENT))
-      && (RequestNo == SET_PROTOCOL))
+  if ((Type_Recipient == (CLASS_REQUEST | INTERFACE_RECIPIENT)))
   {
-		if (RequestNo == SET_COMM_FEATURE)
+		switch(RequestNo)
     {
-      return USB_SUCCESS;
-    }
-    else if (RequestNo == SET_CONTROL_LINE_STATE)
-    {
-      return USB_SUCCESS;
-    }
-		else 
-		{
+    case SET_PROTOCOL:
 			return CustomHID_SetProtocol();
-		}
+		
+    case SET_COMM_FEATURE:
+			return USB_SUCCESS;
+		
+		case SET_CONTROL_LINE_STATE:
+			return USB_SUCCESS;
+		
+    default:
+      break;
+    }
   }
-
-  else
-  {
-    return USB_UNSUPPORT;
-  }
+	
+  return USB_UNSUPPORT;
 }
 
 /*******************************************************************************
@@ -546,7 +550,7 @@ RESULT CustomHID_Get_Interface_Setting(uint8_t Interface, uint8_t AlternateSetti
   {
     return USB_UNSUPPORT;
   }
-  else if (Interface > 0)
+  else if (Interface > 3)					// ??????????????????????????????????????????????
   {
     return USB_UNSUPPORT;
   }
@@ -588,13 +592,13 @@ uint8_t *CustomHID_GetProtocolValue(uint16_t Length)
 }
 
 /*******************************************************************************
-* Function Name  : Virtual_Com_Port_GetLineCoding.
+* Function Name  : CDC_GetLineCoding.
 * Description    : send the linecoding structure to the PC host.
 * Input          : Length.
 * Output         : None.
 * Return         : Linecoding structure base address.
 *******************************************************************************/
-uint8_t *Virtual_Com_Port_GetLineCoding(uint16_t Length)
+uint8_t *CDC_GetLineCoding(uint16_t Length)
 {
   if (Length == 0)
   {
@@ -605,13 +609,13 @@ uint8_t *Virtual_Com_Port_GetLineCoding(uint16_t Length)
 }
 
 /*******************************************************************************
-* Function Name  : Virtual_Com_Port_SetLineCoding.
+* Function Name  : CDC_SetLineCoding.
 * Description    : Set the linecoding structure fields.
 * Input          : Length.
 * Output         : None.
 * Return         : Linecoding structure base address.
 *******************************************************************************/
-uint8_t *Virtual_Com_Port_SetLineCoding(uint16_t Length)
+uint8_t *CDC_SetLineCoding(uint16_t Length)
 {
   if (Length == 0)
   {

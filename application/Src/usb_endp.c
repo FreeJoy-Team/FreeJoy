@@ -38,10 +38,13 @@
 
 /* Includes ------------------------------------------------------------------*/
 
+#include "usb_endp.h"
 #include "usb_hw.h"
 #include "usb_lib.h"
 #include "usb_istr.h"
 #include "usb_pwr.h"
+#include "usb_cdc_conf.h"
+#include "cdc_data_handler.h"
 
 #include "config.h"
 #include "crc16.h"
@@ -58,16 +61,14 @@ volatile extern int32_t sensors_ticks;
 volatile extern int32_t buttons_ticks;
 volatile extern int32_t configurator_millis;
 
-extern __IO uint32_t packet_sent;
-extern __IO uint32_t packet_receive;
-extern __IO uint8_t Receive_Buffer[64];
-uint32_t Receive_length;
-
 __IO uint8_t EP1_PrevXferComplete = 1;
 __IO uint8_t EP2_PrevXferComplete = 1;
 __IO uint8_t EP3_PrevXferComplete = 1;
 __IO uint8_t EP4_PrevXferComplete = 1;
 __IO uint8_t EP5_PrevXferComplete = 1;
+
+static uint8_t receive_buffer[CDC_DATA_SIZE];
+static uint32_t receive_length = 0;
 
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
@@ -245,16 +246,37 @@ void EP2_OUT_Callback(void)
 * Output         : None.
 * Return         : None.
 *******************************************************************************/
+
+
+
+
+
+
+void SH_ProcessEndpData(void)
+{
+	if (receive_length > 0)
+	{
+		SH_ProcessIncomingData((uint8_t *)receive_buffer, receive_length, RB_GetPtr());
+		memset((uint8_t *)receive_buffer, 0 ,64);
+		receive_length = 0;
+	}
+}
+
 void EP4_OUT_Callback(void)
 {
-	//SetEPRxStatus(ENDP4, EP_RX_VALID);
+//	if (dev_config.rgb_effect == WS2812B_SIMHUB)// && SH_ReadyToReceiveData)
+//	{
+//		receive_length = USB_SIL_Read(CDC_DATA_OUT_ENDP_ADR, (uint8_t *)receive_buffer);
+//		//SH_ProcessIncomingData((uint8_t *)receive_buffer, receive_length, RB_GetPtr());
+//	}
+//	else
+//	{
+//		receive_length = USB_SIL_Read(CDC_DATA_OUT_ENDP_ADR, (uint8_t *)receive_buffer);
+//		//CDC_Send_DATA ((unsigned char*)receive_buffer,receive_length);
+//	}
+	receive_length = USB_SIL_Read(CDC_DATA_OUT_ENDP_ADR, (uint8_t *)receive_buffer);
 	
-	packet_receive = 1;
-	//Receive_length = GetEPRxCount(ENDP4);
-  //PMAToUserBufferCopy((unsigned char*)Receive_Buffer, ENDP4_RXADDR, Receive_length);
-	
-	Receive_length = USB_SIL_Read(EP4_OUT, (unsigned char*)Receive_Buffer);
-	SetEPRxValid(ENDP4);
+	SetEPRxValid(CDC_DATA_OUT_ENDP_NUM);
 }
 
 /*******************************************************************************
@@ -280,7 +302,6 @@ void EP2_IN_Callback(void)
 {
   EP2_PrevXferComplete = 1;
 }
-
 /*******************************************************************************
 * Function Name  : EP4_IN_Callback.
 * Description    : EP4 IN Callback Routine.
@@ -291,7 +312,6 @@ void EP2_IN_Callback(void)
 void EP5_IN_Callback(void)
 {
   EP5_PrevXferComplete = 1;
-	packet_sent = 1;
 }
 
 /*******************************************************************************
@@ -318,6 +338,42 @@ int8_t USB_CUSTOM_HID_SendReport(uint8_t EP_num, uint8_t * data, uint8_t length)
 			return 0;
 	}
 	return -1;
+}
+
+/*******************************************************************************
+* Function Name  : Send DATA .
+* Description    : send the data received from the STM32 to the PC through USB  
+* Input          : None.
+* Output         : None.
+* Return         : 0 if success otherwise -1.			// sdelal kak sverhu. ebanii v rot nahuia -1 vmesto 1 vo vremia success
+*******************************************************************************/
+int8_t CDC_Send_DATA (uint8_t *ptrBuffer, uint8_t Send_length)
+{
+  /*if max buffer is Not reached*/
+  if(EP5_PrevXferComplete && bDeviceState == CONFIGURED && Send_length < CDC_DATA_SIZE)     
+  {
+    /* send  packet*/
+		USB_SIL_Write(CDC_DATA_IN_ENDP_ADR, (unsigned char*)ptrBuffer, Send_length);
+    SetEPTxValid(CDC_DATA_IN_ENDP_NUM);
+		EP5_PrevXferComplete = 0;
+  }
+  else
+  {
+    return 0;
+  } 
+  return -1;
+}
+
+/*******************************************************************************
+* Function Name  : Is Ready To Send DATA .
+* Description    : Checking the port for readiness to send files. 
+* Input          : None.
+* Output         : None.
+* Return         : 1 if success otherwise 0.
+*******************************************************************************/
+uint8_t CDC_IsReadeToSend()
+{
+	return EP5_PrevXferComplete;
 }
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
 

@@ -51,13 +51,12 @@
 /* Exported define -----------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
 void Get_SerialNum(void);
+uint8_t SerialNum(uint8_t *str, uint8_t length);
 void Get_ProductStr(void);
 void Get_VidPid(void);
 uint8_t Get_ReportDesc(void);
 void USB_HW_Init(void);
 void USB_HW_DeInit(void);
-uint32_t CDC_Send_DATA (uint8_t *ptrBuffer, uint8_t Send_length);
-uint32_t CDC_Receive_DATA(void);
 
 #endif  /*__USB_HW_H*/
 

@@ -66,9 +66,6 @@
 #define Composite_SIZ_STRING_PRODUCT            52
 #define Composite_SIZ_STRING_SERIAL             26
 
-#define VIRTUAL_COM_PORT_DATA_SIZE              64
-#define VIRTUAL_COM_PORT_INT_SIZE               8
-
 #define STANDARD_ENDPOINT_DESC_SIZE             0x09
 
 /* Exported functions ------------------------------------------------------- */
