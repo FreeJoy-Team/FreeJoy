@@ -59,7 +59,7 @@
 
 
 #define WS2812B_APB1_RCC        NULL
-#define WS2812B_APB2_RCC        RCC_APB2Periph_TIM1 | RCC_APB2Periph_GPIOA
+#define WS2812B_APB2_RCC        RCC_APB2Periph_TIM1 | RCC_APB2Periph_GPIOA // see void ws2812b_Init(void)
 
 #define WS2812B_AHB_RCC         RCC_AHBPeriph_DMA1
 
@@ -92,7 +92,7 @@
 #define WS2812B_FREQUENCY       72000000
 #define WS2812B_PERIOD          90//91?
 
-#define WS2812B_PULSE_HIGH      26//65
-#define WS2812B_PULSE_LOW       65//26
+#define WS2812B_PULSE_HIGH      30//65
+#define WS2812B_PULSE_LOW       60//26
 
 #endif //__WS2812B_CONF_H

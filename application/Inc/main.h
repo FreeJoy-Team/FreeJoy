@@ -35,7 +35,7 @@ static const dev_config_t init_config =
 	.device_name[10] = '.',
 	.device_name[11] = '7',
 	.device_name[12] = '.',
-	.device_name[13] = '1',
+	.device_name[13] = '2',
 	.device_name[14] = 0,
 	.device_name[15] = 0,
 	.device_name[16] = 0,
@@ -48,7 +48,7 @@ static const dev_config_t init_config =
 
 	.button_debounce_ms = 50,					// debounce time for all buttons
 	
-	.encoder_press_time_ms = 10,			// amount of milliseconds virtual button 
+	.encoder_press_time_ms = 20,			// amount of milliseconds virtual button 
 																		// will be pressed at encoder increment/decrement
 																		
 	.exchange_period_ms = 5,					// amount of millisecond between joystick data sending
@@ -78,7 +78,7 @@ static const dev_config_t init_config =
 	.pins[7] 	= NOT_USED,							// PA7
 	.pins[8] 	= NOT_USED,							// PA8
 	.pins[9] 	= NOT_USED,							// PA9
-	.pins[10] = LED_RGB,							// PA10
+	.pins[10] = NOT_USED,							// PA10
 	.pins[11] = NOT_USED,							// PA15
 	.pins[12] = NOT_USED,							// PB0
 	.pins[13] = NOT_USED,							// PB1
@@ -124,7 +124,7 @@ static const dev_config_t init_config =
 	.axis_config[0].deadband_size = 0,
 	.axis_config[0].channel = 0,
 	.axis_config[0].i2c_address = 0x48,
-	.axis_config[0].source_main = 0,
+	.axis_config[0].source_main = -1,
 	.axis_config[0].function = 0,
 	.axis_config[0].source_secondary = 0,
 	.axis_config[0].button1 = -1,
@@ -158,7 +158,7 @@ static const dev_config_t init_config =
 	.axis_config[1].deadband_size = 0,
 	.axis_config[1].channel = 0,
 	.axis_config[1].i2c_address = 0x48,
-	.axis_config[1].source_main = 1,
+	.axis_config[1].source_main = -1,
 	.axis_config[1].function = 0,
 	.axis_config[1].source_secondary = 0,
 	.axis_config[1].button1 = -1,
@@ -192,7 +192,7 @@ static const dev_config_t init_config =
 	.axis_config[2].deadband_size = 0,
 	.axis_config[2].i2c_address = 0x48,
 	.axis_config[2].channel = 0,
-	.axis_config[2].source_main = 2,
+	.axis_config[2].source_main = -1,
 	.axis_config[2].function = 0,
 	.axis_config[2].source_secondary = 0,
 	.axis_config[2].button1 = -1,
@@ -226,7 +226,7 @@ static const dev_config_t init_config =
 	.axis_config[3].deadband_size = 0,
 	.axis_config[3].channel = 0,
 	.axis_config[3].i2c_address = 0x48,
-	.axis_config[3].source_main = 3,
+	.axis_config[3].source_main = -1,
 	.axis_config[3].function = 0,
 	.axis_config[3].source_secondary = 0,
 	.axis_config[3].button1 = -1,
@@ -404,13 +404,13 @@ static const dev_config_t init_config =
 		- ENCODER_INPUT_A
 		- ENCODER_INPUT_B
 	*/
-	.buttons[0].physical_num = 12,
+	.buttons[0].physical_num = -1,
 	.buttons[0].type = BUTTON_NORMAL,
-	.buttons[1].physical_num = 13,
+	.buttons[1].physical_num = -1,
 	.buttons[1].type = BUTTON_NORMAL,
-	.buttons[2].physical_num = 14,
+	.buttons[2].physical_num = -1,
 	.buttons[2].type = BUTTON_NORMAL,
-	.buttons[3].physical_num = 15,
+	.buttons[3].physical_num = -1,
 	.buttons[3].type = BUTTON_NORMAL,
 	.buttons[4].physical_num = -1,
 	.buttons[4].type = BUTTON_NORMAL,
@@ -782,8 +782,9 @@ static const dev_config_t init_config =
 	.leds[23].input_num = -1,
 	.leds[23].type = LED_NORMAL,
 
-	.rgb_effect = WS2812B_SIMHUB,
-	.rgb_count = 40,
+	.rgb_effect = WS2812B_STATIC,
+	.rgb_count = 0,
+	.rgb_brightness = 125,
 	.rgb_delay_ms = 20,
 		
 };

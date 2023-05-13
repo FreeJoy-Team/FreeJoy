@@ -44,7 +44,7 @@
 #include "usb_istr.h"
 #include "usb_pwr.h"
 #include "usb_cdc_conf.h"
-#include "cdc_data_handler.h"
+#include "simhub.h"
 
 #include "config.h"
 #include "crc16.h"
@@ -256,7 +256,7 @@ void SH_ProcessEndpData(void)
 {
 	if (receive_length > 0)
 	{
-		SH_ProcessIncomingData((uint8_t *)receive_buffer, receive_length, RB_GetPtr());
+		SH_ProcessIncomingData((uint8_t *)receive_buffer, receive_length);
 		memset((uint8_t *)receive_buffer, 0 ,64);
 		receive_length = 0;
 	}
@@ -264,16 +264,6 @@ void SH_ProcessEndpData(void)
 
 void EP4_OUT_Callback(void)
 {
-//	if (dev_config.rgb_effect == WS2812B_SIMHUB)// && SH_ReadyToReceiveData)
-//	{
-//		receive_length = USB_SIL_Read(CDC_DATA_OUT_ENDP_ADR, (uint8_t *)receive_buffer);
-//		//SH_ProcessIncomingData((uint8_t *)receive_buffer, receive_length, RB_GetPtr());
-//	}
-//	else
-//	{
-//		receive_length = USB_SIL_Read(CDC_DATA_OUT_ENDP_ADR, (uint8_t *)receive_buffer);
-//		//CDC_Send_DATA ((unsigned char*)receive_buffer,receive_length);
-//	}
 	receive_length = USB_SIL_Read(CDC_DATA_OUT_ENDP_ADR, (uint8_t *)receive_buffer);
 	
 	SetEPRxValid(CDC_DATA_OUT_ENDP_NUM);

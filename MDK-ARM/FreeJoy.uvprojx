@@ -539,9 +539,9 @@
               <FilePath>..\application\Inc\main.h</FilePath>
             </File>
             <File>
-              <FileName>cdc_data_handler.c</FileName>
+              <FileName>simhub.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\application\Src\cdc_data_handler.c</FilePath>
+              <FilePath>..\application\Src\simhub.c</FilePath>
             </File>
             <File>
               <FileName>bitmap.c</FileName>
@@ -1398,9 +1398,9 @@
               <FilePath>..\application\Inc\main.h</FilePath>
             </File>
             <File>
-              <FileName>cdc_data_handler.c</FileName>
+              <FileName>simhub.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\application\Src\cdc_data_handler.c</FilePath>
+              <FilePath>..\application\Src\simhub.c</FilePath>
             </File>
             <File>
               <FileName>bitmap.c</FileName>

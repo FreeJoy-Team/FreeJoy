@@ -375,8 +375,9 @@ typedef struct
 enum 
 {
 	WS2812B_STATIC = 0,
-	WS2812B_RAINBOW,
 	WS2812B_SIMHUB,
+	WS2812B_RAINBOW,
+	WS2812B_FLOW,
 };
 
 struct RGB
@@ -437,6 +438,7 @@ typedef struct
 	
 	uint8_t							rgb_effect;
 	uint8_t							rgb_count;
+	uint8_t							rgb_brightness;
 	uint16_t						rgb_delay_ms;
 	RGB_t 							rgb_leds[NUM_RGB_LEDS];
 	

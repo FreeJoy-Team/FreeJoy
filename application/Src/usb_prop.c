@@ -58,7 +58,7 @@ uint8_t Report_Buf[2];
 
 LINE_CODING linecoding =
   {
-    115200, /* baud rate*/
+    921600, /* baud rate*/
     0x00,   /* stop bits-1*/
     0x00,   /* parity - none*/
     0x08    /* no. of bits 8*/
