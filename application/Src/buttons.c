@@ -36,7 +36,7 @@ uint8_t												pov_pos[MAX_POVS_NUM];
 uint8_t												shifts_state = 0;
 uint8_t												a2b_first = 0;
 uint8_t												a2b_last = 0;
-uint8_t												button_mutex = 0;
+volatile uint8_t							button_mutex = 0;
 
 /**
   * @brief  Processing debounce for raw buttons input
