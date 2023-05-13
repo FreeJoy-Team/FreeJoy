@@ -18,7 +18,7 @@
 
 static const dev_config_t init_config =
 {
-	.firmware_version = 0x1714,		// do not change	
+	.firmware_version = 0x1720,		// do not change
 	/* 
 		Name of device in devices dispatcher
 	*/
@@ -35,7 +35,7 @@ static const dev_config_t init_config =
 	.device_name[10] = '.',
 	.device_name[11] = '7',
 	.device_name[12] = '.',
-	.device_name[13] = '1',
+	.device_name[13] = '2',
 	.device_name[14] = 0,
 	.device_name[15] = 0,
 	.device_name[16] = 0,
@@ -48,7 +48,7 @@ static const dev_config_t init_config =
 
 	.button_debounce_ms = 50,					// debounce time for all buttons
 	
-	.encoder_press_time_ms = 10,			// amount of milliseconds virtual button 
+	.encoder_press_time_ms = 20,			// amount of milliseconds virtual button 
 																		// will be pressed at encoder increment/decrement
 																		
 	.exchange_period_ms = 5,					// amount of millisecond between joystick data sending
@@ -57,6 +57,8 @@ static const dev_config_t init_config =
 	.button_timer2_ms = 200,					// amount of milliseconds of delay2 for a virtual button
 	.button_timer3_ms = 300,					// amount of milliseconds of delay3 for a virtual button
 	.a2b_debounce_ms = 50,
+	.button_polling_interval_ticks = 5,
+	.encoder_polling_interval_ticks = 1,
 	
 	/*
 		Device pins configuration. Available values:
@@ -66,10 +68,10 @@ static const dev_config_t init_config =
 		- BUTTON_COLUMN
 		- BUTTON_ROW
 	*/
-	.pins[0] 	= AXIS_ANALOG,					// PA0
-	.pins[1] 	= AXIS_ANALOG,					// PA1
-	.pins[2] 	= AXIS_ANALOG,					// PA2
-	.pins[3] 	= AXIS_ANALOG,					// PA3
+	.pins[0] 	= NOT_USED,					// PA0
+	.pins[1] 	= NOT_USED,					// PA1
+	.pins[2] 	= NOT_USED,					// PA2
+	.pins[3] 	= NOT_USED,					// PA3
 	.pins[4] 	= NOT_USED,							// PA4
 	.pins[5] 	= NOT_USED,							// PA5
 	.pins[6] 	= NOT_USED,							// PA6
@@ -89,10 +91,10 @@ static const dev_config_t init_config =
 	.pins[20] = NOT_USED,							// PB9
 	.pins[21] = NOT_USED,							// PB10
 	.pins[22] = NOT_USED,							// PB11
-	.pins[23] = BUTTON_GND,						// PB12
-	.pins[24] = BUTTON_GND,						// PB13
-	.pins[25] = BUTTON_GND,						// PB14
-	.pins[26] = BUTTON_GND,						// PB15
+	.pins[23] = NOT_USED,						// PB12
+	.pins[24] = NOT_USED,						// PB13
+	.pins[25] = NOT_USED,						// PB14
+	.pins[26] = NOT_USED,						// PB15
 	.pins[27] = NOT_USED,							// PC13
 	.pins[28] = NOT_USED,							// PC14
 	.pins[29] = NOT_USED,							// PC15
@@ -122,7 +124,7 @@ static const dev_config_t init_config =
 	.axis_config[0].deadband_size = 0,
 	.axis_config[0].channel = 0,
 	.axis_config[0].i2c_address = 0x48,
-	.axis_config[0].source_main = 0,
+	.axis_config[0].source_main = -1,
 	.axis_config[0].function = 0,
 	.axis_config[0].source_secondary = 0,
 	.axis_config[0].button1 = -1,
@@ -156,7 +158,7 @@ static const dev_config_t init_config =
 	.axis_config[1].deadband_size = 0,
 	.axis_config[1].channel = 0,
 	.axis_config[1].i2c_address = 0x48,
-	.axis_config[1].source_main = 1,
+	.axis_config[1].source_main = -1,
 	.axis_config[1].function = 0,
 	.axis_config[1].source_secondary = 0,
 	.axis_config[1].button1 = -1,
@@ -190,7 +192,7 @@ static const dev_config_t init_config =
 	.axis_config[2].deadband_size = 0,
 	.axis_config[2].i2c_address = 0x48,
 	.axis_config[2].channel = 0,
-	.axis_config[2].source_main = 2,
+	.axis_config[2].source_main = -1,
 	.axis_config[2].function = 0,
 	.axis_config[2].source_secondary = 0,
 	.axis_config[2].button1 = -1,
@@ -224,7 +226,7 @@ static const dev_config_t init_config =
 	.axis_config[3].deadband_size = 0,
 	.axis_config[3].channel = 0,
 	.axis_config[3].i2c_address = 0x48,
-	.axis_config[3].source_main = 3,
+	.axis_config[3].source_main = -1,
 	.axis_config[3].function = 0,
 	.axis_config[3].source_secondary = 0,
 	.axis_config[3].button1 = -1,
@@ -402,13 +404,13 @@ static const dev_config_t init_config =
 		- ENCODER_INPUT_A
 		- ENCODER_INPUT_B
 	*/
-	.buttons[0].physical_num = 12,
+	.buttons[0].physical_num = -1,
 	.buttons[0].type = BUTTON_NORMAL,
-	.buttons[1].physical_num = 13,
+	.buttons[1].physical_num = -1,
 	.buttons[1].type = BUTTON_NORMAL,
-	.buttons[2].physical_num = 14,
+	.buttons[2].physical_num = -1,
 	.buttons[2].type = BUTTON_NORMAL,
-	.buttons[3].physical_num = 15,
+	.buttons[3].physical_num = -1,
 	.buttons[3].type = BUTTON_NORMAL,
 	.buttons[4].physical_num = -1,
 	.buttons[4].type = BUTTON_NORMAL,
@@ -778,7 +780,12 @@ static const dev_config_t init_config =
 	.leds[22].input_num = -1,
 	.leds[22].type = LED_NORMAL,
 	.leds[23].input_num = -1,
-	.leds[23].type = LED_NORMAL,	
+	.leds[23].type = LED_NORMAL,
+
+	.rgb_effect = WS2812B_STATIC,
+	.rgb_count = 0,
+	.rgb_brightness = 125,
+	.rgb_delay_ms = 20,
 		
 };
 

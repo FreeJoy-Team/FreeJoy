@@ -31,6 +31,7 @@
 #include "buttons.h"
 #include "leds.h"
 #include "encoders.h"
+#include "led_effects.h"
 
 #include "usb_hw.h"
 #include "usb_lib.h"
@@ -72,7 +73,7 @@ int main(void)
 	
 	IO_Init(&dev_config);
 	 
-	EncodersInit(&dev_config);	
+	EncodersInit(&dev_config);	// add rgb timer check
 	ShiftRegistersInit(&dev_config);
 	RadioButtons_Init(&dev_config);
 	SequentialButtons_Init(&dev_config);		
@@ -80,10 +81,13 @@ int main(void)
 	// init sensors
 	AxesInit(&dev_config);
 	// start sequential periphery reading
-	Timers_Init(&dev_config);		
+	Timers_Init(&dev_config);
+	
+	uint8_t serial_num[12];
+	SerialNum(serial_num, 12);
 	
   while (1)
-  {		
+  {	
 		ButtonsDebounceProcess(&dev_config);
 		ButtonsReadLogical(&dev_config);
 		
@@ -92,6 +96,8 @@ int main(void)
 		analog_data_t tmp[8];
 		AnalogGet(NULL, tmp, NULL);
 		PWM_SetFromAxis(&dev_config, tmp);
+		
+		WS2812b_Process(&dev_config, serial_num, 12, GetMillis());
 		
 		// Enter flasher command received
 		if (bootloader > 0)

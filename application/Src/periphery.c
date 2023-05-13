@@ -99,7 +99,6 @@ void SysTick_Init(void) {
   */
 void Timers_Init(dev_config_t * p_dev_config)
 {
-	
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure;	
 	TIM_OCInitTypeDef  				TIM_OCInitStructure;
 	RCC_ClocksTypeDef RCC_Clocks;
@@ -155,7 +154,7 @@ void Timers_Init(dev_config_t * p_dev_config)
   TIM_OC4Init(TIM3, &TIM_OCInitStructure);
   TIM_OC4PreloadConfig(TIM3, TIM_OCPreload_Enable);	
 	
-	if (p_dev_config->pins[8] == LED_PWM)				// prevent conflict with encoder timer
+	if (p_dev_config->pins[8] == LED_PWM && p_dev_config->pins[10] != LED_RGB)				// prevent conflict with encoder and rgb timer
 	{
 		/* PWM TIM1 config */
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);		
@@ -224,14 +223,17 @@ void PWM_SetFromAxis(dev_config_t * p_dev_config, analog_data_t * axis_data)
 
 	/* PWM TIM1 config */
 	// Channel 3
-	if (p_dev_config->led_pwm_config[0].is_axis && p_dev_config->pins[8] == LED_PWM)		// prevent conflicts with encoder timer
+	if (p_dev_config->pins[8] == LED_PWM && p_dev_config->pins[10] != LED_RGB) // prevent conflicts with encoder and rgb timer
 	{
-		tmp32 = (axis_data[p_dev_config->led_pwm_config[0].axis_num] + 32767)/655;
-		TIM_SetCompare1(TIM1, tmp32 * p_dev_config->led_pwm_config[0].duty_cycle * (TIM1->ARR + 1) / 10000);
-  }
-	else if (p_dev_config->pins[8] == LED_PWM)																					// prevent conflicts with encoder timer
-	{
-		TIM_SetCompare1(TIM1, p_dev_config->led_pwm_config[0].duty_cycle * (TIM1->ARR + 1) / 100);
+		if (p_dev_config->led_pwm_config[0].is_axis)
+		{
+			tmp32 = (axis_data[p_dev_config->led_pwm_config[0].axis_num] + 32767)/655;
+			TIM_SetCompare1(TIM1, tmp32 * p_dev_config->led_pwm_config[0].duty_cycle * (TIM1->ARR + 1) / 10000);
+		}
+		else
+		{
+			TIM_SetCompare1(TIM1, p_dev_config->led_pwm_config[0].duty_cycle * (TIM1->ARR + 1) / 100);
+		}
 	}
 }
 
@@ -517,6 +519,10 @@ void IO_Init (dev_config_t * p_dev_config)
 			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
 			GPIO_InitStructure.GPIO_Pin = pin_config[i].pin;
 			GPIO_Init(pin_config[i].port, &GPIO_InitStructure);
+		}
+		else if (p_dev_config->pins[i] == LED_RGB && i == 10) // PA10
+		{
+			ws2812b_Init();
 		}
 		
 	}

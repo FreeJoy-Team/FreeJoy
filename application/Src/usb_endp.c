@@ -38,10 +38,13 @@
 
 /* Includes ------------------------------------------------------------------*/
 
+#include "usb_endp.h"
 #include "usb_hw.h"
 #include "usb_lib.h"
 #include "usb_istr.h"
 #include "usb_pwr.h"
+#include "usb_cdc_conf.h"
+#include "simhub.h"
 
 #include "config.h"
 #include "crc16.h"
@@ -60,6 +63,12 @@ volatile extern int64_t buttons_ticks;
 
 __IO uint8_t EP1_PrevXferComplete = 1;
 __IO uint8_t EP2_PrevXferComplete = 1;
+__IO uint8_t EP3_PrevXferComplete = 1;
+__IO uint8_t EP4_PrevXferComplete = 1;
+__IO uint8_t EP5_PrevXferComplete = 1;
+
+static uint8_t receive_buffer[CDC_DATA_SIZE];
+static uint32_t receive_length = 0;
 
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
@@ -227,6 +236,37 @@ void EP2_OUT_Callback(void)
  
 }
 
+
+/*******************************************************************************
+* Function Name  : EP4_OUT_Callback.
+* Description    : EP4 OUT Callback Routine.
+* Input          : None.
+* Output         : None.
+* Return         : None.
+*******************************************************************************/
+
+
+
+
+
+
+void SH_ProcessEndpData(void)
+{
+	if (receive_length > 0)
+	{
+		SH_ProcessIncomingData((uint8_t *)receive_buffer, receive_length);
+		memset((uint8_t *)receive_buffer, 0 ,64);
+		receive_length = 0;
+	}
+}
+
+void EP4_OUT_Callback(void)
+{
+	receive_length = USB_SIL_Read(CDC_DATA_OUT_ENDP_ADR, (uint8_t *)receive_buffer);
+	
+	SetEPRxValid(CDC_DATA_OUT_ENDP_NUM);
+}
+
 /*******************************************************************************
 * Function Name  : EP1_IN_Callback.
 * Description    : EP1 IN Callback Routine.
@@ -250,13 +290,24 @@ void EP2_IN_Callback(void)
 {
   EP2_PrevXferComplete = 1;
 }
+/*******************************************************************************
+* Function Name  : EP4_IN_Callback.
+* Description    : EP4 IN Callback Routine.
+* Input          : None.
+* Output         : None.
+* Return         : None.
+*******************************************************************************/
+void EP5_IN_Callback(void)
+{
+  EP5_PrevXferComplete = 1;
+}
 
 /*******************************************************************************
 * Function Name  : USB_CUSTOM_HID_SendReport.
 * Description    : 
 * Input          : None.
 * Output         : None.
-* Return         : 1 if success otherwise 0.
+* Return         : 0 if success otherwise -1.
 *******************************************************************************/
 int8_t USB_CUSTOM_HID_SendReport(uint8_t EP_num, uint8_t * data, uint8_t length)
 {
@@ -275,6 +326,42 @@ int8_t USB_CUSTOM_HID_SendReport(uint8_t EP_num, uint8_t * data, uint8_t length)
 			return 0;
 	}
 	return -1;
+}
+
+/*******************************************************************************
+* Function Name  : Send DATA .
+* Description    : send the data received from the STM32 to the PC through USB  
+* Input          : None.
+* Output         : None.
+* Return         : 0 if success otherwise -1.			// sdelal kak sverhu. ebanii v rot nahuia -1 vmesto 1 vo vremia success
+*******************************************************************************/
+int8_t CDC_Send_DATA (uint8_t *ptrBuffer, uint8_t Send_length)
+{
+  /*if max buffer is Not reached*/
+  if(EP5_PrevXferComplete && bDeviceState == CONFIGURED && Send_length < CDC_DATA_SIZE)     
+  {
+    /* send  packet*/
+		USB_SIL_Write(CDC_DATA_IN_ENDP_ADR, (unsigned char*)ptrBuffer, Send_length);
+    SetEPTxValid(CDC_DATA_IN_ENDP_NUM);
+		EP5_PrevXferComplete = 0;
+  }
+  else
+  {
+    return 0;
+  } 
+  return -1;
+}
+
+/*******************************************************************************
+* Function Name  : Is Ready To Send DATA .
+* Description    : Checking the port for readiness to send files. 
+* Input          : None.
+* Output         : None.
+* Return         : 1 if success otherwise 0.
+*******************************************************************************/
+uint8_t CDC_IsReadeToSend()
+{
+	return EP5_PrevXferComplete;
 }
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
 

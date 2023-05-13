@@ -51,6 +51,7 @@
 /* Exported define -----------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
 void Get_SerialNum(void);
+uint8_t SerialNum(uint8_t *str, uint8_t length);
 void Get_ProductStr(void);
 void Get_VidPid(void);
 uint8_t Get_ReportDesc(void);

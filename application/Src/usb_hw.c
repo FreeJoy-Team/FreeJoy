@@ -201,6 +201,34 @@ void Get_SerialNum(void)
 }
 
 /*******************************************************************************
+* Function Name  : SerialNum.
+* Description    : Get serial number.
+* Input          : Array ptr, length
+* Output         : Array ptr with serial num
+* Return         : 1 if success, otherwise -1.
+*******************************************************************************/
+uint8_t SerialNum(uint8_t *str, uint8_t length)
+{
+	if (length != 12) return 0;
+	
+	uint32_t Device_Serial0, Device_Serial1, Device_Serial2;
+  
+  Device_Serial0 = *(uint32_t*)ID1;
+  Device_Serial1 = *(uint32_t*)ID2;
+  Device_Serial2 = *(uint32_t*)ID3;
+  
+  Device_Serial0 += Device_Serial2;
+  
+  if (Device_Serial0 != 0)
+  {
+    IntToUnicode (Device_Serial0, str , 8);
+    IntToUnicode (Device_Serial1, str + 8, 4);
+		return 1;
+  }
+	return 0;
+}
+
+/*******************************************************************************
 * Function Name  : Get_ProductStr.
 * Description    : Create the product string descriptor.
 * Input          : None.
@@ -453,7 +481,5 @@ void USB_HW_DeInit(void)
 	
 	GPIOA->ODR &= ~(GPIO_Pin_11 | GPIO_Pin_12);
 }
-
-
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
 

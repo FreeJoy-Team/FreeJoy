@@ -170,6 +170,8 @@ enum
 	
 	MLX90363_CS,
 	SHIFT_REG_CLK,
+	
+	LED_RGB,
 };
 typedef int8_t pin_t;
 
@@ -370,6 +372,28 @@ typedef struct
 	
 } led_config_t;
 
+enum 
+{
+	WS2812B_STATIC = 0,
+	WS2812B_SIMHUB,
+	WS2812B_RAINBOW,
+	WS2812B_FLOW,
+};
+
+struct RGB
+{
+    uint8_t r, g, b;
+};
+
+struct HSV
+{
+    int16_t h;
+    uint8_t s, v;
+};
+
+typedef struct RGB RGB_t;
+typedef struct HSV HSV_t;
+
 
 
 /******************** DEVICE CONFIGURATION **********************/
@@ -391,7 +415,7 @@ typedef struct
 	uint16_t						button_timer1_ms;						// config packet 6				
 	uint16_t						button_timer2_ms;						// config packet 7
 	uint16_t						button_timer3_ms;						// config packet 8
-	uint16_t 						a2b_debounce_ms;						// config packet 9	
+	uint16_t 						a2b_debounce_ms;						// config packet 9
 	
 	// config 12-13-14
 	axis_to_buttons_t		axes_to_buttons[MAX_AXIS_NUM];
@@ -409,6 +433,14 @@ typedef struct
 	// config 16;
 	encoder_t						encoders[MAX_ENCODERS_NUM];
 	
+	uint8_t							button_polling_interval_ticks;
+	uint8_t							encoder_polling_interval_ticks;
+	
+	uint8_t							rgb_effect;
+	uint8_t							rgb_count;
+	uint8_t							rgb_brightness;
+	uint16_t						rgb_delay_ms;
+	RGB_t 							rgb_leds[NUM_RGB_LEDS];
 	
 }dev_config_t;
 
@@ -424,6 +456,7 @@ typedef struct
 	uint8_t							slow_encoder_cnt;
 	uint8_t							fast_encoder_cnt;
 	uint8_t							pwm_cnt;
+	uint8_t							rgb_cnt;
 	
 } app_config_t;
 
