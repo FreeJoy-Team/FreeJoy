@@ -368,6 +368,7 @@ typedef struct
 {
 	int8_t				input_num;
 	uint8_t				type: 3;
+	int8_t timer 	:4;
 	uint8_t				:0;
 	
 } led_config_t;
@@ -429,6 +430,7 @@ typedef struct
 	// config 15;
 	led_pwm_config_t		led_pwm_config[4];
 	led_config_t				leds[MAX_LEDS_NUM];
+	uint16_t						led_timer_ms[4];
 	
 	// config 16;
 	encoder_t						encoders[MAX_ENCODERS_NUM];

@@ -25,22 +25,62 @@
 #include "buttons.h"
 	
 uint8_t leds_state[MAX_LEDS_NUM];
+static int32_t time_last[4];
 	
 void LEDs_LogicalProcess (dev_config_t * p_dev_config)
 {
+	int32_t millis = GetMillis();
+	
 	for (uint8_t i=0; i<MAX_LEDS_NUM; i++)
 	{
 		if (p_dev_config->leds[i].input_num >= 0)
 		{
+			uint8_t but_state = logical_buttons_state[p_dev_config->leds[i].input_num].current_state;
 			switch (p_dev_config->leds[i].type)
 			{
 				default:
+					
 				case LED_NORMAL:
-					leds_state[i] = logical_buttons_state[p_dev_config->leds[i].input_num].current_state;
+					if (p_dev_config->leds[i].timer == -1 || !but_state)
+					{
+						leds_state[i] = but_state;
+					}
+					else if (but_state)
+					{
+						for (int j = 0; j < 4; j++)
+						{
+							if (p_dev_config->leds[i].timer == j)
+							{
+								if (millis - time_last[j] > p_dev_config->led_timer_ms[j])
+								{
+									leds_state[i] = !leds_state[i];
+									time_last[j] = millis;
+								}
+							}
+						}
+					}
 				break;
 				
 				case LED_INVERTED:
-					leds_state[i] = !logical_buttons_state[p_dev_config->leds[i].input_num].current_state;
+					if (p_dev_config->leds[i].timer == -1 || but_state)
+					{
+						leds_state[i] = !but_state;
+					}
+					else if (!but_state)
+					{
+						for (int j = 0; j < 4; j++)
+						{
+							if (p_dev_config->leds[i].timer == j)
+							{
+								if (millis - time_last[j] > p_dev_config->led_timer_ms[j])
+								{
+									leds_state[i] = !leds_state[i];
+									time_last[j] = millis;
+								}
+							}
+						}
+					}
+				
 				break;
 				
 			}
