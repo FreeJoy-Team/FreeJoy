@@ -30,12 +30,19 @@ static int32_t time_last[4];
 void LEDs_LogicalProcess (dev_config_t * p_dev_config)
 {
 	int32_t millis = GetMillis();
+	int8_t input_num = -1;
 	
 	for (uint8_t i=0; i<MAX_LEDS_NUM; i++)
 	{
-		if (p_dev_config->leds[i].input_num >= 0)
+		input_num = p_dev_config->leds[i].input_num;
+		if (input_num >= 0)
 		{
-			uint8_t but_state = logical_buttons_state[p_dev_config->leds[i].input_num].current_state;
+			uint8_t but_state = logical_buttons_state[input_num].current_state;
+			if (p_dev_config->buttons[input_num].is_inverted)
+			{
+				but_state = !but_state;
+			}
+			
 			switch (p_dev_config->leds[i].type)
 			{
 				default:
