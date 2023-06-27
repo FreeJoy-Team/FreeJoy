@@ -244,22 +244,6 @@ void EP2_OUT_Callback(void)
 * Output         : None.
 * Return         : None.
 *******************************************************************************/
-
-
-
-
-
-
-void SH_ProcessEndpData(void)
-{
-	if (receive_length > 0)
-	{
-		SH_ProcessIncomingData((uint8_t *)receive_buffer, receive_length);
-		memset((uint8_t *)receive_buffer, 0 ,64);
-		receive_length = 0;
-	}
-}
-
 void EP4_OUT_Callback(void)
 {
 	receive_length = USB_SIL_Read(CDC_DATA_OUT_ENDP_ADR, (uint8_t *)receive_buffer);
@@ -303,6 +287,23 @@ void EP5_IN_Callback(void)
 }
 
 /*******************************************************************************
+* Function Name  : SH_ProcessEndpData.
+* Description    : SH Process Endp Data.
+* Input          : None.
+* Output         : None.
+* Return         : None.
+*******************************************************************************/
+void SH_ProcessEndpData(void)
+{
+	if (receive_length > 0)
+	{
+		SH_ProcessIncomingData((uint8_t *)receive_buffer, receive_length);
+		memset((uint8_t *)receive_buffer, 0 ,64);
+		receive_length = 0;
+	}
+}
+
+/*******************************************************************************
 * Function Name  : USB_CUSTOM_HID_SendReport.
 * Description    : 
 * Input          : None.
@@ -342,8 +343,9 @@ int8_t CDC_Send_DATA (uint8_t *ptrBuffer, uint8_t Send_length)
   {
     /* send  packet*/
 		USB_SIL_Write(CDC_DATA_IN_ENDP_ADR, (unsigned char*)ptrBuffer, Send_length);
-    SetEPTxValid(CDC_DATA_IN_ENDP_NUM);
+		// should be in this order
 		EP5_PrevXferComplete = 0;
+		SetEPTxValid(CDC_DATA_IN_ENDP_NUM);
   }
   else
   {
@@ -364,4 +366,3 @@ uint8_t CDC_IsReadeToSend()
 	return EP5_PrevXferComplete;
 }
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
-

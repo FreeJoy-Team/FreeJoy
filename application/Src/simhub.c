@@ -399,12 +399,16 @@ void Command_RGBLEDSCount(uint8_t count)
 void Command_RGBLEDSData(RGB_t *rgb, uint8_t count)
 {
 	SH_RGBDataProcess(rgb, count);
-	while (1) {
+	// "while" - it seems necessary, but it works without
+	int mil = GetMillis();	
+	//do
+	//{
 		if (CDC_IsReadeToSend()) {
 			SH_writeByte(0x15);
-			break;
+			//break;
 		}
-	}
+	//}
+	//while (GetMillis() - mil < 20);
 }
 
 void Command_RGBMatrixData()
