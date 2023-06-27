@@ -205,11 +205,11 @@ void Get_SerialNum(void)
 * Description    : Get serial number.
 * Input          : Array ptr, length
 * Output         : Array ptr with serial num
-* Return         : 1 if success, otherwise -1.
+* Return         : 1 if success, otherwise 0.
 *******************************************************************************/
 uint8_t SerialNum(uint8_t *str, uint8_t length)
 {
-	if (length != 12) return 0;
+	if (length != 24) return 0;
 	
 	uint32_t Device_Serial0, Device_Serial1, Device_Serial2;
   
@@ -222,7 +222,7 @@ uint8_t SerialNum(uint8_t *str, uint8_t length)
   if (Device_Serial0 != 0)
   {
     IntToUnicode (Device_Serial0, str , 8);
-    IntToUnicode (Device_Serial1, str + 8, 4);
+    IntToUnicode (Device_Serial1, str + 16, 4);
 		return 1;
   }
 	return 0;

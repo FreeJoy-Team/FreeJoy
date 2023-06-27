@@ -83,11 +83,11 @@ int main(void)
 	// start sequential periphery reading
 	Timers_Init(&dev_config);
 	
-	uint8_t serial_num[12];
-	SerialNum(serial_num, 12);
+	uint8_t serial_num[24];
+	SerialNum(serial_num, 24);
 	
   while (1)
-  {	
+  {
 		ButtonsDebounceProcess(&dev_config);
 		ButtonsReadLogical(&dev_config);
 		
@@ -97,7 +97,7 @@ int main(void)
 		AnalogGet(NULL, tmp, NULL);
 		PWM_SetFromAxis(&dev_config, tmp);
 		
-		WS2812b_Process(&dev_config, serial_num, 12, GetMillis());
+		WS2812b_Process(&dev_config, serial_num, 24, GetMillis());
 		
 		// Enter flasher command received
 		if (bootloader > 0)
