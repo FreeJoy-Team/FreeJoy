@@ -67,8 +67,8 @@ __IO uint8_t EP3_PrevXferComplete = 1;
 __IO uint8_t EP4_PrevXferComplete = 1;
 __IO uint8_t EP5_PrevXferComplete = 1;
 
-static uint8_t receive_buffer[CDC_DATA_SIZE];
-static uint32_t receive_length = 0;
+static volatile uint8_t receive_buffer[CDC_DATA_SIZE];
+static volatile uint32_t receive_length = 0;
 
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/

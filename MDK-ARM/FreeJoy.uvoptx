@@ -205,11 +205,6 @@
           <WinNumber>1</WinNumber>
           <ItemText>shifts_state</ItemText>
         </Ww>
-        <Ww>
-          <count>10</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>serial_num</ItemText>
-        </Ww>
       </WatchWindow1>
       <MemoryWindow1>
         <Mm>
