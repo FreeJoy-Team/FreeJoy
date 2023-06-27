@@ -276,6 +276,19 @@ void SH_writeCharArr(const char *str, uint8_t length) // add length check
 	CDC_Send_DATA ((uint8_t *)data, sizeof(data));
 }
 
+// read simhub data up to terminator, fill char arr and return string length
+uint8_t ReadStringUntil(char *str, char terminator1, char terminator2)
+{
+	int16_t c = SH_Read();
+	uint8_t i = 0;
+	
+	while (c >= 0 && c != terminator1 && c != terminator2)
+	{
+		str[i++] = (char)c;
+		c = SH_Read();
+	}
+	return i;
+}
 
 
 // RGB LEDs process
@@ -384,8 +397,8 @@ void Command_UniqueId(char * id, uint8_t length)
 }
 void Command_Features()
 {
-	uint8_t data[12] = {0x06, 1, 'N', 0x20, 0x06, 1, 'I', 0x20, 0x06, 1, '\n', 0x20};
-	CDC_Send_DATA ((uint8_t *)data, 12);
+	uint8_t data[16] = {0x06, 1, 'N', 0x20, 0x06, 1, 'I', 0x20, 0x06, 1, 'X', 0x20, 0x06, 1, '\n', 0x20};
+	CDC_Send_DATA ((uint8_t *)data, 16);
 }
 void Command_TM1638Data(){}
 void Command_Motors(){}
@@ -426,21 +439,40 @@ void Command_CustomProtocolData(){} // empty?
 void Command_Shutdown(uint8_t leds_count)
 {
 	RGB_t rgb[leds_count];
+	for (uint8_t i = 0; i < leds_count; i ++)
+	{
+		rgb[i].r = 0;
+		rgb[i].g = 0;
+		rgb[i].b = 0;
+	}
 	ws2812b_SendRGB(rgb, leds_count);
+}
+void Command_ExpandedCommandsList()
+{
+	uint8_t data[15] = {//0x06, 8, 'm', 'c', 'u', 't', 'y', 'p', 'e', '\n', 0x20,
+											0x06, 10, 'k', 'e', 'e', 'p', 'a', 'l', 'i', 'v', 'e', '\n', 0x20,
+											0x08, '\n'};
+	CDC_Send_DATA ((uint8_t *)data, 15);
+}
+void Command_MCUType()
+{
+	char type[5] = "STM32";
+	SH_writeCharArr(type, 5);
 }
 //////////// Commands STOP
 
 
 
-//static uint64_t last_activity = 0;
-//static uint8_t actived = 1;
 void SH_Process(dev_config_t * p_dev_config, uint8_t * serial_num, uint8_t sn_length)
 {
+	static int64_t last_activity = 0;
+	static uint8_t actived = 1;
+	
 	if (SH_DataAvailable() > 0 && CDC_IsReadeToSend()) {
 		if (SH_Read() == SH_MESSAGE_HEADER)
 		{
-			//last_activity = GetMillis();
-			//actived = 1;
+			last_activity = GetMillis();
+			actived = 1;
 			// Read command
 			uint8_t loop_opt = SH_Read();
 
@@ -466,22 +498,18 @@ void SH_Process(dev_config_t * p_dev_config, uint8_t * serial_num, uint8_t sn_le
 			else if (loop_opt == 'P') Command_CustomProtocolData();
 			else if (loop_opt == 'X')
 			{
-//				String xaction = FlowSerialReadStringUntil(' ', '\n');
-//				if (xaction == F("list")) Command_ExpandedCommandsList();
-//				else if (xaction == F("mcutype")) Command_MCUType();
-//				else if (xaction == F("tach")) Command_TachData();
-//				else if (xaction == F("speedo")) Command_SpeedoData();
-//				else if (xaction == F("boost")) Command_BoostData();
-//				else if (xaction == F("temp")) Command_TempData();
-//				else if (xaction == F("fuel")) Command_FuelData();
-//				else if (xaction == F("cons")) Command_ConsData();
-//				else if (xaction == F("encoderscount")) Command_EncodersCount();
+				char xaction[SH_PACKET_SIZE - 8];
+				uint8_t length;
+				length = ReadStringUntil(xaction, ' ', '\n');	// unsafe
+				
+				if (strncmp(xaction, "list", length) == 0) Command_ExpandedCommandsList();
+				//else if (strncmp(xaction, "mcutype", length) == 0) Command_MCUType();
 			}
 		}
 	}
 	
-//	if (actived && (GetMillis() - last_activity > 5000)) {		// before this need to added loop_opt == 'X', "list" and "keepalive"
-//		Command_Shutdown(p_dev_config->rgb_count);
-//		actived = 0;
-//	}
+	if (actived && (GetMillis() - last_activity > 5000)) {
+		Command_Shutdown(p_dev_config->rgb_count);
+		actived = 0;
+	}
 }

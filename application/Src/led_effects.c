@@ -55,7 +55,18 @@ void WS2812b_Process(dev_config_t * p_dev_config, uint8_t * serial_num, uint8_t 
 	if (first_start) {
 		// reset leds color
 		if(p_dev_config->rgb_effect != WS2812B_STATIC) {
-			ws2812b_SendRGB(p_dev_config->rgb_leds, p_dev_config->rgb_count);
+			uint8_t leds_count = p_dev_config->rgb_count;
+			RGB_t rgb[leds_count];
+			for (uint8_t i = 0; i < leds_count; i ++)
+			{
+				rgb[i].r = 0;
+				rgb[i].g = 0;
+				rgb[i].b = 0;
+			}
+			ws2812b_SendRGB(rgb, leds_count);
+			// load saved color, not reset. not sure about this, for some it will be a feature and for others it will be a bug
+			// for reset comment this and uncomment ^^
+			//ws2812b_SendRGB(p_dev_config->rgb_leds, leds_count);
 		}
 		
 		if (p_dev_config->rgb_effect == WS2812B_RAINBOW) {
@@ -66,6 +77,7 @@ void WS2812b_Process(dev_config_t * p_dev_config, uint8_t * serial_num, uint8_t 
 			}
 		}
 		first_start = 0;
+		return;
 	}
 	
 	if (p_dev_config->rgb_effect == WS2812B_SIMHUB) 
