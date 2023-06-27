@@ -32,7 +32,7 @@
 // Internal
 //------------------------------------------------------------
 
-#define MIN(a, b)   ({ typeof(a) a1 = a; typeof(b) b1 = b; a1 < b1 ? a1 : b1; })
+#define MIN(a, b)   ({ __typeof__(a) a1 = a; __typeof__(b) b1 = b; a1 < b1 ? a1 : b1; })
 
 #if defined(__ICCARM__)
 __packed struct PWM
@@ -168,7 +168,7 @@ static void DMASend(SrcFilter_t *filter, void *src, unsigned count)
             SrcFilterNull(NULL, &pwm, NULL, end - pwm);
 
         // Start transfer
-        DMA_SetCurrDataCounter(WS2812B_DMA_CHANNEL, sizeof(DMABuffer) / sizeof(uint16_t));
+        DMA_SetCurrDataCounter(WS2812B_DMA_CHANNEL, (uint16_t)sizeof(DMABuffer) / sizeof(uint16_t));
 
         TIM_Cmd(WS2812B_TIM, ENABLE);
         DMA_Cmd(WS2812B_DMA_CHANNEL, ENABLE);
@@ -298,7 +298,7 @@ void ws2812b_Init(void)
     DMA_InitStruct.DMA_PeripheralBaseAddr = (uint32_t) & WS2812B_TIM_DMA_CCR;
     DMA_InitStruct.DMA_MemoryBaseAddr = (uint32_t) DMABuffer;
     DMA_InitStruct.DMA_DIR = DMA_DIR_PeripheralDST;
-    DMA_InitStruct.DMA_BufferSize = sizeof(DMABuffer) / sizeof(uint16_t);
+    DMA_InitStruct.DMA_BufferSize = (uint16_t)sizeof(DMABuffer) / sizeof(uint16_t);
     DMA_InitStruct.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
     DMA_InitStruct.DMA_MemoryInc = DMA_MemoryInc_Enable;
     DMA_InitStruct.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;

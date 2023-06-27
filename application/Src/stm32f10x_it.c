@@ -508,7 +508,7 @@ void DMA1_Channel3_IRQHandler(void)
 		DMA_Cmd(DMA1_Channel3, DISABLE);
 		
 		// wait SPI transfer to end
-		while(!SPI1->SR & SPI_SR_TXE);
+		while(!(SPI1->SR & SPI_SR_TXE));
 		while(SPI1->SR & SPI_SR_BSY);
 		
 		// searching for active sensor
