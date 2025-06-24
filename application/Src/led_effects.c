@@ -32,13 +32,27 @@
 // in the future, it should be replaced with this one https://github.com/Crazy-Geeks/STM32-ARGB-DMA
 // it needs to be adapted from HAL to SPL
 
-static const uint8_t RAINBOW_FADE_STEP = 5;
+// static const uint8_t RAINBOW_FADE_STEP = 5;
+#define FADE_STEP				 24//ceil(RAINBOW_FADE_STEP * 255.0f / m_brightness)
+
+static uint8_t current_fade_step = FADE_STEP;
 static uint16_t AlgStep2, AlgStep3 = 0;
 static uint8_t static_effect_set = 0;
 static int32_t ticks = 0;
 static uint8_t first_start = 1;
 
-RGB_t RainbowColors[7] =
+static const RGB_t RB_COLORS[7] =
+{
+  {255,   0, 		0},        	// red
+  {255, 165,		0},        	// orange
+  {255, 255, 		0},        	// yellow
+  {0, 	255,  	0},        	// green
+  {0, 	255,  255},      		// cyan
+  {0,   	0,  255},      		// blue
+  {255, 	0,  255}       		// violet
+};
+
+static RGB_t RainbowColors[7] =
 {
   {255,   0, 		0},        	// red
   {255, 165,		0},        	// orange
@@ -52,30 +66,58 @@ RGB_t RainbowColors[7] =
 
 void WS2812b_Process(dev_config_t * p_dev_config, uint8_t * serial_num, uint8_t sn_length, int32_t current_ticks)
 {
+	if (!ws2812b_IsReady()) return;
+	
 	if (first_start) {
-		// reset leds color
-		if(p_dev_config->rgb_effect != WS2812B_STATIC) {
-			uint8_t leds_count = p_dev_config->rgb_count;
-			RGB_t rgb[leds_count];
-			for (uint8_t i = 0; i < leds_count; i ++)
+		// brightness
+		if (p_dev_config->rgb_effect == WS2812B_RAINBOW) {
+			for (uint8_t i = 0; i < NUM_RGB_LEDS; i ++)
+			{
+				p_dev_config->rgb_leds[i].r = 0;
+				p_dev_config->rgb_leds[i].g = 0;
+				p_dev_config->rgb_leds[i].b = 0;
+			}
+			
+			for (uint8_t i = 0; i < 7; i++) {
+				RainbowColors[i].r = (uint8_t)((uint16_t)(RB_COLORS[i].r * p_dev_config->rgb_brightness) / 255);
+				RainbowColors[i].g = (uint8_t)((uint16_t)(RB_COLORS[i].g * p_dev_config->rgb_brightness) / 255);
+				RainbowColors[i].b = (uint8_t)((uint16_t)(RB_COLORS[i].b * p_dev_config->rgb_brightness) / 255);
+			}
+			current_fade_step = FADE_STEP * p_dev_config->rgb_brightness / 255 + 1;
+			ws2812b_SendRGB(p_dev_config->rgb_leds, NUM_RGB_LEDS);
+		}
+		else if (p_dev_config->rgb_effect == WS2812B_STATIC || p_dev_config->rgb_effect == WS2812B_FLOW)
+		{
+			// reset leds color
+			RGB_t rgb[NUM_RGB_LEDS];
+			for (uint8_t i = 0; i < NUM_RGB_LEDS; i ++)
 			{
 				rgb[i].r = 0;
 				rgb[i].g = 0;
 				rgb[i].b = 0;
 			}
-			ws2812b_SendRGB(rgb, leds_count);
-			// load saved color, not reset. not sure about this, for some it will be a feature and for others it will be a bug
-			// for reset comment this and uncomment ^^
-			//ws2812b_SendRGB(p_dev_config->rgb_leds, leds_count);
+			
+			for (uint8_t i = 0; i < p_dev_config->rgb_count; i++) 
+			{
+				p_dev_config->rgb_leds[i].r = (uint8_t)((uint16_t)(p_dev_config->rgb_leds[i].r * p_dev_config->rgb_brightness) / 255);
+				p_dev_config->rgb_leds[i].g = (uint8_t)((uint16_t)(p_dev_config->rgb_leds[i].g * p_dev_config->rgb_brightness) / 255);
+				p_dev_config->rgb_leds[i].b = (uint8_t)((uint16_t)(p_dev_config->rgb_leds[i].b * p_dev_config->rgb_brightness) / 255);
+			}
+			ws2812b_SendRGB(rgb, NUM_RGB_LEDS);
+		}
+		else
+		{
+			// reset leds color
+			RGB_t rgb[NUM_RGB_LEDS];
+			for (uint8_t i = 0; i < NUM_RGB_LEDS; i ++)
+			{
+				rgb[i].r = 0;
+				rgb[i].g = 0;
+				rgb[i].b = 0;
+			}
+			ws2812b_SendRGB(rgb, NUM_RGB_LEDS);
 		}
 		
-		if (p_dev_config->rgb_effect == WS2812B_RAINBOW) {
-			for (uint8_t i = 0; i < 7; i++) {
-				RainbowColors[i].r = (uint8_t)((uint16_t)(RainbowColors[i].r * p_dev_config->rgb_brightness) / 255);
-				RainbowColors[i].g = (uint8_t)((uint16_t)(RainbowColors[i].g * p_dev_config->rgb_brightness) / 255);
-				RainbowColors[i].b = (uint8_t)((uint16_t)(RainbowColors[i].b * p_dev_config->rgb_brightness) / 255);
-			}
-		}
 		first_start = 0;
 		return;
 	}
@@ -86,7 +128,7 @@ void WS2812b_Process(dev_config_t * p_dev_config, uint8_t * serial_num, uint8_t 
 	}
 	else
 	{
-		if (ws2812b_IsReady() && ticks < current_ticks && !static_effect_set)
+		if (ticks < current_ticks && !static_effect_set)
 		{
 			SetEffect(p_dev_config->rgb_leds, p_dev_config->rgb_count, p_dev_config->rgb_effect);
 			ticks = current_ticks + p_dev_config->rgb_delay_ms;
@@ -94,6 +136,11 @@ void WS2812b_Process(dev_config_t * p_dev_config, uint8_t * serial_num, uint8_t 
 	}
 }
 
+void UpdateLEDs(void)
+{
+	static_effect_set = 0;
+	first_start = 1;
+}
 
 void StepChange(uint8_t *desc, uint8_t *source, uint8_t Step)
 {
@@ -154,7 +201,7 @@ void SetEffect(RGB_t *rgb, unsigned count, uint8_t effect)
 			}
 
 			// smooth color change of the zero pixel with a step of no more than RAINBOW_FADE_STEP
-			StepChangeColor(rgb, (RGB_t *) &(RainbowColors[AlgStep3]), RAINBOW_FADE_STEP);
+			StepChangeColor(rgb, (RGB_t *) &(RainbowColors[AlgStep3]), current_fade_step);
 			
 			ws2812b_SendRGB(rgb, count);
 		}

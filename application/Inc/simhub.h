@@ -11,43 +11,36 @@
 
 #include "common_types.h"
 
-
-#define SH_MESSAGE_HEADER							0x03
 #define SH_PACKET_SIZE								32
-#define MAX_RING_BIF_SIZE 						64	// 32? // max 255 because uint8_t
-#define SH_VERSION 										'j'
+#define MAX_RING_BIF_SIZE 						128//64	// 32?
+
+typedef struct
+{
+	uint8_t *buffer;
+	uint16_t idxIn;
+	uint16_t idxOut;
+	uint16_t size;
+} ring_buf_t;
 
 
-//typedef struct
-//{
-//	uint8_t size;
-//	uint8_t read_index;
-//	uint8_t buffer[MAX_RING_BIF_SIZE];
-//} ring_buf_t;
-///* DONT USE DIRECTLY */
-//uint8_t RB_WriteIndex(const ring_buf_t *b);
-///* Return the size of the buffer */
-//uint8_t RB_Size(ring_buf_t *b);
-///* Access the buffer using array syntax, not interrupt safe */
-//uint8_t RB_MaxSize(ring_buf_t *b);
-///* Return true if the buffer is full */
-//uint8_t RB_IsFull(ring_buf_t *b);
-///* Return true if the buffer is empty */
-//uint8_t RB_IsEmpty(ring_buf_t *b);
-///* Reset the buffer to an empty state */
-//void RB_Clear(ring_buf_t *b);
-///* Push a data at the end of the buffer. Return 1 if success, otherwise 0*/
-//uint8_t RB_Push(uint8_t value, ring_buf_t *b);
-///* Push a array data at the end of the buffer. Return 1 if success, otherwise 0*/
-//uint8_t RB_PushArr(uint8_t *arr, uint8_t length, ring_buf_t *b);
-///* Pop the data at the beginning of the buffer and return it */
-//uint8_t RB_Pop(ring_buf_t *b);
-///* Pop the data at the beginning of the buffer. Return 1 if success, otherwise 0 */
-//uint8_t RB_PopErrCheck(uint8_t *value, ring_buf_t *b);
-///* Return pointer to Ring Buffer */
-//ring_buf_t * RB_GetPtr(void);
+typedef enum 
+{
+    RING_ERROR = 0,
+    RING_SUCCESS = !RING_ERROR
+} RB_ErrorStatus_t;
 
-void SH_ProcessIncomingData(uint8_t *raw_serial_data, uint8_t size);
+
+void RB_Push(uint8_t symbol, ring_buf_t* buf);
+uint8_t RB_Pop(ring_buf_t *buf);
+uint16_t RB_Size(ring_buf_t *buf);
+//int32_t RING_ShowSymbol(uint16_t symbolNumber ,RING_buffer_t *buf);
+void RB_Clear(ring_buf_t* buf);
+RB_ErrorStatus_t RB_Init(ring_buf_t *ring, uint8_t *buf, uint16_t size);
+ring_buf_t * RB_GetPtr(void);
+
+
+uint8_t SH_ProcessIncomingData(uint8_t *raw_serial_data, uint8_t size);
+uint16_t SH_BufferFreeSize(void);
 
 void SH_Process(dev_config_t * p_dev_config, uint8_t * serial_num, uint8_t sn_length);
 

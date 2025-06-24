@@ -12,5 +12,6 @@
 
 void WS2812b_Process(dev_config_t * p_dev_config, uint8_t * serial_num, uint8_t sn_length, int32_t current_ticks);
 void SetEffect(RGB_t *rgb, unsigned count, uint8_t effect);
+void UpdateLEDs(void);
 
 #endif
