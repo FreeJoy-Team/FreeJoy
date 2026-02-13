@@ -18,7 +18,7 @@
 
 static const dev_config_t init_config =
 {
-	.firmware_version = 0x1720,		// do not change
+	.firmware_version = 0x1730,		// do not change
 	/* 
 		Name of device in devices dispatcher
 	*/
@@ -48,7 +48,7 @@ static const dev_config_t init_config =
 
 	.button_debounce_ms = 50,					// debounce time for all buttons
 	
-	.encoder_press_time_ms = 20,			// amount of milliseconds virtual button 
+	.encoder_press_time_ms = 20,			// amount of milliseconds virtual button
 																		// will be pressed at encoder increment/decrement
 																		
 	.exchange_period_ms = 5,					// amount of millisecond between joystick data sending
@@ -59,7 +59,7 @@ static const dev_config_t init_config =
 	.a2b_debounce_ms = 50,
 	.button_polling_interval_ticks = 5,
 	.encoder_polling_interval_ticks = 1,
-	
+
 	/*
 		Device pins configuration. Available values:
 		- AXIS_ANALOG (only for pins 0-7)
@@ -804,8 +804,8 @@ static const dev_config_t init_config =
 	.leds[22].timer = -1,
 	.leds[23].input_num = -1,
 	.leds[23].type = LED_NORMAL,
-	.leds[23].timer = -1,	
-	
+	.leds[23].timer = -1,
+
 	.led_timer_ms[0] = 50,
 	.led_timer_ms[1] = 100,
 	.led_timer_ms[2] = 150,
