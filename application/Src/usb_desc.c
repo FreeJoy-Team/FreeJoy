@@ -380,6 +380,11 @@ uint8_t CustomHID_ReportDescriptor[CustomHID_SIZ_REPORT_DESC] =
 		0x95, 0x3f,                    //   REPORT_COUNT (63)
 		0x91, 0x00,                    //   OUTPUT (Data,Ary,Abs)
 		
+		0x85, REPORT_ID_LED,    	 	 //   REPORT_ID (6)	
+    0x09, 0x0A,                    //   USAGE (Vendor Usage 10)
+    0x75, 0x08,                    //   REPORT_SIZE (8)
+		0x95, 0x04,                    //   REPORT_COUNT (4)
+		0x91, 0x00,                    //   OUTPUT (Data,Ary,Abs)
 		
 		0xc0,                           // END_COLLECTION
   }; /* CustomHID_ReportDescriptor */

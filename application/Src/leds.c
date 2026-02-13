@@ -25,13 +25,14 @@
 #include "buttons.h"
 	
 uint8_t leds_state[MAX_LEDS_NUM];
+external_led_data_t external_led_data;
 static int32_t time_last[4];
-	
+
 void LEDs_LogicalProcess (dev_config_t * p_dev_config)
 {
 	int32_t millis = GetMillis();
 	int8_t input_num = -1;
-	
+
 	for (uint8_t i=0; i<MAX_LEDS_NUM; i++)
 	{
 		input_num = p_dev_config->leds[i].input_num;
@@ -42,11 +43,11 @@ void LEDs_LogicalProcess (dev_config_t * p_dev_config)
 			{
 				but_state = !but_state;
 			}
-			
+
 			switch (p_dev_config->leds[i].type)
 			{
 				default:
-					
+
 				case LED_NORMAL:
 					if (p_dev_config->leds[i].timer == -1 || !but_state)
 					{
@@ -87,10 +88,14 @@ void LEDs_LogicalProcess (dev_config_t * p_dev_config)
 							}
 						}
 					}
-				
+
 				break;
 				
 			}
+		}
+		else if (p_dev_config->leds[i].input_num == SOURCE_EXTERNAL)
+		{
+			leds_state[i] = (external_led_data.leds_state >> i) & 1;
 		}
 	}
 }
