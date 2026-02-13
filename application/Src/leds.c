@@ -36,12 +36,16 @@ void LEDs_LogicalProcess (dev_config_t * p_dev_config)
 	for (uint8_t i=0; i<MAX_LEDS_NUM; i++)
 	{
 		input_num = p_dev_config->leds[i].input_num;
-		if (input_num >= 0)
+		if (input_num >= 0 || input_num == SOURCE_EXTERNAL)
 		{
-			uint8_t but_state = logical_buttons_state[input_num].current_state;
-			if (p_dev_config->buttons[input_num].is_inverted)
+			uint8_t state;
+			if (input_num == SOURCE_EXTERNAL)
 			{
-				but_state = !but_state;
+				state =  (external_led_data.leds_state >> i) & 1;
+			}
+			else {
+				uint8_t but_state = logical_buttons_state[input_num].current_state;
+				state = (p_dev_config->buttons[input_num].is_inverted) ? !but_state : but_state;
 			}
 
 			switch (p_dev_config->leds[i].type)
@@ -49,11 +53,11 @@ void LEDs_LogicalProcess (dev_config_t * p_dev_config)
 				default:
 
 				case LED_NORMAL:
-					if (p_dev_config->leds[i].timer == -1 || !but_state)
+					if (p_dev_config->leds[i].timer == -1 || !state)
 					{
-						leds_state[i] = but_state;
+						leds_state[i] = state;
 					}
-					else if (but_state)
+					else if (state)
 					{
 						for (int j = 0; j < 4; j++)
 						{
@@ -70,11 +74,11 @@ void LEDs_LogicalProcess (dev_config_t * p_dev_config)
 				break;
 				
 				case LED_INVERTED:
-					if (p_dev_config->leds[i].timer == -1 || but_state)
+					if (p_dev_config->leds[i].timer == -1 || state)
 					{
-						leds_state[i] = !but_state;
+						leds_state[i] = !state;
 					}
-					else if (!but_state)
+					else if (!state)
 					{
 						for (int j = 0; j < 4; j++)
 						{
@@ -92,10 +96,6 @@ void LEDs_LogicalProcess (dev_config_t * p_dev_config)
 				break;
 				
 			}
-		}
-		else if (p_dev_config->leds[i].input_num == SOURCE_EXTERNAL)
-		{
-			leds_state[i] = (external_led_data.leds_state >> i) & 1;
 		}
 	}
 }
