@@ -559,6 +559,16 @@
               <FileType>1</FileType>
               <FilePath>..\application\Src\ws2812b.c</FilePath>
             </File>
+            <File>
+              <FileName>uart.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>C:\Users\123\Desktop\rgb pedal\application\Src\uart.c</FilePath>
+            </File>
+            <File>
+              <FileName>nrf24l01.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\application\Src\nrf24l01.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -742,6 +752,11 @@
               <FileName>stm32f10x_i2c.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Drivers\STM32F10x_StdPeriph_Driver\src\stm32f10x_i2c.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f10x_usart.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>C:\Users\123\Desktop\rgb pedal\Drivers\STM32F10x_StdPeriph_Driver\src\stm32f10x_usart.c</FilePath>
             </File>
             <File>
               <FileName>stm32f10x_conf.h</FileName>
@@ -1419,6 +1434,16 @@
               <FileType>1</FileType>
               <FilePath>..\application\Src\ws2812b.c</FilePath>
             </File>
+            <File>
+              <FileName>uart.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>C:\Users\123\Desktop\rgb pedal\application\Src\uart.c</FilePath>
+            </File>
+            <File>
+              <FileName>nrf24l01.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\application\Src\nrf24l01.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1992,6 +2017,11 @@
                   </Cads>
                 </FileArmAds>
               </FileOption>
+            </File>
+            <File>
+              <FileName>stm32f10x_usart.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>C:\Users\123\Desktop\rgb pedal\Drivers\STM32F10x_StdPeriph_Driver\src\stm32f10x_usart.c</FilePath>
             </File>
             <File>
               <FileName>stm32f10x_conf.h</FileName>

@@ -154,6 +154,11 @@ void AppConfigInit (dev_config_t * p_dev_config)
 		app_config.rgb_cnt++;
 	}
 	
+	if (p_dev_config->pins[9] == UART_TX)
+	{
+		app_config.uart_tx_used = 1;
+	}
+	
 	for (int i=0; i<MAX_BUTTONS_NUM; i++)
 	{
 		if ((p_dev_config->buttons[i].type) == ENCODER_INPUT_A &&  i > prev_a)

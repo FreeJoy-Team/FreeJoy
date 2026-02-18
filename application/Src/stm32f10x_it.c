@@ -23,6 +23,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
+#include "stm32f10x_usart.h"
 
 #include "usb_istr.h"
 #include "usb_lib.h"
@@ -38,6 +39,7 @@
 #include "ads1115.h"
 #include "as5600.h"
 #include "config.h"
+#include "uart.h"
 
 /** @addtogroup STM32F10x_StdPeriph_Template
   * @{
@@ -51,11 +53,14 @@
 #define SENSORS_PERIOD_TICKS								4
 //#define BUTTONS_PERIOD_TICKS								4
 //#define ENCODERS_PERIOD_TICKS								1
+#define UART_PERIOD_TICKS										20
 
 /* Private variables ---------------------------------------------------------*/
 
 static joy_report_t 			joy_report;
 static params_report_t 	params_report;
+static uint8_t uart_message_code = 0;
+static uart_report_t uart_report;
 
 volatile int32_t millis = 0;
 volatile int32_t joy_millis = 0; 
@@ -64,6 +69,7 @@ volatile int64_t encoder_ticks = 0;
 volatile int64_t adc_ticks = 0;
 volatile int64_t sensors_ticks = 1;
 volatile int64_t buttons_ticks = 0;
+volatile int64_t uart_ticks = 0;
 volatile int status = 0;
 extern dev_config_t dev_config;
 
@@ -261,6 +267,26 @@ void TIM2_IRQHandler(void)
 					report = !report;
 				}
 			}
+		}
+		
+		if (tmp_app_config.uart_tx_used && Ticks - uart_ticks >= UART_PERIOD_TICKS) // UART transmit
+		{
+			uart_ticks = Ticks;
+			
+			AnalogGet(uart_report.axis_data, NULL, NULL);	
+			
+			uart_report.header = 'H';
+			uart_report.separator = '-';
+			uart_report.message_code = uart_message_code;
+			
+			ButtonsGet(joy_report.button_data, NULL, NULL, NULL);
+			memcpy((uint8_t *)&uart_report.buttons_data, joy_report.button_data, MAX_BUTTONS_NUM/8);
+			
+			uart_report.crc = gen_crc16((uint8_t *)&uart_report, sizeof(uart_report) - 2);
+			
+			UART_WriteNonBlocking((uint8_t *)&uart_report, sizeof(uart_report));
+			
+			uart_message_code++;
 		}
 
 		// digital inputs polling

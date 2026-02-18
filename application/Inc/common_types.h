@@ -173,6 +173,8 @@ enum
 	
 	LED_RGB_WS2812B,
 	LED_RGB_PL9823,
+	
+	UART_TX,
 };
 typedef int8_t pin_t;
 
@@ -467,6 +469,7 @@ typedef struct
 	uint8_t							fast_encoder_cnt;
 	uint8_t							pwm_cnt;
 	uint8_t							rgb_cnt;
+	uint8_t							uart_tx_used;
 	
 } app_config_t;
 
@@ -490,6 +493,22 @@ typedef struct
 	uint8_t							shift_button_data;
 	
 } params_report_t;
+
+/****************** UART REPORT CONFIGURATION **********************/
+#pragma pack(push, 1)
+typedef struct
+{
+	uint8_t							header;
+	uint8_t							separator;
+	uint8_t							message_code;
+	analog_data_t			 	axis_data[MAX_AXIS_NUM];
+	uint8_t							buttons_data[MAX_BUTTONS_NUM/8];
+	uint16_t						crc;
+	// uint8_t             endl;
+	// when adding variable after crc don't forget to calc size
+	
+} uart_report_t;
+#pragma pack(pop)
 
 
 

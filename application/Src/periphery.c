@@ -25,6 +25,7 @@
 
 #include "periphery.h"
 #include "ws2812b.h"
+#include "uart.h"
 
 /* define compiler specific symbols */
 #if defined ( __CC_ARM   )
