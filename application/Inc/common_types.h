@@ -171,7 +171,8 @@ enum
 	MLX90363_CS,
 	SHIFT_REG_CLK,
 	
-	LED_RGB,
+	LED_RGB_WS2812B,
+	LED_RGB_PL9823,
 };
 typedef int8_t pin_t;
 
@@ -381,19 +382,26 @@ enum
 	WS2812B_FLOW,
 };
 
-struct RGB
+typedef struct
 {
-    uint8_t r, g, b;
-};
+    uint8_t				r, g, b;
+} rgb_t;
 
-struct HSV
+typedef struct
 {
-    int16_t h;
-    uint8_t s, v;
-};
+    rgb_t					color;
+    int8_t				input_num;
+    uint8_t				is_inverted: 1;
+		uint8_t				is_disabled: 1;
+		uint8_t				:0;
+} argb_led_t;
 
-typedef struct RGB RGB_t;
-typedef struct HSV HSV_t;
+typedef struct
+{
+    int16_t				h;
+    uint8_t				s, v;
+} HSV_t;
+
 
 
 
@@ -442,7 +450,7 @@ typedef struct
 	uint8_t							rgb_count;
 	uint8_t							rgb_brightness;
 	uint16_t						rgb_delay_ms;
-	RGB_t 							rgb_leds[NUM_RGB_LEDS];
+	argb_led_t 					rgb_leds[NUM_RGB_LEDS];
 	
 }dev_config_t;
 

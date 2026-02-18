@@ -84,26 +84,50 @@ static SrcFilter_t *DMAFilter;
 static void *DMASrc;
 static unsigned DMACount;
 
+static uint8_t argb_type = ARGB_WS2812B;
+
 static void SrcFilterNull(void **src, PWM_t **pwm, unsigned *count, unsigned size)
 {
     memset(*pwm, 0, size * sizeof(PWM_t));
     *pwm += size;
 }
 
-static void RGB2PWM(RGB_t *rgb, PWM_t *pwm)
+static void RGB2PWM(argb_led_t *rgb, PWM_t *pwm)
 {
-    uint8_t r = LEDGamma(rgb->r);
-    uint8_t g = LEDGamma(rgb->g);
-    uint8_t b = LEDGamma(rgb->b);
+		uint8_t r, g, b;
+		if (rgb->is_disabled)
+		{
+				r = LEDGamma(0);
+				g = LEDGamma(0);
+				b = LEDGamma(0);
+		} 
+		else
+		{
+				r = LEDGamma(rgb->color.r);
+				g = LEDGamma(rgb->color.g);
+				b = LEDGamma(rgb->color.b);
+		}
 
     uint8_t mask = 128;
 
+		uint8_t h, l;
+		if (argb_type == ARGB_WS2812B)
+		{
+			h = WS2812B_PULSE_HIGH;
+			l = WS2812B_PULSE_LOW;
+		}
+		else
+		{
+			h = PL9823_PULSE_HIGH;
+			l = PL9823_PULSE_LOW;
+		}
+		
     int i;
     for (i = 0; i < 8; i++)
     {
-        pwm->r[i] = r & mask ? WS2812B_PULSE_HIGH : WS2812B_PULSE_LOW;
-        pwm->g[i] = g & mask ? WS2812B_PULSE_HIGH : WS2812B_PULSE_LOW;
-        pwm->b[i] = b & mask ? WS2812B_PULSE_HIGH : WS2812B_PULSE_LOW;
+        pwm->r[i] = r & mask ? h : l;
+        pwm->g[i] = g & mask ? h : l;
+        pwm->b[i] = b & mask ? h : l;
 
         mask >>= 1;
     }
@@ -111,7 +135,7 @@ static void RGB2PWM(RGB_t *rgb, PWM_t *pwm)
 
 static void SrcFilterRGB(void **src, PWM_t **pwm, unsigned *count, unsigned size)
 {
-    RGB_t *rgb = *src;
+    argb_led_t *rgb = *src;
     PWM_t *p = *pwm;
 
     *count -= size;
@@ -134,9 +158,9 @@ static void SrcFilterHSV(void **src, PWM_t **pwm, unsigned *count, unsigned size
 
     while (size--)
     {
-        RGB_t rgb;
+        argb_led_t rgb;
 
-        HSV2RGB(hsv++, &rgb);
+        HSV2RGB(hsv++, &rgb.color);
         RGB2PWM(&rgb, p++);
     }
 
@@ -222,8 +246,9 @@ void WS2812B_DMA_HANDLER(void)
 // Interface
 //------------------------------------------------------------
 /////////////////// = added for advanced timer // TODO: add "is advanced timer"
-void ws2812b_Init(void)
+void ws2812b_Init(uint8_t led_type)
 {
+	argb_type = led_type;
     // Turn on peripheral clock
 //    RCC_APB1PeriphClockCmd(WS2812B_APB1_RCC, ENABLE);
 //    RCC_APB2PeriphClockCmd(WS2812B_APB2_RCC, ENABLE);
@@ -331,7 +356,7 @@ inline int ws2812b_IsReady(void)
     return !DMABusy;
 }
 
-void ws2812b_SendRGB(RGB_t *rgb, unsigned count)
+void ws2812b_SendRGB(argb_led_t *rgb, unsigned count)
 {
     DMASend(&SrcFilterRGB, rgb, count);
 }

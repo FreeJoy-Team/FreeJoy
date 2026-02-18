@@ -68,7 +68,7 @@ int main(void)
 	}
 	AppConfigInit(&dev_config);
 	
-	USB_HW_Init();
+USB_HW_Init();
 	// wait for USB initialization
 	Delay_ms(1000);	
 	
@@ -103,7 +103,7 @@ int main(void)
 		AnalogGet(NULL, tmp, NULL);
 		PWM_SetFromAxis(&dev_config, tmp);
 		
-		WS2812b_Process(&dev_config, serial_num, 24, GetMillis());
+		ArgbLed_Process(&dev_config, serial_num, 24, GetMillis());
 		
 		// Enter flasher command received
 		if (bootloader > 0)
@@ -152,4 +152,3 @@ void EnterBootloader (void)
 /**
   * @}
   */
-

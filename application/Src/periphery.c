@@ -24,6 +24,7 @@
   */
 
 #include "periphery.h"
+#include "ws2812b.h"
 
 /* define compiler specific symbols */
 #if defined ( __CC_ARM   )
@@ -154,7 +155,8 @@ void Timers_Init(dev_config_t * p_dev_config)
   TIM_OC4Init(TIM3, &TIM_OCInitStructure);
   TIM_OC4PreloadConfig(TIM3, TIM_OCPreload_Enable);	
 	
-	if (p_dev_config->pins[8] == LED_PWM && p_dev_config->pins[10] != LED_RGB)				// prevent conflict with encoder and rgb timer
+																					 // prevent conflict with encoder and rgb timer
+	if (p_dev_config->pins[8] == LED_PWM && p_dev_config->pins[10] != LED_RGB_WS2812B && p_dev_config->pins[10] != LED_RGB_PL9823)
 	{
 		/* PWM TIM1 config */
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);		
@@ -222,8 +224,8 @@ void PWM_SetFromAxis(dev_config_t * p_dev_config, analog_data_t * axis_data)
 	
 
 	/* PWM TIM1 config */
-	// Channel 3
-	if (p_dev_config->pins[8] == LED_PWM && p_dev_config->pins[10] != LED_RGB) // prevent conflicts with encoder and rgb timer
+	// Channel 3														// prevent conflicts with encoder and rgb timer
+	if (p_dev_config->pins[8] == LED_PWM && p_dev_config->pins[10] != LED_RGB_WS2812B && p_dev_config->pins[10] != LED_RGB_PL9823)
 	{
 		if (p_dev_config->led_pwm_config[0].is_axis)
 		{
@@ -520,11 +522,23 @@ void IO_Init (dev_config_t * p_dev_config)
 			GPIO_InitStructure.GPIO_Pin = pin_config[i].pin;
 			GPIO_Init(pin_config[i].port, &GPIO_InitStructure);
 		}
-		else if (p_dev_config->pins[i] == LED_RGB && i == 10) // PA10
+		else if (p_dev_config->pins[i] == LED_RGB_WS2812B && i == 10) // PA10
 		{
-			ws2812b_Init();
+			ws2812b_Init(ARGB_WS2812B);
 		}
-		
+		else if (p_dev_config->pins[i] == LED_RGB_PL9823 && i == 10) // PA10
+		{
+			ws2812b_Init(ARGB_PL9823);
+		}
+		else if (p_dev_config->pins[i] == UART_TX && i == 9)						// PA9
+		{
+			UART_Start();
+			
+			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+			GPIO_InitStructure.GPIO_Pin = pin_config[i].pin;
+			GPIO_Init(pin_config[i].port, &GPIO_InitStructure);
+		}
 	}
 
 #ifdef DEBUG

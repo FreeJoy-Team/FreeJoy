@@ -218,8 +218,8 @@ void resetSerialNumber(char * id, uint8_t length) {
 /// <summary>
 /// Read leds data from serial port.
 /// </summary>
-volatile uint32_t nonv = 0;
-void readLeds(RGB_t* rgb, uint8_t ledCount, uint8_t rightToLeft) {
+//volatile uint32_t nonv = 0; // debug
+uint8_t readLeds(argb_led_t* rgb, uint8_t ledCount, uint8_t rightToLeft) {
 	
 	uint8_t r, g, b;
 	for (uint8_t i = 0; i < ledCount; i++) {
@@ -227,14 +227,14 @@ void readLeds(RGB_t* rgb, uint8_t ledCount, uint8_t rightToLeft) {
 		g = (char)SH_Read();
 		b = (char)SH_Read();
 		if (rightToLeft) {
-			rgb[ledCount - 1 - i].r = r;
-			rgb[ledCount - 1 - i].g = g;
-			rgb[ledCount - 1 - i].b = b;
+			rgb[ledCount - 1 - i].color.r = r;
+			rgb[ledCount - 1 - i].color.g = g;
+			rgb[ledCount - 1 - i].color.b = b;
 		}
 		else {
-			rgb[i].r = r;
-			rgb[i].g = g;
-			rgb[i].b = b;
+			rgb[i].color.r = r;
+			rgb[i].color.g = g;
+			rgb[i].color.b = b;
 		}
 	}
 
@@ -247,22 +247,26 @@ void readLeds(RGB_t* rgb, uint8_t ledCount, uint8_t rightToLeft) {
 	}
 
 	if (valid) {
-		ws2812b_SendRGB(rgb, ledCount);
-	} else {
-		nonv++;
+		return 1;
+		//ws2812b_SendRGB(rgb, ledCount);
 	}
+//	} else { // debug
+//		nonv++;
+//	}
+	return 0;
 }
 
 
 
 
 static uint8_t messageend = 0;
-static char cmd[20]; // 5?
+static char cmd[10]; // 5?
 static uint8_t index = 0;
 
-void SH_Process(dev_config_t * p_dev_config, uint8_t * serial_num, uint8_t sn_length)
+uint8_t SH_Process(dev_config_t * p_dev_config, uint8_t * serial_num, uint8_t sn_length)
 {
 	ring_buf_t *rb = RB_GetPtr();
+	uint8_t need_update = 0;
 	
 	if (SH_DataAvailable() > 0) {
 		
@@ -319,7 +323,7 @@ void SH_Process(dev_config_t * p_dev_config, uint8_t * serial_num, uint8_t sn_le
 			// Send leds data (in binary) terminated by (0xFF)(0xFE)(0xFD)
 			// (0xFF)(0xFF)(0xFF)(0xFF)(0xFF)(0xFF)sleds(RL1)(GL1)(BL1)(RL2)(GL2)(BL2) .... (0xFF)(0xFE)(0xFD)
 			else if (strncmp(cmd, "sleds", 5) == 0) {
-				readLeds(p_dev_config->rgb_leds, p_dev_config->rgb_count, 0);
+				need_update = readLeds(p_dev_config->rgb_leds, p_dev_config->rgb_count, 0);
 				//sh_start_led = 1;
 			}
 
@@ -334,4 +338,5 @@ void SH_Process(dev_config_t * p_dev_config, uint8_t * serial_num, uint8_t sn_le
 			messageend = 0;
 		}
 	}
+	return need_update;
 }

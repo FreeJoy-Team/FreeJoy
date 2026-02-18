@@ -95,4 +95,7 @@
 #define WS2812B_PULSE_HIGH      60
 #define WS2812B_PULSE_LOW       30
 
+#define PL9823_PULSE_HIGH				72
+#define PL9823_PULSE_LOW				18
+
 #endif //__WS2812B_CONF_H

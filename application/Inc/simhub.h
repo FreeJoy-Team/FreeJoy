@@ -42,6 +42,6 @@ ring_buf_t * RB_GetPtr(void);
 uint8_t SH_ProcessIncomingData(uint8_t *raw_serial_data, uint8_t size);
 uint16_t SH_BufferFreeSize(void);
 
-void SH_Process(dev_config_t * p_dev_config, uint8_t * serial_num, uint8_t sn_length);
+uint8_t SH_Process(dev_config_t * p_dev_config, uint8_t * serial_num, uint8_t sn_length);
 
 #endif 	/* __CDC_DATA_HANDLER_H__ */
