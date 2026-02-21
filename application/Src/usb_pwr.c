@@ -86,7 +86,8 @@ RESULT PowerOn(void)
   wInterrupt_Mask = 0;
   
   _SetCNTR(wInterrupt_Mask);
-  
+
+  // TODO: "warning: bitwise comparison always evaluates to false" - seems it never works as expected. Maybe fix or change to NOP?
   /* Wait until RESET flag = 1 (polling) */
   while((_GetISTR()&ISTR_RESET) == 1);
   

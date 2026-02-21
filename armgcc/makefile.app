@@ -9,8 +9,8 @@ TARGET = FreeJoy
 ######################################
 # debug build?
 DEBUG = 1
-# optimization
-OPT = -O3
+# optimization. Note: with -O3 the binary is not fitted in 64k anymore
+OPT = -O2
 
 
 #######################################
@@ -30,6 +30,9 @@ C_SOURCES =  \
 ../utils/crc16.c \
 ../application/Src/encoders.c \
 ../application/Src/config.c \
+../application/Src/bitmap.c \
+../application/Src/led_effects.c \
+../application/Src/simhub.c \
 ../application/Src/leds.c \
 ../application/Src/main.c \
 ../application/Src/periphery.c \
@@ -41,6 +44,7 @@ C_SOURCES =  \
 ../application/Src/mlx90363.c \
 ../application/Src/mlx90393.c \
 ../application/Src/mcp320x.c \
+../application/Src/ws2812b.c \
 ../application/Src/shift_registers.c \
 ../application/Src/spi.c \
 ../application/Src/i2c.c \

@@ -45,6 +45,7 @@
 #include "usb_pwr.h"
 #include "usb_cdc_conf.h"
 #include "simhub.h"
+#include "leds.h"
 #include "led_effects.h"
 
 #include "config.h"
@@ -227,7 +228,13 @@ void EP2_OUT_Callback(void)
 			}
 		}
 		break;
-		
+
+		case REPORT_ID_LED:
+		{
+			memcpy(&external_led_data, &hid_buf[1], sizeof(external_led_data_t));
+		}
+		break;
+
 		default:
 			break;
 	}
@@ -338,7 +345,7 @@ int8_t USB_CUSTOM_HID_SendReport(uint8_t EP_num, uint8_t * data, uint8_t length)
 
 /*******************************************************************************
 * Function Name  : Send DATA .
-* Description    : send the data received from the STM32 to the PC through USB  
+* Description    : send the data received from the STM32 to the PC through USB
 * Input          : None.
 * Output         : None.
 * Return         : 0 if success otherwise -1.			// sdelal kak sverhu. ebanii v rot nahuia -1 vmesto 1 vo vremia success
@@ -357,13 +364,13 @@ int8_t CDC_Send_DATA (uint8_t *ptrBuffer, uint8_t send_length)
   else
   {
     return 0;
-  } 
+  }
   return -1;
 }
 
 /*******************************************************************************
 * Function Name  : Is Ready To Send DATA .
-* Description    : Checking the port for readiness to send files. 
+* Description    : Checking the port for readiness to send files.
 * Input          : None.
 * Output         : None.
 * Return         : 1 if success otherwise 0.

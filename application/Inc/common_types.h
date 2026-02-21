@@ -86,6 +86,7 @@ enum
 	SOURCE_ENCODER = -3,
 	SOURCE_I2C = -2,
 	SOURCE_NO = -1,
+	SOURCE_EXTERNAL = -4,
 };
 typedef int8_t axis_source_t;
 
@@ -472,6 +473,13 @@ typedef struct
 	uint8_t							uart_tx_used;
 	
 } app_config_t;
+
+
+/******************** EXTERNAL LED DATA **********************/
+typedef struct
+{
+	uint32_t 						leds_state;		// 24 bits used
+} external_led_data_t;
 
 
 /******************** HID REPORT CONFIGURATION **********************/
