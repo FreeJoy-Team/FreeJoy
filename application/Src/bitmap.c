@@ -24,7 +24,7 @@
 
 #include "bitmap.h"
 
-void HSV2RGB(HSV_t *hsv, RGB_t *rgb)
+void HSV2RGB(HSV_t *hsv, rgb_t *rgb)
 {
     if (!hsv->v)
     {

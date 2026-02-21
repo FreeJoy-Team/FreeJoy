@@ -149,9 +149,14 @@ void AppConfigInit (dev_config_t * p_dev_config)
 		app_config.fast_encoder_cnt++;
 	}
 	
-	if (p_dev_config->pins[10] == LED_RGB) // 15-PB4 // 10-PA10
+	if (p_dev_config->pins[10] == LED_RGB_PL9823 || p_dev_config->pins[10] == LED_RGB_WS2812B) // 15-PB4 // 10-PA10
 	{
 		app_config.rgb_cnt++;
+	}
+	
+	if (p_dev_config->pins[9] == UART_TX)
+	{
+		app_config.uart_tx_used = 1;
 	}
 	
 	for (int i=0; i<MAX_BUTTONS_NUM; i++)

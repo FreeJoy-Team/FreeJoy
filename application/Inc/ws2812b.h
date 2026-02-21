@@ -26,11 +26,17 @@
 #include <stdint.h>
 #include "bitmap.h"
 
-void ws2812b_Init(void);
+enum
+{
+	ARGB_WS2812B = 0,
+	ARGB_PL9823,
+};
+
+void ws2812b_Init(uint8_t led_type);
 
 int ws2812b_IsReady(void);
 
-void ws2812b_SendRGB(RGB_t *rgb, unsigned count);
+void ws2812b_SendRGB(argb_led_t *rgb, unsigned count);
 void ws2812b_SendHSV(HSV_t *hsv, unsigned count);
 
 #endif //__WS2812B_H

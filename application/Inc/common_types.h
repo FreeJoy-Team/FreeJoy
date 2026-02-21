@@ -172,7 +172,10 @@ enum
 	MLX90363_CS,
 	SHIFT_REG_CLK,
 	
-	LED_RGB,
+	LED_RGB_WS2812B,
+	LED_RGB_PL9823,
+	
+	UART_TX,
 };
 typedef int8_t pin_t;
 
@@ -382,19 +385,26 @@ enum
 	WS2812B_FLOW,
 };
 
-struct RGB
+typedef struct
 {
-    uint8_t r, g, b;
-};
+    uint8_t				r, g, b;
+} rgb_t;
 
-struct HSV
+typedef struct
 {
-    int16_t h;
-    uint8_t s, v;
-};
+    rgb_t					color;
+    int8_t				input_num;
+    uint8_t				is_inverted: 1;
+		uint8_t				is_disabled: 1;
+		uint8_t				:0;
+} argb_led_t;
 
-typedef struct RGB RGB_t;
-typedef struct HSV HSV_t;
+typedef struct
+{
+    int16_t				h;
+    uint8_t				s, v;
+} HSV_t;
+
 
 
 
@@ -443,7 +453,7 @@ typedef struct
 	uint8_t							rgb_count;
 	uint8_t							rgb_brightness;
 	uint16_t						rgb_delay_ms;
-	RGB_t 							rgb_leds[NUM_RGB_LEDS];
+	argb_led_t 					rgb_leds[NUM_RGB_LEDS];
 	
 }dev_config_t;
 
@@ -460,6 +470,7 @@ typedef struct
 	uint8_t							fast_encoder_cnt;
 	uint8_t							pwm_cnt;
 	uint8_t							rgb_cnt;
+	uint8_t							uart_tx_used;
 	
 } app_config_t;
 
@@ -490,6 +501,22 @@ typedef struct
 	uint8_t							shift_button_data;
 	
 } params_report_t;
+
+/****************** UART REPORT CONFIGURATION **********************/
+#pragma pack(push, 1)
+typedef struct
+{
+	uint8_t							header;
+	uint8_t							separator;
+	uint8_t							message_code;
+	analog_data_t			 	axis_data[MAX_AXIS_NUM];
+	uint8_t							buttons_data[MAX_BUTTONS_NUM/8];
+	uint16_t						crc;
+	// uint8_t             endl;
+	// when adding variable after crc don't forget to calc size
+	
+} uart_report_t;
+#pragma pack(pop)
 
 
 

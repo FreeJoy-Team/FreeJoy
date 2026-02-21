@@ -1,7 +1,7 @@
 /**
   ******************************************************************************
   * @file           : common_defines.h
-  * @brief          : This file contains the common defines for the app.                  
+  * @brief          : This file contains the common defines for the app.
   ******************************************************************************
   */
 
@@ -19,7 +19,8 @@
 #define MAX_ENCODERS_NUM					16					// max 64
 #define MAX_SHIFT_REG_NUM					4						// max 4
 #define MAX_LEDS_NUM							24
-#define NUM_RGB_LEDS    					100					// if increase dont forget calc config size CONFIG_PAGE_COUNT
+#define NUM_RGB_LEDS    					50					// if increase dont forget calc config size CONFIG_PAGE_COUNT
+#define NUM_RGB_LEDS_SH						20
 
 #define AXIS_MIN_VALUE						(-32767)
 #define AXIS_MAX_VALUE						(32767)

@@ -46,6 +46,7 @@
 #include "usb_cdc_conf.h"
 #include "simhub.h"
 #include "leds.h"
+#include "led_effects.h"
 
 #include "config.h"
 #include "crc16.h"
@@ -254,8 +255,16 @@ void EP2_OUT_Callback(void)
 void EP4_OUT_Callback(void)
 {
 	receive_length = USB_SIL_Read(CDC_DATA_OUT_ENDP_ADR, (uint8_t *)receive_buffer);
-
-	SetEPRxValid(CDC_DATA_OUT_ENDP_NUM);
+	uint16_t free_size = MAX_RING_BIF_SIZE;
+	
+	if (receive_length > 0)
+	{
+		free_size = SH_ProcessIncomingData((uint8_t *)receive_buffer, receive_length);
+	}
+	if (free_size > SH_PACKET_SIZE)
+	{
+		SetEPRxValid(CDC_DATA_OUT_ENDP_NUM);
+	}
 }
 
 /*******************************************************************************
@@ -302,11 +311,9 @@ void EP5_IN_Callback(void)
 *******************************************************************************/
 void SH_ProcessEndpData(void)
 {
-	if (receive_length > 0)
+	if (SH_BufferFreeSize() > SH_PACKET_SIZE)
 	{
-		SH_ProcessIncomingData((uint8_t *)receive_buffer, receive_length);
-		memset((uint8_t *)receive_buffer, 0 ,64);
-		receive_length = 0;
+		SetEPRxValid(CDC_DATA_OUT_ENDP_NUM);
 	}
 }
 
@@ -343,13 +350,13 @@ int8_t USB_CUSTOM_HID_SendReport(uint8_t EP_num, uint8_t * data, uint8_t length)
 * Output         : None.
 * Return         : 0 if success otherwise -1.			// sdelal kak sverhu. ebanii v rot nahuia -1 vmesto 1 vo vremia success
 *******************************************************************************/
-int8_t CDC_Send_DATA (uint8_t *ptrBuffer, uint8_t Send_length)
+int8_t CDC_Send_DATA (uint8_t *ptrBuffer, uint8_t send_length)
 {
   /*if max buffer is Not reached*/
-  if(EP5_PrevXferComplete && bDeviceState == CONFIGURED && Send_length < CDC_DATA_SIZE)
+  if(EP5_PrevXferComplete && bDeviceState == CONFIGURED && send_length < CDC_DATA_SIZE)     
   {
     /* send  packet*/
-		USB_SIL_Write(CDC_DATA_IN_ENDP_ADR, (unsigned char*)ptrBuffer, Send_length);
+		USB_SIL_Write(CDC_DATA_IN_ENDP_ADR, (unsigned char*)ptrBuffer, send_length);
 		// should be in this order
 		EP5_PrevXferComplete = 0;
 		SetEPTxValid(CDC_DATA_IN_ENDP_NUM);

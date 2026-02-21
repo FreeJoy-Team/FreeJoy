@@ -42,6 +42,6 @@
 
 #define HUE(h)  ({ __typeof__(h) h1 = h % 360; h1 < 0 ? 360 + h1 : h1; })
 
-void HSV2RGB(HSV_t *hsv, RGB_t *rgb);
+void HSV2RGB(HSV_t *hsv, rgb_t *rgb);
 
 #endif //__BITMAP_H

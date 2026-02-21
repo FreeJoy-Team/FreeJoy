@@ -71,7 +71,7 @@
 #define WS2812B_TIM_OCPRELOAD   TIM_OC3PreloadConfig
 #define WS2812B_TIM_DMA_CC      TIM_DMA_CC3
 #define WS2812B_TIM_DMA_CCR     (WS2812B_TIM->CCR3)
-#define WS2812B_TIM_PWM_MODE		TIM_OCMode_PWM2
+#define WS2812B_TIM_PWM_MODE		TIM_OCMode_PWM1
 
 #define WS2812B_GPIO_Mode				GPIO_Mode_AF_OD
 
@@ -90,9 +90,12 @@
 #define WS2812B_IRQ_SUBPRIO     2
 
 #define WS2812B_FREQUENCY       72000000
-#define WS2812B_PERIOD          90//91?
+#define WS2812B_PERIOD          90
 
-#define WS2812B_PULSE_HIGH      30//65
-#define WS2812B_PULSE_LOW       60//26
+#define WS2812B_PULSE_HIGH      60
+#define WS2812B_PULSE_LOW       30
+
+#define PL9823_PULSE_HIGH				72
+#define PL9823_PULSE_LOW				18
 
 #endif //__WS2812B_CONF_H
