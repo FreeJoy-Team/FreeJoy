@@ -18,7 +18,7 @@
 
 static const dev_config_t init_config =
 {
-	.firmware_version = 0x1713,		// do not change	
+	.firmware_version = 0x1730,		// do not change
 	/* 
 		Name of device in devices dispatcher
 	*/
@@ -35,7 +35,7 @@ static const dev_config_t init_config =
 	.device_name[10] = '.',
 	.device_name[11] = '7',
 	.device_name[12] = '.',
-	.device_name[13] = '1',
+	.device_name[13] = '2',
 	.device_name[14] = 0,
 	.device_name[15] = 0,
 	.device_name[16] = 0,
@@ -48,7 +48,7 @@ static const dev_config_t init_config =
 
 	.button_debounce_ms = 50,					// debounce time for all buttons
 	
-	.encoder_press_time_ms = 10,			// amount of milliseconds virtual button 
+	.encoder_press_time_ms = 20,			// amount of milliseconds virtual button
 																		// will be pressed at encoder increment/decrement
 																		
 	.exchange_period_ms = 5,					// amount of millisecond between joystick data sending
@@ -57,7 +57,9 @@ static const dev_config_t init_config =
 	.button_timer2_ms = 200,					// amount of milliseconds of delay2 for a virtual button
 	.button_timer3_ms = 300,					// amount of milliseconds of delay3 for a virtual button
 	.a2b_debounce_ms = 50,
-	
+	.button_polling_interval_ticks = 5,
+	.encoder_polling_interval_ticks = 1,
+
 	/*
 		Device pins configuration. Available values:
 		- AXIS_ANALOG (only for pins 0-7)
@@ -66,10 +68,10 @@ static const dev_config_t init_config =
 		- BUTTON_COLUMN
 		- BUTTON_ROW
 	*/
-	.pins[0] 	= AXIS_ANALOG,					// PA0
-	.pins[1] 	= AXIS_ANALOG,					// PA1
-	.pins[2] 	= AXIS_ANALOG,					// PA2
-	.pins[3] 	= AXIS_ANALOG,					// PA3
+	.pins[0] 	= NOT_USED,					// PA0
+	.pins[1] 	= NOT_USED,					// PA1
+	.pins[2] 	= NOT_USED,					// PA2
+	.pins[3] 	= NOT_USED,					// PA3
 	.pins[4] 	= NOT_USED,							// PA4
 	.pins[5] 	= NOT_USED,							// PA5
 	.pins[6] 	= NOT_USED,							// PA6
@@ -89,10 +91,10 @@ static const dev_config_t init_config =
 	.pins[20] = NOT_USED,							// PB9
 	.pins[21] = NOT_USED,							// PB10
 	.pins[22] = NOT_USED,							// PB11
-	.pins[23] = BUTTON_GND,						// PB12
-	.pins[24] = BUTTON_GND,						// PB13
-	.pins[25] = BUTTON_GND,						// PB14
-	.pins[26] = BUTTON_GND,						// PB15
+	.pins[23] = NOT_USED,						// PB12
+	.pins[24] = NOT_USED,						// PB13
+	.pins[25] = NOT_USED,						// PB14
+	.pins[26] = NOT_USED,						// PB15
 	.pins[27] = NOT_USED,							// PC13
 	.pins[28] = NOT_USED,							// PC14
 	.pins[29] = NOT_USED,							// PC15
@@ -122,7 +124,7 @@ static const dev_config_t init_config =
 	.axis_config[0].deadband_size = 0,
 	.axis_config[0].channel = 0,
 	.axis_config[0].i2c_address = 0x48,
-	.axis_config[0].source_main = 0,
+	.axis_config[0].source_main = -1,
 	.axis_config[0].function = 0,
 	.axis_config[0].source_secondary = 0,
 	.axis_config[0].button1 = -1,
@@ -156,7 +158,7 @@ static const dev_config_t init_config =
 	.axis_config[1].deadband_size = 0,
 	.axis_config[1].channel = 0,
 	.axis_config[1].i2c_address = 0x48,
-	.axis_config[1].source_main = 1,
+	.axis_config[1].source_main = -1,
 	.axis_config[1].function = 0,
 	.axis_config[1].source_secondary = 0,
 	.axis_config[1].button1 = -1,
@@ -190,7 +192,7 @@ static const dev_config_t init_config =
 	.axis_config[2].deadband_size = 0,
 	.axis_config[2].i2c_address = 0x48,
 	.axis_config[2].channel = 0,
-	.axis_config[2].source_main = 2,
+	.axis_config[2].source_main = -1,
 	.axis_config[2].function = 0,
 	.axis_config[2].source_secondary = 0,
 	.axis_config[2].button1 = -1,
@@ -224,7 +226,7 @@ static const dev_config_t init_config =
 	.axis_config[3].deadband_size = 0,
 	.axis_config[3].channel = 0,
 	.axis_config[3].i2c_address = 0x48,
-	.axis_config[3].source_main = 3,
+	.axis_config[3].source_main = -1,
 	.axis_config[3].function = 0,
 	.axis_config[3].source_secondary = 0,
 	.axis_config[3].button1 = -1,
@@ -402,13 +404,13 @@ static const dev_config_t init_config =
 		- ENCODER_INPUT_A
 		- ENCODER_INPUT_B
 	*/
-	.buttons[0].physical_num = 12,
+	.buttons[0].physical_num = -1,
 	.buttons[0].type = BUTTON_NORMAL,
-	.buttons[1].physical_num = 13,
+	.buttons[1].physical_num = -1,
 	.buttons[1].type = BUTTON_NORMAL,
-	.buttons[2].physical_num = 14,
+	.buttons[2].physical_num = -1,
 	.buttons[2].type = BUTTON_NORMAL,
-	.buttons[3].physical_num = 15,
+	.buttons[3].physical_num = -1,
 	.buttons[3].type = BUTTON_NORMAL,
 	.buttons[4].physical_num = -1,
 	.buttons[4].type = BUTTON_NORMAL,
@@ -733,52 +735,137 @@ static const dev_config_t init_config =
 	
 	.leds[0].input_num = -1,
 	.leds[0].type = LED_NORMAL,
+	.leds[0].timer = -1,
 	.leds[1].input_num = -1,
 	.leds[1].type = LED_NORMAL,
+	.leds[1].timer = -1,
 	.leds[2].input_num = -1,
 	.leds[2].type = LED_NORMAL,
+	.leds[2].timer = -1,
 	.leds[3].input_num = -1,
 	.leds[3].type = LED_NORMAL,
+	.leds[3].timer = -1,
 	.leds[4].input_num = -1,
 	.leds[4].type = LED_NORMAL,
+	.leds[4].timer = -1,
 	.leds[5].input_num = -1,
 	.leds[5].type = LED_NORMAL,
+	.leds[5].timer = -1,
 	.leds[6].input_num = -1,
 	.leds[6].type = LED_NORMAL,
+	.leds[6].timer = -1,
 	.leds[7].input_num = -1,
 	.leds[7].type = LED_NORMAL,
+	.leds[7].timer = -1,
 	.leds[8].input_num = -1,
 	.leds[8].type = LED_NORMAL,
+	.leds[8].timer = -1,
 	.leds[9].input_num = -1,
 	.leds[9].type = LED_NORMAL,
+	.leds[9].timer = -1,
 	.leds[10].input_num = -1,
 	.leds[10].type = LED_NORMAL,
+	.leds[10].timer = -1,
 	.leds[11].input_num = -1,
 	.leds[11].type = LED_NORMAL,
+	.leds[11].timer = -1,
 	.leds[12].input_num = -1,
 	.leds[12].type = LED_NORMAL,
+	.leds[12].timer = -1,
 	.leds[13].input_num = -1,
 	.leds[13].type = LED_NORMAL,
+	.leds[13].timer = -1,
 	.leds[14].input_num = -1,
 	.leds[14].type = LED_NORMAL,
+	.leds[14].timer = -1,
 	.leds[15].input_num = -1,
 	.leds[15].type = LED_NORMAL,
+	.leds[15].timer = -1,
 	.leds[16].input_num = -1,
 	.leds[16].type = LED_NORMAL,
+	.leds[16].timer = -1,
 	.leds[17].input_num = -1,
 	.leds[17].type = LED_NORMAL,
+	.leds[17].timer = -1,
 	.leds[18].input_num = -1,
 	.leds[18].type = LED_NORMAL,
+	.leds[18].timer = -1,
 	.leds[19].input_num = -1,
 	.leds[19].type = LED_NORMAL,
+	.leds[19].timer = -1,
 	.leds[20].input_num = -1,
 	.leds[20].type = LED_NORMAL,
+	.leds[20].timer = -1,
 	.leds[21].input_num = -1,
 	.leds[21].type = LED_NORMAL,
+	.leds[21].timer = -1,
 	.leds[22].input_num = -1,
 	.leds[22].type = LED_NORMAL,
+	.leds[22].timer = -1,
 	.leds[23].input_num = -1,
-	.leds[23].type = LED_NORMAL,	
+	.leds[23].type = LED_NORMAL,
+	.leds[23].timer = -1,
+
+	.led_timer_ms[0] = 50,
+	.led_timer_ms[1] = 100,
+	.led_timer_ms[2] = 150,
+	.led_timer_ms[3] = 200,
+
+	.rgb_effect = WS2812B_STATIC,
+	.rgb_count = 0,
+	.rgb_brightness = 125,
+	.rgb_delay_ms = 50,
+	
+	.rgb_leds[0].input_num = -1,
+	.rgb_leds[1].input_num = -1,
+	.rgb_leds[2].input_num = -1,
+	.rgb_leds[3].input_num = -1,
+	.rgb_leds[4].input_num = -1,
+	.rgb_leds[5].input_num = -1,
+	.rgb_leds[6].input_num = -1,
+	.rgb_leds[7].input_num = -1,
+	.rgb_leds[8].input_num = -1,
+	.rgb_leds[9].input_num = -1,
+	.rgb_leds[10].input_num = -1,
+	.rgb_leds[11].input_num = -1,
+	.rgb_leds[12].input_num = -1,
+	.rgb_leds[13].input_num = -1,
+	.rgb_leds[14].input_num = -1,
+	.rgb_leds[15].input_num = -1,
+	.rgb_leds[16].input_num = -1,
+	.rgb_leds[17].input_num = -1,
+	.rgb_leds[18].input_num = -1,
+	.rgb_leds[19].input_num = -1,
+	.rgb_leds[20].input_num = -1,
+	.rgb_leds[21].input_num = -1,
+	.rgb_leds[22].input_num = -1,
+	.rgb_leds[23].input_num = -1,
+	.rgb_leds[24].input_num = -1,
+	.rgb_leds[25].input_num = -1,
+	.rgb_leds[26].input_num = -1,
+	.rgb_leds[27].input_num = -1,
+	.rgb_leds[28].input_num = -1,
+	.rgb_leds[29].input_num = -1,
+	.rgb_leds[30].input_num = -1,
+	.rgb_leds[31].input_num = -1,
+	.rgb_leds[32].input_num = -1,
+	.rgb_leds[33].input_num = -1,
+	.rgb_leds[34].input_num = -1,
+	.rgb_leds[35].input_num = -1,
+	.rgb_leds[36].input_num = -1,
+	.rgb_leds[37].input_num = -1,
+	.rgb_leds[38].input_num = -1,
+	.rgb_leds[39].input_num = -1,
+	.rgb_leds[40].input_num = -1,
+	.rgb_leds[41].input_num = -1,
+	.rgb_leds[42].input_num = -1,
+	.rgb_leds[43].input_num = -1,
+	.rgb_leds[44].input_num = -1,
+	.rgb_leds[45].input_num = -1,
+	.rgb_leds[46].input_num = -1,
+	.rgb_leds[47].input_num = -1,
+	.rgb_leds[48].input_num = -1,
+	.rgb_leds[49].input_num = -1,
 		
 };
 
@@ -803,4 +890,3 @@ void _Error_Handler(char *, int);
 #endif
 
 #endif /* __MAIN_H__ */
-

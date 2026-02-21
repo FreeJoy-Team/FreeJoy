@@ -22,7 +22,7 @@ FreeJoy supports the following external periphery:
 - digital sensors  TLE5010/5011, TLE5012B, AS5048A, AS5600, MLX90393 (SPI interface only)
 - external ADCs ADS1115 and MCP3201/02/04/08
 - 4 PWM channels for lighting
-- 24 LEDs (single or matrix) bindable to buttons' states
+- 24 LEDs (single or matrix) bindable to buttons' states or controlled by host software (see [Host-controlled LEDs](#host-controlled-leds) section)
 - device name and other USB settings
 
 ## Axes
@@ -60,3 +60,51 @@ FreeJoy configuration is possible using an external [utility](https://github.com
 
 <img src="https://github.com/FreeJoy-Team/FreeJoyWiki/blob/master/images/main.jpg" width="800"/>
 
+## Host-controlled LEDs
+FreeJoy supports controlling up to 24 LEDs from host software using HID reports. To use this feature:
+1. In FreeJoy Configurator, set the LED source to **External**.
+2. Send a HID Output Report to the second HID device (Usage Page: 0xFF00, Interface: 1) with the following format:
+
+| Byte | Value | Description |
+| --- | --- | --- |
+| 0 | 6 | Report ID |
+| 1-4 | Bitmask | LED states (1 bit per LED, 4 bytes, little-endian) |
+
+Example: to turn on LEDs 1 and 3, send `06 05 00 00 00`.
+
+### Python Example
+You can use the `hidapi` library to control LEDs from Python:
+
+```python
+import hid
+
+# FreeJoy USB VID/PID
+VID = 0x0483
+PID = 0x5750
+
+def set_freejoy_leds(led_mask):
+    # Find the correct interface (Interface 1 for LEDs)
+    target_path = None
+    for device in hid.enumerate(VID, PID):
+        if device['interface_number'] == 1:
+            target_path = device['path']
+            break
+
+    if not target_path:
+        print("FreeJoy interface 1 not found")
+        return
+
+    try:
+        device = hid.device()
+        device.open_path(target_path)
+        
+        # Report ID 6 + 4 bytes of bitmask (little-endian)
+        report = [0x06] + list(led_mask.to_bytes(4, 'little'))
+        device.write(report)
+        device.close()
+    except Exception as e:
+        print(f"Error: {e}")
+
+# Example: Turn on LEDs 1 and 3 (bitmask 0x05)
+set_freejoy_leds(0x00000005)
+```

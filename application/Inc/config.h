@@ -12,6 +12,7 @@
 #include "periphery.h"
 #include "common_types.h"
 
+
 void DevConfigSet (dev_config_t * p_dev_config);
 void DevConfigGet (dev_config_t * p_dev_config);
 void AppConfigInit (dev_config_t * p_dev_config);

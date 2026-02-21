@@ -39,6 +39,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "usb_lib.h"
 #include "usb_desc.h"
+#include "usb_cdc_conf.h"
 
 #include "common_defines.h"
 
@@ -89,7 +90,7 @@ uint8_t Composite_ConfigDescriptor[Composite_SIZ_CONFIG_DESC] =
     Composite_SIZ_CONFIG_DESC,
     /* wTotalLength: Bytes returned */
     0x00,
-    0x02,         /* bNumInterfaces: 2 interface */
+    0x04,         /* bNumInterfaces: 4 interface */
     0x01,         /* bConfigurationValue: Configuration value */
     0x00,         /* iConfiguration: Index of string descriptor describing
                                  the configuration*/
@@ -173,8 +174,100 @@ uint8_t Composite_ConfigDescriptor[Composite_SIZ_CONFIG_DESC] =
     0x00,
 		0x10,	/* bInterval: Polling Interval (16 ms) */
 		/* 66 */
-  }
-  ; /* JoystickHID_ConfigDescriptor */
+		
+		
+		/******** IAD should be positioned just before the CDC interfaces ******
+																	IAD to associate the two CDC interfaces */
+		0x08, /* bLength */
+		0x0B, /* bDescriptorType */
+		0x02, /* bFirstInterface */
+		0x02, /* bInterfaceCount */
+		0x02, /* bFunctionClass */
+		0x02, /* bFunctionSubClass */
+		0x01, /* bFunctionProtocol */
+		0x00, /* iFunction (Index of string descriptor describing this function) */
+		/* 08 bytes */
+
+		0x09,   /* bLength: Interface Descriptor size */
+    USB_INTERFACE_DESCRIPTOR_TYPE,  /* bDescriptorType: Interface */
+    /* Interface descriptor type */
+    0x02,   /* bInterfaceNumber: 2 Number of Interface */
+    0x00,   /* bAlternateSetting: Alternate setting */
+    0x01,   /* bNumEndpoints: 1 endpoints used */
+    0x02,   /* bInterfaceClass: Communication Interface Class */
+    0x02,   /* bInterfaceSubClass: Abstract Control Model */
+    0x01,   /* bInterfaceProtocol: Common AT commands */
+    0x00,   /* iInterface: */
+		
+    /*Header Functional Descriptor*/
+    0x05,   /* bLength: Endpoint Descriptor size */
+    0x24,   /* bDescriptorType: CS_INTERFACE */
+    0x00,   /* bDescriptorSubtype: Header Func Desc */
+    0x10,   /* bcdCDC: spec release number */
+    0x01,
+		
+    /*Call Management Functional Descriptor*/
+    0x05,   /* bFunctionLength */
+    0x24,   /* bDescriptorType: CS_INTERFACE */
+    0x01,   /* bDescriptorSubtype: Call Management Func Desc */
+    0x00,   /* bmCapabilities: D0+D1 */
+    0x03,   /* bDataInterface: 3 */
+		
+    /*ACM Functional Descriptor*/
+    0x04,   /* bFunctionLength */
+    0x24,   /* bDescriptorType: CS_INTERFACE */
+    0x02,   /* bDescriptorSubtype: Abstract Control Management desc */
+    0x02,   /* bmCapabilities */
+		
+    /*Union Functional Descriptor*/
+    0x05,   /* bFunctionLength */
+    0x24,   /* bDescriptorType: CS_INTERFACE */
+    0x06,   /* bDescriptorSubtype: Union func desc */
+    0x02,   /* bMasterInterface: Communication class interface */
+    0x03,   /* bSlaveInterface0: Data Class Interface */
+		
+    /*Endpoint 3 Descriptor*/
+    0x07,   /* bLength: Endpoint Descriptor size */
+    USB_ENDPOINT_DESCRIPTOR_TYPE,   /* bDescriptorType: Endpoint */
+    CDC_COMMAND_ENDP_ADR,   /* bEndpointAddress: (IN3) */
+    0x03,   /* bmAttributes: Interrupt */
+    CDC_INT_SIZE,      /* wMaxPacketSize: */
+    0x00,
+    0x10,   /* bInterval: */ 				/// ????
+		
+		
+    /*Data class interface descriptor*/
+    0x09,   /* bLength: Endpoint Descriptor size */
+    USB_INTERFACE_DESCRIPTOR_TYPE,  /* bDescriptorType: */
+    0x03,   /* bInterfaceNumber: Number of Interface */
+    0x00,   /* bAlternateSetting: Alternate setting */
+    0x02,   /* bNumEndpoints: Two endpoints used */
+    0x0A,   /* bInterfaceClass: CDC */
+    0x00,   /* bInterfaceSubClass: */
+    0x00,   /* bInterfaceProtocol: */
+    0x00,   /* iInterface: */
+		
+    /*Endpoint 4 Descriptor*/
+    0x07,   /* bLength: Endpoint Descriptor size */
+    USB_ENDPOINT_DESCRIPTOR_TYPE,   /* bDescriptorType: Endpoint */
+    CDC_DATA_OUT_ENDP_ADR,   /* bEndpointAddress: (OUT4) */
+    0x02,   /* bmAttributes: Bulk */
+    CDC_DATA_SIZE,             /* wMaxPacketSize: */
+    0x00,
+    0x00,   /* bInterval: ignore for Bulk transfer */
+		
+    /*Endpoint 4 Descriptor*/
+    0x07,   /* bLength: Endpoint Descriptor size */
+    USB_ENDPOINT_DESCRIPTOR_TYPE,   /* bDescriptorType: Endpoint */
+    CDC_DATA_IN_ENDP_ADR,   /* bEndpointAddress: (IN5) */
+    0x02,   /* bmAttributes: Bulk */
+    CDC_DATA_SIZE,             /* wMaxPacketSize: */
+    0x00,
+    0x00    /* bInterval */
+		
+  }; /* JoystickHID_ConfigDescriptor */
+	
+	
 uint8_t JoystickHID_ReportDescriptor[JoystickHID_SIZ_REPORT_DESC] =
   {                    
     0x05, 0x01,                    // USAGE_PAGE (Generic Desktop)
@@ -287,6 +380,11 @@ uint8_t CustomHID_ReportDescriptor[CustomHID_SIZ_REPORT_DESC] =
 		0x95, 0x3f,                    //   REPORT_COUNT (63)
 		0x91, 0x00,                    //   OUTPUT (Data,Ary,Abs)
 		
+		0x85, REPORT_ID_LED,    	 	 //   REPORT_ID (6)	
+    0x09, 0x0A,                    //   USAGE (Vendor Usage 10)
+    0x75, 0x08,                    //   REPORT_SIZE (8)
+		0x95, 0x04,                    //   REPORT_COUNT (4)
+		0x91, 0x00,                    //   OUTPUT (Data,Ary,Abs)
 		
 		0xc0,                           // END_COLLECTION
   }; /* CustomHID_ReportDescriptor */

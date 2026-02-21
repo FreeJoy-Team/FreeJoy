@@ -31,6 +31,8 @@
 #include "buttons.h"
 #include "leds.h"
 #include "encoders.h"
+#include "led_effects.h"
+#include "simhub.h"
 
 #include "usb_hw.h"
 #include "usb_lib.h"
@@ -66,24 +68,32 @@ int main(void)
 	}
 	AppConfigInit(&dev_config);
 	
-	USB_HW_Init();
+USB_HW_Init();
 	// wait for USB initialization
 	Delay_ms(1000);	
 	
 	IO_Init(&dev_config);
 	 
-	EncodersInit(&dev_config);	
+	EncodersInit(&dev_config);	// add rgb timer check. what?
 	ShiftRegistersInit(&dev_config);
 	RadioButtons_Init(&dev_config);
-	SequentialButtons_Init(&dev_config);		
+	SequentialButtons_Init(&dev_config);
 	
 	// init sensors
 	AxesInit(&dev_config);
 	// start sequential periphery reading
-	Timers_Init(&dev_config);		
+	Timers_Init(&dev_config);
+	
+	uint8_t serial_num[24];
+	SerialNum((uint8_t*)serial_num, 24);
+	
+	// ring buffer for cdc
+	uint8_t buf[MAX_RING_BIF_SIZE];
+	ring_buf_t *rb = RB_GetPtr();
+	RB_Init(rb, buf, MAX_RING_BIF_SIZE);
 	
   while (1)
-  {		
+  {
 		ButtonsDebounceProcess(&dev_config);
 		ButtonsReadLogical(&dev_config);
 		
@@ -92,6 +102,8 @@ int main(void)
 		analog_data_t tmp[8];
 		AnalogGet(NULL, tmp, NULL);
 		PWM_SetFromAxis(&dev_config, tmp);
+		
+		ArgbLed_Process(&dev_config, serial_num, 24, GetMillis());
 		
 		// Enter flasher command received
 		if (bootloader > 0)
@@ -140,4 +152,3 @@ void EnterBootloader (void)
 /**
   * @}
   */
-

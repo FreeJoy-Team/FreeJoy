@@ -24,6 +24,7 @@
 
 #include "config.h"
 
+
 app_config_t app_config;
 
 uint8_t DevConfigCheck (dev_config_t * p_dev_config)
@@ -46,7 +47,10 @@ void DevConfigSet (dev_config_t * p_dev_config)
 	prog_addr = CONFIG_ADDR;
 	
 	FLASH_Unlock();
-	FLASH_ErasePage(prog_addr);
+	for (int i=0; i<CONFIG_PAGE_COUNT; i++)
+	{
+		FLASH_ErasePage(prog_addr + i * FLASH_PAGE_SIZE);
+	}
 	
 	for (int i=0; i<sizeof(dev_config_t); i+=4)
 	{
@@ -83,6 +87,7 @@ void AppConfigInit (dev_config_t * p_dev_config)
 	app_config.buttons_cnt = 0;
 	app_config.pov = 0;
 	app_config.pov_cnt = 0;
+	app_config.rgb_cnt = 0;
 	
 	for (uint8_t i=0; i<MAX_AXIS_NUM; i++)
 	{
@@ -142,6 +147,16 @@ void AppConfigInit (dev_config_t * p_dev_config)
 			p_dev_config->pins[9] == FAST_ENCODER)
 	{
 		app_config.fast_encoder_cnt++;
+	}
+	
+	if (p_dev_config->pins[10] == LED_RGB_PL9823 || p_dev_config->pins[10] == LED_RGB_WS2812B) // 15-PB4 // 10-PA10
+	{
+		app_config.rgb_cnt++;
+	}
+	
+	if (p_dev_config->pins[9] == UART_TX)
+	{
+		app_config.uart_tx_used = 1;
 	}
 	
 	for (int i=0; i<MAX_BUTTONS_NUM; i++)

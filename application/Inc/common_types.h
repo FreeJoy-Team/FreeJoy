@@ -86,6 +86,7 @@ enum
 	SOURCE_ENCODER = -3,
 	SOURCE_I2C = -2,
 	SOURCE_NO = -1,
+	SOURCE_EXTERNAL = -4,
 };
 typedef int8_t axis_source_t;
 
@@ -170,6 +171,11 @@ enum
 	
 	MLX90363_CS,
 	SHIFT_REG_CLK,
+	
+	LED_RGB_WS2812B,
+	LED_RGB_PL9823,
+	
+	UART_TX,
 };
 typedef int8_t pin_t;
 
@@ -243,7 +249,7 @@ typedef struct button_t
 
 typedef struct physical_buttons_state_t
 {
-  uint32_t time_last;	
+  int32_t time_last;	
 	uint8_t pin_state						:1;
 	uint8_t prev_pin_state			:1;
 	uint8_t current_state				:1;
@@ -264,7 +270,7 @@ typedef uint8_t button_action_t;
 
 typedef struct logical_buttons_state_t
 {
-  uint32_t time_last;	
+  int32_t time_last;	
 	uint8_t curr_physical_state		:1;
 	uint8_t prev_physical_state		:1;	
 	uint8_t on_state 							:1;	
@@ -288,7 +294,7 @@ typedef uint8_t encoder_t;
 
 typedef struct
 {
-  uint32_t 				time_last;
+  int32_t 				time_last;
 	int32_t 				cnt;
 	uint8_t 				state;					//:4?	
 	int8_t 					pin_a;
@@ -366,9 +372,39 @@ typedef struct
 {
 	int8_t				input_num;
 	uint8_t				type: 3;
+	int8_t timer 	:4;
 	uint8_t				:0;
 	
 } led_config_t;
+
+enum 
+{
+	WS2812B_STATIC = 0,
+	WS2812B_SIMHUB,
+	WS2812B_RAINBOW,
+	WS2812B_FLOW,
+};
+
+typedef struct
+{
+    uint8_t				r, g, b;
+} rgb_t;
+
+typedef struct
+{
+    rgb_t					color;
+    int8_t				input_num;
+    uint8_t				is_inverted: 1;
+		uint8_t				is_disabled: 1;
+		uint8_t				:0;
+} argb_led_t;
+
+typedef struct
+{
+    int16_t				h;
+    uint8_t				s, v;
+} HSV_t;
+
 
 
 
@@ -391,7 +427,7 @@ typedef struct
 	uint16_t						button_timer1_ms;						// config packet 6				
 	uint16_t						button_timer2_ms;						// config packet 7
 	uint16_t						button_timer3_ms;						// config packet 8
-	uint16_t 						a2b_debounce_ms;						// config packet 9	
+	uint16_t 						a2b_debounce_ms;						// config packet 9
 	
 	// config 12-13-14
 	axis_to_buttons_t		axes_to_buttons[MAX_AXIS_NUM];
@@ -405,10 +441,19 @@ typedef struct
 	// config 15;
 	led_pwm_config_t		led_pwm_config[4];
 	led_config_t				leds[MAX_LEDS_NUM];
+	uint16_t						led_timer_ms[4];
 	
 	// config 16;
 	encoder_t						encoders[MAX_ENCODERS_NUM];
 	
+	uint8_t							button_polling_interval_ticks;
+	uint8_t							encoder_polling_interval_ticks;
+	
+	uint8_t							rgb_effect;
+	uint8_t							rgb_count;
+	uint8_t							rgb_brightness;
+	uint16_t						rgb_delay_ms;
+	argb_led_t 					rgb_leds[NUM_RGB_LEDS];
 	
 }dev_config_t;
 
@@ -424,8 +469,17 @@ typedef struct
 	uint8_t							slow_encoder_cnt;
 	uint8_t							fast_encoder_cnt;
 	uint8_t							pwm_cnt;
+	uint8_t							rgb_cnt;
+	uint8_t							uart_tx_used;
 	
 } app_config_t;
+
+
+/******************** EXTERNAL LED DATA **********************/
+typedef struct
+{
+	uint32_t 						leds_state;		// 24 bits used
+} external_led_data_t;
 
 
 /******************** HID REPORT CONFIGURATION **********************/
@@ -447,6 +501,22 @@ typedef struct
 	uint8_t							shift_button_data;
 	
 } params_report_t;
+
+/****************** UART REPORT CONFIGURATION **********************/
+#pragma pack(push, 1)
+typedef struct
+{
+	uint8_t							header;
+	uint8_t							separator;
+	uint8_t							message_code;
+	analog_data_t			 	axis_data[MAX_AXIS_NUM];
+	uint8_t							buttons_data[MAX_BUTTONS_NUM/8];
+	uint16_t						crc;
+	// uint8_t             endl;
+	// when adding variable after crc don't forget to calc size
+	
+} uart_report_t;
+#pragma pack(pop)
 
 
 

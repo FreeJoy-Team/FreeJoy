@@ -44,6 +44,7 @@
 #include "usb_prop.h"
 #include "usb_desc.h"
 #include "usb_pwr.h"
+#include "usb_cdc_conf.h"
 
 
 /* Private typedef -----------------------------------------------------------*/ 
@@ -54,6 +55,14 @@ uint32_t ProtocolValue;
 __IO uint8_t EXTI_Enable;
 __IO uint8_t Request = 0;
 uint8_t Report_Buf[2];   
+
+LINE_CODING linecoding =
+  {
+    115200, /* baud rate*/
+    0x00,   /* stop bits-1*/
+    0x00,   /* parity - none*/
+    0x08    /* no. of bits 8*/
+  };
 /* -------------------------------------------------------------------------- */
 /*  Structures initializations */
 /* -------------------------------------------------------------------------- */
@@ -215,6 +224,25 @@ void CustomHID_Reset(void)
   SetEPRxCount(ENDP2, 64);
   SetEPRxStatus(ENDP2, EP_RX_VALID);
   SetEPTxStatus(ENDP2, EP_TX_NAK);
+	
+	/* Initialize Endpoint 3 */
+  SetEPType(CDC_COMMAND_ENDP_NUM, EP_INTERRUPT);
+  SetEPTxAddr(CDC_COMMAND_ENDP_NUM, CDC_COMMAND_ENDP_BUF_ADR);
+  SetEPRxStatus(CDC_COMMAND_ENDP_NUM, EP_RX_DIS);
+  SetEPTxStatus(CDC_COMMAND_ENDP_NUM, EP_TX_NAK);
+
+  /* Initialize Endpoint 4 */
+  SetEPType(CDC_DATA_OUT_ENDP_NUM, EP_BULK);
+  SetEPRxAddr(CDC_DATA_OUT_ENDP_NUM, CDC_DATA_OUT_ENDP_BUF_ADR);
+  SetEPRxCount(CDC_DATA_OUT_ENDP_NUM, CDC_DATA_SIZE);
+  SetEPRxStatus(CDC_DATA_OUT_ENDP_NUM, EP_RX_VALID);
+  SetEPTxStatus(CDC_DATA_OUT_ENDP_NUM, EP_TX_DIS);
+	
+	/* Initialize Endpoint 5 */
+  SetEPType(CDC_DATA_IN_ENDP_NUM, EP_BULK);
+  SetEPTxAddr(CDC_DATA_IN_ENDP_NUM, CDC_DATA_IN_ENDP_BUF_ADR);
+  SetEPTxStatus(CDC_DATA_IN_ENDP_NUM, EP_TX_NAK);
+  SetEPRxStatus(CDC_DATA_IN_ENDP_NUM, EP_RX_DIS);
 
   /* Set this device to response on default address */
   SetDeviceAddress(0);
@@ -222,6 +250,9 @@ void CustomHID_Reset(void)
 	
 	EP1_PrevXferComplete = 1;
 	EP2_PrevXferComplete = 1;
+	EP3_PrevXferComplete = 1;
+	EP4_PrevXferComplete = 1;
+	EP5_PrevXferComplete = 1;
 }
 /*******************************************************************************
 * Function Name  : CustomHID_SetConfiguration.
@@ -260,7 +291,10 @@ void CustomHID_SetDeviceAddress (void)
 *******************************************************************************/
 void CustomHID_Status_In(void)
 {  
-
+	if (Request == SET_LINE_CODING)
+  {
+    Request = 0;
+  }
 }
 
 /*******************************************************************************
@@ -291,8 +325,7 @@ RESULT CustomHID_Data_Setup(uint8_t RequestNo)
   CopyRoutine = NULL;
   
   if ((RequestNo == GET_DESCRIPTOR)
-      && (Type_Recipient == (STANDARD_REQUEST | INTERFACE_RECIPIENT))
-        )
+      && (Type_Recipient == (STANDARD_REQUEST | INTERFACE_RECIPIENT)))
   {
     
     if (pInformation->USBwValue1 == REPORT_DESCRIPTOR)
@@ -321,7 +354,7 @@ RESULT CustomHID_Data_Setup(uint8_t RequestNo)
   } /* End of GET_DESCRIPTOR */
   
   /*** GET_PROTOCOL, GET_REPORT, SET_REPORT ***/
-  else if ( (Type_Recipient == (CLASS_REQUEST | INTERFACE_RECIPIENT)) )
+  else if ((Type_Recipient == (CLASS_REQUEST | INTERFACE_RECIPIENT)))
   {         
     switch( RequestNo )
     {
@@ -332,9 +365,21 @@ RESULT CustomHID_Data_Setup(uint8_t RequestNo)
       CopyRoutine = CustomHID_SetReport_Feature;
       Request = SET_REPORT;
       break;
+		case GET_LINE_CODING:
+      CopyRoutine = CDC_GetLineCoding;
+      break;
+		case SET_LINE_CODING:
+      CopyRoutine = CDC_SetLineCoding;
+			//Request = SET_LINE_CODING;
+      break;
     default:
       break;
     }
+  }
+	
+	if (RequestNo == SET_LINE_CODING)
+  {
+    Request = SET_LINE_CODING;
   }
   
   if (CopyRoutine == NULL)
@@ -377,16 +422,25 @@ uint8_t *CustomHID_SetReport_Feature(uint16_t Length)
 *******************************************************************************/
 RESULT CustomHID_NoData_Setup(uint8_t RequestNo)
 {
-  if ((Type_Recipient == (CLASS_REQUEST | INTERFACE_RECIPIENT))
-      && (RequestNo == SET_PROTOCOL))
+  if ((Type_Recipient == (CLASS_REQUEST | INTERFACE_RECIPIENT)))
   {
-    return CustomHID_SetProtocol();
+		switch(RequestNo)
+    {
+    case SET_PROTOCOL:
+			return CustomHID_SetProtocol();
+		
+    case SET_COMM_FEATURE:
+			return USB_SUCCESS;
+		
+		case SET_CONTROL_LINE_STATE:
+			return USB_SUCCESS;
+		
+    default:
+      break;
+    }
   }
-
-  else
-  {
-    return USB_UNSUPPORT;
-  }
+	
+  return USB_UNSUPPORT;
 }
 
 /*******************************************************************************
@@ -496,7 +550,7 @@ RESULT CustomHID_Get_Interface_Setting(uint8_t Interface, uint8_t AlternateSetti
   {
     return USB_UNSUPPORT;
   }
-  else if (Interface > 0)
+  else if (Interface > 3)					// ??????????????????????????????????????????????
   {
     return USB_UNSUPPORT;
   }
@@ -535,6 +589,40 @@ uint8_t *CustomHID_GetProtocolValue(uint16_t Length)
   {
     return (uint8_t *)(&ProtocolValue);
   }
+}
+
+/*******************************************************************************
+* Function Name  : CDC_GetLineCoding.
+* Description    : send the linecoding structure to the PC host.
+* Input          : Length.
+* Output         : None.
+* Return         : Linecoding structure base address.
+*******************************************************************************/
+uint8_t *CDC_GetLineCoding(uint16_t Length)
+{
+  if (Length == 0)
+  {
+    pInformation->Ctrl_Info.Usb_wLength = sizeof(linecoding);
+    return NULL;
+  }
+  return(uint8_t *)&linecoding;
+}
+
+/*******************************************************************************
+* Function Name  : CDC_SetLineCoding.
+* Description    : Set the linecoding structure fields.
+* Input          : Length.
+* Output         : None.
+* Return         : Linecoding structure base address.
+*******************************************************************************/
+uint8_t *CDC_SetLineCoding(uint16_t Length)
+{
+  if (Length == 0)
+  {
+    pInformation->Ctrl_Info.Usb_wLength = sizeof(linecoding);
+    return NULL;
+  }
+  return(uint8_t *)&linecoding;
 }
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

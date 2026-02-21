@@ -38,10 +38,15 @@
 
 /* Includes ------------------------------------------------------------------*/
 
+#include "usb_endp.h"
 #include "usb_hw.h"
 #include "usb_lib.h"
 #include "usb_istr.h"
 #include "usb_pwr.h"
+#include "usb_cdc_conf.h"
+#include "simhub.h"
+#include "leds.h"
+#include "led_effects.h"
 
 #include "config.h"
 #include "crc16.h"
@@ -52,14 +57,20 @@
 /* Private variables ---------------------------------------------------------*/
 volatile extern uint8_t bootloader;
 volatile extern int32_t joy_millis;
-volatile extern int32_t encoder_ticks;
-volatile extern int32_t adc_ticks;
-volatile extern int32_t sensors_ticks;
-volatile extern int32_t buttons_ticks;
 volatile extern int32_t configurator_millis;
+volatile extern int64_t encoder_ticks;
+volatile extern int64_t adc_ticks;
+volatile extern int64_t sensors_ticks;
+volatile extern int64_t buttons_ticks;
 
 __IO uint8_t EP1_PrevXferComplete = 1;
 __IO uint8_t EP2_PrevXferComplete = 1;
+__IO uint8_t EP3_PrevXferComplete = 1;
+__IO uint8_t EP4_PrevXferComplete = 1;
+__IO uint8_t EP5_PrevXferComplete = 1;
+
+static volatile uint8_t receive_buffer[CDC_DATA_SIZE];
+static volatile uint32_t receive_length = 0;
 
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
@@ -107,11 +118,9 @@ void EP2_OUT_Callback(void)
 	else 
 	{
 		// 2 second delay for joy report
-		joy_millis = GetMillis() + 2000;
-		adc_ticks = (GetMillis() + 2000) * TICKS_IN_MILLISECOND;
-		buttons_ticks = (GetMillis() + 2000) * TICKS_IN_MILLISECOND;
-		sensors_ticks = (GetMillis() + 2000) * TICKS_IN_MILLISECOND;
-		encoder_ticks = (GetMillis() + 2000) * TICKS_IN_MILLISECOND;
+		uint64_t delay = GetMillis() + 2000;
+		joy_millis = delay;
+		adc_ticks = buttons_ticks = sensors_ticks = encoder_ticks = delay * TICKS_IN_MILLISECOND;
 	}
 	
 	uint8_t cfg_count = sizeof(dev_config_t) / 62;
@@ -219,7 +228,13 @@ void EP2_OUT_Callback(void)
 			}
 		}
 		break;
-		
+
+		case REPORT_ID_LED:
+		{
+			memcpy(&external_led_data, &hid_buf[1], sizeof(external_led_data_t));
+		}
+		break;
+
 		default:
 			break;
 	}
@@ -227,6 +242,29 @@ void EP2_OUT_Callback(void)
 	memset(hid_buf, 0 ,64);
   SetEPRxStatus(ENDP2, EP_RX_VALID);
  
+}
+
+
+/*******************************************************************************
+* Function Name  : EP4_OUT_Callback.
+* Description    : EP4 OUT Callback Routine.
+* Input          : None.
+* Output         : None.
+* Return         : None.
+*******************************************************************************/
+void EP4_OUT_Callback(void)
+{
+	receive_length = USB_SIL_Read(CDC_DATA_OUT_ENDP_ADR, (uint8_t *)receive_buffer);
+	uint16_t free_size = MAX_RING_BIF_SIZE;
+	
+	if (receive_length > 0)
+	{
+		free_size = SH_ProcessIncomingData((uint8_t *)receive_buffer, receive_length);
+	}
+	if (free_size > SH_PACKET_SIZE)
+	{
+		SetEPRxValid(CDC_DATA_OUT_ENDP_NUM);
+	}
 }
 
 /*******************************************************************************
@@ -252,13 +290,39 @@ void EP2_IN_Callback(void)
 {
   EP2_PrevXferComplete = 1;
 }
+/*******************************************************************************
+* Function Name  : EP4_IN_Callback.
+* Description    : EP4 IN Callback Routine.
+* Input          : None.
+* Output         : None.
+* Return         : None.
+*******************************************************************************/
+void EP5_IN_Callback(void)
+{
+  EP5_PrevXferComplete = 1;
+}
+
+/*******************************************************************************
+* Function Name  : SH_ProcessEndpData.
+* Description    : SH Process Endp Data.
+* Input          : None.
+* Output         : None.
+* Return         : None.
+*******************************************************************************/
+void SH_ProcessEndpData(void)
+{
+	if (SH_BufferFreeSize() > SH_PACKET_SIZE)
+	{
+		SetEPRxValid(CDC_DATA_OUT_ENDP_NUM);
+	}
+}
 
 /*******************************************************************************
 * Function Name  : USB_CUSTOM_HID_SendReport.
 * Description    : 
 * Input          : None.
 * Output         : None.
-* Return         : 1 if success otherwise 0.
+* Return         : 0 if success otherwise -1.
 *******************************************************************************/
 int8_t USB_CUSTOM_HID_SendReport(uint8_t EP_num, uint8_t * data, uint8_t length)
 {
@@ -278,5 +342,41 @@ int8_t USB_CUSTOM_HID_SendReport(uint8_t EP_num, uint8_t * data, uint8_t length)
 	}
 	return -1;
 }
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
 
+/*******************************************************************************
+* Function Name  : Send DATA .
+* Description    : send the data received from the STM32 to the PC through USB
+* Input          : None.
+* Output         : None.
+* Return         : 0 if success otherwise -1.			// sdelal kak sverhu. ebanii v rot nahuia -1 vmesto 1 vo vremia success
+*******************************************************************************/
+int8_t CDC_Send_DATA (uint8_t *ptrBuffer, uint8_t send_length)
+{
+  /*if max buffer is Not reached*/
+  if(EP5_PrevXferComplete && bDeviceState == CONFIGURED && send_length < CDC_DATA_SIZE)     
+  {
+    /* send  packet*/
+		USB_SIL_Write(CDC_DATA_IN_ENDP_ADR, (unsigned char*)ptrBuffer, send_length);
+		// should be in this order
+		EP5_PrevXferComplete = 0;
+		SetEPTxValid(CDC_DATA_IN_ENDP_NUM);
+  }
+  else
+  {
+    return 0;
+  }
+  return -1;
+}
+
+/*******************************************************************************
+* Function Name  : Is Ready To Send DATA .
+* Description    : Checking the port for readiness to send files.
+* Input          : None.
+* Output         : None.
+* Return         : 1 if success otherwise 0.
+*******************************************************************************/
+uint8_t CDC_IsReadeToSend()
+{
+	return EP5_PrevXferComplete;
+}
+/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
