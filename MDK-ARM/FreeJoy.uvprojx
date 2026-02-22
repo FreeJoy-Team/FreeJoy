@@ -564,11 +564,6 @@
               <FileType>1</FileType>
               <FilePath>C:\Users\123\Desktop\rgb pedal\application\Src\uart.c</FilePath>
             </File>
-            <File>
-              <FileName>nrf24l01.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\application\Src\nrf24l01.c</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>
@@ -1438,11 +1433,6 @@
               <FileName>uart.c</FileName>
               <FileType>1</FileType>
               <FilePath>C:\Users\123\Desktop\rgb pedal\application\Src\uart.c</FilePath>
-            </File>
-            <File>
-              <FileName>nrf24l01.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\application\Src\nrf24l01.c</FilePath>
             </File>
           </Files>
         </Group>
