@@ -57,7 +57,7 @@ C_SOURCES =  \
 ../application/Src/usb_prop.c \
 ../application/Src/usb_pwr.c \
 ../Drivers/CMSIS/CM3/DeviceSupport/ST/STM32F10x/system_stm32f10x.c \
-../Drivers/CMSIS/CM3/DeviceSupport/ST/STM32F10x/stm32f10x_usart.c
+../Drivers/STM32F10x_StdPeriph_Driver/src/stm32f10x_usart.c
 ../Drivers/STM32F10x_StdPeriph_Driver/src/misc.c \
 ../Drivers/STM32F10x_StdPeriph_Driver/src/stm32f10x_adc.c \
 ../Drivers/STM32F10x_StdPeriph_Driver/src/stm32f10x_dma.c \
