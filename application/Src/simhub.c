@@ -261,7 +261,7 @@ uint8_t readLeds(argb_led_t* rgb, uint8_t ledCount, uint8_t rightToLeft) {
 
 static uint8_t messageend = 0;
 static char cmd[10]; // 5?
-static uint8_t index = 0;
+static uint8_t index_value = 0;
 
 uint8_t SH_Process(dev_config_t * p_dev_config, uint8_t * serial_num, uint8_t sn_length)
 {
@@ -288,12 +288,12 @@ uint8_t SH_Process(dev_config_t * p_dev_config, uint8_t * serial_num, uint8_t sn
 		while (messageend < 6 || SH_DataAvailable() > 0 || c != (char)(0xff));
 
 		if (messageend >= 3 && c != (char)(0xff)) {
-			cmd[index++] = c;
+			cmd[index_value++] = c;
 			//command += c;
 
-			while (index < 5) {
+			while (index_value < 5) {
 				c = (char)SH_Read();
-				cmd[index++] = c;
+				cmd[index_value++] = c;
 			}
 
 			// Get protocol version
@@ -334,7 +334,7 @@ uint8_t SH_Process(dev_config_t * p_dev_config, uint8_t * serial_num, uint8_t sn
 			}
 
 			memset(cmd, 0, sizeof(cmd));
-			index = 0;
+			index_value = 0;
 			messageend = 0;
 		}
 	}
