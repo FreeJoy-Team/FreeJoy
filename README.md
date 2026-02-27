@@ -23,6 +23,7 @@ FreeJoy supports the following external periphery:
 - external ADCs ADS1115 and MCP3201/02/04/08
 - 4 PWM channels for lighting
 - 24 LEDs (single or matrix) bindable to buttons' states or controlled by host software (see [Host-controlled LEDs](#host-controlled-leds) section)
+- 50 addressable LEDs ws2812b or pl9823 with effects and the ability to control via SimHub;
 - device name and other USB settings
 
 ## Axes
