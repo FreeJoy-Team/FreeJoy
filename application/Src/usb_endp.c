@@ -115,9 +115,9 @@ void EP2_OUT_Callback(void)
 		SetEPRxStatus(ENDP2, EP_RX_VALID);
 		return;
 	}
-	else 
+	else if (repotId == REPORT_ID_CONFIG_IN || repotId == REPORT_ID_CONFIG_OUT || repotId == REPORT_ID_FIRMWARE)
 	{
-		// 2 second delay for joy report
+		// 2 second delay for joy report during configurator/firmware operations
 		uint64_t delay = GetMillis() + 2000;
 		joy_millis = delay;
 		adc_ticks = buttons_ticks = sensors_ticks = encoder_ticks = delay * TICKS_IN_MILLISECOND;
