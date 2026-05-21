@@ -296,12 +296,13 @@ typedef struct
 {
   int32_t 				time_last;
 	int32_t 				cnt;
-	uint8_t 				state;					//:4?	
+	uint8_t 				state;
 	int8_t 					pin_a;
 	int8_t 					pin_b;
-	int8_t					dir :4;					//:2?
-	int8_t					last_dir :4;		//:2?
-	
+	int8_t					dir :4;
+	int8_t					last_dir :4;
+	uint8_t					cycle_started;		// rastreia se o ciclo iniciou corretamente
+	uint8_t					fsm_state;				// estado da maquina de quadratura
 	
 } encoder_state_t;
 
@@ -310,7 +311,7 @@ typedef struct
 typedef struct
 {
 	uint8_t points[13];
-	uint8_t buttons_cnt;									// :4
+	uint8_t buttons_cnt;
 
 } axis_to_buttons_t;
 
@@ -424,10 +425,10 @@ typedef struct
 	
 	// config 6-7-8-9-10-11-12
 	button_t 						buttons[MAX_BUTTONS_NUM];
-	uint16_t						button_timer1_ms;						// config packet 6				
-	uint16_t						button_timer2_ms;						// config packet 7
-	uint16_t						button_timer3_ms;						// config packet 8
-	uint16_t 						a2b_debounce_ms;						// config packet 9
+	uint16_t						button_timer1_ms;
+	uint16_t						button_timer2_ms;
+	uint16_t						button_timer3_ms;
+	uint16_t 						a2b_debounce_ms;
 	
 	// config 12-13-14
 	axis_to_buttons_t		axes_to_buttons[MAX_AXIS_NUM];
@@ -478,7 +479,7 @@ typedef struct
 /******************** EXTERNAL LED DATA **********************/
 typedef struct
 {
-	uint32_t 						leds_state;		// 24 bits used
+	uint32_t 						leds_state;
 } external_led_data_t;
 
 
@@ -512,8 +513,6 @@ typedef struct
 	analog_data_t			 	axis_data[MAX_AXIS_NUM];
 	uint8_t							buttons_data[MAX_BUTTONS_NUM/8];
 	uint16_t						crc;
-	// uint8_t             endl;
-	// when adding variable after crc don't forget to calc size
 	
 } uart_report_t;
 #pragma pack(pop)
