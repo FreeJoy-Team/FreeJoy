@@ -23,6 +23,7 @@
   */
 
 #include "buttons.h"
+#include "bcd_buttons.h"
 #include "string.h"
 
 uint8_t												raw_buttons_data[MAX_BUTTONS_NUM];
@@ -38,6 +39,112 @@ uint8_t												a2b_first = 0;
 uint8_t												a2b_last = 0;
 volatile uint8_t							button_mutex = 0;
 
+/* ISR publishes one sample per switch; debounce commits the whole code together. */
+typedef struct
+{
+    uint8_t first;
+    uint8_t count;
+    uint8_t value;
+} bcd_sample_t;
+
+typedef struct
+{
+    uint32_t time_last;
+    uint8_t first;
+    uint8_t count;
+    uint8_t candidate;
+    uint8_t current;
+    uint8_t initialized;
+} bcd_state_t;
+
+#define BCD_NO_POSITION 255
+static volatile bcd_sample_t bcd_samples[BCD_SWITCH_COUNT];
+static bcd_state_t bcd_states[BCD_SWITCH_COUNT];
+static volatile uint8_t bcd_first;
+static volatile uint8_t bcd_last;
+
+static void BcdButtonsDebounce(dev_config_t *config, uint32_t millis)
+{
+    for (uint8_t group = 0; group < BCD_SWITCH_COUNT; group++)
+    {
+        uint8_t first = bcd_samples[group].first;
+        uint8_t count = bcd_samples[group].count;
+        uint8_t value = bcd_samples[group].value;
+        bcd_state_t *state = &bcd_states[group];
+        if (!count)
+        {
+            state->initialized = 0;
+            continue;
+        }
+        if (!state->initialized || state->first != first || state->count != count)
+        {
+            state->initialized = 1;
+            state->first = first;
+            state->count = count;
+            state->current = BCD_NO_POSITION;
+            state->candidate = value;
+            state->time_last = millis;
+        }
+        if (state->candidate != value)
+        {
+            state->candidate = value;
+            state->time_last = millis;
+        }
+        if ((uint32_t)(millis - state->time_last) >= config->button_debounce_ms)
+            state->current = state->candidate;
+
+        /* Logical processing runs after this loop: never expose two positions. */
+        for (uint8_t slot = 0; slot < count; slot++)
+            physical_buttons_state[first + slot].current_state = (slot == state->current);
+    }
+}
+
+static void BcdButtonsGet(uint8_t *buf, dev_config_t *config, uint8_t *pos)
+{
+    uint8_t masks[BCD_SWITCH_COUNT] = {0};
+    uint8_t values[BCD_SWITCH_COUNT] = {0};
+    uint8_t duplicates[BCD_SWITCH_COUNT] = {0};
+    for (uint8_t pin = 0; pin < USED_PINS_NUM; pin++)
+    {
+        pin_t type = config->pins[pin];
+        if (!BcdPinIsInput(type))
+            continue;
+        uint8_t group = BcdPinGroup(type);
+        uint8_t mask = 1u << BcdPinBit(type);
+        duplicates[group] |= masks[group] & mask;
+        masks[group] |= mask;
+        uint8_t level = GPIO_ReadInputDataBit(pin_config[pin].port, pin_config[pin].pin);
+        if (BcdPinIsVcc(type) ? level : !level)
+            values[group] |= mask;
+    }
+
+    bcd_first = *pos;
+    for (uint8_t group = 0; group < BCD_SWITCH_COUNT; group++)
+    {
+        uint8_t count = 0;
+        uint8_t value = BCD_NO_POSITION;
+        if (masks[group])
+        {
+            uint8_t width = 1;
+            while (width <= masks[group])
+                width <<= 1;
+            uint8_t remaining = MAX_BUTTONS_NUM - *pos;
+            count = width <= remaining ? width : remaining;
+            /* Missing/duplicate bits or insufficient capacity fail closed. */
+            if (!duplicates[group] && masks[group] == width - 1 && count == width)
+                value = values[group];
+        }
+        uint8_t first = *pos;
+        for (uint8_t slot = 0; slot < count; slot++)
+            buf[(*pos)++] = (slot == value);
+        bcd_samples[group].first = first;
+        bcd_samples[group].count = count;
+        bcd_samples[group].value = value;
+    }
+    bcd_last = *pos;
+}
+
+
 /**
   * @brief  Processing debounce for raw buttons input
 	* @param  p_dev_config: Pointer to device configuration
@@ -49,9 +156,13 @@ void ButtonsDebounceProcess (dev_config_t * p_dev_config)
 	uint16_t	debounce;
 	
 	millis = GetMillis();
+	BcdButtonsDebounce(p_dev_config, (uint32_t)millis);
 	
 	for (uint8_t i=0; i<MAX_BUTTONS_NUM; i++)
 	{
+			// BCD positions are debounced as one code above.
+			if (i >= bcd_first && i < bcd_last)
+				continue;
 			// set a2b debounce
 			if (a2b_first != a2b_last && i > a2b_first && i <= a2b_last)
 			{
@@ -768,6 +879,7 @@ uint8_t ButtonsReadPhysical(dev_config_t * p_dev_config, uint8_t * p_buf)
 	AxisToButtonsGet(p_buf, p_dev_config, &pos);
 	a2b_last = pos;
 	SingleButtonsGet(p_buf, p_dev_config, &pos);
+	BcdButtonsGet(p_buf, p_dev_config, &pos);
 	
 	return pos;
 }

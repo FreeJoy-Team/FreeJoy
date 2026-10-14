@@ -24,6 +24,7 @@
   */
 
 #include "periphery.h"
+#include "bcd_buttons.h"
 #include "ws2812b.h"
 #include "uart.h"
 
@@ -362,14 +363,16 @@ void IO_Init (dev_config_t * p_dev_config)
 	for (int i=0; i<USED_PINS_NUM; i++)
 	{
 		// buttons
-		if (p_dev_config->pins[i] == BUTTON_GND)
+		if (p_dev_config->pins[i] == BUTTON_GND ||
+            (BcdPinIsInput(p_dev_config->pins[i]) && !BcdPinIsVcc(p_dev_config->pins[i])))
 		{
 			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
 			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
 			GPIO_InitStructure.GPIO_Pin = pin_config[i].pin;
 			GPIO_Init(pin_config[i].port, &GPIO_InitStructure);
 		}
-		else if (p_dev_config->pins[i] == BUTTON_VCC)
+		else if (p_dev_config->pins[i] == BUTTON_VCC ||
+                 (BcdPinIsInput(p_dev_config->pins[i]) && BcdPinIsVcc(p_dev_config->pins[i])))
 		{
 			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
 			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
